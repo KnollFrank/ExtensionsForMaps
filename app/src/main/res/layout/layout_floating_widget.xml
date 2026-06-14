@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetContainer"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@drawable/bg_floating_widget"
+    android:elevation="8dp"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/ivWidgetDragHandle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:src="@android:drawable/ic_menu_sort_by_size"
+        android:contentDescription="Drag Widget" />
+
+    <Button
+        android:id="@+id/btnNextStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="➔ NÄCHSTER STOPP"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+</LinearLayout>
