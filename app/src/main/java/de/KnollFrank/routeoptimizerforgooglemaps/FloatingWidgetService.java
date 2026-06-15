@@ -27,6 +27,7 @@ public class FloatingWidgetService extends Service {
 
 	private static final String CHANNEL_ID = "RouteOptimizerServiceChannel";
 	private static final int NOTIFICATION_ID = 1;
+	public static final String OPTIMIZED_STOPS = "OPTIMIZED_STOPS";
 
 	private WindowManager windowManager;
 	private View floatingView;
@@ -41,8 +42,8 @@ public class FloatingWidgetService extends Service {
 
 	@Override
 	public int onStartCommand(final Intent intent, final int flags, final int startId) {
-		if (intent != null && intent.hasExtra("OPTIMIZED_STOPS")) {
-			optimizedStops = intent.getStringArrayListExtra("OPTIMIZED_STOPS");
+		if (intent != null && intent.hasExtra(OPTIMIZED_STOPS)) {
+			optimizedStops = intent.getStringArrayListExtra(OPTIMIZED_STOPS);
 			currentStopIndex = 0;
 			createNotificationChannel();
 			final Notification notification = createNotification();

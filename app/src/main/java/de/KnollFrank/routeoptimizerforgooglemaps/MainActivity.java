@@ -143,101 +143,130 @@ public class MainActivity extends AppCompatActivity {
 
 	private void startOptimizationFlow() {
 		if (addressList.isEmpty()) {
-			Toast.makeText(this, "Add some stops first!", Toast.LENGTH_SHORT).show();
+			Toast
+					.makeText(this, "Add some stops first!", Toast.LENGTH_SHORT)
+					.show();
 			return;
 		}
-
 		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+			ActivityCompat.requestPermissions(
+					this,
+					new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+					LOCATION_PERMISSION_REQUEST_CODE);
 			return;
 		}
-
 		if (!Settings.canDrawOverlays(this)) {
 			final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
 			startActivityForResult(intent, OVERLAY_PERMISSION_REQUEST_CODE);
 			return;
 		}
-
 		performOptimization();
 	}
 
 	private void performOptimization() {
-		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 			return;
 		}
-
-		fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
-			if (location != null) {
-				optimizeRoute(location);
-			} else {
-				Toast.makeText(this, "Could not get current location", Toast.LENGTH_LONG).show();
-			}
-		}).addOnFailureListener(this, e -> Toast.makeText(this, "Location error: " + e.getMessage(), Toast.LENGTH_LONG).show());
+		fusedLocationClient
+				.getLastLocation()
+				.addOnSuccessListener(
+						this,
+						location -> {
+							if (location == null) {
+								Toast
+										.makeText(this, "Could not get current location", Toast.LENGTH_LONG)
+										.show();
+								return;
+							}
+							optimizeRoute(location);
+						})
+				.addOnFailureListener(
+						this,
+						exception ->
+								Toast
+										.makeText(this, "Location error: " + exception.getMessage(), Toast.LENGTH_LONG)
+										.show());
 	}
 
 	private void optimizeRoute(final Location startLocation) {
 		final Geocoder geocoder = new Geocoder(this, Locale.getDefault());
 		final List<RouteOptimizer.Stop> stops = new ArrayList<>();
-
-		new Thread(() -> {
-			try {
-				for (final String addressStr : addressList) {
-					final List<Address> addresses = geocoder.getFromLocationName(addressStr, 1);
-					if (addresses != null && !addresses.isEmpty()) {
-						final Address address = addresses.get(0);
-						stops.add(new RouteOptimizer.Stop(addressStr, address.getLatitude(), address.getLongitude()));
-					} else {
-						runOnUiThread(() -> Toast.makeText(this, "Geocoding failed for: " + addressStr, Toast.LENGTH_LONG).show());
-						return; // Abort
+		final Thread thread =
+				new Thread(() -> {
+					try {
+						for (final String addressStr : addressList) {
+							final List<Address> addresses = geocoder.getFromLocationName(addressStr, 1);
+							if (addresses != null && !addresses.isEmpty()) {
+								final Address address = addresses.get(0);
+								stops.add(new RouteOptimizer.Stop(addressStr, address.getLatitude(), address.getLongitude()));
+							} else {
+								runOnUiThread(
+										() ->
+												Toast
+														.makeText(this, "Geocoding failed for: " + addressStr, Toast.LENGTH_LONG)
+														.show());
+								return;
+							}
+						}
+						// Call the optimizer
+						final List<String> optimizedAddresses = RouteOptimizer.optimize(startLocation.getLatitude(), startLocation.getLongitude(), stops);
+						runOnUiThread(() -> {
+							addressList.clear();
+							addressList.addAll(optimizedAddresses);
+							addressAdapter.notifyDataSetChanged();
+							startFloatingService();
+						});
+					} catch (final IOException exception) {
+						runOnUiThread(
+								() ->
+										Toast
+												.makeText(this, "Network error during Geocoding: " + exception.getMessage(), Toast.LENGTH_LONG)
+												.show());
+					} catch (final Exception exception) {
+						runOnUiThread(
+								() ->
+										Toast
+												.makeText(this, "Optimization error: " + exception.getMessage(), Toast.LENGTH_LONG)
+												.show());
 					}
-				}
-
-				// Call the optimizer
-				final List<String> optimizedAddresses = RouteOptimizer.optimize(startLocation.getLatitude(), startLocation.getLongitude(), stops);
-
-				runOnUiThread(() -> {
-					addressList.clear();
-					addressList.addAll(optimizedAddresses);
-					addressAdapter.notifyDataSetChanged();
-					startFloatingService();
 				});
-
-			} catch (final IOException e) {
-				runOnUiThread(() -> Toast.makeText(this, "Network error during Geocoding: " + e.getMessage(), Toast.LENGTH_LONG).show());
-			} catch (final Exception e) {
-				runOnUiThread(() -> Toast.makeText(this, "Optimization error: " + e.getMessage(), Toast.LENGTH_LONG).show());
-			}
-		}).start();
+		thread.start();
 	}
 
 	private void startFloatingService() {
 		final Intent serviceIntent = new Intent(this, FloatingWidgetService.class);
-		serviceIntent.putStringArrayListExtra("OPTIMIZED_STOPS", new ArrayList<>(addressList));
+		serviceIntent.putStringArrayListExtra(FloatingWidgetService.OPTIMIZED_STOPS, new ArrayList<>(addressList));
 		ContextCompat.startForegroundService(this, serviceIntent);
 		// Minimize the app
 		moveTaskToBack(true);
 	}
 
 	@Override
-	public void onRequestPermissionsResult(final int requestCode, final String[] permissions, final int[] grantResults) {
+	public void onRequestPermissionsResult(final int requestCode,
+	                                       @NonNull final String[] permissions,
+	                                       @NonNull final int[] grantResults) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 		if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
 			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 				startOptimizationFlow();
 			} else {
-				Toast.makeText(this, "Location permission required", Toast.LENGTH_SHORT).show();
+				Toast
+						.makeText(this, "Location permission required", Toast.LENGTH_SHORT)
+						.show();
 			}
 		}
 	}
 
 	@Override
-	protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+	protected void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == OVERLAY_PERMISSION_REQUEST_CODE) {
 			if (Settings.canDrawOverlays(this)) {
 				startOptimizationFlow();
 			} else {
-				Toast.makeText(this, "Overlay permission required", Toast.LENGTH_SHORT).show();
+				Toast
+						.makeText(this, "Overlay permission required", Toast.LENGTH_SHORT)
+						.show();
 			}
 		}
 	}
@@ -250,22 +279,27 @@ public class MainActivity extends AppCompatActivity {
 			this.data = data;
 		}
 
+		@NonNull
 		@Override
-		public ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
-			final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_address, parent, false);
+		public ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
+			final View view =
+					LayoutInflater
+							.from(parent.getContext())
+							.inflate(R.layout.item_address, parent, false);
 			return new ViewHolder(view);
 		}
 
 		@Override
-		public void onBindViewHolder(final ViewHolder holder, final int position) {
+		public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
 			holder.tvAddress.setText(data.get(position));
-			holder.ivDelete.setOnClickListener(v -> {
-				final int currentPos = holder.getAdapterPosition();
-				if (currentPos != RecyclerView.NO_POSITION) {
-					data.remove(currentPos);
-					notifyItemRemoved(currentPos);
-				}
-			});
+			holder.ivDelete.setOnClickListener(
+					view -> {
+						final int currentPos = holder.getAdapterPosition();
+						if (currentPos != RecyclerView.NO_POSITION) {
+							data.remove(currentPos);
+							notifyItemRemoved(currentPos);
+						}
+					});
 		}
 
 		@Override
@@ -274,11 +308,12 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 		static class ViewHolder extends RecyclerView.ViewHolder {
-			final TextView tvAddress;
-			final View ivDelete;
-			final View ivDragHandle;
 
-			ViewHolder(final View itemView) {
+			public final TextView tvAddress;
+			public final View ivDelete;
+			public final View ivDragHandle;
+
+			public ViewHolder(final View itemView) {
 				super(itemView);
 				tvAddress = itemView.findViewById(R.id.tvAddress);
 				ivDelete = itemView.findViewById(R.id.ivDelete);
