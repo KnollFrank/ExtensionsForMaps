@@ -44,6 +44,7 @@ public class RouteOptimizer {
 										.Builder
 										.newInstance("car")
 										.build())
+						.setReturnToDepot(false)
 						.build());
 
 		// Define Transport Costs using Haversine
