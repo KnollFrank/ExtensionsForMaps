@@ -1,6 +1,7 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import android.Manifest;
+import android.content.ClipDescription;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 		setupRecyclerView();
 		this
 				.<ExtendedFloatingActionButton>findViewById(R.id.fabStartTour)
-				.setOnClickListener(v -> startOptimizationFlow());
+				.setOnClickListener(view -> startOptimizationFlow());
 		handleIntent(getIntent());
 	}
 
@@ -99,15 +101,17 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void handleIntent(final Intent intent) {
-		if (Intent.ACTION_SEND.equals(intent.getAction()) && "text/plain".equals(intent.getType())) {
-			final String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
-			if (sharedText != null) {
-				final String parsedAddress = parseAddress(sharedText);
-				if (!parsedAddress.isEmpty() && !addressList.contains(parsedAddress)) {
-					addressList.add(parsedAddress);
-					addressAdapter.notifyItemInserted(addressList.size() - 1);
-				}
-			}
+		if (Intent.ACTION_SEND.equals(intent.getAction()) && ClipDescription.MIMETYPE_TEXT_PLAIN.equals(intent.getType())) {
+			Optional
+					.ofNullable(intent.getStringExtra(Intent.EXTRA_TEXT))
+					.ifPresent(
+							sharedText -> {
+								final String parsedAddress = parseAddress(sharedText);
+								if (!parsedAddress.isEmpty() && !addressList.contains(parsedAddress)) {
+									addressList.add(parsedAddress);
+									addressAdapter.notifyItemInserted(addressList.size() - 1);
+								}
+							});
 		}
 	}
 
@@ -117,14 +121,23 @@ public class MainActivity extends AppCompatActivity {
 		final String urlRegex = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
 		final Pattern pattern = Pattern.compile(urlRegex);
 		final Matcher matcher = pattern.matcher(sharedText);
-		String textWithoutUrl = matcher.replaceAll("").trim();
+		final String textWithoutUrl =
+				matcher
+						.replaceAll("")
+						.trim();
 
 		// Google Maps sometimes shares "Name \n Address \n URL". We want to keep it simple and clean.
 		// If there are multiple lines, the address is often the last or second to last.
 		// For MVP, we will just take the cleaned text, maybe remove multiple newlines.
-		final String cleanedText = textWithoutUrl.replaceAll("\n+", ", ").replaceAll(",\\s*,", ",").trim();
+		final String cleanedText =
+				textWithoutUrl
+						.replaceAll("\n+", ", ")
+						.replaceAll(",\\s*,", ",")
+						.trim();
 		if (cleanedText.endsWith(",")) {
-			return cleanedText.substring(0, cleanedText.length() - 1).trim();
+			return cleanedText
+					.substring(0, cleanedText.length() - 1)
+					.trim();
 		}
 		return cleanedText;
 	}
