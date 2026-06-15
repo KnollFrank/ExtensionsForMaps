@@ -8,7 +8,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -44,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 	private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
 	private static final int OVERLAY_PERMISSION_REQUEST_CODE = 1002;
 
-	private final ArrayList<String> addressList = new ArrayList<>();
+	private final List<String> addressList = new ArrayList<>();
 	private final AddressAdapter addressAdapter = new AddressAdapter(addressList);
 	private FusedLocationProviderClient fusedLocationClient;
 
@@ -213,14 +212,8 @@ public class MainActivity extends AppCompatActivity {
 
 	private void startFloatingService() {
 		final Intent serviceIntent = new Intent(this, FloatingWidgetService.class);
-		serviceIntent.putStringArrayListExtra("OPTIMIZED_STOPS", addressList);
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			ContextCompat.startForegroundService(this, serviceIntent);
-		} else {
-			startService(serviceIntent);
-		}
-
+		serviceIntent.putStringArrayListExtra("OPTIMIZED_STOPS", new ArrayList<>(addressList));
+		ContextCompat.startForegroundService(this, serviceIntent);
 		// Minimize the app
 		moveTaskToBack(true);
 	}
@@ -250,9 +243,10 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private static class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHolder> {
-		private final ArrayList<String> data;
 
-		AddressAdapter(final ArrayList<String> data) {
+		private final List<String> data;
+
+		public AddressAdapter(final List<String> data) {
 			this.data = data;
 		}
 
