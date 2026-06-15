@@ -40,13 +40,13 @@ dependencies {
     implementation libs.material
     
     // Core App Dependencies
-    implementation 'androidx.recyclerview:recyclerview:1.3.2'
-    implementation 'com.google.android.gms:play-services-location:21.1.0'
-    implementation 'com.graphhopper:jsprit-core:1.8'
+    implementation libs.recyclerview
+    implementation libs.play.services.location
+    implementation libs.jsprit.core
     
     testImplementation libs.junit
     androidTestImplementation libs.espresso.core
     androidTestImplementation libs.ext.junit
-    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.3.0'
-    androidTestImplementation 'androidx.test:rules:1.5.0'
+    androidTestImplementation libs.uiautomator
+    androidTestImplementation libs.rules
 }
