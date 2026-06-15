@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.io.IOException;
@@ -48,12 +49,14 @@ public class MainActivity extends AppCompatActivity {
 	private final List<String> addressList = new ArrayList<>();
 	private final AddressAdapter addressAdapter = new AddressAdapter(addressList);
 	private FusedLocationProviderClient fusedLocationClient;
+	private View progressBar;
 
 	@Override
 	protected void onCreate(@Nullable final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+		progressBar = findViewById(R.id.progressBar);
 		setupRecyclerView();
 		this
 				.<ExtendedFloatingActionButton>findViewById(R.id.fabStartTour)
@@ -219,12 +222,14 @@ public class MainActivity extends AppCompatActivity {
 		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 			return;
 		}
+		progressBar.setVisibility(View.VISIBLE);
 		fusedLocationClient
-				.getLastLocation()
+				.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
 				.addOnSuccessListener(
 						this,
 						location -> {
 							if (location == null) {
+								progressBar.setVisibility(View.GONE);
 								Toast
 										.makeText(this, "Could not get current location", Toast.LENGTH_LONG)
 										.show();
@@ -234,10 +239,12 @@ public class MainActivity extends AppCompatActivity {
 						})
 				.addOnFailureListener(
 						this,
-						exception ->
-								Toast
-										.makeText(this, "Location error: " + exception.getMessage(), Toast.LENGTH_LONG)
-										.show());
+						exception -> {
+							progressBar.setVisibility(View.GONE);
+							Toast
+									.makeText(this, "Location error: " + exception.getMessage(), Toast.LENGTH_LONG)
+									.show();
+						});
 	}
 
 	private void optimizeRoute(final Location startLocation) {
@@ -252,31 +259,38 @@ public class MainActivity extends AppCompatActivity {
 								final Address address = addresses.get(0);
 								stops.add(new RouteOptimizer.Stop(addressStr, address.getLatitude(), address.getLongitude()));
 							} else {
-								runOnUiThread(() ->
-										Toast
-												.makeText(this, "Geocoding failed for: " + addressStr, Toast.LENGTH_LONG)
-												.show());
+								runOnUiThread(() -> {
+									progressBar.setVisibility(View.GONE);
+									Toast
+											.makeText(this, "Geocoding failed for: " + addressStr, Toast.LENGTH_LONG)
+											.show();
+								});
 								return;
 							}
 						}
 						// Call the optimizer
 						final List<String> optimizedAddresses = RouteOptimizer.optimize(startLocation.getLatitude(), startLocation.getLongitude(), stops);
 						runOnUiThread(() -> {
+							progressBar.setVisibility(View.GONE);
 							addressList.clear();
 							addressList.addAll(optimizedAddresses);
 							addressAdapter.notifyDataSetChanged();
 							startFloatingService();
 						});
 					} catch (final IOException exception) {
-						runOnUiThread(() ->
-								Toast
-										.makeText(this, "Network error during Geocoding: " + exception.getMessage(), Toast.LENGTH_LONG)
-										.show());
+						runOnUiThread(() -> {
+							progressBar.setVisibility(View.GONE);
+							Toast
+									.makeText(this, "Network error during Geocoding: " + exception.getMessage(), Toast.LENGTH_LONG)
+									.show();
+						});
 					} catch (final Exception exception) {
-						runOnUiThread(() ->
-								Toast
-										.makeText(this, "Optimization error: " + exception.getMessage(), Toast.LENGTH_LONG)
-										.show());
+						runOnUiThread(() -> {
+							progressBar.setVisibility(View.GONE);
+							Toast
+									.makeText(this, "Optimization error: " + exception.getMessage(), Toast.LENGTH_LONG)
+									.show();
+						});
 					}
 				});
 		thread.start();
