@@ -200,11 +200,10 @@ public class MainActivity extends AppCompatActivity {
 								final Address address = addresses.get(0);
 								stops.add(new RouteOptimizer.Stop(addressStr, address.getLatitude(), address.getLongitude()));
 							} else {
-								runOnUiThread(
-										() ->
-												Toast
-														.makeText(this, "Geocoding failed for: " + addressStr, Toast.LENGTH_LONG)
-														.show());
+								runOnUiThread(() ->
+										Toast
+												.makeText(this, "Geocoding failed for: " + addressStr, Toast.LENGTH_LONG)
+												.show());
 								return;
 							}
 						}
@@ -217,17 +216,15 @@ public class MainActivity extends AppCompatActivity {
 							startFloatingService();
 						});
 					} catch (final IOException exception) {
-						runOnUiThread(
-								() ->
-										Toast
-												.makeText(this, "Network error during Geocoding: " + exception.getMessage(), Toast.LENGTH_LONG)
-												.show());
+						runOnUiThread(() ->
+								Toast
+										.makeText(this, "Network error during Geocoding: " + exception.getMessage(), Toast.LENGTH_LONG)
+										.show());
 					} catch (final Exception exception) {
-						runOnUiThread(
-								() ->
-										Toast
-												.makeText(this, "Optimization error: " + exception.getMessage(), Toast.LENGTH_LONG)
-												.show());
+						runOnUiThread(() ->
+								Toast
+										.makeText(this, "Optimization error: " + exception.getMessage(), Toast.LENGTH_LONG)
+										.show());
 					}
 				});
 		thread.start();

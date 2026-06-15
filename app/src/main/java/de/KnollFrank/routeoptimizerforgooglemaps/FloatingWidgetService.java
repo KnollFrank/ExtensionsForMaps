@@ -21,7 +21,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class FloatingWidgetService extends Service {
 
@@ -31,7 +31,7 @@ public class FloatingWidgetService extends Service {
 
 	private WindowManager windowManager;
 	private View floatingView;
-	private ArrayList<String> optimizedStops;
+	private List<String> optimizedStops;
 	private int currentStopIndex = 0;
 
 	@Nullable
@@ -55,11 +55,9 @@ public class FloatingWidgetService extends Service {
 			} else {
 				startForeground(NOTIFICATION_ID, notification);
 			}
-
 			if (floatingView == null) {
 				setupFloatingWidget();
 			}
-
 			// Automatically launch the first stop if the list is not empty
 			if (optimizedStops != null && !optimizedStops.isEmpty()) {
 				launchNextStopNavigation();
@@ -73,8 +71,7 @@ public class FloatingWidgetService extends Service {
 				new NotificationChannel(
 						CHANNEL_ID,
 						"Route Optimizer Active",
-						NotificationManager.IMPORTANCE_LOW
-				);
+						NotificationManager.IMPORTANCE_LOW);
 		final NotificationManager manager = getSystemService(NotificationManager.class);
 		if (manager != null) {
 			manager.createNotificationChannel(serviceChannel);
@@ -82,7 +79,8 @@ public class FloatingWidgetService extends Service {
 	}
 
 	private Notification createNotification() {
-		return new NotificationCompat.Builder(this, CHANNEL_ID)
+		return new NotificationCompat
+				.Builder(this, CHANNEL_ID)
 				.setContentTitle("Tour Active")
 				.setContentText("Navigation overlay is active.")
 				.setSmallIcon(android.R.drawable.ic_dialog_map)
@@ -90,17 +88,19 @@ public class FloatingWidgetService extends Service {
 	}
 
 	private void setupFloatingWidget() {
-		floatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_widget, null);
+		floatingView =
+				LayoutInflater
+						.from(this)
+						.inflate(R.layout.layout_floating_widget, null);
 
-		final int layoutFlag;
-		layoutFlag = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-
-		final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-				WindowManager.LayoutParams.WRAP_CONTENT,
-				WindowManager.LayoutParams.WRAP_CONTENT,
-				layoutFlag,
-				WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-				PixelFormat.TRANSLUCENT);
+		final int layoutFlag = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+		final WindowManager.LayoutParams params =
+				new WindowManager.LayoutParams(
+						WindowManager.LayoutParams.WRAP_CONTENT,
+						WindowManager.LayoutParams.WRAP_CONTENT,
+						layoutFlag,
+						WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+						PixelFormat.TRANSLUCENT);
 
 		params.gravity = Gravity.TOP | Gravity.START;
 		params.x = 0;
@@ -110,33 +110,35 @@ public class FloatingWidgetService extends Service {
 		windowManager.addView(floatingView, params);
 
 		final View dragHandle = floatingView.findViewById(R.id.ivWidgetDragHandle);
-		dragHandle.setOnTouchListener(new View.OnTouchListener() {
-			private int initialX;
-			private int initialY;
-			private float initialTouchX;
-			private float initialTouchY;
+		dragHandle.setOnTouchListener(
+				new View.OnTouchListener() {
 
-			@Override
-			public boolean onTouch(final View v, final MotionEvent event) {
-				switch (event.getAction()) {
-					case MotionEvent.ACTION_DOWN:
-						initialX = params.x;
-						initialY = params.y;
-						initialTouchX = event.getRawX();
-						initialTouchY = event.getRawY();
-						return true;
-					case MotionEvent.ACTION_MOVE:
-						params.x = initialX + (int) (event.getRawX() - initialTouchX);
-						params.y = initialY + (int) (event.getRawY() - initialTouchY);
-						windowManager.updateViewLayout(floatingView, params);
-						return true;
-				}
-				return false;
-			}
-		});
+					private int initialX;
+					private int initialY;
+					private float initialTouchX;
+					private float initialTouchY;
+
+					@Override
+					public boolean onTouch(final View view, final MotionEvent event) {
+						switch (event.getAction()) {
+							case MotionEvent.ACTION_DOWN:
+								initialX = params.x;
+								initialY = params.y;
+								initialTouchX = event.getRawX();
+								initialTouchY = event.getRawY();
+								return true;
+							case MotionEvent.ACTION_MOVE:
+								params.x = initialX + (int) (event.getRawX() - initialTouchX);
+								params.y = initialY + (int) (event.getRawY() - initialTouchY);
+								windowManager.updateViewLayout(floatingView, params);
+								return true;
+						}
+						return false;
+					}
+				});
 
 		final Button btnNextStop = floatingView.findViewById(R.id.btnNextStop);
-		btnNextStop.setOnClickListener(v -> launchNextStopNavigation());
+		btnNextStop.setOnClickListener(view -> launchNextStopNavigation());
 	}
 
 	private void launchNextStopNavigation() {
@@ -152,13 +154,13 @@ public class FloatingWidgetService extends Service {
 		final Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
 		mapIntent.setPackage("com.google.android.apps.maps");
 		mapIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
 		try {
 			startActivity(mapIntent);
 		} catch (final Exception e) {
-			Toast.makeText(this, "Google Maps is not installed.", Toast.LENGTH_SHORT).show();
+			Toast
+					.makeText(this, "Google Maps is not installed.", Toast.LENGTH_SHORT)
+					.show();
 		}
-
 		if (currentStopIndex >= optimizedStops.size()) {
 			final Button btnNextStop = floatingView.findViewById(R.id.btnNextStop);
 			btnNextStop.setText("BEENDEN");
@@ -166,7 +168,9 @@ public class FloatingWidgetService extends Service {
 	}
 
 	private void finishTour() {
-		Toast.makeText(this, "Tour finished!", Toast.LENGTH_LONG).show();
+		Toast
+				.makeText(this, "Tour finished!", Toast.LENGTH_LONG)
+				.show();
 		stopSelf();
 	}
 
