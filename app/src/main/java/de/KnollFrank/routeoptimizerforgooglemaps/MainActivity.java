@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -42,26 +43,23 @@ public class MainActivity extends AppCompatActivity {
 	private static final int OVERLAY_PERMISSION_REQUEST_CODE = 1002;
 
 	private final ArrayList<String> addressList = new ArrayList<>();
-	private AddressAdapter addressAdapter;
+	private final AddressAdapter addressAdapter = new AddressAdapter(addressList);
 	private FusedLocationProviderClient fusedLocationClient;
 
 	@Override
-	protected void onCreate(final Bundle savedInstanceState) {
+	protected void onCreate(@Nullable final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
 		fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
 		setupRecyclerView();
-
-		final ExtendedFloatingActionButton fabStartTour = findViewById(R.id.fabStartTour);
-		fabStartTour.setOnClickListener(v -> startOptimizationFlow());
-
+		this
+				.<ExtendedFloatingActionButton>findViewById(R.id.fabStartTour)
+				.setOnClickListener(v -> startOptimizationFlow());
 		handleIntent(getIntent());
 	}
 
 	@Override
-	protected void onNewIntent(final Intent intent) {
+	protected void onNewIntent(@NonNull final Intent intent) {
 		super.onNewIntent(intent);
 		handleIntent(intent);
 	}
@@ -69,28 +67,35 @@ public class MainActivity extends AppCompatActivity {
 	private void setupRecyclerView() {
 		final RecyclerView recyclerView = findViewById(R.id.recyclerView);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
-		addressAdapter = new AddressAdapter(addressList);
 		recyclerView.setAdapter(addressAdapter);
+		createItemTouchHelper().attachToRecyclerView(recyclerView);
+	}
 
-		final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
-				ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT) {
-			@Override
-			public boolean onMove(@NonNull final RecyclerView recyclerView, @NonNull final RecyclerView.ViewHolder viewHolder, @NonNull final RecyclerView.ViewHolder target) {
-				final int fromPos = viewHolder.getAdapterPosition();
-				final int toPos = target.getAdapterPosition();
-				Collections.swap(addressList, fromPos, toPos);
-				addressAdapter.notifyItemMoved(fromPos, toPos);
-				return true;
-			}
+	private ItemTouchHelper createItemTouchHelper() {
+		return new ItemTouchHelper(
+				new ItemTouchHelper.SimpleCallback(
+						ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+						ItemTouchHelper.LEFT) {
 
-			@Override
-			public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, final int direction) {
-				final int position = viewHolder.getAdapterPosition();
-				addressList.remove(position);
-				addressAdapter.notifyItemRemoved(position);
-			}
-		});
-		itemTouchHelper.attachToRecyclerView(recyclerView);
+					@Override
+					public boolean onMove(@NonNull final RecyclerView recyclerView,
+					                      @NonNull final RecyclerView.ViewHolder viewHolder,
+					                      @NonNull final RecyclerView.ViewHolder target) {
+						final int fromPos = viewHolder.getAdapterPosition();
+						final int toPos = target.getAdapterPosition();
+						Collections.swap(addressList, fromPos, toPos);
+						addressAdapter.notifyItemMoved(fromPos, toPos);
+						return true;
+					}
+
+					@Override
+					public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder,
+					                     final int direction) {
+						final int position = viewHolder.getAdapterPosition();
+						addressList.remove(position);
+						addressAdapter.notifyItemRemoved(position);
+					}
+				});
 	}
 
 	private void handleIntent(final Intent intent) {
@@ -208,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	@Override
-	public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+	public void onRequestPermissionsResult(final int requestCode, final String[] permissions, final int[] grantResults) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 		if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
 			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -238,15 +243,14 @@ public class MainActivity extends AppCompatActivity {
 			this.data = data;
 		}
 
-		@NonNull
 		@Override
-		public ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
+		public ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
 			final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_address, parent, false);
 			return new ViewHolder(view);
 		}
 
 		@Override
-		public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
+		public void onBindViewHolder(final ViewHolder holder, final int position) {
 			holder.tvAddress.setText(data.get(position));
 			holder.ivDelete.setOnClickListener(v -> {
 				final int currentPos = holder.getAdapterPosition();
