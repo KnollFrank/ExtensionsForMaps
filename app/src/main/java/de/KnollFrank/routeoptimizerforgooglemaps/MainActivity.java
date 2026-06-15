@@ -35,8 +35,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -116,28 +114,30 @@ public class MainActivity extends AppCompatActivity {
 
 	// Public for testing
 	public static String parseAddress(final String sharedText) {
-		// Remove URLs
+		// 1. Remove URLs
 		final String urlRegex = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
-		final Pattern pattern = Pattern.compile(urlRegex);
-		final Matcher matcher = pattern.matcher(sharedText);
 		final String textWithoutUrl =
-				matcher
-						.replaceAll("")
+				sharedText
+						.replaceAll(urlRegex, "")
 						.trim();
 
-		// Google Maps sometimes shares "Name \n Address \n URL". We want to keep it simple and clean.
-		// If there are multiple lines, the address is often the last or second to last.
-		// For MVP, we will just take the cleaned text, maybe remove multiple newlines.
-		final String cleanedText =
-				textWithoutUrl
-						.replaceAll("\n+", ", ")
-						.replaceAll(",\\s*,", ",")
-						.trim();
-		if (cleanedText.endsWith(",")) {
-			return cleanedText
-					.substring(0, cleanedText.length() - 1)
-					.trim();
+		// 2. Replace line breaks (and surrounding whitespace) with a comma and space
+		// This handles cases like "Name \n Address" -> "Name, Address"
+		String cleanedText = textWithoutUrl.replaceAll("\\s*\\n+\\s*", ", ");
+
+		// 3. Clean up multiple commas or spaces that might have resulted
+		cleanedText = cleanedText.replaceAll(",(\\s*,)+", ","); // Remove duplicate commas
+		cleanedText = cleanedText.replaceAll("\\s+", " ");      // Collapse multiple spaces
+
+		// 4. Final trim of the result and removal of leading/trailing commas
+		cleanedText = cleanedText.trim();
+		if (cleanedText.startsWith(",")) {
+			cleanedText = cleanedText.substring(1).trim();
 		}
+		if (cleanedText.endsWith(",")) {
+			cleanedText = cleanedText.substring(0, cleanedText.length() - 1).trim();
+		}
+
 		return cleanedText;
 	}
 
