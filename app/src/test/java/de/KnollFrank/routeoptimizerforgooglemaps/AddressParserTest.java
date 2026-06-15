@@ -26,4 +26,11 @@ public class AddressParserTest {
 		final String result = MainActivity.parseAddress(shareText);
 		assertEquals("Alexanderplatz, 10178 Berlin", result);
 	}
+
+	@Test
+	public void testParseAddress_longGoogleMapsUrl() {
+		final String longUrl = "https://www.google.com/maps/place/Goetheanum,+R%C3%BCttiweg+45,+4143+Dornach,+Switzerland/data=!4m2!3m1!1s0x4791c871e14eee41:0x28bc250fed7c57c";
+		final String result = MainActivity.parseAddress(longUrl);
+		assertEquals("Goetheanum, Rüttiweg 45, 4143 Dornach, Switzerland", result);
+	}
 }

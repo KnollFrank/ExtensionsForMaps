@@ -30,11 +30,15 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -103,26 +107,74 @@ public class MainActivity extends AppCompatActivity {
 					.ofNullable(intent.getStringExtra(Intent.EXTRA_TEXT))
 					.ifPresent(
 							sharedText -> {
-								final String parsedAddress = parseAddress(sharedText);
-								if (!parsedAddress.isEmpty() && !addressList.contains(parsedAddress)) {
-									addressList.add(parsedAddress);
-									addressAdapter.notifyItemInserted(addressList.size() - 1);
+								if (sharedText.contains("maps.app.goo.gl") || sharedText.contains("goo.gl/maps")) {
+									expandAndAddAddress(sharedText);
+								} else {
+									addParsedAddress(sharedText);
 								}
 							});
 		}
 	}
 
+	private void expandAndAddAddress(final String sharedText) {
+		final String shortUrl = extractUrl(sharedText);
+		if (shortUrl.isEmpty()) {
+			addParsedAddress(sharedText);
+			return;
+		}
+
+		new Thread(() -> {
+			try {
+				final String expandedUrl = UrlExpander.expandUrl(shortUrl);
+				runOnUiThread(() -> addParsedAddress(expandedUrl));
+			} catch (IOException e) {
+				runOnUiThread(() -> {
+					Toast.makeText(this, "Failed to expand URL", Toast.LENGTH_SHORT).show();
+					addParsedAddress(sharedText);
+				});
+			}
+		}).start();
+	}
+
+	private void addParsedAddress(final String text) {
+		final String parsedAddress = parseAddress(text);
+		if (!parsedAddress.isEmpty() && !addressList.contains(parsedAddress)) {
+			addressList.add(parsedAddress);
+			addressAdapter.notifyItemInserted(addressList.size() - 1);
+		}
+	}
+
+	private static String extractUrl(final String text) {
+		final String urlRegex = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+		final Pattern pattern = Pattern.compile(urlRegex);
+		final Matcher matcher = pattern.matcher(text);
+		if (matcher.find()) {
+			return matcher.group();
+		}
+		return "";
+	}
+
 	// Public for testing
-	public static String parseAddress(final String sharedText) {
+	public static String parseAddress(final String text) {
+		if (text.contains("/maps/place/")) {
+			// Extract from long URL: .../place/Name+Address/data=...
+			final Pattern pattern = Pattern.compile("place/([^/@?]+)");
+			final Matcher matcher = pattern.matcher(text);
+			if (matcher.find()) {
+				try {
+					final String rawPlace = matcher.group(1);
+					return URLDecoder.decode(rawPlace.replace("+", " "), StandardCharsets.UTF_8.name());
+				} catch (final Exception e) {
+					// Fallback to normal parsing if URL extraction fails
+				}
+			}
+		}
+
 		// 1. Remove URLs
 		final String urlRegex = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
-		final String textWithoutUrl =
-				sharedText
-						.replaceAll(urlRegex, "")
-						.trim();
+		final String textWithoutUrl = text.replaceAll(urlRegex, "").trim();
 
 		// 2. Replace line breaks (and surrounding whitespace) with a comma and space
-		// This handles cases like "Name \n Address" -> "Name, Address"
 		String cleanedText = textWithoutUrl.replaceAll("\\s*\\n+\\s*", ", ");
 
 		// 3. Clean up multiple commas or spaces that might have resulted
