@@ -21,8 +21,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="➔ NÄCHSTER STOPP"
-        android:textSize="14sp"
+        android:text="➔ NÄCHSTER"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/btnAllStops"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:text="ALLE"
+        android:textSize="12sp"
         android:textStyle="bold" />
 
 </LinearLayout>

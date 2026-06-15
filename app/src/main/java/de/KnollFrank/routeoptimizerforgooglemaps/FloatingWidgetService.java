@@ -139,6 +139,35 @@ public class FloatingWidgetService extends Service {
 
 		final Button btnNextStop = floatingView.findViewById(R.id.btnNextStop);
 		btnNextStop.setOnClickListener(view -> launchNextStopNavigation());
+
+		final Button btnAllStops = floatingView.findViewById(R.id.btnAllStops);
+		btnAllStops.setOnClickListener(view -> launchWholeRouteNavigation());
+	}
+
+	private void launchWholeRouteNavigation() {
+		if (optimizedStops == null || optimizedStops.isEmpty()) return;
+
+		// The last stop in the optimized list is the final destination
+		final String destination = optimizedStops.get(optimizedStops.size() - 1);
+		final StringBuilder waypoints = new StringBuilder();
+
+		// All other stops are waypoints (intermediate stops)
+		for (int i = 0; i < optimizedStops.size() - 1; i++) {
+			if (i > 0) waypoints.append("|");
+			waypoints.append(optimizedStops.get(i));
+		}
+
+		final String uri = "google.navigation:q=" + Uri.encode(destination) +
+				(waypoints.length() > 0 ? "&waypoints=" + Uri.encode(waypoints.toString()) : "");
+
+		final Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+		mapIntent.setPackage("com.google.android.apps.maps");
+		mapIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		try {
+			startActivity(mapIntent);
+		} catch (final Exception e) {
+			Toast.makeText(this, "Google Maps is not installed.", Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	private void launchNextStopNavigation() {

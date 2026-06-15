@@ -111,39 +111,43 @@ public class MainActivity extends AppCompatActivity {
 					.ifPresent(
 							sharedText -> {
 								if (sharedText.contains("maps.app.goo.gl") || sharedText.contains("goo.gl/maps")) {
-									expandAndAddAddress(sharedText);
+									expandAndAddAddresses(sharedText);
 								} else {
-									addParsedAddress(sharedText);
+									addParsedAddresses(sharedText);
 								}
 							});
 		}
 	}
 
-	private void expandAndAddAddress(final String sharedText) {
+	private void expandAndAddAddresses(final String sharedText) {
 		final String shortUrl = extractUrl(sharedText);
 		if (shortUrl.isEmpty()) {
-			addParsedAddress(sharedText);
+			addParsedAddresses(sharedText);
 			return;
 		}
 
 		new Thread(() -> {
 			try {
 				final String expandedUrl = UrlExpander.expandUrl(shortUrl);
-				runOnUiThread(() -> addParsedAddress(expandedUrl));
-			} catch (IOException e) {
+				runOnUiThread(() -> addParsedAddresses(expandedUrl));
+			} catch (final IOException e) {
 				runOnUiThread(() -> {
-					Toast.makeText(this, "Failed to expand URL", Toast.LENGTH_SHORT).show();
-					addParsedAddress(sharedText);
+					Toast
+							.makeText(this, "Failed to expand URL", Toast.LENGTH_SHORT)
+							.show();
+					addParsedAddresses(sharedText);
 				});
 			}
 		}).start();
 	}
 
-	private void addParsedAddress(final String text) {
-		final String parsedAddress = parseAddress(text);
-		if (!parsedAddress.isEmpty() && !addressList.contains(parsedAddress)) {
-			addressList.add(parsedAddress);
-			addressAdapter.notifyItemInserted(addressList.size() - 1);
+	private void addParsedAddresses(final String text) {
+		final List<String> parsedAddresses = parseAddresses(text);
+		for (final String address : parsedAddresses) {
+			if (!address.isEmpty() && !addressList.contains(address)) {
+				addressList.add(address);
+				addressAdapter.notifyItemInserted(addressList.size() - 1);
+			}
 		}
 	}
 
@@ -158,42 +162,66 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	// Public for testing
-	public static String parseAddress(final String text) {
+	public static List<String> parseAddresses(final String text) {
+		final List<String> results = new ArrayList<>();
+
+		// 1. Check for multi-stop directory URL
+		if (text.contains("/maps/dir/")) {
+			final String[] parts = text.split("/maps/dir/")[1].split("/");
+			for (final String part : parts) {
+				if (part.isEmpty() || part.startsWith("@") || part.startsWith("data=")) {
+					break;
+				}
+				try {
+					results.add(URLDecoder.decode(part.replace("+", " "), StandardCharsets.UTF_8.name()));
+				} catch (final Exception e) {
+					// Skip malformed parts
+				}
+			}
+			if (!results.isEmpty()) return results;
+		}
+
+		// 2. Check for "Arrive at location" (Share directions text)
+		if (text.contains("Arrive at location:")) {
+			final Pattern pattern = Pattern.compile("Arrive at location: (.*)");
+			final Matcher matcher = pattern.matcher(text);
+			while (matcher.find()) {
+				results.add(matcher.group(1).trim());
+			}
+			if (!results.isEmpty()) return results;
+		}
+
+		// 3. Check for single place URL
 		if (text.contains("/maps/place/")) {
-			// Extract from long URL: .../place/Name+Address/data=...
 			final Pattern pattern = Pattern.compile("place/([^/@?]+)");
 			final Matcher matcher = pattern.matcher(text);
 			if (matcher.find()) {
 				try {
 					final String rawPlace = matcher.group(1);
-					return URLDecoder.decode(rawPlace.replace("+", " "), StandardCharsets.UTF_8.name());
+					results.add(URLDecoder.decode(rawPlace.replace("+", " "), StandardCharsets.UTF_8.name()));
+					return results;
 				} catch (final Exception e) {
-					// Fallback to normal parsing if URL extraction fails
+					// Fallback
 				}
 			}
 		}
 
-		// 1. Remove URLs
+		// 4. Fallback: Plain text parsing
 		final String urlRegex = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
 		final String textWithoutUrl = text.replaceAll(urlRegex, "").trim();
 
-		// 2. Replace line breaks (and surrounding whitespace) with a comma and space
 		String cleanedText = textWithoutUrl.replaceAll("\\s*\\n+\\s*", ", ");
-
-		// 3. Clean up multiple commas or spaces that might have resulted
-		cleanedText = cleanedText.replaceAll(",(\\s*,)+", ","); // Remove duplicate commas
-		cleanedText = cleanedText.replaceAll("\\s+", " ");      // Collapse multiple spaces
-
-		// 4. Final trim of the result and removal of leading/trailing commas
+		cleanedText = cleanedText.replaceAll(",(\\s*,)+", ",");
+		cleanedText = cleanedText.replaceAll("\\s+", " ");
 		cleanedText = cleanedText.trim();
-		if (cleanedText.startsWith(",")) {
-			cleanedText = cleanedText.substring(1).trim();
-		}
-		if (cleanedText.endsWith(",")) {
+		if (cleanedText.startsWith(",")) cleanedText = cleanedText.substring(1).trim();
+		if (cleanedText.endsWith(","))
 			cleanedText = cleanedText.substring(0, cleanedText.length() - 1).trim();
-		}
 
-		return cleanedText;
+		if (!cleanedText.isEmpty()) {
+			results.add(cleanedText);
+		}
+		return results;
 	}
 
 	private void startOptimizationFlow() {
