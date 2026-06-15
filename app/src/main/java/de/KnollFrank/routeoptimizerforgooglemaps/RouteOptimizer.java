@@ -1,4 +1,4 @@
-package com.example.routeoptimizerforgooglemaps;
+package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;

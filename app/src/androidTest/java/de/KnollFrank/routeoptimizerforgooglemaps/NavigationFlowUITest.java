@@ -1,4 +1,4 @@
-package com.example.routeoptimizerforgooglemaps;
+package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
@@ -29,7 +29,7 @@ public class NavigationFlowUITest {
 
 	private UiDevice device;
 	private static final int LAUNCH_TIMEOUT = 5000;
-	private static final String APP_PACKAGE = "com.example.routeoptimizerforgooglemaps";
+	private static final String APP_PACKAGE = "de.KnollFrank.routeoptimizerforgooglemaps";
 
 	@Before
 	public void startMainActivityFromHomeScreen() {

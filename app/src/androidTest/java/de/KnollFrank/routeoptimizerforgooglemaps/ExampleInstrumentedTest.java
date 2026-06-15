@@ -1,4 +1,4 @@
-package com.example.routeoptimizerforgooglemaps;
+package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import static org.junit.Assert.assertEquals;
 
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
 	public void useAppContext() {
 		// Context of the app under test.
 		Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-		assertEquals("com.example.routeoptimizerforgooglemaps", appContext.getPackageName());
+		assertEquals("de.KnollFrank.routeoptimizerforgooglemaps", appContext.getPackageName());
 	}
 }

@@ -1,4 +1,4 @@
-package com.example.routeoptimizerforgooglemaps;
+package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
