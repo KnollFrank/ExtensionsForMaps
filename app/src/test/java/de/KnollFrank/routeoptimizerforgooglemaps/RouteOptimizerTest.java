@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class RouteOptimizerTest {
@@ -31,14 +32,12 @@ public class RouteOptimizerTest {
 		assertEquals(3, optimized.size());
 
 		// Expected order: Potsdam -> Leipzig -> Munich
-		assertEquals("Potsdam", optimized.get(0));
-		assertEquals("Leipzig", optimized.get(1));
-		assertEquals("Munich", optimized.get(2));
+		assertEquals(List.of("Potsdam", "Leipzig", "Munich"), optimized);
 	}
 
 	@Test
 	public void testOptimize_emptyList() {
-		final List<String> optimized = RouteOptimizer.optimize(52.0, 13.0, new ArrayList<>());
+		final List<String> optimized = RouteOptimizer.optimize(52.0, 13.0, Collections.emptyList());
 		assertTrue(optimized.isEmpty());
 	}
 }

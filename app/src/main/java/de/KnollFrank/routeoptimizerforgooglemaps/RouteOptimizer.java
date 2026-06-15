@@ -23,17 +23,7 @@ import java.util.List;
 
 public class RouteOptimizer {
 
-	public static class Stop {
-
-		public final String address;
-		public final double lat;
-		public final double lng;
-
-		public Stop(final String address, final double lat, final double lng) {
-			this.address = address;
-			this.lat = lat;
-			this.lng = lng;
-		}
+	public record Stop(String address, double lat, double lng) {
 	}
 
 	public static List<String> optimize(final double startLat, final double startLng, final List<Stop> stops) {
