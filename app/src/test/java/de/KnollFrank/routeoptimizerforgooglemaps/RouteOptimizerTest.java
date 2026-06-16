@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RouteOptimizerTest {
 
@@ -26,13 +27,14 @@ public class RouteOptimizerTest {
 		// Stop C: Leipzig (medium)
 		stops.add(new RouteOptimizer.Stop("Leipzig", 51.3397, 12.3731));
 
-		final List<String> optimized = RouteOptimizer.optimize(startLat, startLng, stops);
+		final List<RouteOptimizer.Stop> optimized = RouteOptimizer.optimize(startLat, startLng, stops);
 
 		assertFalse(optimized.isEmpty());
 		assertEquals(3, optimized.size());
 
 		// Expected order: Potsdam -> Leipzig -> Munich
-		assertEquals(List.of("Potsdam", "Leipzig", "Munich"), optimized);
+		List<String> addresses = optimized.stream().map(RouteOptimizer.Stop::address).collect(Collectors.toList());
+		assertEquals(List.of("Potsdam", "Leipzig", "Munich"), addresses);
 	}
 
 	@Test
@@ -45,17 +47,18 @@ public class RouteOptimizerTest {
 		stops.add(new RouteOptimizer.Stop("Hamburg", 53.548828, 9.987170));
 		stops.add(new RouteOptimizer.Stop("Unterhausen", 48.430628, 9.254637));
 
-		List<String> optimized = RouteOptimizer.optimize(startLat, startLng, stops);
+		List<RouteOptimizer.Stop> optimized = RouteOptimizer.optimize(startLat, startLng, stops);
 
 		// Expect both stops to be present
 		assertEquals(2, optimized.size());
 		// Order: Unterhausen is much closer to Central-Apotheke than Hamburg is
-		assertEquals(List.of("Unterhausen", "Hamburg"), optimized);
+		List<String> addresses = optimized.stream().map(RouteOptimizer.Stop::address).collect(Collectors.toList());
+		assertEquals(List.of("Unterhausen", "Hamburg"), addresses);
 	}
 
 	@Test
 	public void testOptimize_emptyList() {
-		final List<String> optimized = RouteOptimizer.optimize(52.0, 13.0, Collections.emptyList());
+		final List<RouteOptimizer.Stop> optimized = RouteOptimizer.optimize(52.0, 13.0, Collections.emptyList());
 		assertTrue(optimized.isEmpty());
 	}
 }

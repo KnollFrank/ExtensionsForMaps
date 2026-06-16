@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 					if (stops.size() >= 2) {
 						runOptimizationWithStops(stops);
 					} else if (!stops.isEmpty()) {
-						launchRouteOverview(List.of(stops.get(0).address()));
+						launchRouteOverview(List.of(stops.get(0)));
 						finish();
 					} else {
 						showErrorAndFinish("No stops found in URL.");
@@ -78,8 +78,7 @@ public class MainActivity extends AppCompatActivity {
 					if (addressList.isEmpty()) {
 						showErrorAndFinish("No addresses found to optimize.");
 					} else if (addressList.size() < 2) {
-						launchRouteOverview(addressList);
-						finish();
+						runLegacyOptimization(addressList);
 					} else {
 						runLegacyOptimization(addressList);
 					}
@@ -158,14 +157,14 @@ public class MainActivity extends AppCompatActivity {
 				final RouteOptimizer.Stop start = stops.get(0);
 				final List<RouteOptimizer.Stop> intermediate = stops.subList(1, stops.size());
 
-				final List<String> optimizedIntermediate =
+				final List<RouteOptimizer.Stop> optimizedIntermediate =
 						RouteOptimizer.optimize(
 								start.lat(),
 								start.lng(),
 								intermediate);
 
-				final List<String> finalRoute = new ArrayList<>();
-				finalRoute.add(start.address());
+				final List<RouteOptimizer.Stop> finalRoute = new ArrayList<>();
+				finalRoute.add(start);
 				finalRoute.addAll(optimizedIntermediate);
 
 				launchRouteOverview(finalRoute);
@@ -191,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
 				}
 
 				final Address startLocation = startCoords.get(0);
+				final RouteOptimizer.Stop startStop = new RouteOptimizer.Stop(startAddressStr, startLocation.getLatitude(), startLocation.getLongitude());
 
 				for (int i = 1; i < addressList.size(); i++) {
 					final String addressStr = addressList.get(i);
@@ -201,18 +201,18 @@ public class MainActivity extends AppCompatActivity {
 					}
 				}
 
-				if (stops.isEmpty()) {
+				if (stops.isEmpty() && addressList.size() > 1) {
 					showErrorAndFinish("Could not geocode any intermediate stops.");
 					return;
 				}
 
-				final List<String> optimizedIntermediate = RouteOptimizer.optimize(
-						startLocation.getLatitude(),
-						startLocation.getLongitude(),
+				final List<RouteOptimizer.Stop> optimizedIntermediate = RouteOptimizer.optimize(
+						startStop.lat(),
+						startStop.lng(),
 						stops);
 
-				final List<String> finalRoute = new ArrayList<>();
-				finalRoute.add(startAddressStr);
+				final List<RouteOptimizer.Stop> finalRoute = new ArrayList<>();
+				finalRoute.add(startStop);
 				finalRoute.addAll(optimizedIntermediate);
 
 				launchRouteOverview(finalRoute);
@@ -224,12 +224,13 @@ public class MainActivity extends AppCompatActivity {
 		}).start();
 	}
 
-	private void launchRouteOverview(final List<String> stops) {
+	private void launchRouteOverview(final List<RouteOptimizer.Stop> stops) {
 		if (stops.isEmpty()) return;
 
+		// Use the coordinate-path format for 100% precision.
 		final StringBuilder uriBuilder = new StringBuilder("https://www.google.com/maps/dir/");
-		for (final String stop : stops) {
-			uriBuilder.append(Uri.encode(stop)).append("/");
+		for (final RouteOptimizer.Stop stop : stops) {
+			uriBuilder.append(String.format(Locale.US, "%f,%f", stop.lat(), stop.lng())).append("/");
 		}
 
 		final Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriBuilder.toString()));

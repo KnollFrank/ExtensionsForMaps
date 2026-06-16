@@ -19,18 +19,23 @@ import com.graphhopper.jsprit.core.util.Solutions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RouteOptimizer {
 
 	public record Stop(String address, double lat, double lng) {
 	}
 
-	public static List<String> optimize(final double startLat, final double startLng, final List<Stop> stops) {
-		final List<String> optimizedRoute = new ArrayList<>();
+	public static List<Stop> optimize(final double startLat, final double startLng, final List<Stop> stops) {
+		final List<Stop> optimizedRoute = new ArrayList<>();
 		if (stops.isEmpty()) {
 			return optimizedRoute;
 		}
+
+		// Map to quickly find Stop object by its unique ID
+		final Map<String, Stop> stopMap = new HashMap<>();
 
 		// Define Problem Builder
 		final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
@@ -123,14 +128,13 @@ public class RouteOptimizer {
 		// Add Services (Stops)
 		for (int i = 0; i < stops.size(); i++) {
 			final Stop stop = stops.get(i);
-			// We use address as ID. If duplicate addresses exist, we append index to make it unique
 			final String jobId = stop.address + "___" + i;
+			stopMap.put(jobId, stop);
 
 			final Service service =
 					Service
 							.Builder
 							.newInstance(jobId)
-							// jsprit coordinate is (x=longitude, y=latitude)
 							.setLocation(
 									Location
 											.Builder
@@ -141,7 +145,7 @@ public class RouteOptimizer {
 			vrpBuilder.addJob(service);
 		}
 
-		// Build Problem - Force finite fleet size to use only the vehicle we added
+		// Build Problem - Force finite fleet size
 		final VehicleRoutingProblem problem = vrpBuilder
 				.setFleetSize(VehicleRoutingProblem.FleetSize.FINITE)
 				.build();
@@ -154,30 +158,31 @@ public class RouteOptimizer {
 		final VehicleRoutingProblemSolution bestSolution = Solutions.bestOf(solutions);
 
 		if (bestSolution != null) {
-			// Iterate over all routes (though we only expect one with finite fleet size)
+			// Iterate over all routes
 			for (final VehicleRoute route : bestSolution.getRoutes()) {
 				for (final TourActivity activity : route.getActivities()) {
 					if (activity instanceof final TourActivity.JobActivity jobActivity) {
 						final String rawId = jobActivity.getJob().getId();
-						final String originalAddress = rawId.split("___")[0];
-						optimizedRoute.add(originalAddress);
+						final Stop originalStop = stopMap.get(rawId);
+						if (originalStop != null) {
+							optimizedRoute.add(originalStop);
+						}
 					}
 				}
 			}
 
-			// Add unassigned jobs to ensure no stops are ever lost
+			// Add unassigned jobs as fallback
 			for (final Job job : bestSolution.getUnassignedJobs()) {
-				final String rawId = job.getId();
-				final String originalAddress = rawId.split("___")[0];
-				optimizedRoute.add(originalAddress);
+				final Stop originalStop = stopMap.get(job.getId());
+				if (originalStop != null && !optimizedRoute.contains(originalStop)) {
+					optimizedRoute.add(originalStop);
+				}
 			}
 		}
 
-		// Final fallback: if result is still empty, return input order
+		// Final fallback
 		if (optimizedRoute.isEmpty()) {
-			for (final Stop stop : stops) {
-				optimizedRoute.add(stop.address);
-			}
+			optimizedRoute.addAll(stops);
 		}
 
 		return optimizedRoute;
