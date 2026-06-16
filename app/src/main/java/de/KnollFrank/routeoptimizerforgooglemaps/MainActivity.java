@@ -65,11 +65,8 @@ public class MainActivity extends AppCompatActivity {
 
 				if (processingUrl.contains("/maps/dir/")) {
 					final List<RouteOptimizer.Stop> stops = extractStopsFromUrl(processingUrl);
-					if (stops.size() >= 2) {
-						runOptimizationWithStops(stops);
-					} else if (!stops.isEmpty()) {
-						launchRouteOverview(List.of(stops.get(0)));
-						finish();
+					if (!stops.isEmpty()) {
+						ensureAllStopsHaveCoordinatesAndOptimize(stops);
 					} else {
 						showErrorAndFinish("No stops found in URL.");
 					}
@@ -77,8 +74,6 @@ public class MainActivity extends AppCompatActivity {
 					final List<String> addressList = parseAddresses(processingUrl.isEmpty() ? sharedText : processingUrl);
 					if (addressList.isEmpty()) {
 						showErrorAndFinish("No addresses found to optimize.");
-					} else if (addressList.size() < 2) {
-						runLegacyOptimization(addressList);
 					} else {
 						runLegacyOptimization(addressList);
 					}
@@ -92,16 +87,43 @@ public class MainActivity extends AppCompatActivity {
 		}).start();
 	}
 
+	private void ensureAllStopsHaveCoordinatesAndOptimize(final List<RouteOptimizer.Stop> stops) {
+		final Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+		final List<RouteOptimizer.Stop> completeStops = new ArrayList<>();
+
+		for (final RouteOptimizer.Stop stop : stops) {
+			if (stop.lat() != 0 || stop.lng() != 0) {
+				completeStops.add(stop);
+			} else {
+				try {
+					final List<Address> addresses = geocoder.getFromLocationName(stop.address(), 1);
+					if (addresses != null && !addresses.isEmpty()) {
+						completeStops.add(new RouteOptimizer.Stop(stop.address(), addresses.get(0).getLatitude(), addresses.get(0).getLongitude()));
+					} else {
+						completeStops.add(stop);
+					}
+				} catch (IOException e) {
+					completeStops.add(stop);
+				}
+			}
+		}
+
+		if (completeStops.size() < 2) {
+			launchRouteOverview(completeStops);
+			finish();
+		} else {
+			runOptimizationWithStops(completeStops);
+		}
+	}
+
 	public static List<RouteOptimizer.Stop> extractStopsFromUrl(final String url) {
 		final List<RouteOptimizer.Stop> stops = new ArrayList<>();
-
 		final List<String> labels = new ArrayList<>();
+
 		if (url.contains("/maps/dir/")) {
 			final String[] urlParts = url.split("/maps/dir/");
 			if (urlParts.length > 1) {
-				String pathPart = urlParts[1];
-				pathPart = pathPart.split("/@|/data=")[0];
-
+				String pathPart = urlParts[1].split("/@|/data=")[0];
 				final String[] parts = pathPart.split("/");
 				for (final String part : parts) {
 					if (!part.isEmpty()) {
@@ -115,40 +137,50 @@ public class MainActivity extends AppCompatActivity {
 
 		final Pattern pattern = Pattern.compile("!([1-4])d([-0-9.]+)");
 		final Matcher matcher = pattern.matcher(url);
-
 		final List<Bang> bangs = new ArrayList<>();
 		while (matcher.find()) {
 			bangs.add(new Bang(Integer.parseInt(matcher.group(1)), Double.parseDouble(matcher.group(2))));
 		}
 
 		int labelIdx = 0;
-		for (int b = 0; b < bangs.size() - 1 && labelIdx < labels.size(); b++) {
-			final Bang first = bangs.get(b);
-			final Bang second = bangs.get(b + 1);
-
+		int bangIdx = 0;
+		while (labelIdx < labels.size()) {
 			Double lat = null;
 			Double lng = null;
 
-			if (first.index == 3 && second.index == 4) {
-				lat = first.value;
-				lng = second.value;
-				b++;
-			} else if (first.index == 1 && second.index == 2) {
-				lng = first.value;
-				lat = second.value;
-				b++;
+			if (bangIdx < bangs.size() - 1) {
+				Bang first = bangs.get(bangIdx);
+				Bang second = bangs.get(bangIdx + 1);
+
+				if (first.index == 3 && second.index == 4) {
+					lat = first.value;
+					lng = second.value;
+					bangIdx += 2;
+				} else if (first.index == 1 && second.index == 2) {
+					lng = first.value;
+					lat = second.value;
+					bangIdx += 2;
+				} else {
+					bangIdx++;
+					continue;
+				}
 			}
 
-			if (lat != null && lng != null) {
-				stops.add(new RouteOptimizer.Stop(labels.get(labelIdx), lat, lng));
-				labelIdx++;
-			}
+			stops.add(new RouteOptimizer.Stop(labels.get(labelIdx), lat != null ? lat : 0.0, lng != null ? lng : 0.0));
+			labelIdx++;
 		}
 
 		return stops;
 	}
 
-	private record Bang(int index, double value) {
+	private static class Bang {
+		final int index;
+		final double value;
+
+		Bang(int i, double v) {
+			index = i;
+			value = v;
+		}
 	}
 
 	private void runOptimizationWithStops(final List<RouteOptimizer.Stop> stops) {
@@ -157,11 +189,10 @@ public class MainActivity extends AppCompatActivity {
 				final RouteOptimizer.Stop start = stops.get(0);
 				final List<RouteOptimizer.Stop> intermediate = stops.subList(1, stops.size());
 
-				final List<RouteOptimizer.Stop> optimizedIntermediate =
-						RouteOptimizer.optimize(
-								start.lat(),
-								start.lng(),
-								intermediate);
+				final List<RouteOptimizer.Stop> optimizedIntermediate = RouteOptimizer.optimize(
+						start.lat(),
+						start.lng(),
+						intermediate);
 
 				final List<RouteOptimizer.Stop> finalRoute = new ArrayList<>();
 				finalRoute.add(start);
@@ -198,12 +229,9 @@ public class MainActivity extends AppCompatActivity {
 					if (addresses != null && !addresses.isEmpty()) {
 						final Address addr = addresses.get(0);
 						stops.add(new RouteOptimizer.Stop(addressStr, addr.getLatitude(), addr.getLongitude()));
+					} else {
+						stops.add(new RouteOptimizer.Stop(addressStr, 0.0, 0.0));
 					}
-				}
-
-				if (stops.isEmpty() && addressList.size() > 1) {
-					showErrorAndFinish("Could not geocode any intermediate stops.");
-					return;
 				}
 
 				final List<RouteOptimizer.Stop> optimizedIntermediate = RouteOptimizer.optimize(
@@ -227,10 +255,29 @@ public class MainActivity extends AppCompatActivity {
 	private void launchRouteOverview(final List<RouteOptimizer.Stop> stops) {
 		if (stops.isEmpty()) return;
 
-		// Use the coordinate-path format for 100% precision.
-		final StringBuilder uriBuilder = new StringBuilder("https://www.google.com/maps/dir/");
-		for (final RouteOptimizer.Stop stop : stops) {
-			uriBuilder.append(String.format(Locale.US, "%f,%f", stop.lat(), stop.lng())).append("/");
+		// Use the official Universal Maps URL API for maximum reliability on Android.
+		// This format explicitly defines origin, destination, and waypoints.
+		final StringBuilder uriBuilder = new StringBuilder("https://www.google.com/maps/dir/?api=1");
+
+		// 1. Origin
+		final RouteOptimizer.Stop origin = stops.get(0);
+		String originValue = String.format(Locale.US, "%f,%f(%s)", origin.lat(), origin.lng(), origin.address());
+		uriBuilder.append("&origin=").append(Uri.encode(originValue));
+
+		// 2. Destination (The last stop in our list)
+		final RouteOptimizer.Stop destination = stops.get(stops.size() - 1);
+		String destValue = String.format(Locale.US, "%f,%f(%s)", destination.lat(), destination.lng(), destination.address());
+		uriBuilder.append("&destination=").append(Uri.encode(destValue));
+
+		// 3. Waypoints (Everything in between)
+		if (stops.size() > 2) {
+			uriBuilder.append("&waypoints=");
+			for (int i = 1; i < stops.size() - 1; i++) {
+				if (i > 1) uriBuilder.append(Uri.encode("|"));
+				final RouteOptimizer.Stop waypoint = stops.get(i);
+				String waypointValue = String.format(Locale.US, "%f,%f(%s)", waypoint.lat(), waypoint.lng(), waypoint.address());
+				uriBuilder.append(Uri.encode(waypointValue));
+			}
 		}
 
 		final Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriBuilder.toString()));
@@ -247,19 +294,20 @@ public class MainActivity extends AppCompatActivity {
 		});
 	}
 
-	public static String extractUrl(final String text) {
-		final String urlRegex = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
-		final Pattern pattern = Pattern.compile(urlRegex);
-		final Matcher matcher = pattern.matcher(text);
-		if (matcher.find()) {
-			return matcher.group();
+	private static String extractUrl(final String text) {
+		if (text == null) return "";
+		int start = text.indexOf("http");
+		if (start == -1) return "";
+		String url = text.substring(start).trim();
+		int end = url.indexOf("\n");
+		if (end != -1) {
+			url = url.substring(0, end).trim();
 		}
-		return "";
+		return url;
 	}
 
 	public static List<String> parseAddresses(final String text) {
 		final List<String> results = new ArrayList<>();
-
 		if (text.contains("/maps/dir/")) {
 			final String[] dirParts = text.split("/maps/dir/");
 			if (dirParts.length > 1) {
@@ -275,7 +323,6 @@ public class MainActivity extends AppCompatActivity {
 			}
 			if (!results.isEmpty()) return results;
 		}
-
 		if (text.contains("Arrive at location:")) {
 			final Pattern pattern = Pattern.compile("Arrive at location: (.*)");
 			final Matcher matcher = pattern.matcher(text);
@@ -284,7 +331,6 @@ public class MainActivity extends AppCompatActivity {
 			}
 			if (!results.isEmpty()) return results;
 		}
-
 		if (text.contains("/maps/place/")) {
 			final Pattern pattern = Pattern.compile("place/([^/@?]+)");
 			final Matcher matcher = pattern.matcher(text);
@@ -296,10 +342,8 @@ public class MainActivity extends AppCompatActivity {
 				} catch (final Exception e) { /* skip */ }
 			}
 		}
-
 		final String urlRegex = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
 		final String textWithoutUrl = text.replaceAll(urlRegex, "").trim();
-
 		String cleanedText = textWithoutUrl.replaceAll("\\s*\\n+\\s*", ", ");
 		cleanedText = cleanedText.replaceAll(",(\\s*,)+", ",");
 		cleanedText = cleanedText.replaceAll("\\s+", " ");
@@ -307,7 +351,6 @@ public class MainActivity extends AppCompatActivity {
 		if (cleanedText.startsWith(",")) cleanedText = cleanedText.substring(1).trim();
 		if (cleanedText.endsWith(","))
 			cleanedText = cleanedText.substring(0, cleanedText.length() - 1).trim();
-
 		if (!cleanedText.isEmpty()) results.add(cleanedText);
 		return results;
 	}
