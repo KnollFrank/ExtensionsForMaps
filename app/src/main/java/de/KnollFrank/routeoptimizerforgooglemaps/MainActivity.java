@@ -1,40 +1,22 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
-import android.Manifest;
 import android.content.ClipDescription;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.Priority;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -43,24 +25,13 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
-	private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
-	private static final int OVERLAY_PERMISSION_REQUEST_CODE = 1002;
-
-	private final List<String> addressList = new ArrayList<>();
-	private final AddressAdapter addressAdapter = new AddressAdapter(addressList);
-	private FusedLocationProviderClient fusedLocationClient;
 	private View progressBar;
 
 	@Override
 	protected void onCreate(@Nullable final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 		progressBar = findViewById(R.id.progressBar);
-		setupRecyclerView();
-		this
-				.<ExtendedFloatingActionButton>findViewById(R.id.fabStartTour)
-				.setOnClickListener(view -> startOptimizationFlow());
 		handleIntent(getIntent());
 	}
 
@@ -70,88 +41,212 @@ public class MainActivity extends AppCompatActivity {
 		handleIntent(intent);
 	}
 
-	private void setupRecyclerView() {
-		final RecyclerView recyclerView = findViewById(R.id.recyclerView);
-		recyclerView.setLayoutManager(new LinearLayoutManager(this));
-		recyclerView.setAdapter(addressAdapter);
-		createItemTouchHelper().attachToRecyclerView(recyclerView);
-	}
-
-	private ItemTouchHelper createItemTouchHelper() {
-		return new ItemTouchHelper(
-				new ItemTouchHelper.SimpleCallback(
-						ItemTouchHelper.UP | ItemTouchHelper.DOWN,
-						ItemTouchHelper.LEFT) {
-
-					@Override
-					public boolean onMove(@NonNull final RecyclerView recyclerView,
-					                      @NonNull final RecyclerView.ViewHolder viewHolder,
-					                      @NonNull final RecyclerView.ViewHolder target) {
-						final int fromPos = viewHolder.getAdapterPosition();
-						final int toPos = target.getAdapterPosition();
-						Collections.swap(addressList, fromPos, toPos);
-						addressAdapter.notifyItemMoved(fromPos, toPos);
-						return true;
-					}
-
-					@Override
-					public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder,
-					                     final int direction) {
-						final int position = viewHolder.getAdapterPosition();
-						addressList.remove(position);
-						addressAdapter.notifyItemRemoved(position);
-					}
-				});
-	}
-
 	private void handleIntent(final Intent intent) {
 		if (Intent.ACTION_SEND.equals(intent.getAction()) && ClipDescription.MIMETYPE_TEXT_PLAIN.equals(intent.getType())) {
 			Optional
 					.ofNullable(intent.getStringExtra(Intent.EXTRA_TEXT))
-					.ifPresent(
-							sharedText -> {
-								if (sharedText.contains("maps.app.goo.gl") || sharedText.contains("goo.gl/maps")) {
-									expandAndAddAddresses(sharedText);
-								} else {
-									addParsedAddresses(sharedText);
-								}
-							});
+					.ifPresent(this::performOptimization);
+		} else {
+			finish();
 		}
 	}
 
-	private void expandAndAddAddresses(final String sharedText) {
-		final String shortUrl = extractUrl(sharedText);
-		if (shortUrl.isEmpty()) {
-			addParsedAddresses(sharedText);
-			return;
-		}
+	private void performOptimization(final String sharedText) {
+		progressBar.setVisibility(View.VISIBLE);
 
 		new Thread(() -> {
 			try {
-				final String expandedUrl = UrlExpander.expandUrl(shortUrl);
-				runOnUiThread(() -> addParsedAddresses(expandedUrl));
-			} catch (final IOException e) {
-				runOnUiThread(() -> {
-					Toast
-							.makeText(this, "Failed to expand URL", Toast.LENGTH_SHORT)
-							.show();
-					addParsedAddresses(sharedText);
-				});
+				final String url = extractUrl(sharedText);
+				String processingUrl = url;
+
+				if (url.contains("maps.app.goo.gl") || url.contains("goo.gl/maps")) {
+					processingUrl = UrlExpander.expandUrl(url);
+				}
+
+				if (processingUrl.contains("/maps/dir/")) {
+					final List<RouteOptimizer.Stop> stops = extractStopsFromUrl(processingUrl);
+					if (stops.size() >= 2) {
+						runOptimizationWithStops(stops);
+					} else if (!stops.isEmpty()) {
+						launchRouteOverview(List.of(stops.get(0).address()));
+						finish();
+					} else {
+						showErrorAndFinish("No stops found in URL.");
+					}
+				} else {
+					final List<String> addressList = parseAddresses(processingUrl.isEmpty() ? sharedText : processingUrl);
+					if (addressList.isEmpty()) {
+						showErrorAndFinish("No addresses found to optimize.");
+					} else if (addressList.size() < 2) {
+						launchRouteOverview(addressList);
+						finish();
+					} else {
+						runLegacyOptimization(addressList);
+					}
+				}
+
+			} catch (IOException e) {
+				showErrorAndFinish("Network error: " + e.getMessage());
+			} catch (Exception e) {
+				showErrorAndFinish("Error: " + e.getMessage());
 			}
 		}).start();
 	}
 
-	private void addParsedAddresses(final String text) {
-		final List<String> parsedAddresses = parseAddresses(text);
-		for (final String address : parsedAddresses) {
-			if (!address.isEmpty() && !addressList.contains(address)) {
-				addressList.add(address);
-				addressAdapter.notifyItemInserted(addressList.size() - 1);
+	public static List<RouteOptimizer.Stop> extractStopsFromUrl(final String url) {
+		final List<RouteOptimizer.Stop> stops = new ArrayList<>();
+
+		final List<String> labels = new ArrayList<>();
+		if (url.contains("/maps/dir/")) {
+			final String[] urlParts = url.split("/maps/dir/");
+			if (urlParts.length > 1) {
+				String pathPart = urlParts[1];
+				pathPart = pathPart.split("/@|/data=")[0];
+
+				final String[] parts = pathPart.split("/");
+				for (final String part : parts) {
+					if (!part.isEmpty()) {
+						try {
+							labels.add(URLDecoder.decode(part.replace("+", " "), StandardCharsets.UTF_8.name()));
+						} catch (final Exception e) { /* skip */ }
+					}
+				}
 			}
 		}
+
+		final Pattern pattern = Pattern.compile("!([1-4])d([-0-9.]+)");
+		final Matcher matcher = pattern.matcher(url);
+
+		final List<Bang> bangs = new ArrayList<>();
+		while (matcher.find()) {
+			bangs.add(new Bang(Integer.parseInt(matcher.group(1)), Double.parseDouble(matcher.group(2))));
+		}
+
+		int labelIdx = 0;
+		for (int b = 0; b < bangs.size() - 1 && labelIdx < labels.size(); b++) {
+			final Bang first = bangs.get(b);
+			final Bang second = bangs.get(b + 1);
+
+			Double lat = null;
+			Double lng = null;
+
+			if (first.index == 3 && second.index == 4) {
+				lat = first.value;
+				lng = second.value;
+				b++;
+			} else if (first.index == 1 && second.index == 2) {
+				lng = first.value;
+				lat = second.value;
+				b++;
+			}
+
+			if (lat != null && lng != null) {
+				stops.add(new RouteOptimizer.Stop(labels.get(labelIdx), lat, lng));
+				labelIdx++;
+			}
+		}
+
+		return stops;
 	}
 
-	private static String extractUrl(final String text) {
+	private record Bang(int index, double value) {
+	}
+
+	private void runOptimizationWithStops(final List<RouteOptimizer.Stop> stops) {
+		new Thread(() -> {
+			try {
+				final RouteOptimizer.Stop start = stops.get(0);
+				final List<RouteOptimizer.Stop> intermediate = stops.subList(1, stops.size());
+
+				final List<String> optimizedIntermediate =
+						RouteOptimizer.optimize(
+								start.lat(),
+								start.lng(),
+								intermediate);
+
+				final List<String> finalRoute = new ArrayList<>();
+				finalRoute.add(start.address());
+				finalRoute.addAll(optimizedIntermediate);
+
+				launchRouteOverview(finalRoute);
+				finish();
+			} catch (final Exception e) {
+				showErrorAndFinish("Optimization error: " + e.getMessage());
+			}
+		}).start();
+	}
+
+	private void runLegacyOptimization(final List<String> addressList) {
+		final Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+		final List<RouteOptimizer.Stop> stops = new ArrayList<>();
+
+		new Thread(() -> {
+			try {
+				final String startAddressStr = addressList.get(0);
+				final List<Address> startCoords = geocoder.getFromLocationName(startAddressStr, 1);
+
+				if (startCoords == null || startCoords.isEmpty()) {
+					showErrorAndFinish("Could not find start location: " + startAddressStr);
+					return;
+				}
+
+				final Address startLocation = startCoords.get(0);
+
+				for (int i = 1; i < addressList.size(); i++) {
+					final String addressStr = addressList.get(i);
+					final List<Address> addresses = geocoder.getFromLocationName(addressStr, 1);
+					if (addresses != null && !addresses.isEmpty()) {
+						final Address addr = addresses.get(0);
+						stops.add(new RouteOptimizer.Stop(addressStr, addr.getLatitude(), addr.getLongitude()));
+					}
+				}
+
+				if (stops.isEmpty()) {
+					showErrorAndFinish("Could not geocode any intermediate stops.");
+					return;
+				}
+
+				final List<String> optimizedIntermediate = RouteOptimizer.optimize(
+						startLocation.getLatitude(),
+						startLocation.getLongitude(),
+						stops);
+
+				final List<String> finalRoute = new ArrayList<>();
+				finalRoute.add(startAddressStr);
+				finalRoute.addAll(optimizedIntermediate);
+
+				launchRouteOverview(finalRoute);
+				finish();
+
+			} catch (final Exception e) {
+				showErrorAndFinish("Optimization error: " + e.getMessage());
+			}
+		}).start();
+	}
+
+	private void launchRouteOverview(final List<String> stops) {
+		if (stops.isEmpty()) return;
+
+		final StringBuilder uriBuilder = new StringBuilder("https://www.google.com/maps/dir/");
+		for (final String stop : stops) {
+			uriBuilder.append(Uri.encode(stop)).append("/");
+		}
+
+		final Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriBuilder.toString()));
+		mapIntent.setPackage("com.google.android.apps.maps");
+		mapIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		startActivity(mapIntent);
+	}
+
+	private void showErrorAndFinish(final String message) {
+		runOnUiThread(() -> {
+			progressBar.setVisibility(View.GONE);
+			Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+			finish();
+		});
+	}
+
+	public static String extractUrl(final String text) {
 		final String urlRegex = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
 		final Pattern pattern = Pattern.compile(urlRegex);
 		final Matcher matcher = pattern.matcher(text);
@@ -161,27 +256,25 @@ public class MainActivity extends AppCompatActivity {
 		return "";
 	}
 
-	// Public for testing
 	public static List<String> parseAddresses(final String text) {
 		final List<String> results = new ArrayList<>();
 
-		// 1. Check for multi-stop directory URL
 		if (text.contains("/maps/dir/")) {
-			final String[] parts = text.split("/maps/dir/")[1].split("/");
-			for (final String part : parts) {
-				if (part.isEmpty() || part.startsWith("@") || part.startsWith("data=")) {
-					break;
-				}
-				try {
-					results.add(URLDecoder.decode(part.replace("+", " "), StandardCharsets.UTF_8.name()));
-				} catch (final Exception e) {
-					// Skip malformed parts
+			final String[] dirParts = text.split("/maps/dir/");
+			if (dirParts.length > 1) {
+				final String pathPart = dirParts[1].split("/@|/data=")[0];
+				final String[] parts = pathPart.split("/");
+				for (final String part : parts) {
+					if (!part.isEmpty()) {
+						try {
+							results.add(URLDecoder.decode(part.replace("+", " "), StandardCharsets.UTF_8.name()));
+						} catch (final Exception e) { /* skip */ }
+					}
 				}
 			}
 			if (!results.isEmpty()) return results;
 		}
 
-		// 2. Check for "Arrive at location" (Share directions text)
 		if (text.contains("Arrive at location:")) {
 			final Pattern pattern = Pattern.compile("Arrive at location: (.*)");
 			final Matcher matcher = pattern.matcher(text);
@@ -191,7 +284,6 @@ public class MainActivity extends AppCompatActivity {
 			if (!results.isEmpty()) return results;
 		}
 
-		// 3. Check for single place URL
 		if (text.contains("/maps/place/")) {
 			final Pattern pattern = Pattern.compile("place/([^/@?]+)");
 			final Matcher matcher = pattern.matcher(text);
@@ -200,13 +292,10 @@ public class MainActivity extends AppCompatActivity {
 					final String rawPlace = matcher.group(1);
 					results.add(URLDecoder.decode(rawPlace.replace("+", " "), StandardCharsets.UTF_8.name()));
 					return results;
-				} catch (final Exception e) {
-					// Fallback
-				}
+				} catch (final Exception e) { /* skip */ }
 			}
 		}
 
-		// 4. Fallback: Plain text parsing
 		final String urlRegex = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
 		final String textWithoutUrl = text.replaceAll(urlRegex, "").trim();
 
@@ -218,198 +307,7 @@ public class MainActivity extends AppCompatActivity {
 		if (cleanedText.endsWith(","))
 			cleanedText = cleanedText.substring(0, cleanedText.length() - 1).trim();
 
-		if (!cleanedText.isEmpty()) {
-			results.add(cleanedText);
-		}
+		if (!cleanedText.isEmpty()) results.add(cleanedText);
 		return results;
-	}
-
-	private void startOptimizationFlow() {
-		if (addressList.isEmpty()) {
-			Toast
-					.makeText(this, "Add some stops first!", Toast.LENGTH_SHORT)
-					.show();
-			return;
-		}
-		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-			ActivityCompat.requestPermissions(
-					this,
-					new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-					LOCATION_PERMISSION_REQUEST_CODE);
-			return;
-		}
-		if (!Settings.canDrawOverlays(this)) {
-			final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-			startActivityForResult(intent, OVERLAY_PERMISSION_REQUEST_CODE);
-			return;
-		}
-		performOptimization();
-	}
-
-	private void performOptimization() {
-		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-			return;
-		}
-		progressBar.setVisibility(View.VISIBLE);
-		fusedLocationClient
-				.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-				.addOnSuccessListener(
-						this,
-						location -> {
-							if (location == null) {
-								progressBar.setVisibility(View.GONE);
-								Toast
-										.makeText(this, "Could not get current location", Toast.LENGTH_LONG)
-										.show();
-								return;
-							}
-							optimizeRoute(location);
-						})
-				.addOnFailureListener(
-						this,
-						exception -> {
-							progressBar.setVisibility(View.GONE);
-							Toast
-									.makeText(this, "Location error: " + exception.getMessage(), Toast.LENGTH_LONG)
-									.show();
-						});
-	}
-
-	private void optimizeRoute(final Location startLocation) {
-		final Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-		final List<RouteOptimizer.Stop> stops = new ArrayList<>();
-		final Thread thread =
-				new Thread(() -> {
-					try {
-						for (final String addressStr : addressList) {
-							final List<Address> addresses = geocoder.getFromLocationName(addressStr, 1);
-							if (addresses != null && !addresses.isEmpty()) {
-								final Address address = addresses.get(0);
-								stops.add(new RouteOptimizer.Stop(addressStr, address.getLatitude(), address.getLongitude()));
-							} else {
-								runOnUiThread(() -> {
-									progressBar.setVisibility(View.GONE);
-									Toast
-											.makeText(this, "Geocoding failed for: " + addressStr, Toast.LENGTH_LONG)
-											.show();
-								});
-								return;
-							}
-						}
-						// Call the optimizer
-						final List<String> optimizedAddresses = RouteOptimizer.optimize(startLocation.getLatitude(), startLocation.getLongitude(), stops);
-						runOnUiThread(() -> {
-							progressBar.setVisibility(View.GONE);
-							addressList.clear();
-							addressList.addAll(optimizedAddresses);
-							addressAdapter.notifyDataSetChanged();
-							startFloatingService();
-						});
-					} catch (final IOException exception) {
-						runOnUiThread(() -> {
-							progressBar.setVisibility(View.GONE);
-							Toast
-									.makeText(this, "Network error during Geocoding: " + exception.getMessage(), Toast.LENGTH_LONG)
-									.show();
-						});
-					} catch (final Exception exception) {
-						runOnUiThread(() -> {
-							progressBar.setVisibility(View.GONE);
-							Toast
-									.makeText(this, "Optimization error: " + exception.getMessage(), Toast.LENGTH_LONG)
-									.show();
-						});
-					}
-				});
-		thread.start();
-	}
-
-	private void startFloatingService() {
-		final Intent serviceIntent = new Intent(this, FloatingWidgetService.class);
-		serviceIntent.putStringArrayListExtra(FloatingWidgetService.OPTIMIZED_STOPS, new ArrayList<>(addressList));
-		ContextCompat.startForegroundService(this, serviceIntent);
-		// Minimize the app
-		moveTaskToBack(true);
-	}
-
-	@Override
-	public void onRequestPermissionsResult(final int requestCode,
-	                                       @NonNull final String[] permissions,
-	                                       @NonNull final int[] grantResults) {
-		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-		if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-				startOptimizationFlow();
-			} else {
-				Toast
-						.makeText(this, "Location permission required", Toast.LENGTH_SHORT)
-						.show();
-			}
-		}
-	}
-
-	@Override
-	protected void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == OVERLAY_PERMISSION_REQUEST_CODE) {
-			if (Settings.canDrawOverlays(this)) {
-				startOptimizationFlow();
-			} else {
-				Toast
-						.makeText(this, "Overlay permission required", Toast.LENGTH_SHORT)
-						.show();
-			}
-		}
-	}
-
-	private static class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHolder> {
-
-		private final List<String> data;
-
-		public AddressAdapter(final List<String> data) {
-			this.data = data;
-		}
-
-		@NonNull
-		@Override
-		public ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
-			final View view =
-					LayoutInflater
-							.from(parent.getContext())
-							.inflate(R.layout.item_address, parent, false);
-			return new ViewHolder(view);
-		}
-
-		@Override
-		public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-			holder.tvAddress.setText(data.get(position));
-			holder.ivDelete.setOnClickListener(
-					view -> {
-						final int currentPos = holder.getAdapterPosition();
-						if (currentPos != RecyclerView.NO_POSITION) {
-							data.remove(currentPos);
-							notifyItemRemoved(currentPos);
-						}
-					});
-		}
-
-		@Override
-		public int getItemCount() {
-			return data.size();
-		}
-
-		static class ViewHolder extends RecyclerView.ViewHolder {
-
-			public final TextView tvAddress;
-			public final View ivDelete;
-			public final View ivDragHandle;
-
-			public ViewHolder(final View itemView) {
-				super(itemView);
-				tvAddress = itemView.findViewById(R.id.tvAddress);
-				ivDelete = itemView.findViewById(R.id.ivDelete);
-				ivDragHandle = itemView.findViewById(R.id.ivDragHandle);
-			}
-		}
 	}
 }

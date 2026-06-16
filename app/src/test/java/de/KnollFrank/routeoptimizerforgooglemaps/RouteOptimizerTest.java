@@ -36,6 +36,24 @@ public class RouteOptimizerTest {
 	}
 
 	@Test
+	public void testOptimize_userBugReproduction() {
+		// Central-Apotheke coords from user URL
+		double startLat = 48.4765345;
+		double startLng = 8.9349008;
+
+		List<RouteOptimizer.Stop> stops = new ArrayList<>();
+		stops.add(new RouteOptimizer.Stop("Hamburg", 53.548828, 9.987170));
+		stops.add(new RouteOptimizer.Stop("Unterhausen", 48.430628, 9.254637));
+
+		List<String> optimized = RouteOptimizer.optimize(startLat, startLng, stops);
+
+		// Expect both stops to be present
+		assertEquals(2, optimized.size());
+		// Order: Unterhausen is much closer to Central-Apotheke than Hamburg is
+		assertEquals(List.of("Unterhausen", "Hamburg"), optimized);
+	}
+
+	@Test
 	public void testOptimize_emptyList() {
 		final List<String> optimized = RouteOptimizer.optimize(52.0, 13.0, Collections.emptyList());
 		assertTrue(optimized.isEmpty());

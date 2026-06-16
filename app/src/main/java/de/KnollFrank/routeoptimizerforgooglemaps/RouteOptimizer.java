@@ -43,6 +43,7 @@ public class RouteOptimizer {
 								VehicleTypeImpl
 										.Builder
 										.newInstance("car")
+										.setCostPerDistance(1.0)
 										.build())
 						.setReturnToDepot(false)
 						.build());
@@ -140,8 +141,10 @@ public class RouteOptimizer {
 			vrpBuilder.addJob(service);
 		}
 
-		// Build Problem
-		final VehicleRoutingProblem problem = vrpBuilder.build();
+		// Build Problem - Force finite fleet size to use only the vehicle we added
+		final VehicleRoutingProblem problem = vrpBuilder
+				.setFleetSize(VehicleRoutingProblem.FleetSize.FINITE)
+				.build();
 
 		// Define and Run Algorithm
 		final VehicleRoutingAlgorithm algorithm = Jsprit.createAlgorithm(problem);
@@ -150,28 +153,31 @@ public class RouteOptimizer {
 		// Extract Best Solution
 		final VehicleRoutingProblemSolution bestSolution = Solutions.bestOf(solutions);
 
-		if (bestSolution != null && !bestSolution.getRoutes().isEmpty()) {
-			final VehicleRoute route = bestSolution.getRoutes().iterator().next();
-			for (final TourActivity activity : route.getActivities()) {
-				if (activity instanceof final TourActivity.JobActivity jobActivity) {
-					final String rawId = jobActivity.getJob().getId();
-					// Split the ID to get the original address string
-					final String originalAddress = rawId.split("___")[0];
-					optimizedRoute.add(originalAddress);
+		if (bestSolution != null) {
+			// Iterate over all routes (though we only expect one with finite fleet size)
+			for (final VehicleRoute route : bestSolution.getRoutes()) {
+				for (final TourActivity activity : route.getActivities()) {
+					if (activity instanceof final TourActivity.JobActivity jobActivity) {
+						final String rawId = jobActivity.getJob().getId();
+						final String originalAddress = rawId.split("___")[0];
+						optimizedRoute.add(originalAddress);
+					}
 				}
 			}
-		} else {
-			// Fallback if optimization fails to find a valid route
-			for (final Stop stop : stops) {
-				optimizedRoute.add(stop.address);
+
+			// Add unassigned jobs to ensure no stops are ever lost
+			for (final Job job : bestSolution.getUnassignedJobs()) {
+				final String rawId = job.getId();
+				final String originalAddress = rawId.split("___")[0];
+				optimizedRoute.add(originalAddress);
 			}
 		}
 
-		// Handle unassigned jobs (should not happen in this simple MVP, but good practice)
-		for (final Job job : bestSolution.getUnassignedJobs()) {
-			final String rawId = job.getId();
-			final String originalAddress = rawId.split("___")[0];
-			optimizedRoute.add(originalAddress);
+		// Final fallback: if result is still empty, return input order
+		if (optimizedRoute.isEmpty()) {
+			for (final Stop stop : stops) {
+				optimizedRoute.add(stop.address);
+			}
 		}
 
 		return optimizedRoute;
