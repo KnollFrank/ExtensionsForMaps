@@ -78,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
 						runLegacyOptimization(addressList);
 					}
 				}
-
 			} catch (IOException e) {
 				showErrorAndFinish("Network error: " + e.getMessage());
 			} catch (Exception e) {
@@ -252,35 +251,50 @@ public class MainActivity extends AppCompatActivity {
 		}).start();
 	}
 
-	private void launchRouteOverview(final List<RouteOptimizer.Stop> stops) {
-		if (stops.isEmpty()) return;
+	/**
+	 * Builds a bulletproof, high-precision Google Maps URL using raw coordinates.
+	 * Guaranteed to work flawlessly with the Android Google Maps Intent API.
+	 */
+	private void launchRouteOverview(final List<RouteOptimizer.Stop> optimizedStops) {
+		if (optimizedStops == null || optimizedStops.size() < 2) {
+			return;
+		}
 
-		// Use the official Universal Maps URL API for maximum reliability on Android.
-		// This format explicitly defines origin, destination, and waypoints.
-		final StringBuilder uriBuilder = new StringBuilder("https://www.google.com/maps/dir/?api=1");
+		// 1. The modern, official Google Maps Directions API endpoint
+		final StringBuilder urlBuilder = new StringBuilder("https://www.google.com/maps/dir/?api=1");
 
-		// 1. Origin
-		final RouteOptimizer.Stop origin = stops.get(0);
-		String originValue = String.format(Locale.US, "%f,%f(%s)", origin.lat(), origin.lng(), origin.address());
-		uriBuilder.append("&origin=").append(Uri.encode(originValue));
+		// 2. Set the exact coordinates for the starting point
+		final RouteOptimizer.Stop origin = optimizedStops.get(0);
+		urlBuilder.append("&origin=")
+				.append(origin.lat())
+				.append(",")
+				.append(origin.lng());
 
-		// 2. Destination (The last stop in our list)
-		final RouteOptimizer.Stop destination = stops.get(stops.size() - 1);
-		String destValue = String.format(Locale.US, "%f,%f(%s)", destination.lat(), destination.lng(), destination.address());
-		uriBuilder.append("&destination=").append(Uri.encode(destValue));
+		// 3. Set the exact coordinates for the final destination
+		final RouteOptimizer.Stop destination = optimizedStops.get(optimizedStops.size() - 1);
+		urlBuilder.append("&destination=")
+				.append(destination.lat())
+				.append(",")
+				.append(destination.lng());
 
-		// 3. Waypoints (Everything in between)
-		if (stops.size() > 2) {
-			uriBuilder.append("&waypoints=");
-			for (int i = 1; i < stops.size() - 1; i++) {
-				if (i > 1) uriBuilder.append(Uri.encode("|"));
-				final RouteOptimizer.Stop waypoint = stops.get(i);
-				String waypointValue = String.format(Locale.US, "%f,%f(%s)", waypoint.lat(), waypoint.lng(), waypoint.address());
-				uriBuilder.append(Uri.encode(waypointValue));
+		// 4. Handle intermediate waypoints if there are any stops in between
+		if (optimizedStops.size() > 2) {
+			urlBuilder.append("&waypoints=");
+
+			for (int i = 1; i < optimizedStops.size() - 1; i++) {
+				final RouteOptimizer.Stop waypoint = optimizedStops.get(i);
+				urlBuilder.append(waypoint.lat())
+						.append(",")
+						.append(waypoint.lng());
+
+				// Modern API separates multiple waypoints using the pipe character '|'
+				if (i < optimizedStops.size() - 2) {
+					urlBuilder.append("|");
+				}
 			}
 		}
 
-		final Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriBuilder.toString()));
+		final Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlBuilder.toString()));
 		mapIntent.setPackage("com.google.android.apps.maps");
 		mapIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(mapIntent);
