@@ -25,6 +25,7 @@ import java.util.Map;
 
 public class RouteOptimizer {
 
+	// FK-TODO: use Labyrinth:org.labyrinth.coordinate.Geodetic instead of lat/lng at all places in this app
 	public record Stop(String address, double lat, double lng) {
 	}
 
@@ -130,7 +131,6 @@ public class RouteOptimizer {
 			final Stop stop = stops.get(i);
 			final String jobId = stop.address + "___" + i;
 			stopMap.put(jobId, stop);
-
 			final Service service =
 					Service
 							.Builder

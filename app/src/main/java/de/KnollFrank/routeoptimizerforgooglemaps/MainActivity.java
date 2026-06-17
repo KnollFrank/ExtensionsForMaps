@@ -52,17 +52,15 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void performOptimization(final String sharedText) {
+		// FK-TODO: falls dem Benutzer die Optimierung zu lange dauert, dann soll er die Möglichkeit haben, mit einem Cancel-Button den Prozess abzubrechen.
 		progressBar.setVisibility(View.VISIBLE);
-
 		new Thread(() -> {
 			try {
 				final String url = extractUrl(sharedText);
 				String processingUrl = url;
-
 				if (url.contains("maps.app.goo.gl") || url.contains("goo.gl/maps")) {
 					processingUrl = UrlExpander.expandUrl(url);
 				}
-
 				if (processingUrl.contains("/maps/dir/")) {
 					final List<RouteOptimizer.Stop> stops = extractStopsFromUrl(processingUrl);
 					if (!stops.isEmpty()) {
@@ -78,9 +76,9 @@ public class MainActivity extends AppCompatActivity {
 						runLegacyOptimization(addressList);
 					}
 				}
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				showErrorAndFinish("Network error: " + e.getMessage());
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				showErrorAndFinish("Error: " + e.getMessage());
 			}
 		}).start();
@@ -97,16 +95,19 @@ public class MainActivity extends AppCompatActivity {
 				try {
 					final List<Address> addresses = geocoder.getFromLocationName(stop.address(), 1);
 					if (addresses != null && !addresses.isEmpty()) {
-						completeStops.add(new RouteOptimizer.Stop(stop.address(), addresses.get(0).getLatitude(), addresses.get(0).getLongitude()));
+						completeStops.add(
+								new RouteOptimizer.Stop(
+										stop.address(),
+										addresses.get(0).getLatitude(),
+										addresses.get(0).getLongitude()));
 					} else {
 						completeStops.add(stop);
 					}
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					completeStops.add(stop);
 				}
 			}
 		}
-
 		if (completeStops.size() < 2) {
 			launchRouteOverview(completeStops);
 			finish();
@@ -118,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
 	public static List<RouteOptimizer.Stop> extractStopsFromUrl(final String url) {
 		final List<RouteOptimizer.Stop> stops = new ArrayList<>();
 		final List<String> labels = new ArrayList<>();
-
 		if (url.contains("/maps/dir/")) {
 			final String[] urlParts = url.split("/maps/dir/");
 			if (urlParts.length > 1) {
@@ -133,24 +133,23 @@ public class MainActivity extends AppCompatActivity {
 				}
 			}
 		}
-
 		final Pattern pattern = Pattern.compile("!([1-4])d([-0-9.]+)");
 		final Matcher matcher = pattern.matcher(url);
 		final List<Bang> bangs = new ArrayList<>();
 		while (matcher.find()) {
-			bangs.add(new Bang(Integer.parseInt(matcher.group(1)), Double.parseDouble(matcher.group(2))));
+			bangs.add(
+					new Bang(
+							Integer.parseInt(matcher.group(1)),
+							Double.parseDouble(matcher.group(2))));
 		}
-
 		int labelIdx = 0;
 		int bangIdx = 0;
 		while (labelIdx < labels.size()) {
 			Double lat = null;
 			Double lng = null;
-
 			if (bangIdx < bangs.size() - 1) {
-				Bang first = bangs.get(bangIdx);
-				Bang second = bangs.get(bangIdx + 1);
-
+				final Bang first = bangs.get(bangIdx);
+				final Bang second = bangs.get(bangIdx + 1);
 				if (first.index == 3 && second.index == 4) {
 					lat = first.value;
 					lng = second.value;
@@ -164,22 +163,17 @@ public class MainActivity extends AppCompatActivity {
 					continue;
 				}
 			}
-
-			stops.add(new RouteOptimizer.Stop(labels.get(labelIdx), lat != null ? lat : 0.0, lng != null ? lng : 0.0));
+			stops.add(
+					new RouteOptimizer.Stop(
+							labels.get(labelIdx),
+							lat != null ? lat : 0.0,
+							lng != null ? lng : 0.0));
 			labelIdx++;
 		}
-
 		return stops;
 	}
 
-	private static class Bang {
-		final int index;
-		final double value;
-
-		Bang(int i, double v) {
-			index = i;
-			value = v;
-		}
+	private record Bang(int index, double value) {
 	}
 
 	private void runOptimizationWithStops(final List<RouteOptimizer.Stop> stops) {
@@ -187,16 +181,11 @@ public class MainActivity extends AppCompatActivity {
 			try {
 				final RouteOptimizer.Stop start = stops.get(0);
 				final List<RouteOptimizer.Stop> intermediate = stops.subList(1, stops.size());
-
-				final List<RouteOptimizer.Stop> optimizedIntermediate = RouteOptimizer.optimize(
-						start.lat(),
-						start.lng(),
-						intermediate);
-
+				final List<RouteOptimizer.Stop> optimizedIntermediate =
+						RouteOptimizer.optimize(start.lat(), start.lng(), intermediate);
 				final List<RouteOptimizer.Stop> finalRoute = new ArrayList<>();
 				finalRoute.add(start);
 				finalRoute.addAll(optimizedIntermediate);
-
 				launchRouteOverview(finalRoute);
 				finish();
 			} catch (final Exception e) {
@@ -208,43 +197,45 @@ public class MainActivity extends AppCompatActivity {
 	private void runLegacyOptimization(final List<String> addressList) {
 		final Geocoder geocoder = new Geocoder(this, Locale.getDefault());
 		final List<RouteOptimizer.Stop> stops = new ArrayList<>();
-
 		new Thread(() -> {
 			try {
 				final String startAddressStr = addressList.get(0);
 				final List<Address> startCoords = geocoder.getFromLocationName(startAddressStr, 1);
-
 				if (startCoords == null || startCoords.isEmpty()) {
 					showErrorAndFinish("Could not find start location: " + startAddressStr);
 					return;
 				}
-
 				final Address startLocation = startCoords.get(0);
-				final RouteOptimizer.Stop startStop = new RouteOptimizer.Stop(startAddressStr, startLocation.getLatitude(), startLocation.getLongitude());
-
+				final RouteOptimizer.Stop startStop =
+						new RouteOptimizer.Stop(
+								startAddressStr,
+								startLocation.getLatitude(),
+								startLocation.getLongitude());
 				for (int i = 1; i < addressList.size(); i++) {
 					final String addressStr = addressList.get(i);
 					final List<Address> addresses = geocoder.getFromLocationName(addressStr, 1);
 					if (addresses != null && !addresses.isEmpty()) {
 						final Address addr = addresses.get(0);
-						stops.add(new RouteOptimizer.Stop(addressStr, addr.getLatitude(), addr.getLongitude()));
+						stops.add(
+								new RouteOptimizer.Stop(
+										addressStr,
+										addr.getLatitude(),
+										addr.getLongitude()));
 					} else {
-						stops.add(new RouteOptimizer.Stop(addressStr, 0.0, 0.0));
+						stops.add(
+								new RouteOptimizer.Stop(
+										addressStr,
+										0.0,
+										0.0));
 					}
 				}
-
-				final List<RouteOptimizer.Stop> optimizedIntermediate = RouteOptimizer.optimize(
-						startStop.lat(),
-						startStop.lng(),
-						stops);
-
+				final List<RouteOptimizer.Stop> optimizedIntermediate =
+						RouteOptimizer.optimize(startStop.lat(), startStop.lng(), stops);
 				final List<RouteOptimizer.Stop> finalRoute = new ArrayList<>();
 				finalRoute.add(startStop);
 				finalRoute.addAll(optimizedIntermediate);
-
 				launchRouteOverview(finalRoute);
 				finish();
-
 			} catch (final Exception e) {
 				showErrorAndFinish("Optimization error: " + e.getMessage());
 			}
@@ -303,7 +294,9 @@ public class MainActivity extends AppCompatActivity {
 	private void showErrorAndFinish(final String message) {
 		runOnUiThread(() -> {
 			progressBar.setVisibility(View.GONE);
-			Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+			Toast
+					.makeText(this, message, Toast.LENGTH_LONG)
+					.show();
 			finish();
 		});
 	}
