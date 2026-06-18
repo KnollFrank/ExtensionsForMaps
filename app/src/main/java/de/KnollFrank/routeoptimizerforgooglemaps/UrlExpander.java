@@ -6,6 +6,7 @@ import java.net.URL;
 
 public class UrlExpander {
 
+    // FK-TODO: use OkHttp?
     public static String expandUrl(final String shortenedUrl) throws IOException {
         String url = shortenedUrl;
         HttpURLConnection conn;

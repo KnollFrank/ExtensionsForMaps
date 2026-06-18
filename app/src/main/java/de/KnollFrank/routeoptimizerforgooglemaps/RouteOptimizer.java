@@ -29,15 +29,17 @@ public class RouteOptimizer {
 	public record Stop(String address, double lat, double lng) {
 	}
 
+	// FK-TODO: biete neben der HaversineDistance auch folgendes an:
+	//  + Embedded GraphHopper + GitHub-Download
+	//  - der öffentliche OSRM Demo-Server: router.project-osrm.org
+	//  - OpenRouteService-API
 	public static List<Stop> optimize(final double startLat, final double startLng, final List<Stop> stops) {
 		final List<Stop> optimizedRoute = new ArrayList<>();
 		if (stops.isEmpty()) {
 			return optimizedRoute;
 		}
-
 		// Map to quickly find Stop object by its unique ID
 		final Map<String, Stop> stopMap = new HashMap<>();
-
 		// Define Problem Builder
 		final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
 		vrpBuilder.addVehicle(
@@ -53,79 +55,8 @@ public class RouteOptimizer {
 										.build())
 						.setReturnToDepot(false)
 						.build());
-
 		// Define Transport Costs using Haversine
-		vrpBuilder.setRoutingCost(
-				new VehicleRoutingTransportCosts() {
-
-					@Override
-					public double getTransportTime(final Location from,
-					                               final Location to,
-					                               final double departureTime,
-					                               final Driver driver,
-					                               final Vehicle vehicle) {
-						return getDistance(from, to, departureTime, vehicle);
-					}
-
-					@Override
-					public double getBackwardTransportTime(final Location from,
-					                                       final Location to,
-					                                       double arrivalTime,
-					                                       final Driver driver,
-					                                       final Vehicle vehicle) {
-						return getDistance(from, to, arrivalTime, vehicle);
-					}
-
-					@Override
-					public double getBackwardTransportCost(final Location from,
-					                                       final Location to,
-					                                       final double arrivalTime,
-					                                       final Driver driver,
-					                                       final Vehicle vehicle) {
-						return getDistance(from, to, arrivalTime, vehicle);
-					}
-
-					@Override
-					public double getDistance(final Location from,
-					                          final Location to,
-					                          final double departureTime,
-					                          final Vehicle vehicle) {
-						if (from.getCoordinate() == null || to.getCoordinate() == null) {
-							return 0.0;
-						}
-						// Note jsprit Coordinate is (x, y) -> (lng, lat)
-						return calculateHaversineDistance(
-								from.getCoordinate().getY(),
-								from.getCoordinate().getX(),
-								to.getCoordinate().getY(),
-								to.getCoordinate().getX());
-					}
-
-					@Override
-					public double getTransportCost(final Location from,
-					                               final Location to,
-					                               final double departureTime,
-					                               final Driver driver,
-					                               final Vehicle vehicle) {
-						return getDistance(from, to, departureTime, vehicle);
-					}
-
-					/**
-					 * Calculates the great-circle distance between two points on Earth using the Haversine formula.
-					 * Returns distance in meters.
-					 */
-					private double calculateHaversineDistance(final double lat1, final double lon1, final double lat2, final double lon2) {
-						final double R = 6371000.0; // Earth radius in meters
-						final double dLat = Math.toRadians(lat2 - lat1);
-						final double dLon = Math.toRadians(lon2 - lon1);
-						final double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-								Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-										Math.sin(dLon / 2) * Math.sin(dLon / 2);
-						final double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-						return R * c;
-					}
-				});
-
+		vrpBuilder.setRoutingCost(getVehicleRoutingTransportCosts());
 		// Add Services (Stops)
 		for (int i = 0; i < stops.size(); i++) {
 			final Stop stop = stops.get(i);
@@ -144,19 +75,16 @@ public class RouteOptimizer {
 							.build();
 			vrpBuilder.addJob(service);
 		}
-
 		// Build Problem - Force finite fleet size
-		final VehicleRoutingProblem problem = vrpBuilder
-				.setFleetSize(VehicleRoutingProblem.FleetSize.FINITE)
-				.build();
-
+		final VehicleRoutingProblem problem =
+				vrpBuilder
+						.setFleetSize(VehicleRoutingProblem.FleetSize.FINITE)
+						.build();
 		// Define and Run Algorithm
 		final VehicleRoutingAlgorithm algorithm = Jsprit.createAlgorithm(problem);
 		final Collection<VehicleRoutingProblemSolution> solutions = algorithm.searchSolutions();
-
 		// Extract Best Solution
 		final VehicleRoutingProblemSolution bestSolution = Solutions.bestOf(solutions);
-
 		if (bestSolution != null) {
 			// Iterate over all routes
 			for (final VehicleRoute route : bestSolution.getRoutes()) {
@@ -170,7 +98,6 @@ public class RouteOptimizer {
 					}
 				}
 			}
-
 			// Add unassigned jobs as fallback
 			for (final Job job : bestSolution.getUnassignedJobs()) {
 				final Stop originalStop = stopMap.get(job.getId());
@@ -179,12 +106,82 @@ public class RouteOptimizer {
 				}
 			}
 		}
-
 		// Final fallback
 		if (optimizedRoute.isEmpty()) {
 			optimizedRoute.addAll(stops);
 		}
-
 		return optimizedRoute;
+	}
+
+	private static VehicleRoutingTransportCosts getVehicleRoutingTransportCosts() {
+		return new VehicleRoutingTransportCosts() {
+
+			@Override
+			public double getTransportTime(final Location from,
+			                               final Location to,
+			                               final double departureTime,
+			                               final Driver driver,
+			                               final Vehicle vehicle) {
+				return getDistance(from, to, departureTime, vehicle);
+			}
+
+			@Override
+			public double getBackwardTransportTime(final Location from,
+			                                       final Location to,
+			                                       double arrivalTime,
+			                                       final Driver driver,
+			                                       final Vehicle vehicle) {
+				return getDistance(from, to, arrivalTime, vehicle);
+			}
+
+			@Override
+			public double getBackwardTransportCost(final Location from,
+			                                       final Location to,
+			                                       final double arrivalTime,
+			                                       final Driver driver,
+			                                       final Vehicle vehicle) {
+				return getDistance(from, to, arrivalTime, vehicle);
+			}
+
+			@Override
+			public double getDistance(final Location from,
+			                          final Location to,
+			                          final double departureTime,
+			                          final Vehicle vehicle) {
+				if (from.getCoordinate() == null || to.getCoordinate() == null) {
+					return 0.0;
+				}
+				// Note jsprit Coordinate is (x, y) -> (lng, lat)
+				return calculateHaversineDistance(
+						from.getCoordinate().getY(),
+						from.getCoordinate().getX(),
+						to.getCoordinate().getY(),
+						to.getCoordinate().getX());
+			}
+
+			@Override
+			public double getTransportCost(final Location from,
+			                               final Location to,
+			                               final double departureTime,
+			                               final Driver driver,
+			                               final Vehicle vehicle) {
+				return getDistance(from, to, departureTime, vehicle);
+			}
+
+			/**
+			 * Calculates the great-circle distance between two points on Earth using the Haversine formula.
+			 * Returns distance in meters.
+			 */
+			private double calculateHaversineDistance(final double lat1, final double lon1, final double lat2, final double lon2) {
+				final double R = 6371000.0; // Earth radius in meters
+				final double dLat = Math.toRadians(lat2 - lat1);
+				final double dLon = Math.toRadians(lon2 - lon1);
+				final double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+						Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+								Math.sin(dLon / 2) * Math.sin(dLon / 2);
+				final double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+				return R * c;
+			}
+		};
 	}
 }
