@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -246,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
 	 * Builds a bulletproof, high-precision Google Maps URL using raw coordinates.
 	 * Guaranteed to work flawlessly with the Android Google Maps Intent API.
 	 */
+	// FK-TODO: add unit test for building the URL.
 	private void launchRouteOverview(final List<RouteOptimizer.Stop> optimizedStops) {
 		if (optimizedStops == null || optimizedStops.size() < 2) {
 			return;
@@ -256,28 +258,28 @@ public class MainActivity extends AppCompatActivity {
 
 		// 2. Set the exact coordinates for the starting point
 		final RouteOptimizer.Stop origin = optimizedStops.get(0);
-		urlBuilder.append("&origin=")
+		urlBuilder
+				.append("&origin=")
 				.append(origin.lat())
 				.append(",")
 				.append(origin.lng());
-
+		// FK-TODO: der letzte optimizedStop muß nicht unbedingt das Ziel sein. Wie ist das Destination vs. Waypoint in der Original-Teilen-URL von Google Maps mit dem data-Parameter hinterlegt? Unit-Test dazu schreiben.
 		// 3. Set the exact coordinates for the final destination
 		final RouteOptimizer.Stop destination = optimizedStops.get(optimizedStops.size() - 1);
-		urlBuilder.append("&destination=")
+		urlBuilder
+				.append("&destination=")
 				.append(destination.lat())
 				.append(",")
 				.append(destination.lng());
-
 		// 4. Handle intermediate waypoints if there are any stops in between
 		if (optimizedStops.size() > 2) {
 			urlBuilder.append("&waypoints=");
-
 			for (int i = 1; i < optimizedStops.size() - 1; i++) {
 				final RouteOptimizer.Stop waypoint = optimizedStops.get(i);
-				urlBuilder.append(waypoint.lat())
+				urlBuilder
+						.append(waypoint.lat())
 						.append(",")
 						.append(waypoint.lng());
-
 				// Modern API separates multiple waypoints using the pipe character '|'
 				if (i < optimizedStops.size() - 2) {
 					urlBuilder.append("|");
@@ -285,6 +287,7 @@ public class MainActivity extends AppCompatActivity {
 			}
 		}
 
+		// FK-TODO: extract method
 		final Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlBuilder.toString()));
 		mapIntent.setPackage("com.google.android.apps.maps");
 		mapIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -301,10 +304,15 @@ public class MainActivity extends AppCompatActivity {
 		});
 	}
 
+	// FK-TODO: unit test
 	private static String extractUrl(final String text) {
-		if (text == null) return "";
-		int start = text.indexOf("http");
-		if (start == -1) return "";
+		if (text == null) {
+			return "";
+		}
+		final int start = text.indexOf("http");
+		if (start == -1) {
+			return "";
+		}
 		String url = text.substring(start).trim();
 		int end = url.indexOf("\n");
 		if (end != -1) {
@@ -313,7 +321,8 @@ public class MainActivity extends AppCompatActivity {
 		return url;
 	}
 
-	public static List<String> parseAddresses(final String text) {
+	// FK-TODO: refactor
+	public static List<String> parseAddresses(final String text) throws UnsupportedEncodingException {
 		final List<String> results = new ArrayList<>();
 		if (text.contains("/maps/dir/")) {
 			final String[] dirParts = text.split("/maps/dir/");
@@ -322,13 +331,16 @@ public class MainActivity extends AppCompatActivity {
 				final String[] parts = pathPart.split("/");
 				for (final String part : parts) {
 					if (!part.isEmpty()) {
-						try {
-							results.add(URLDecoder.decode(part.replace("+", " "), StandardCharsets.UTF_8.name()));
-						} catch (final Exception e) { /* skip */ }
+						results.add(
+								URLDecoder.decode(
+										part.replace("+", " "),
+										StandardCharsets.UTF_8.name()));
 					}
 				}
 			}
-			if (!results.isEmpty()) return results;
+			if (!results.isEmpty()) {
+				return results;
+			}
 		}
 		if (text.contains("Arrive at location:")) {
 			final Pattern pattern = Pattern.compile("Arrive at location: (.*)");
@@ -336,17 +348,20 @@ public class MainActivity extends AppCompatActivity {
 			while (matcher.find()) {
 				results.add(matcher.group(1).trim());
 			}
-			if (!results.isEmpty()) return results;
+			if (!results.isEmpty()) {
+				return results;
+			}
 		}
 		if (text.contains("/maps/place/")) {
 			final Pattern pattern = Pattern.compile("place/([^/@?]+)");
 			final Matcher matcher = pattern.matcher(text);
 			if (matcher.find()) {
-				try {
-					final String rawPlace = matcher.group(1);
-					results.add(URLDecoder.decode(rawPlace.replace("+", " "), StandardCharsets.UTF_8.name()));
-					return results;
-				} catch (final Exception e) { /* skip */ }
+				final String rawPlace = matcher.group(1);
+				results.add(
+						URLDecoder.decode(
+								rawPlace.replace("+", " "),
+								StandardCharsets.UTF_8.name()));
+				return results;
 			}
 		}
 		final String urlRegex = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
@@ -358,7 +373,9 @@ public class MainActivity extends AppCompatActivity {
 		if (cleanedText.startsWith(",")) cleanedText = cleanedText.substring(1).trim();
 		if (cleanedText.endsWith(","))
 			cleanedText = cleanedText.substring(0, cleanedText.length() - 1).trim();
-		if (!cleanedText.isEmpty()) results.add(cleanedText);
+		if (!cleanedText.isEmpty()) {
+			results.add(cleanedText);
+		}
 		return results;
 	}
 }
