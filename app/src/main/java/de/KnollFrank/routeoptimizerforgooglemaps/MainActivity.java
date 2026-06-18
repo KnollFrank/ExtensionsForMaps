@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
 				final String url = extractUrl(sharedText);
 				String processingUrl = url;
 				if (url.contains("maps.app.goo.gl") || url.contains("goo.gl/maps")) {
-					processingUrl = UrlExpander.expandUrl(url);
+					processingUrl = UrlExpander.expandUrl(new URL(url)).toString();
 				}
 				if (processingUrl.contains("/maps/dir/")) {
 					final List<RouteOptimizer.Stop> stops = extractStopsFromUrl(processingUrl);

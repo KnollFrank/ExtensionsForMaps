@@ -1,38 +1,31 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class UrlExpander {
 
-    // FK-TODO: use OkHttp?
-    public static String expandUrl(final String shortenedUrl) throws IOException {
-        String url = shortenedUrl;
-        HttpURLConnection conn;
+	private static final OkHttpClient client =
+			new OkHttpClient
+					.Builder()
+					.followRedirects(true)
+					.followSslRedirects(true)
+					.connectTimeout(5, TimeUnit.SECONDS)
+					.readTimeout(5, TimeUnit.SECONDS)
+					.build();
 
-        while (true) {
-            conn = (HttpURLConnection) new URL(url).openConnection();
-            conn.setInstanceFollowRedirects(false);
-            conn.setRequestMethod("HEAD");
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(5000);
-            conn.connect();
+	public static URL expandUrl(final URL shortenedUrl) throws IOException {
+		try (final Response response = client.newCall(createRequest(shortenedUrl)).execute()) {
+			return response.request().url().url();
+		}
+	}
 
-            final int responseCode = conn.getResponseCode();
-            if (responseCode >= 300 && responseCode < 400) {
-                final String location = conn.getHeaderField("Location");
-                if (location == null) {
-                    conn.disconnect();
-                    break;
-                }
-                url = location;
-                conn.disconnect();
-            } else {
-                conn.disconnect();
-                break;
-            }
-        }
-        return url;
-    }
+	private static Request createRequest(final URL url) {
+		return new Request.Builder().url(url).head().build();
+	}
 }
