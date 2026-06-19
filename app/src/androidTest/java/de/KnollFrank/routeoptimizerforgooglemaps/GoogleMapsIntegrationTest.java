@@ -28,7 +28,8 @@ import java.util.regex.Pattern;
 
 /**
  * End-to-end integration test that automates Google Maps to verify the full optimization cycle.
- * Highly robust selectors used to handle the direct share button on the bottom sheet (EN/DE).
+ * Waits for background processing to complete and verifies the final optimized route display
+ * by checking for the "Preview" button on the bottom sheet.
  */
 @RunWith(AndroidJUnit4.class)
 @SdkSuppress(minSdkVersion = 26)
@@ -52,7 +53,6 @@ public class GoogleMapsIntegrationTest {
 		// 1. Launch Google Maps directly with the pre-defined Route-URL
 		final Context context = ApplicationProvider.getApplicationContext();
 
-		// WICHTIG: Setze hier deine funktionierende Test-URL ein
 		final String routeUrl = "https://www.google.com/maps/dir/Central-Apotheke/Hamburg/Unterhausen/data=!4m22!4m21!1m5!1m4!1s0x4799fc4b13515dd5:0x345201aaff119b3a!8m2!3d48.4765345!4d8.934900899999999!1m5!1m4!1s0x47b161837e1813b9:0x4263df27bd63aa0!8m2!3d53.548828199999996!4d9.987170299999999!1m5!1m4!1s0x4799f35ec85b80b1:0xe432d2a55bc3cd11!8m2!3d48.430628399999996!4d9.2546378!2m1!11b1!3e0?utm_source=mstt_0&g_ep=CAESCDI2LjE2LjEyGAAgkUEqiwEsOTQyNjc3MjcsOTQyOTIxOTUsOTQyOTk1MzIsMTAwNzk2NDk4LDEwMDc5Nzc2MSwxMDA3OTY1MzUsOTQyODA1NzYsMTAwODExOTYwLDk0MjA3Mzk0LDk0MjA3NTA2LDk0MjA4NTA2LDk0MjE4NjUzLDk0MjI5ODM5LDk0Mjc1MTY4LDk0Mjc5NjE5QgJVUw%3D%3D&skid=0a1f62d3-c01c-47b9-b4b6-ccadc456baa8";
 		final Intent mapsIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(routeUrl));
 		mapsIntent.setPackage(MAPS_PACKAGE);
@@ -60,20 +60,15 @@ public class GoogleMapsIntegrationTest {
 
 		context.startActivity(mapsIntent);
 
-		// Wait for the Google Maps app to appear and settle
 		device.wait(Until.hasObject(By.pkg(MAPS_PACKAGE).depth(0)), TIMEOUT);
 		device.waitForIdle();
 
-		// Handle initial Google Maps popups (Terms, Got it, etc.) if any
 		UiObject2 gotIt = device.findObject(By.text(Pattern.compile("Got it|Verstanden", Pattern.CASE_INSENSITIVE)));
 		if (gotIt != null) gotIt.click();
 
 		// 2. Trigger "Share directions" directly from the Bottom-Sheet
-		// Wir suchen direkt nach "Share", "Share directions", "Teilen" oder "Wegbeschreibung teilen"
 		Pattern sharePattern = Pattern.compile("Share|Share directions|Teilen|Wegbeschreibung teilen", Pattern.CASE_INSENSITIVE);
 
-		// Da das Laden der Route über das Netzwerk einen Moment dauern kann, warten wir hier
-		// Zuerst prüfen wir die Content-Description (häufig bei Icons), dann den sichtbaren Text.
 		UiObject2 shareBtn = device.wait(Until.findObject(By.desc(sharePattern)), TIMEOUT * 2);
 		if (shareBtn == null) {
 			shareBtn = device.wait(Until.findObject(By.text(sharePattern)), TIMEOUT);
@@ -81,33 +76,29 @@ public class GoogleMapsIntegrationTest {
 
 		if (shareBtn == null) {
 			dumpWindowHierarchy();
-			fail("Konnte den 'Share' / 'Teilen' Button auf dem Bottom-Sheet nicht finden. Route möglicherweise nicht geladen. UI Dump gespeichert.");
+			fail("Konnte den 'Share' Button auf dem Bottom-Sheet nicht finden. UI Dump gespeichert.");
 		}
 		shareBtn.click();
 
-		// 3. Select "Routeoptimizer" from Android Share Sheet
-		device.waitForIdle(); // Kurz warten, bis das Menü fertig gerendert ist
+		// 3. Select "Routeoptimizer" from Android Share Sheet via manual swiping
+		device.waitForIdle();
 		boolean appFound = false;
 
-		// Wir wischen maximal 7 Mal nach oben, um die App zu finden
 		for (int i = 0; i < 7; i++) {
-			// Wir suchen nach einem Teil des Namens, um abgeschnittene Texte (z.B. "Routeopti...") abzufangen
 			UiObject2 appInShareSheet = device.findObject(By.textContains("Routeopt"));
 
 			if (appInShareSheet != null) {
 				appInShareSheet.click();
 				appFound = true;
-				break; // Schleife abbrechen, da gefunden!
+				break;
 			}
 
-			// App nicht auf dem Schirm -> Einmal wischen (wie ein menschlicher Daumen)
 			int startX = device.getDisplayWidth() / 2;
-			int startY = (int) (device.getDisplayHeight() * 0.8); // Im unteren Viertel ansetzen
-			int endY = (int) (device.getDisplayHeight() * 0.3);   // Nach oben wischen
+			int startY = (int) (device.getDisplayHeight() * 0.8);
+			int endY = (int) (device.getDisplayHeight() * 0.3);
 
-			// Wische in 20 Schritten (relativ schnell) von unten nach oben
 			device.swipe(startX, startY, startX, endY, 20);
-			device.waitForIdle(); // Kurz warten, bis die Scroll-Animation beendet ist
+			device.waitForIdle();
 		}
 
 		if (!appFound) {
@@ -115,26 +106,41 @@ public class GoogleMapsIntegrationTest {
 			fail("Routeoptimizer wurde im Teilen-Menü auch nach 7 manuellen Swipes nicht gefunden. UI Dump gespeichert.");
 		}
 
-		// 4. Verify Magic Return to Google Maps
-		// Prüfen, ob wir nach der Optimierung wieder in Google Maps landen
-		boolean backInMaps = device.wait(Until.hasObject(By.pkg(MAPS_PACKAGE)), TIMEOUT * 2);
+		// =====================================================================
+		// 4. Warten auf Fertigstellung der Optimierung & Verifikation (Preview)
+		// =====================================================================
+
+		// Erhöhtes Timeout für die Hintergrundberechnung (UrlExpander + Geocoder + Jsprit)
+		boolean backInMaps = device.wait(Until.hasObject(By.pkg(MAPS_PACKAGE)), TIMEOUT * 3);
 		assertTrue("Rückkehr zu Google Maps nach der Optimierung fehlgeschlagen", backInMaps);
 
-		// Prüfen, ob die Routeoptimizer-Activity sauber beendet wurde
+		// Sicherstellen, dass die transparente Routeoptimizer-Activity ordnungsgemäß schließt
 		boolean appGone = device.wait(Until.gone(By.pkg(APP_PACKAGE)), TIMEOUT);
-		assertTrue("Routeoptimizer Activity hängt fest und wurde nicht geschlossen", appGone);
+		assertTrue("Routeoptimizer Activity wurde nach dem Prozess nicht beendet", appGone);
+
+		// Überprüfung, ob die neue Route geladen wurde.
+		// Da kein "Start"-Button angezeigt wird, prüfen wir auf das Vorhandensein des "Preview"-Buttons.
+		Pattern previewButtonPattern = Pattern.compile("^Preview$|^Preview route$", Pattern.CASE_INSENSITIVE);
+
+		// Bis zu 30 Sekunden Geduld für das Rendern der geänderten Stopps durch Maps
+		UiObject2 previewBtn = device.wait(Until.findObject(By.text(previewButtonPattern)), TIMEOUT * 2);
+		if (previewBtn == null) {
+			previewBtn = device.findObject(By.desc(previewButtonPattern));
+		}
+
+		// Absicherung: Wenn der "Preview"-Button existiert, steht das korrekte Bottom-Sheet bereit
+		if (previewBtn == null) {
+			dumpWindowHierarchy();
+			fail("Die optimierte Route wurde nicht in Google Maps geladen (Kein 'Preview'-Button auf dem Bildschirm gefunden). UI Dump gespeichert.");
+		}
 	}
 
-	/**
-	 * Schreibt die komplette View-Hierarchie in eine XML-Datei, wenn der Test fehlschlägt.
-	 */
 	private void dumpWindowHierarchy() {
 		try {
 			File dumpFile = new File(InstrumentationRegistry.getInstrumentation().getTargetContext().getExternalFilesDir(null), "ui_dump.xml");
 			device.dumpWindowHierarchy(dumpFile);
 			Log.e(TAG, "==================================================");
 			Log.e(TAG, "UI DUMP SAVED TO: " + dumpFile.getAbsolutePath());
-			Log.e(TAG, "Öffne diese Datei (z.B. über Device File Explorer in Android Studio), um zu sehen, welche UI-Elemente wirklich geladen wurden.");
 			Log.e(TAG, "==================================================");
 		} catch (IOException e) {
 			Log.e(TAG, "Failed to dump window hierarchy", e);
