@@ -18,8 +18,10 @@ import com.graphhopper.jsprit.core.util.Coordinate;
 import com.graphhopper.jsprit.core.util.Solutions;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,7 +56,10 @@ public class RouteOptimizer {
 	private record RoutingMatrices(double[][] distances, double[][] durations) {
 	}
 
-	public static List<Stop> optimize(final double startLat, final double startLng, final List<Stop> stops, final OptimizationStrategy strategy) {
+	public static List<Stop> optimize(final double startLat,
+	                                  final double startLng,
+	                                  final List<Stop> stops,
+	                                  final OptimizationStrategy strategy) throws Exception {
 		final List<Stop> optimizedRoute = new ArrayList<>();
 		if (stops.isEmpty()) {
 			return optimizedRoute;
@@ -62,7 +67,6 @@ public class RouteOptimizer {
 
 		final Map<String, Stop> stopMap = new HashMap<>();
 		final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
-
 		// Start-Location definieren (ID "0" für den OSRM Matrix-Index)
 		final Location startLocation =
 				Location
@@ -71,7 +75,6 @@ public class RouteOptimizer {
 						.setId("0")
 						.setCoordinate(Coordinate.newInstance(startLng, startLat))
 						.build();
-
 		vrpBuilder.addVehicle(
 				VehicleImpl
 						.Builder
@@ -85,22 +88,15 @@ public class RouteOptimizer {
 										.build())
 						.setReturnToDepot(false)
 						.build());
-
 		// ---------------------------------------------------------
 		// STRATEGY PATTERN: Auswahl der korrekten Kosten-Implementierung
 		// ---------------------------------------------------------
-		VehicleRoutingTransportCosts transportCosts;
-		if (strategy == OptimizationStrategy.OSRM) {
-			final RoutingMatrices matrices = fetchOsrmMatrices(startLat, startLng, stops);
-			if (matrices != null) {
-				transportCosts = new OsrmTransportCosts(matrices);
-			} else {
-				// Fallback, falls der OSRM-Server nicht erreichbar war
-				transportCosts = new HaversineTransportCosts();
-			}
-		} else {
-			transportCosts = new HaversineTransportCosts();
-		}
+		final VehicleRoutingTransportCosts transportCosts =
+				switch (strategy) {
+					case OSRM ->
+							new OsrmTransportCosts(fetchOsrmMatrices(startLat, startLng, stops));
+					case HAVERSINE -> new HaversineTransportCosts();
+				};
 
 		vrpBuilder.setRoutingCost(transportCosts);
 		// ---------------------------------------------------------
@@ -159,51 +155,49 @@ public class RouteOptimizer {
 		return optimizedRoute;
 	}
 
-	private static RoutingMatrices fetchOsrmMatrices(final double startLat, final double startLng, final List<Stop> stops) {
-		try {
-			final StringBuilder coordinatesStr = new StringBuilder();
-			coordinatesStr.append(String.format(Locale.US, "%f,%f", startLng, startLat));
-			for (final Stop stop : stops) {
-				coordinatesStr.append(";").append(String.format(Locale.US, "%f,%f", stop.lng, stop.lat));
-			}
+	private static RoutingMatrices fetchOsrmMatrices(final double startLat,
+	                                                 final double startLng,
+	                                                 final List<Stop> stops) throws JSONException, IOException {
+		final StringBuilder coordinatesStr = new StringBuilder();
+		coordinatesStr.append(String.format(Locale.US, "%f,%f", startLng, startLat));
+		for (final Stop stop : stops) {
+			coordinatesStr.append(";").append(String.format(Locale.US, "%f,%f", stop.lng, stop.lat));
+		}
 
-			final String url = "http://router.project-osrm.org/table/v1/driving/" + coordinatesStr
-					+ "?annotations=distance,duration";
+		final String url = "http://router.project-osrm.org/table/v1/driving/" + coordinatesStr
+				+ "?annotations=distance,duration";
 
-			final Request request = new Request.Builder().url(url).build();
-			try (final Response response = httpClient.newCall(request).execute()) {
-				if (response.isSuccessful()) {
-					final JSONObject json = new JSONObject(response.body().string());
-					if (json.has("code") && "Ok".equals(json.getString("code"))) {
+		final Request request = new Request.Builder().url(url).build();
+		try (final Response response = httpClient.newCall(request).execute()) {
+			if (response.isSuccessful()) {
+				final JSONObject json = new JSONObject(response.body().string());
+				if (json.has("code") && "Ok".equals(json.getString("code"))) {
 
-						final JSONArray distancesArray = json.getJSONArray("distances");
-						final JSONArray durationsArray = json.getJSONArray("durations");
+					final JSONArray distancesArray = json.getJSONArray("distances");
+					final JSONArray durationsArray = json.getJSONArray("durations");
 
-						final int size = distancesArray.length();
-						final double[][] distances = new double[size][size];
-						final double[][] durations = new double[size][size];
+					final int size = distancesArray.length();
+					final double[][] distances = new double[size][size];
+					final double[][] durations = new double[size][size];
 
-						for (int i = 0; i < size; i++) {
-							final JSONArray rowDist = distancesArray.getJSONArray(i);
-							final JSONArray rowDur = durationsArray.getJSONArray(i);
-							for (int j = 0; j < size; j++) {
-								if (rowDist.isNull(j) || rowDur.isNull(j)) {
-									distances[i][j] = Double.MAX_VALUE;
-									durations[i][j] = Double.MAX_VALUE;
-								} else {
-									distances[i][j] = rowDist.getDouble(j);
-									durations[i][j] = rowDur.getDouble(j);
-								}
+					for (int i = 0; i < size; i++) {
+						final JSONArray rowDist = distancesArray.getJSONArray(i);
+						final JSONArray rowDur = durationsArray.getJSONArray(i);
+						for (int j = 0; j < size; j++) {
+							if (rowDist.isNull(j) || rowDur.isNull(j)) {
+								distances[i][j] = Double.MAX_VALUE;
+								durations[i][j] = Double.MAX_VALUE;
+							} else {
+								distances[i][j] = rowDist.getDouble(j);
+								durations[i][j] = rowDur.getDouble(j);
 							}
 						}
-						return new RoutingMatrices(distances, durations);
 					}
+					return new RoutingMatrices(distances, durations);
 				}
 			}
-		} catch (final Exception e) {
-			e.printStackTrace();
 		}
-		return null;
+		throw new IllegalStateException();
 	}
 
 	// =========================================================================================

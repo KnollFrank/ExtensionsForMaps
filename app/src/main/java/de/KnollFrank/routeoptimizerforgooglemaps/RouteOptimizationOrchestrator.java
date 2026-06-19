@@ -10,8 +10,11 @@ import java.util.List;
 public class RouteOptimizationOrchestrator {
 
 	public interface Callback {
+
 		void onOptimizationStarted();
+
 		void onOptimizationSuccess(List<RouteOptimizer.Stop> finalRoute);
+
 		void onError(String message);
 	}
 
@@ -67,12 +70,16 @@ public class RouteOptimizationOrchestrator {
 		}).start();
 	}
 
-	private List<RouteOptimizer.Stop> optimizeRoute(final List<RouteOptimizer.Stop> stops) {
+	private List<RouteOptimizer.Stop> optimizeRoute(final List<RouteOptimizer.Stop> stops) throws Exception {
 		final RouteOptimizer.Stop start = stops.get(0);
 		final List<RouteOptimizer.Stop> intermediate = stops.subList(1, stops.size());
 		final List<RouteOptimizer.Stop> optimizedIntermediate =
-				RouteOptimizer.optimize(start.lat(), start.lng(), intermediate, RouteOptimizer.OptimizationStrategy.OSRM);
-
+				RouteOptimizer.optimize(
+						start.lat(),
+						start.lng(),
+						intermediate,
+						RouteOptimizer.OptimizationStrategy.OSRM);
+		// FK-TODO: use guava ImmutableList
 		final List<RouteOptimizer.Stop> finalRoute = new ArrayList<>();
 		finalRoute.add(start);
 		finalRoute.addAll(optimizedIntermediate);
