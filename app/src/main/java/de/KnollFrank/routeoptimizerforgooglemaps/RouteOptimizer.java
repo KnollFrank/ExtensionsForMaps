@@ -56,6 +56,10 @@ public class RouteOptimizer {
 	}
 
 	public static List<Stop> optimize(final double startLat, final double startLng, final List<Stop> stops) {
+		return optimize(startLat, startLng, stops, SELECTED_STRATEGY);
+	}
+
+	public static List<Stop> optimize(final double startLat, final double startLng, final List<Stop> stops, final OptimizationStrategy strategy) {
 		final List<Stop> optimizedRoute = new ArrayList<>();
 		if (stops.isEmpty()) {
 			return optimizedRoute;
@@ -88,7 +92,7 @@ public class RouteOptimizer {
 		// STRATEGY PATTERN: Auswahl der korrekten Kosten-Implementierung
 		// ---------------------------------------------------------
 		VehicleRoutingTransportCosts transportCosts;
-		if (SELECTED_STRATEGY == OptimizationStrategy.OSRM) {
+		if (strategy == OptimizationStrategy.OSRM) {
 			final RoutingMatrices matrices = fetchOsrmMatrices(startLat, startLng, stops);
 			if (matrices != null) {
 				transportCosts = new OsrmTransportCosts(matrices);

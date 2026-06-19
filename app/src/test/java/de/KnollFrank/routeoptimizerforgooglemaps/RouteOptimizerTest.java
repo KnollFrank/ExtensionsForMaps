@@ -5,11 +5,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RunWith(RobolectricTestRunner.class)
 public class RouteOptimizerTest {
 
 	@Test
@@ -56,5 +59,45 @@ public class RouteOptimizerTest {
 		List<String> addresses = optimized.stream().map(RouteOptimizer.Stop::address).collect(Collectors.toList());
 		assertTrue(addresses.contains("Hamburg"));
 		assertTrue(addresses.contains("Unterhausen"));
+	}
+
+	@Test
+	public void testOptimize_osrmVsHaversine_LakeGarda() {
+		// Geografisches Hindernis: Der Gardasee (Lago di Garda) in Italien
+		// Start: Limone sul Garda (am Westufer des Sees)
+		final double startLat = 45.8156;
+		final double startLng = 10.7904;
+
+		final List<RouteOptimizer.Stop> stops = new ArrayList<>();
+
+		// Stop A: Malcesine
+		// (Liegt am Ostufer, genau gegenüber von Limone. Luftlinie: ~6 km. Auto: ~30 km, da man um den See fahren muss)
+		stops.add(new RouteOptimizer.Stop("Malcesine", 45.7656, 10.8092));
+
+		// Stop B: Riva del Garda
+		// (Liegt an der Nordspitze. Luftlinie: ~9 km. Auto: ~11 km, da auf derselben Uferseite über direkte Straße erreichbar)
+		stops.add(new RouteOptimizer.Stop("Riva del Garda", 45.8893, 10.8430));
+
+		// ==========================================================
+		// TEST 1: Haversine-Strategie (Luftlinie ignoriert den See)
+		// Erwartung: Limone -> Malcesine (6km) -> Riva del Garda
+		// ==========================================================
+		final List<RouteOptimizer.Stop> haversineRoute =
+				RouteOptimizer.optimize(startLat, startLng, stops, RouteOptimizer.OptimizationStrategy.HAVERSINE);
+
+		assertEquals(2, haversineRoute.size());
+		assertEquals("Malcesine", haversineRoute.get(0).address());
+		assertEquals("Riva del Garda", haversineRoute.get(1).address());
+
+		// ==========================================================
+		// TEST 2: OSRM-Strategie (Echte Straßenführung)
+		// Erwartung: Limone -> Riva del Garda (11km) -> Malcesine (weitere 19km)
+		// ==========================================================
+		final List<RouteOptimizer.Stop> osrmRoute =
+				RouteOptimizer.optimize(startLat, startLng, stops, RouteOptimizer.OptimizationStrategy.OSRM);
+
+		assertEquals(2, osrmRoute.size());
+		assertEquals("Riva del Garda", osrmRoute.get(0).address()); // OSRM erkennt, dass Riva näher zu befahren ist!
+		assertEquals("Malcesine", osrmRoute.get(1).address());
 	}
 }
