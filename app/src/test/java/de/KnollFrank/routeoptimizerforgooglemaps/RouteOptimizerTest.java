@@ -29,7 +29,7 @@ public class RouteOptimizerTest {
 		// Stop C: Leipzig (medium)
 		stops.add(new RouteOptimizer.Stop("Leipzig", 51.3397, 12.3731));
 
-		final List<RouteOptimizer.Stop> optimized = RouteOptimizer.optimize(startLat, startLng, stops);
+		final List<RouteOptimizer.Stop> optimized = RouteOptimizer.optimize(startLat, startLng, stops, RouteOptimizer.OptimizationStrategy.HAVERSINE);
 
 		assertFalse(optimized.isEmpty());
 		assertEquals(3, optimized.size());
@@ -51,12 +51,12 @@ public class RouteOptimizerTest {
 		// Unterhausen
 		stops.add(new RouteOptimizer.Stop("Unterhausen", 48.430628, 9.2546378));
 
-		List<RouteOptimizer.Stop> optimized = RouteOptimizer.optimize(startLat, startLng, stops);
+		List<RouteOptimizer.Stop> optimized = RouteOptimizer.optimize(startLat, startLng, stops, RouteOptimizer.OptimizationStrategy.HAVERSINE);
 
 		// Expect both intermediate stops to be present
 		assertEquals(2, optimized.size());
 		// Verify names
-		List<String> addresses = optimized.stream().map(RouteOptimizer.Stop::address).collect(Collectors.toList());
+		List<String> addresses = optimized.stream().map(RouteOptimizer.Stop::address).toList();
 		assertTrue(addresses.contains("Hamburg"));
 		assertTrue(addresses.contains("Unterhausen"));
 	}

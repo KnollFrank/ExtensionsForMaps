@@ -34,18 +34,17 @@ import okhttp3.Response;
 
 public class RouteOptimizer {
 
-	// HIER UMSCHALTEN: HAVERSINE (Luftlinie) oder OSRM (Echte Straßenführung)
-	private static final OptimizationStrategy SELECTED_STRATEGY = OptimizationStrategy.OSRM;
-
 	public enum OptimizationStrategy {
 		HAVERSINE,
 		OSRM
 	}
 
-	private static final OkHttpClient httpClient = new OkHttpClient.Builder()
-			.connectTimeout(10, TimeUnit.SECONDS)
-			.readTimeout(10, TimeUnit.SECONDS)
-			.build();
+	private static final OkHttpClient httpClient =
+			new OkHttpClient
+					.Builder()
+					.connectTimeout(10, TimeUnit.SECONDS)
+					.readTimeout(10, TimeUnit.SECONDS)
+					.build();
 
 	// FK-TODO: use Labyrinth:org.labyrinth.coordinate.Geodetic instead of lat/lng at all places in this app
 	public record Stop(String address, double lat, double lng) {
@@ -53,10 +52,6 @@ public class RouteOptimizer {
 
 	// Interner Container für die OSRM Distanz- und Dauer-Matrizen
 	private record RoutingMatrices(double[][] distances, double[][] durations) {
-	}
-
-	public static List<Stop> optimize(final double startLat, final double startLng, final List<Stop> stops) {
-		return optimize(startLat, startLng, stops, SELECTED_STRATEGY);
 	}
 
 	public static List<Stop> optimize(final double startLat, final double startLng, final List<Stop> stops, final OptimizationStrategy strategy) {
@@ -169,12 +164,12 @@ public class RouteOptimizer {
 				coordinatesStr.append(";").append(String.format(Locale.US, "%f,%f", stop.lng, stop.lat));
 			}
 
-			final String url = "http://router.project-osrm.org/table/v1/driving/" + coordinatesStr.toString()
+			final String url = "http://router.project-osrm.org/table/v1/driving/" + coordinatesStr
 					+ "?annotations=distance,duration";
 
 			final Request request = new Request.Builder().url(url).build();
 			try (final Response response = httpClient.newCall(request).execute()) {
-				if (response.isSuccessful() && response.body() != null) {
+				if (response.isSuccessful()) {
 					final JSONObject json = new JSONObject(response.body().string());
 					if (json.has("code") && "Ok".equals(json.getString("code"))) {
 

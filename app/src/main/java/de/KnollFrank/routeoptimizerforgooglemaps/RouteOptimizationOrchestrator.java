@@ -71,7 +71,7 @@ public class RouteOptimizationOrchestrator {
 		final RouteOptimizer.Stop start = stops.get(0);
 		final List<RouteOptimizer.Stop> intermediate = stops.subList(1, stops.size());
 		final List<RouteOptimizer.Stop> optimizedIntermediate =
-				RouteOptimizer.optimize(start.lat(), start.lng(), intermediate);
+				RouteOptimizer.optimize(start.lat(), start.lng(), intermediate, RouteOptimizer.OptimizationStrategy.OSRM);
 
 		final List<RouteOptimizer.Stop> finalRoute = new ArrayList<>();
 		finalRoute.add(start);
