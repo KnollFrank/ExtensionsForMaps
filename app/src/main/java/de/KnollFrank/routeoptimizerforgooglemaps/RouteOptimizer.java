@@ -56,6 +56,8 @@ public class RouteOptimizer {
 	private record RoutingMatrices(double[][] distances, double[][] durations) {
 	}
 
+	// FK-TODO: geschätzte Ersparnis in km und Zeit berechnen und anzeigen
+	// FK-TODO: Routen optimieren für Auto, Fußgänger, Fahrrad und öffentliche Verkehrsmittel
 	public static List<Stop> optimize(final double startLat,
 	                                  final double startLng,
 	                                  final List<Stop> stops,
