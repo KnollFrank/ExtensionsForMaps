@@ -164,7 +164,7 @@ public class RouteOptimizer {
 			coordinatesStr.append(";").append(String.format(Locale.US, "%f,%f", stop.lng, stop.lat));
 		}
 
-		final String url = "http://router.project-osrm.org/table/v1/driving/" + coordinatesStr
+		final String url = "https://router.project-osrm.org/table/v1/driving/" + coordinatesStr
 				+ "?annotations=distance,duration";
 
 		final Request request = new Request.Builder().url(url).build();
