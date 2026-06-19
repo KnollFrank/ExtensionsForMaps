@@ -1,10 +1,12 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.util.Log;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -20,113 +22,122 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.util.regex.Pattern;
 
 /**
  * End-to-end integration test that automates Google Maps to verify the full optimization cycle.
- * Highly robust selectors used to handle varying Google Maps UI.
+ * Highly robust selectors used to handle the direct share button on the bottom sheet (EN/DE).
  */
 @RunWith(AndroidJUnit4.class)
 @SdkSuppress(minSdkVersion = 26)
 @LargeTest
 public class GoogleMapsIntegrationTest {
 
-    private UiDevice device;
-    private static final int TIMEOUT = 15000;
-    private static final String MAPS_PACKAGE = "com.google.android.apps.maps";
-    private static final String APP_PACKAGE = "de.KnollFrank.routeoptimizerforgooglemaps";
+	private UiDevice device;
+	private static final int TIMEOUT = 15000;
+	private static final String MAPS_PACKAGE = "com.google.android.apps.maps";
+	private static final String APP_PACKAGE = "de.KnollFrank.routeoptimizerforgooglemaps";
+	private static final String TAG = "GoogleMapsTest";
 
-    @Before
-    public void setUp() {
-        device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-        device.pressHome();
-    }
+	@Before
+	public void setUp() {
+		device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+		device.pressHome();
+	}
 
-    @Test
-    public void testFullOptimizationCycleFromGoogleMaps() {
-        // 1. Launch Google Maps
-        final Context context = ApplicationProvider.getApplicationContext();
-        final Intent mapsIntent = context.getPackageManager().getLaunchIntentForPackage(MAPS_PACKAGE);
-        assertNotNull("Google Maps is not installed", mapsIntent);
-        mapsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        context.startActivity(mapsIntent);
-        device.wait(Until.hasObject(By.pkg(MAPS_PACKAGE).depth(0)), TIMEOUT);
+	@Test
+	public void testFullOptimizationCycleFromGoogleMaps() {
+		// 1. Launch Google Maps directly with the pre-defined Route-URL
+		final Context context = ApplicationProvider.getApplicationContext();
 
-        // Handle initial Google Maps popups (Terms, etc.) if any
-        UiObject2 gotIt = device.findObject(By.textContains("Got it"));
-        if (gotIt != null) gotIt.click();
+		// WICHTIG: Setze hier deine funktionierende Test-URL ein
+		final String routeUrl = "https://www.google.com/maps/dir/Central-Apotheke/Hamburg/Unterhausen/data=!4m22!4m21!1m5!1m4!1s0x4799fc4b13515dd5:0x345201aaff119b3a!8m2!3d48.4765345!4d8.934900899999999!1m5!1m4!1s0x47b161837e1813b9:0x4263df27bd63aa0!8m2!3d53.548828199999996!4d9.987170299999999!1m5!1m4!1s0x4799f35ec85b80b1:0xe432d2a55bc3cd11!8m2!3d48.430628399999996!4d9.2546378!2m1!11b1!3e0?utm_source=mstt_0&g_ep=CAESCDI2LjE2LjEyGAAgkUEqiwEsOTQyNjc3MjcsOTQyOTIxOTUsOTQyOTk1MzIsMTAwNzk2NDk4LDEwMDc5Nzc2MSwxMDA3OTY1MzUsOTQyODA1NzYsMTAwODExOTYwLDk0MjA3Mzk0LDk0MjA3NTA2LDk0MjA4NTA2LDk0MjE4NjUzLDk0MjI5ODM5LDk0Mjc1MTY4LDk0Mjc5NjE5QgJVUw%3D%3D&skid=0a1f62d3-c01c-47b9-b4b6-ccadc456baa8";
+		final Intent mapsIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(routeUrl));
+		mapsIntent.setPackage(MAPS_PACKAGE);
+		mapsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-        // 2. Locate Search Box
-        UiObject2 searchBox = device.wait(Until.findObject(By.textContains("Search here")), TIMEOUT);
-        if (searchBox == null) searchBox = device.findObject(By.res(MAPS_PACKAGE, "search_omnibox_text_box"));
-        if (searchBox == null) searchBox = device.findObject(By.descContains("Search"));
-        
-        assertNotNull("Could not find Maps search box", searchBox);
-        searchBox.click();
-        
-        // Wait for search input field to be focused
-        UiObject2 editTextField = device.wait(Until.findObject(By.focused(true)), TIMEOUT);
-        if (editTextField == null) editTextField = device.findObject(By.clazz("android.widget.EditText"));
-        
-        assertNotNull("Could not find focused edit text for search", editTextField);
-        editTextField.setText("Hamburg");
-        device.pressEnter();
-        
-        // 3. Open Directions
-        UiObject2 directionsBtn = device.wait(Until.findObject(By.text("Directions")), TIMEOUT);
-        if (directionsBtn == null) directionsBtn = device.findObject(By.descContains("Directions"));
-        if (directionsBtn == null) directionsBtn = device.findObject(By.res(MAPS_PACKAGE, "place_card_directions_button"));
-        
-        assertNotNull("Could not find Directions button", directionsBtn);
-        directionsBtn.click();
+		context.startActivity(mapsIntent);
 
-        // 4. Add stops via "More options"
-        UiObject2 moreOptions = device.wait(Until.findObject(By.descContains("More options")), TIMEOUT);
-        assertNotNull("Could not find 'More options' (three dots) menu", moreOptions);
-        moreOptions.click();
-        
-        UiObject2 addStop = device.wait(Until.findObject(By.textContains("Add stop")), TIMEOUT);
-        assertNotNull("Could not find 'Add stop' menu item", addStop);
-        addStop.click();
+		// Wait for the Google Maps app to appear and settle
+		device.wait(Until.hasObject(By.pkg(MAPS_PACKAGE).depth(0)), TIMEOUT);
+		device.waitForIdle();
 
-        // Add additional stops
-        List<String> stopsToAdd = Arrays.asList("Berlin", "Munich");
-        for (String stopName : stopsToAdd) {
-            UiObject2 nextStopField = device.wait(Until.findObject(By.textContains("Add stop")), TIMEOUT);
-            if (nextStopField != null) {
-                nextStopField.click();
-                UiObject2 focusedInput = device.wait(Until.findObject(By.focused(true)), TIMEOUT);
-                if (focusedInput != null) {
-                    focusedInput.setText(stopName);
-                    device.pressEnter();
-                    // Wait for the address to be resolved/suggested and clicked if necessary, 
-                    // or just wait for it to appear in the field.
-                    device.wait(Until.findObject(By.textContains(stopName)), TIMEOUT);
-                }
-            }
-        }
+		// Handle initial Google Maps popups (Terms, Got it, etc.) if any
+		UiObject2 gotIt = device.findObject(By.text(Pattern.compile("Got it|Verstanden", Pattern.CASE_INSENSITIVE)));
+		if (gotIt != null) gotIt.click();
 
-        // 5. Trigger "Share directions"
-        moreOptions = device.wait(Until.findObject(By.descContains("More options")), TIMEOUT);
-        moreOptions.click();
-        
-        UiObject2 shareBtn = device.wait(Until.findObject(By.textContains("Share directions")), TIMEOUT);
-        assertNotNull("Could not find 'Share directions' button", shareBtn);
-        shareBtn.click();
-        
-        // 6. Select "Routeoptimizer" from Android Share Sheet
-        UiObject2 appInShareSheet = device.wait(Until.findObject(By.text("Routeoptimizer")), TIMEOUT);
-        assertNotNull("Routeoptimizer not found in share sheet", appInShareSheet);
-        appInShareSheet.click();
+		// 2. Trigger "Share directions" directly from the Bottom-Sheet
+		// Wir suchen direkt nach "Share", "Share directions", "Teilen" oder "Wegbeschreibung teilen"
+		Pattern sharePattern = Pattern.compile("Share|Share directions|Teilen|Wegbeschreibung teilen", Pattern.CASE_INSENSITIVE);
 
-        // 7. Verify Magic Return to Google Maps
-        // Wait for Routeoptimizer (transparent) to finish and Maps to be back on top
-        boolean backInMaps = device.wait(Until.hasObject(By.pkg(MAPS_PACKAGE)), TIMEOUT * 2);
-        assertTrue("Failed to return to Google Maps after optimization", backInMaps);
-        
-        // Verify Routeoptimizer finished its task
-        boolean appGone = device.wait(Until.gone(By.pkg(APP_PACKAGE)), TIMEOUT);
-        assertTrue("Routeoptimizer activity stuck and did not finish", appGone);
-    }
+		// Da das Laden der Route über das Netzwerk einen Moment dauern kann, warten wir hier
+		// Zuerst prüfen wir die Content-Description (häufig bei Icons), dann den sichtbaren Text.
+		UiObject2 shareBtn = device.wait(Until.findObject(By.desc(sharePattern)), TIMEOUT * 2);
+		if (shareBtn == null) {
+			shareBtn = device.wait(Until.findObject(By.text(sharePattern)), TIMEOUT);
+		}
+
+		if (shareBtn == null) {
+			dumpWindowHierarchy();
+			fail("Konnte den 'Share' / 'Teilen' Button auf dem Bottom-Sheet nicht finden. Route möglicherweise nicht geladen. UI Dump gespeichert.");
+		}
+		shareBtn.click();
+
+		// 3. Select "Routeoptimizer" from Android Share Sheet
+		device.waitForIdle(); // Kurz warten, bis das Menü fertig gerendert ist
+		boolean appFound = false;
+
+		// Wir wischen maximal 7 Mal nach oben, um die App zu finden
+		for (int i = 0; i < 7; i++) {
+			// Wir suchen nach einem Teil des Namens, um abgeschnittene Texte (z.B. "Routeopti...") abzufangen
+			UiObject2 appInShareSheet = device.findObject(By.textContains("Routeopt"));
+
+			if (appInShareSheet != null) {
+				appInShareSheet.click();
+				appFound = true;
+				break; // Schleife abbrechen, da gefunden!
+			}
+
+			// App nicht auf dem Schirm -> Einmal wischen (wie ein menschlicher Daumen)
+			int startX = device.getDisplayWidth() / 2;
+			int startY = (int) (device.getDisplayHeight() * 0.8); // Im unteren Viertel ansetzen
+			int endY = (int) (device.getDisplayHeight() * 0.3);   // Nach oben wischen
+
+			// Wische in 20 Schritten (relativ schnell) von unten nach oben
+			device.swipe(startX, startY, startX, endY, 20);
+			device.waitForIdle(); // Kurz warten, bis die Scroll-Animation beendet ist
+		}
+
+		if (!appFound) {
+			dumpWindowHierarchy();
+			fail("Routeoptimizer wurde im Teilen-Menü auch nach 7 manuellen Swipes nicht gefunden. UI Dump gespeichert.");
+		}
+
+		// 4. Verify Magic Return to Google Maps
+		// Prüfen, ob wir nach der Optimierung wieder in Google Maps landen
+		boolean backInMaps = device.wait(Until.hasObject(By.pkg(MAPS_PACKAGE)), TIMEOUT * 2);
+		assertTrue("Rückkehr zu Google Maps nach der Optimierung fehlgeschlagen", backInMaps);
+
+		// Prüfen, ob die Routeoptimizer-Activity sauber beendet wurde
+		boolean appGone = device.wait(Until.gone(By.pkg(APP_PACKAGE)), TIMEOUT);
+		assertTrue("Routeoptimizer Activity hängt fest und wurde nicht geschlossen", appGone);
+	}
+
+	/**
+	 * Schreibt die komplette View-Hierarchie in eine XML-Datei, wenn der Test fehlschlägt.
+	 */
+	private void dumpWindowHierarchy() {
+		try {
+			File dumpFile = new File(InstrumentationRegistry.getInstrumentation().getTargetContext().getExternalFilesDir(null), "ui_dump.xml");
+			device.dumpWindowHierarchy(dumpFile);
+			Log.e(TAG, "==================================================");
+			Log.e(TAG, "UI DUMP SAVED TO: " + dumpFile.getAbsolutePath());
+			Log.e(TAG, "Öffne diese Datei (z.B. über Device File Explorer in Android Studio), um zu sehen, welche UI-Elemente wirklich geladen wurden.");
+			Log.e(TAG, "==================================================");
+		} catch (IOException e) {
+			Log.e(TAG, "Failed to dump window hierarchy", e);
+		}
+	}
 }
