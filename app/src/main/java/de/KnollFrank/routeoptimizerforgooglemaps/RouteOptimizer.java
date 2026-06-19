@@ -64,10 +64,13 @@ public class RouteOptimizer {
 		final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
 
 		// Start-Location definieren (ID "0" für den OSRM Matrix-Index)
-		final Location startLocation = Location.Builder.newInstance()
-				.setId("0")
-				.setCoordinate(Coordinate.newInstance(startLng, startLat))
-				.build();
+		final Location startLocation =
+				Location
+						.Builder
+						.newInstance()
+						.setId("0")
+						.setCoordinate(Coordinate.newInstance(startLng, startLat))
+						.build();
 
 		vrpBuilder.addVehicle(
 				VehicleImpl
