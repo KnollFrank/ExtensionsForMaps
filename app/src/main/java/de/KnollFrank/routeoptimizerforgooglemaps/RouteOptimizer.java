@@ -17,36 +17,64 @@ import com.graphhopper.jsprit.core.problem.vehicle.VehicleTypeImpl;
 import com.graphhopper.jsprit.core.util.Coordinate;
 import com.graphhopper.jsprit.core.util.Solutions;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class RouteOptimizer {
+
+	// HIER UMSCHALTEN: HAVERSINE (Luftlinie) oder OSRM (Echte Straßenführung)
+	private static final OptimizationStrategy SELECTED_STRATEGY = OptimizationStrategy.OSRM;
+
+	public enum OptimizationStrategy {
+		HAVERSINE,
+		OSRM
+	}
+
+	private static final OkHttpClient httpClient = new OkHttpClient.Builder()
+			.connectTimeout(10, TimeUnit.SECONDS)
+			.readTimeout(10, TimeUnit.SECONDS)
+			.build();
 
 	// FK-TODO: use Labyrinth:org.labyrinth.coordinate.Geodetic instead of lat/lng at all places in this app
 	public record Stop(String address, double lat, double lng) {
 	}
 
-	// FK-TODO: biete neben der HaversineDistance auch folgendes an:
-	//  + Embedded GraphHopper + GitHub-Download
-	//  - der öffentliche OSRM Demo-Server: router.project-osrm.org
-	//  - OpenRouteService-API
+	// Interner Container für die OSRM Distanz- und Dauer-Matrizen
+	private record RoutingMatrices(double[][] distances, double[][] durations) {
+	}
+
 	public static List<Stop> optimize(final double startLat, final double startLng, final List<Stop> stops) {
 		final List<Stop> optimizedRoute = new ArrayList<>();
 		if (stops.isEmpty()) {
 			return optimizedRoute;
 		}
-		// Map to quickly find Stop object by its unique ID
+
 		final Map<String, Stop> stopMap = new HashMap<>();
-		// Define Problem Builder
 		final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
+
+		// Start-Location definieren (ID "0" für den OSRM Matrix-Index)
+		final Location startLocation = Location.Builder.newInstance()
+				.setId("0")
+				.setCoordinate(Coordinate.newInstance(startLng, startLat))
+				.build();
+
 		vrpBuilder.addVehicle(
 				VehicleImpl
 						.Builder
 						.newInstance("vehicle")
-						.setStartLocation(Location.newInstance(startLng, startLat))
+						.setStartLocation(startLocation)
 						.setType(
 								VehicleTypeImpl
 										.Builder
@@ -55,38 +83,56 @@ public class RouteOptimizer {
 										.build())
 						.setReturnToDepot(false)
 						.build());
-		// Define Transport Costs using Haversine
-		vrpBuilder.setRoutingCost(getVehicleRoutingTransportCosts());
-		// Add Services (Stops)
+
+		// ---------------------------------------------------------
+		// STRATEGY PATTERN: Auswahl der korrekten Kosten-Implementierung
+		// ---------------------------------------------------------
+		VehicleRoutingTransportCosts transportCosts;
+		if (SELECTED_STRATEGY == OptimizationStrategy.OSRM) {
+			final RoutingMatrices matrices = fetchOsrmMatrices(startLat, startLng, stops);
+			if (matrices != null) {
+				transportCosts = new OsrmTransportCosts(matrices);
+			} else {
+				// Fallback, falls der OSRM-Server nicht erreichbar war
+				transportCosts = new HaversineTransportCosts();
+			}
+		} else {
+			transportCosts = new HaversineTransportCosts();
+		}
+
+		vrpBuilder.setRoutingCost(transportCosts);
+		// ---------------------------------------------------------
+
+		// Stopps definieren (IDs "1", "2", "3" usw. für die Matrix)
 		for (int i = 0; i < stops.size(); i++) {
 			final Stop stop = stops.get(i);
 			final String jobId = stop.address + "___" + i;
 			stopMap.put(jobId, stop);
+
+			final Location stopLocation = Location.Builder.newInstance()
+					.setId(String.valueOf(i + 1))
+					.setCoordinate(Coordinate.newInstance(stop.lng, stop.lat))
+					.build();
+
 			final Service service =
 					Service
 							.Builder
 							.newInstance(jobId)
-							.setLocation(
-									Location
-											.Builder
-											.newInstance()
-											.setCoordinate(Coordinate.newInstance(stop.lng, stop.lat))
-											.build())
+							.setLocation(stopLocation)
 							.build();
 			vrpBuilder.addJob(service);
 		}
-		// Build Problem - Force finite fleet size
+
 		final VehicleRoutingProblem problem =
 				vrpBuilder
 						.setFleetSize(VehicleRoutingProblem.FleetSize.FINITE)
 						.build();
-		// Define and Run Algorithm
+
 		final VehicleRoutingAlgorithm algorithm = Jsprit.createAlgorithm(problem);
 		final Collection<VehicleRoutingProblemSolution> solutions = algorithm.searchSolutions();
-		// Extract Best Solution
 		final VehicleRoutingProblemSolution bestSolution = Solutions.bestOf(solutions);
+
 		if (bestSolution != null) {
-			// Iterate over all routes
 			for (final VehicleRoute route : bestSolution.getRoutes()) {
 				for (final TourActivity activity : route.getActivities()) {
 					if (activity instanceof final TourActivity.JobActivity jobActivity) {
@@ -98,7 +144,6 @@ public class RouteOptimizer {
 					}
 				}
 			}
-			// Add unassigned jobs as fallback
 			for (final Job job : bestSolution.getUnassignedJobs()) {
 				final Stop originalStop = stopMap.get(job.getId());
 				if (originalStop != null && !optimizedRoute.contains(originalStop)) {
@@ -106,82 +151,159 @@ public class RouteOptimizer {
 				}
 			}
 		}
-		// Final fallback
 		if (optimizedRoute.isEmpty()) {
 			optimizedRoute.addAll(stops);
 		}
 		return optimizedRoute;
 	}
 
-	private static VehicleRoutingTransportCosts getVehicleRoutingTransportCosts() {
-		return new VehicleRoutingTransportCosts() {
-
-			@Override
-			public double getTransportTime(final Location from,
-			                               final Location to,
-			                               final double departureTime,
-			                               final Driver driver,
-			                               final Vehicle vehicle) {
-				return getDistance(from, to, departureTime, vehicle);
+	private static RoutingMatrices fetchOsrmMatrices(final double startLat, final double startLng, final List<Stop> stops) {
+		try {
+			final StringBuilder coordinatesStr = new StringBuilder();
+			coordinatesStr.append(String.format(Locale.US, "%f,%f", startLng, startLat));
+			for (final Stop stop : stops) {
+				coordinatesStr.append(";").append(String.format(Locale.US, "%f,%f", stop.lng, stop.lat));
 			}
 
-			@Override
-			public double getBackwardTransportTime(final Location from,
-			                                       final Location to,
-			                                       double arrivalTime,
-			                                       final Driver driver,
-			                                       final Vehicle vehicle) {
-				return getDistance(from, to, arrivalTime, vehicle);
-			}
+			final String url = "http://router.project-osrm.org/table/v1/driving/" + coordinatesStr.toString()
+					+ "?annotations=distance,duration";
 
-			@Override
-			public double getBackwardTransportCost(final Location from,
-			                                       final Location to,
-			                                       final double arrivalTime,
-			                                       final Driver driver,
-			                                       final Vehicle vehicle) {
-				return getDistance(from, to, arrivalTime, vehicle);
-			}
+			final Request request = new Request.Builder().url(url).build();
+			try (final Response response = httpClient.newCall(request).execute()) {
+				if (response.isSuccessful() && response.body() != null) {
+					final JSONObject json = new JSONObject(response.body().string());
+					if (json.has("code") && "Ok".equals(json.getString("code"))) {
 
-			@Override
-			public double getDistance(final Location from,
-			                          final Location to,
-			                          final double departureTime,
-			                          final Vehicle vehicle) {
-				if (from.getCoordinate() == null || to.getCoordinate() == null) {
-					return 0.0;
+						final JSONArray distancesArray = json.getJSONArray("distances");
+						final JSONArray durationsArray = json.getJSONArray("durations");
+
+						final int size = distancesArray.length();
+						final double[][] distances = new double[size][size];
+						final double[][] durations = new double[size][size];
+
+						for (int i = 0; i < size; i++) {
+							final JSONArray rowDist = distancesArray.getJSONArray(i);
+							final JSONArray rowDur = durationsArray.getJSONArray(i);
+							for (int j = 0; j < size; j++) {
+								if (rowDist.isNull(j) || rowDur.isNull(j)) {
+									distances[i][j] = Double.MAX_VALUE;
+									durations[i][j] = Double.MAX_VALUE;
+								} else {
+									distances[i][j] = rowDist.getDouble(j);
+									durations[i][j] = rowDur.getDouble(j);
+								}
+							}
+						}
+						return new RoutingMatrices(distances, durations);
+					}
 				}
-				// Note jsprit Coordinate is (x, y) -> (lng, lat)
-				return calculateHaversineDistance(
-						from.getCoordinate().getY(),
-						from.getCoordinate().getX(),
-						to.getCoordinate().getY(),
-						to.getCoordinate().getX());
 			}
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
-			@Override
-			public double getTransportCost(final Location from,
-			                               final Location to,
-			                               final double departureTime,
-			                               final Driver driver,
-			                               final Vehicle vehicle) {
-				return getDistance(from, to, departureTime, vehicle);
-			}
+	// =========================================================================================
+	// STRATEGIE 1: Haversine Implementierung (Luftlinie)
+	// =========================================================================================
+	private static class HaversineTransportCosts implements VehicleRoutingTransportCosts {
 
-			/**
-			 * Calculates the great-circle distance between two points on Earth using the Haversine formula.
-			 * Returns distance in meters.
-			 */
-			private double calculateHaversineDistance(final double lat1, final double lon1, final double lat2, final double lon2) {
-				final double R = 6371000.0; // Earth radius in meters
-				final double dLat = Math.toRadians(lat2 - lat1);
-				final double dLon = Math.toRadians(lon2 - lon1);
-				final double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-						Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-								Math.sin(dLon / 2) * Math.sin(dLon / 2);
-				final double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-				return R * c;
+		@Override
+		public double getTransportTime(final Location from, final Location to, final double departureTime, final Driver driver, final Vehicle vehicle) {
+			return getDistance(from, to, departureTime, vehicle);
+		}
+
+		@Override
+		public double getBackwardTransportTime(final Location from, final Location to, double arrivalTime, final Driver driver, final Vehicle vehicle) {
+			return getDistance(from, to, arrivalTime, vehicle);
+		}
+
+		@Override
+		public double getBackwardTransportCost(final Location from, final Location to, final double arrivalTime, final Driver driver, final Vehicle vehicle) {
+			return getDistance(from, to, arrivalTime, vehicle);
+		}
+
+		@Override
+		public double getDistance(final Location from, final Location to, final double departureTime, final Vehicle vehicle) {
+			if (from.getCoordinate() == null || to.getCoordinate() == null) {
+				return 0.0;
 			}
-		};
+			return calculateHaversineDistance(
+					from.getCoordinate().getY(),
+					from.getCoordinate().getX(),
+					to.getCoordinate().getY(),
+					to.getCoordinate().getX());
+		}
+
+		@Override
+		public double getTransportCost(final Location from, final Location to, final double departureTime, final Driver driver, final Vehicle vehicle) {
+			return getDistance(from, to, departureTime, vehicle);
+		}
+
+		private double calculateHaversineDistance(final double lat1, final double lon1, final double lat2, final double lon2) {
+			final double R = 6371000.0;
+			final double dLat = Math.toRadians(lat2 - lat1);
+			final double dLon = Math.toRadians(lon2 - lon1);
+			final double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+					Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+							Math.sin(dLon / 2) * Math.sin(dLon / 2);
+			final double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+			return R * c;
+		}
+	}
+
+	// =========================================================================================
+	// STRATEGIE 2: OSRM Implementierung (Straßennetz-Matrix)
+	// =========================================================================================
+	private static class OsrmTransportCosts implements VehicleRoutingTransportCosts {
+
+		private final RoutingMatrices matrices;
+		// Eingebautes Fallback, falls bei einzelnen Koordinaten ein Fehler auftritt
+		private final HaversineTransportCosts fallback = new HaversineTransportCosts();
+
+		public OsrmTransportCosts(final RoutingMatrices matrices) {
+			this.matrices = matrices;
+		}
+
+		@Override
+		public double getTransportTime(final Location from, final Location to, final double departureTime, final Driver driver, final Vehicle vehicle) {
+			try {
+				final int fromIdx = Integer.parseInt(from.getId());
+				final int toIdx = Integer.parseInt(to.getId());
+				return matrices.durations()[fromIdx][toIdx];
+			} catch (final Exception e) {
+				return fallback.getTransportTime(from, to, departureTime, driver, vehicle);
+			}
+		}
+
+		@Override
+		public double getBackwardTransportTime(final Location from, final Location to, double arrivalTime, final Driver driver, final Vehicle vehicle) {
+			return getTransportTime(from, to, arrivalTime, driver, vehicle);
+		}
+
+		@Override
+		public double getBackwardTransportCost(final Location from, final Location to, final double arrivalTime, final Driver driver, final Vehicle vehicle) {
+			return getTransportCost(from, to, arrivalTime, driver, vehicle);
+		}
+
+		@Override
+		public double getDistance(final Location from, final Location to, final double departureTime, final Vehicle vehicle) {
+			try {
+				final int fromIdx = Integer.parseInt(from.getId());
+				final int toIdx = Integer.parseInt(to.getId());
+				return matrices.distances()[fromIdx][toIdx];
+			} catch (final Exception e) {
+				return fallback.getDistance(from, to, departureTime, vehicle);
+			}
+		}
+
+		@Override
+		public double getTransportCost(final Location from, final Location to, final double departureTime, final Driver driver, final Vehicle vehicle) {
+			// In Jsprit sind in diesem Fall die Transportkosten oft identisch mit der Distanz.
+			// Du kannst hier bei Bedarf auch die Fahrzeit (getTransportTime) zurückgeben,
+			// wenn Jsprit primär auf Zeit optimieren soll.
+			return getDistance(from, to, departureTime, vehicle);
+		}
 	}
 }
