@@ -36,6 +36,9 @@ import okhttp3.Response;
 
 public class RouteOptimizer {
 
+	// FK-TODO: biete neben der HaversineDistance auch folgendes an:
+	//  + Embedded GraphHopper + GitHub-Download
+	//  - OpenRouteService-API (https://openrouteservice.org/)
 	public enum OptimizationStrategy {
 		HAVERSINE,
 		OSRM
