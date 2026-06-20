@@ -11,6 +11,7 @@ import java.util.Locale;
 
 public class AddressResolver {
 
+	// FK-TODO: Geocoder soll nur eine Möglichkeit von mehreren sein, darunter https://github.com/komoot/photon
 	private final Geocoder geocoder;
 
 	public AddressResolver(final Context context) {
