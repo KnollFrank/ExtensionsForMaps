@@ -35,12 +35,15 @@ android {
     }
 
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
 }
 
 dependencies {
+    coreLibraryDesugaring libs.desugar.jdk.libs
+
     implementation libs.activity.ktx
     implementation libs.appcompat
     implementation libs.constraintlayout
@@ -51,6 +54,7 @@ dependencies {
     implementation libs.play.services.location
     implementation libs.jsprit.core
     implementation libs.okhttp
+    implementation libs.guava
 
     testImplementation libs.junit
     testImplementation libs.mockwebserver

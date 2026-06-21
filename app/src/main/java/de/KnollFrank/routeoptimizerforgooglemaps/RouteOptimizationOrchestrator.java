@@ -28,7 +28,6 @@ public class RouteOptimizationOrchestrator {
 	}
 
 	public void processSharedText(final String sharedText) {
-		// FK-TODO: falls dem Benutzer die Optimierung zu lange dauert, dann soll er die Möglichkeit haben, mit einem Cancel-Button den Prozess abzubrechen.
 		callback.onOptimizationStarted();
 		new Thread(() -> {
 			try {
