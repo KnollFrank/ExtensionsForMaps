@@ -59,7 +59,6 @@ public class RouteOptimizationOrchestrator {
 					final List<RouteOptimizer.Stop> resolvedStops = addressResolver.resolveAddressesToStops(addressList);
 					finalRoute = optimizeRoute(resolvedStops);
 				}
-
 				callback.onOptimizationSuccess(finalRoute);
 			} catch (final IOException e) {
 				callback.onError("Network error: " + e.getMessage());
