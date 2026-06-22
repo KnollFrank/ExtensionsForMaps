@@ -9,12 +9,13 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-public class SimpleGmapsRouteParser {
+public class GoogleMapsRouteExtractor {
 
 	/**
 	 * Thrown when a stop (start, waypoint, or destination) is missing
 	 * latitude and longitude data in the provided URL.
 	 */
+	// FK-TODO: MissingCoordinateException soll eine echte Exception sein
 	public static class MissingCoordinateException extends RuntimeException {
 
 		public MissingCoordinateException(final String message) {
@@ -22,11 +23,13 @@ public class SimpleGmapsRouteParser {
 		}
 	}
 
-	public static class Waypoint {
+	public static class Stop {
 
 		public int stopNumber;
 		public String pathName;
+		// FK-TODO: make placeId Optional
 		public String placeId = null;
+		// FK-TODO: use Labyrinth:org.labyrinth.coordinate.Geodetic instead of lat/lng at all places in this app
 		public Double lat = null;
 		public Double lng = null;
 
@@ -39,35 +42,37 @@ public class SimpleGmapsRouteParser {
 		}
 	}
 
-	public static List<Waypoint> parseRoute(String urlStr) throws MissingCoordinateException {
-		List<Waypoint> waypoints = new ArrayList<>();
+	// FK-TODO: use URL instead of String
+	// FK-TODO: return "public record Route(List<Stop> stops) {}"
+	public static List<Stop> extractRouteFromDirectionsUrl(final String directionsUrl) throws MissingCoordinateException {
+		List<Stop> stops = new ArrayList<>();
 
-		if (urlStr == null || urlStr.trim().isEmpty()) {
-			return waypoints;
+		if (directionsUrl == null || directionsUrl.trim().isEmpty()) {
+			return stops;
 		}
 
-		if (!urlStr.contains("/dir/")) {
+		if (!directionsUrl.contains("/dir/")) {
 			throw new IllegalArgumentException(
 					"Invalid URL: This is not a valid Google Maps directions URL " +
 							"(the '/dir/' segment is missing)."
 			);
 		}
 
-		final int startIdx = urlStr.indexOf("/dir/") + 5;
-		int endIdx = urlStr.contains("/data=") ? urlStr.indexOf("/data=") : urlStr.length();
-		if (urlStr.contains("/@")) {
-			endIdx = Math.min(endIdx, urlStr.indexOf("/@"));
+		final int startIdx = directionsUrl.indexOf("/dir/") + 5;
+		int endIdx = directionsUrl.contains("/data=") ? directionsUrl.indexOf("/data=") : directionsUrl.length();
+		if (directionsUrl.contains("/@")) {
+			endIdx = Math.min(endIdx, directionsUrl.indexOf("/@"));
 		}
-		final String pathPart = urlStr.substring(startIdx, endIdx);
+		final String pathPart = directionsUrl.substring(startIdx, endIdx);
 		if (pathPart.isEmpty()) {
-			return waypoints;
+			return stops;
 		}
 		final String[] segments = pathPart.split("/");
 		int stopCounter = 1;
 
 		for (final String segment : segments) {
 			if (segment.isEmpty()) continue;
-			final Waypoint wp = new Waypoint();
+			final Stop wp = new Stop();
 			wp.stopNumber = stopCounter++;
 
 			// FK-TODO: extract method
@@ -83,11 +88,11 @@ public class SimpleGmapsRouteParser {
 				wp.lat = Double.parseDouble(coords[0]);
 				wp.lng = Double.parseDouble(coords[1]);
 			}
-			waypoints.add(wp);
+			stops.add(wp);
 		}
 
-		if (urlStr.contains("data=")) {
-			String dataStr = urlStr.split("data=")[1].split("&")[0];
+		if (directionsUrl.contains("data=")) {
+			String dataStr = directionsUrl.split("data=")[1].split("&")[0];
 			String[] tokens = dataStr.startsWith("!") ? dataStr.substring(1).split("!") : dataStr.split("!");
 
 			int waypointIdx = 0;
@@ -103,8 +108,8 @@ public class SimpleGmapsRouteParser {
 						int subTokens = Character.getNumericValue(subTokenCountChar);
 						int windowEnd = i + subTokens;
 
-						if (waypointIdx < waypoints.size()) {
-							Waypoint wp = waypoints.get(waypointIdx);
+						if (waypointIdx < stops.size()) {
+							Stop wp = stops.get(waypointIdx);
 
 							while (i < windowEnd && i < tokens.length) {
 								String subToken = tokens[i++];
@@ -125,7 +130,7 @@ public class SimpleGmapsRouteParser {
 			}
 		}
 
-		for (final Waypoint wp : waypoints) {
+		for (final Stop wp : stops) {
 			if (wp.lat == null || wp.lng == null) {
 				throw new MissingCoordinateException(
 						"Missing coordinates for Stop " + wp.stopNumber + " ('" + wp.pathName + "'). " +
@@ -134,7 +139,7 @@ public class SimpleGmapsRouteParser {
 			}
 		}
 
-		return waypoints;
+		return stops;
 	}
 
 	/**
