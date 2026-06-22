@@ -41,7 +41,6 @@ public class GoogleMapsRouteExtractor {
 	public record Route(List<Stop> stops) {
 	}
 
-	// FK-TODO: use URL instead of String
 	public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) throws MissingCoordinateException {
 		if (!isDirectionsUrl(directionsUrl)) {
 			throw new IllegalArgumentException("Invalid URL: This is not a valid Google Maps directions URL.");
