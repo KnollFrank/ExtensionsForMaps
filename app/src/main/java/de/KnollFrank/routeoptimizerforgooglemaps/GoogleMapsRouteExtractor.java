@@ -3,6 +3,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 import androidx.annotation.NonNull;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -41,26 +42,18 @@ public class GoogleMapsRouteExtractor {
 	}
 
 	// FK-TODO: use URL instead of String
-	public static Route extractRouteFromDirectionsUrl(final String directionsUrl) throws MissingCoordinateException {
+	public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) throws MissingCoordinateException {
+		if (!isDirectionsUrl(directionsUrl)) {
+			throw new IllegalArgumentException("Invalid URL: This is not a valid Google Maps directions URL.");
+		}
+
 		final List<Stop> stops = new ArrayList<>();
-
-		if (directionsUrl == null || directionsUrl.trim().isEmpty()) {
-			return new Route(stops);
+		final int startIdx = directionsUrl.getPath().indexOf("/dir/") + 5;
+		int endIdx = directionsUrl.getPath().contains("/data=") ? directionsUrl.getPath().indexOf("/data=") : directionsUrl.getPath().length();
+		if (directionsUrl.getPath().contains("/@")) {
+			endIdx = Math.min(endIdx, directionsUrl.getPath().indexOf("/@"));
 		}
-
-		if (!directionsUrl.contains("/dir/")) {
-			throw new IllegalArgumentException(
-					"Invalid URL: This is not a valid Google Maps directions URL " +
-							"(the '/dir/' segment is missing)."
-			);
-		}
-
-		final int startIdx = directionsUrl.indexOf("/dir/") + 5;
-		int endIdx = directionsUrl.contains("/data=") ? directionsUrl.indexOf("/data=") : directionsUrl.length();
-		if (directionsUrl.contains("/@")) {
-			endIdx = Math.min(endIdx, directionsUrl.indexOf("/@"));
-		}
-		final String pathPart = directionsUrl.substring(startIdx, endIdx);
+		final String pathPart = directionsUrl.getPath().substring(startIdx, endIdx);
 		if (pathPart.isEmpty()) {
 			return new Route(stops);
 		}
@@ -88,8 +81,8 @@ public class GoogleMapsRouteExtractor {
 			stops.add(wp);
 		}
 
-		if (directionsUrl.contains("data=")) {
-			String dataStr = directionsUrl.split("data=")[1].split("&")[0];
+		if (directionsUrl.toString().contains("data=")) {
+			String dataStr = directionsUrl.toString().split("data=")[1].split("&")[0];
 			String[] tokens = dataStr.startsWith("!") ? dataStr.substring(1).split("!") : dataStr.split("!");
 
 			int waypointIdx = 0;
@@ -137,6 +130,12 @@ public class GoogleMapsRouteExtractor {
 		}
 
 		return new Route(stops);
+	}
+
+	private static boolean isDirectionsUrl(final URL url) {
+		return "https".equals(url.getProtocol()) &&
+				"www.google.com".equals(url.getHost()) &&
+				url.getPath().startsWith("/maps/dir/");
 	}
 
 	/**
