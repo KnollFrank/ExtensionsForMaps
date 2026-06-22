@@ -11,12 +11,7 @@ import java.util.List;
 
 public class GoogleMapsRouteExtractor {
 
-	/**
-	 * Thrown when a stop (start, waypoint, or destination) is missing
-	 * latitude and longitude data in the provided URL.
-	 */
-	// FK-TODO: MissingCoordinateException soll eine echte Exception sein
-	public static class MissingCoordinateException extends RuntimeException {
+	public static class MissingCoordinateException extends Exception {
 
 		public MissingCoordinateException(final String message) {
 			super(message);

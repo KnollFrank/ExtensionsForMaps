@@ -10,7 +10,7 @@ import org.junit.Test;
 public class GoogleMapsRouteExtractorTest {
 
 	@Test
-	public void testExtractRouteFromDirectionsUrl_AllCoordinatesInData() {
+	public void testExtractRouteFromDirectionsUrl_AllCoordinatesInData() throws GoogleMapsRouteExtractor.MissingCoordinateException {
 		// Given
 		final String url = "https://www.google.com/maps/dir/Central-Apotheke/Hamburg/Unterhausen/data=!4m22!4m21!1m5!1m4!1s0x4799fc4b13515dd5:0x345201aaff119b3a!8m2!3d48.4765345!4d8.934900899999999!1m5!1m4!1s0x47b161837e1813b9:0x4263df27bd63aa0!8m2!3d53.548828199999996!4d9.987170299999999!1m5!1m4!1s0x4799f35ec85b80b1:0xe432d2a55bc3cd11!8m2!3d48.430628399999996!4d9.2546378!2m1!11b1!3e0/dir/Central-Apotheke/Hamburg/Unterhausen/data=!4m22!4m21!1m5!1m4!1s0x4799fc4b13515dd5:0x345201aaff119b3a!8m2!3d48.4765345!4d8.934900899999999!1m5!1m4!1s0x47b161837e1813b9:0x4263df27bd63aa0!8m2!3d53.548828199999996!4d9.987170299999999!1m5!1m4!1s0x4799f35ec85b80b1:0xe432d2a55bc3cd11!8m2!3d48.430628399999996!4d9.2546378!2m1!11b1!3e0";
 
@@ -32,7 +32,7 @@ public class GoogleMapsRouteExtractorTest {
 	}
 
 	@Test
-	public void testExtractRouteFromDirectionsUrl_AllCoordinatesInPath() {
+	public void testExtractRouteFromDirectionsUrl_AllCoordinatesInPath() throws GoogleMapsRouteExtractor.MissingCoordinateException {
 		// Given
 		final String url = "https://www.google.com/maps/dir/48.5015274,8.9932287/48.4765345,8.9349009/48.4752669,8.9284933/@48.4884161,8.9604793,13z/data=!4m4!4m3!2m1!2b1!3e0/dir/48.5015274,8.9932287/48.4765345,8.9349009/48.4752669,8.9284933/@48.4884161,8.9604793,13z/data=!4m4!4m3!2m1!2b1!3e0";
 
@@ -66,7 +66,7 @@ public class GoogleMapsRouteExtractorTest {
 
 	// FK-TODO: Test ändern in "Invalid URL"-Exception
 	@Test
-	public void testExtractRouteFromDirectionsUrl_EmptyDirectionsUrl_ShouldReturnEmptyList() {
+	public void testExtractRouteFromDirectionsUrl_EmptyDirectionsUrl_ShouldReturnEmptyList() throws GoogleMapsRouteExtractor.MissingCoordinateException {
 		// Given
 		final String url = "";
 
@@ -78,7 +78,7 @@ public class GoogleMapsRouteExtractorTest {
 	}
 
 	@Test
-	public void testExtractRouteFromDirectionsUrl_Directions_UrlWithTrailingQueryParams() {
+	public void testExtractRouteFromDirectionsUrl_Directions_UrlWithTrailingQueryParams() throws GoogleMapsRouteExtractor.MissingCoordinateException {
 		// Given
 		final String url = "https://www.google.com/maps/dir/Central-Apotheke/Hamburg/Unterhausen/data=!4m22!4m21!1m5!1m4!1s0x4799fc4b13515dd5:0x345201aaff119b3a!8m2!3d48.4765345!4d8.934900899999999!1m5!1m4!1s0x47b161837e1813b9:0x4263df27bd63aa0!8m2!3d53.548828199999996!4d9.987170299999999!1m5!1m4!1s0x4799f35ec85b80b1:0xe432d2a55bc3cd11!8m2!3d48.430628399999996!4d9.2546378!2m1!11b1!3e0?utm_source=mstt_0/dir/Central-Apotheke/Hamburg/Unterhausen/data=!4m22!4m21!1m5!1m4!1s0x4799fc4b13515dd5:0x345201aaff119b3a!8m2!3d48.4765345!4d8.934900899999999!1m5!1m4!1s0x47b161837e1813b9:0x4263df27bd63aa0!8m2!3d53.548828199999996!4d9.987170299999999!1m5!1m4!1s0x4799f35ec85b80b1:0xe432d2a55bc3cd11!8m2!3d48.430628399999996!4d9.2546378!2m1!11b1!3e0?utm_source=mstt_0";
 
