@@ -43,7 +43,7 @@ public class GoogleMapsRouteExtractor {
 
 	public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) throws MissingCoordinateException {
 		if (!isDirectionsUrl(directionsUrl)) {
-			throw new IllegalArgumentException("Invalid URL: This is not a valid Google Maps directions URL.");
+			throw new IllegalArgumentException(String.format("Invalid URL: %s is not a valid Google Maps directions URL.", directionsUrl));
 		}
 
 		final List<Stop> stops = new ArrayList<>();
