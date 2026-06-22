@@ -42,13 +42,15 @@ public class GoogleMapsRouteExtractor {
 		}
 	}
 
+	public record Route(List<Stop> stops) {
+	}
+
 	// FK-TODO: use URL instead of String
-	// FK-TODO: return "public record Route(List<Stop> stops) {}"
-	public static List<Stop> extractRouteFromDirectionsUrl(final String directionsUrl) throws MissingCoordinateException {
-		List<Stop> stops = new ArrayList<>();
+	public static Route extractRouteFromDirectionsUrl(final String directionsUrl) throws MissingCoordinateException {
+		final List<Stop> stops = new ArrayList<>();
 
 		if (directionsUrl == null || directionsUrl.trim().isEmpty()) {
-			return stops;
+			return new Route(stops);
 		}
 
 		if (!directionsUrl.contains("/dir/")) {
@@ -65,7 +67,7 @@ public class GoogleMapsRouteExtractor {
 		}
 		final String pathPart = directionsUrl.substring(startIdx, endIdx);
 		if (pathPart.isEmpty()) {
-			return stops;
+			return new Route(stops);
 		}
 		final String[] segments = pathPart.split("/");
 		int stopCounter = 1;
@@ -139,7 +141,7 @@ public class GoogleMapsRouteExtractor {
 			}
 		}
 
-		return stops;
+		return new Route(stops);
 	}
 
 	/**
