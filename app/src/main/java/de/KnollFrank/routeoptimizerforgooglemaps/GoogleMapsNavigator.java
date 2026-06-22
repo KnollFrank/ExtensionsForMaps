@@ -23,6 +23,7 @@ public class GoogleMapsNavigator {
 
 		// 2. Set the exact coordinates for the starting point
 		final RouteOptimizer.Stop origin = optimizedStops.get(0);
+		// FK-TODO: add origin_place_id
 		urlBuilder
 				.append("&origin=")
 				.append(origin.lat())
@@ -31,6 +32,7 @@ public class GoogleMapsNavigator {
 
 		// 3. Set the exact coordinates for the final destination
 		final RouteOptimizer.Stop destination = optimizedStops.get(optimizedStops.size() - 1);
+		// FK-TODO: add destination_place_id
 		urlBuilder
 				.append("&destination=")
 				.append(destination.lat())
@@ -39,6 +41,7 @@ public class GoogleMapsNavigator {
 
 		// 4. Handle intermediate waypoints if there are any stops in between
 		if (optimizedStops.size() > 2) {
+			// FK-TODO: add waypoint_place_ids
 			urlBuilder.append("&waypoints=");
 			for (int i = 1; i < optimizedStops.size() - 1; i++) {
 				final RouteOptimizer.Stop waypoint = optimizedStops.get(i);
