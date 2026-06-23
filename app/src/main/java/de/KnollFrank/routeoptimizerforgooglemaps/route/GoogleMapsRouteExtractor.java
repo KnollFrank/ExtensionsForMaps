@@ -34,7 +34,7 @@ public class GoogleMapsRouteExtractor {
 				final String token = nextToken();
 				if (ContainerReader.isContainer(token)) {
 					final List<String> containerTokens = ContainerReader.readTokensInContainer(token);
-					if (List.of(2, 5).contains(containerTokens.size()) && stopDataListIndex < stopDataList.size()) {
+					if (List.of(0, 2, 5).contains(containerTokens.size()) && stopDataListIndex < stopDataList.size()) {
 						final StopData stopData = stopDataList.get(stopDataListIndex++);
 						for (final String containerToken : containerTokens) {
 							parseTokenThenAssignToStopData(containerToken, stopData);
