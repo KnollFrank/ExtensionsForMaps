@@ -1,15 +1,15 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
+import com.google.common.collect.ImmutableList;
+
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
-import de.KnollFrank.routeoptimizerforgooglemaps.common.Optionals;
-import de.KnollFrank.routeoptimizerforgooglemaps.common.Strings;
-import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
-
 public class GoogleMapsRouteExtractor {
+
+	private static String[] tokens = new String[]{};
+	private static int tokenIndex = 0;
 
 	public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) {
 		if (!isDirectionsUrl(directionsUrl)) {
@@ -24,29 +24,20 @@ public class GoogleMapsRouteExtractor {
 		if (directionsUrl.toString().contains(dataPart)) {
 			final String dataStr = directionsUrl.toString().split(dataPart)[1].split("&")[0];
 			final String delimiter = "!";
-			final String[] tokens =
+			tokens =
 					dataStr.startsWith(delimiter) ?
 							dataStr.substring(delimiter.length()).split(delimiter) :
 							dataStr.split(delimiter);
-			int waypointIdx = 0;
-			int i = 0;
-			while (i < tokens.length) {
-				final String token = tokens[i++];
-				final String containerMarker = MarkerFactory.createMarker(1, Datatype.CONTAINER);
-				if (token.startsWith(containerMarker) && token.length() == 3) {
-					final char numTokenInContainerChar = token.charAt(containerMarker.length());
-					if (numTokenInContainerChar == '0' || numTokenInContainerChar == '2' || numTokenInContainerChar == '5') {
-						final int numTokenInContainer = Character.getNumericValue(numTokenInContainerChar);
-						final int windowEnd = i + numTokenInContainer;
-						if (waypointIdx < stopDataList.size()) {
-							final StopData stopData = stopDataList.get(waypointIdx);
-							while (i < windowEnd && i < tokens.length) {
-								final String subToken = tokens[i++];
-								assignParsedTokenToStopData(subToken, stopData);
-							}
-							waypointIdx++;
-						} else {
-							i = windowEnd;
+			int stopDataListIndex = 0;
+			reset();
+			while (hasTokens()) {
+				final String token = nextToken();
+				if (ContainerReader.isContainer(token)) {
+					final List<String> containerTokens = ContainerReader.readTokensInContainer(token);
+					if (List.of(2, 5).contains(containerTokens.size()) && stopDataListIndex < stopDataList.size()) {
+						final StopData stopData = stopDataList.get(stopDataListIndex++);
+						for (final String containerToken : containerTokens) {
+							parseTokenThenAssignToStopData(containerToken, stopData);
 						}
 					}
 				}
@@ -55,7 +46,44 @@ public class GoogleMapsRouteExtractor {
 		return new Route(StopDataConverter.asStops(stopDataList));
 	}
 
-	private static void assignParsedTokenToStopData(final String token, final StopData stopData) {
+	private static void reset() {
+		tokenIndex = 0;
+	}
+
+	private static boolean hasTokens() {
+		return tokenIndex < tokens.length;
+	}
+
+	private static String nextToken() {
+		return tokens[tokenIndex++];
+	}
+
+	private static class ContainerReader {
+
+		private static final String containerMarker = MarkerFactory.createMarker(1, Datatype.CONTAINER);
+
+		public static boolean isContainer(final String token) {
+			return token.startsWith(containerMarker);
+		}
+
+		public static List<String> readTokensInContainer(final String token) {
+			return getNextTokens(getNumTokensInContainer(token));
+		}
+
+		private static int getNumTokensInContainer(final String token) {
+			return Character.getNumericValue(token.charAt(containerMarker.length()));
+		}
+
+		private static List<String> getNextTokens(final int numTokens) {
+			final ImmutableList.Builder<String> nextTokensBuilder = ImmutableList.builder();
+			for (int i = 0; i < numTokens; i++) {
+				nextTokensBuilder.add(nextToken());
+			}
+			return nextTokensBuilder.build();
+		}
+	}
+
+	private static void parseTokenThenAssignToStopData(final String token, final StopData stopData) {
 		final Parser<String> placeIdParser = new PlaceIdParser();
 		final Parser<Double> latitudeParser = ParserFactory.createLatitudeParser();
 		final Parser<Double> longitudeParser = ParserFactory.createLongitudeParser();
@@ -80,58 +108,5 @@ public class GoogleMapsRouteExtractor {
 				.stream()
 				.filter(segment -> !segment.isEmpty())
 				.toList();
-	}
-
-	private static class SegmentsProvider {
-
-		public static List<String> getSegments(final URL directionsUrl) {
-			return Lists.toList(
-					SegmentsProvider
-							.getPathPart(directionsUrl.getPath())
-							.split("/"));
-		}
-
-		private static String getPathPart(final String path) {
-			return path.substring(getStartIndex(path), getEndIndex(path));
-		}
-
-		private static int getStartIndex(final String path) {
-			final String dirPathSegment = "/dir/";
-			return Strings.indexOf(path, dirPathSegment).orElseThrow() + dirPathSegment.length();
-		}
-
-		private static int getEndIndex(final String path) {
-			final int endIndex =
-					Strings
-							.indexOf(path, "/data=")
-							.orElseGet(path::length);
-			return Optionals
-					.asOptional(Strings.indexOf(path, "/@"))
-					.map(indexOfAddSegment -> Math.min(endIndex, indexOfAddSegment))
-					.orElse(endIndex);
-		}
-	}
-
-	private static class SegmentToStopDataFromConverter {
-
-		public static List<StopData> convert(final List<String> segments) {
-			return Lists
-					.asIndexedElements(segments)
-					.stream()
-					.map(indexedSegment -> convert(indexedSegment.element(), indexedSegment.index() + 1))
-					.toList();
-		}
-
-		private static StopData convert(final String segment, final int stopNumber) {
-			final StopData stopData = new StopData();
-			stopData.stopNumber = stopNumber;
-			stopData.pathName = URLs.decode(segment);
-			if (segment.matches("-?\\d+\\.\\d+,-?\\d+\\.\\d+")) {
-				final String[] coords = segment.split(",");
-				stopData.latitude = Optional.of(Double.parseDouble(coords[0]));
-				stopData.longitude = Optional.of(Double.parseDouble(coords[1]));
-			}
-			return stopData;
-		}
 	}
 }
