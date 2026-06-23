@@ -16,23 +16,13 @@ import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 
 public class GoogleMapsRouteExtractor {
 
+	public record Route(List<Stop> stops) {
+	}
+
 	public record Stop(int stopNumber,
 	                   String pathName,
 	                   Optional<String> placeId,
 	                   Geodetic geodetic) {
-	}
-
-	private static class StopData {
-
-		public int stopNumber;
-		public String pathName;
-		// FK-TODO: make placeId Optional
-		public Optional<String> placeId = Optional.empty();
-		public Optional<Double> lat = Optional.empty();
-		public Optional<Double> lng = Optional.empty();
-	}
-
-	public record Route(List<Stop> stops) {
 	}
 
 	public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) {
@@ -41,7 +31,8 @@ public class GoogleMapsRouteExtractor {
 		}
 
 		final List<StopData> stops = new ArrayList<>();
-		final int startIdx = directionsUrl.getPath().indexOf("/dir/") + 5;
+		final String dirPathSegment = "/dir/";
+		final int startIdx = directionsUrl.getPath().indexOf(dirPathSegment) + dirPathSegment.length();
 		int endIdx = directionsUrl.getPath().contains("/data=") ? directionsUrl.getPath().indexOf("/data=") : directionsUrl.getPath().length();
 		if (directionsUrl.getPath().contains("/@")) {
 			endIdx = Math.min(endIdx, directionsUrl.getPath().indexOf("/@"));
@@ -59,15 +50,7 @@ public class GoogleMapsRouteExtractor {
 			}
 			final StopData stopData = new StopData();
 			stopData.stopNumber = stopCounter++;
-
-			// FK-TODO: extract method
-			try {
-				stopData.pathName = URLDecoder.decode(segment, StandardCharsets.UTF_8.name());
-			} catch (final UnsupportedEncodingException e) {
-				// Fallback, falls UTF-8 absolut unerwartet nicht unterstützt wird
-				stopData.pathName = segment;
-			}
-
+			stopData.pathName = decode(segment);
 			if (segment.matches("-?\\d+\\.\\d+,-?\\d+\\.\\d+")) {
 				final String[] coords = segment.split(",");
 				stopData.lat = Optional.of(Double.parseDouble(coords[0]));
@@ -115,6 +98,15 @@ public class GoogleMapsRouteExtractor {
 			}
 		}
 		return new Route(asStops(stops));
+	}
+
+	private static class StopData {
+
+		public int stopNumber;
+		public String pathName;
+		public Optional<String> placeId = Optional.empty();
+		public Optional<Double> lat = Optional.empty();
+		public Optional<Double> lng = Optional.empty();
 	}
 
 	private static boolean isDirectionsUrl(final URL url) {
@@ -172,5 +164,13 @@ public class GoogleMapsRouteExtractor {
 				Geodetic.fromLatitudeLongitude(
 						new Angle(stopData.lat.orElseThrow(), DEGREES),
 						new Angle(stopData.lng.orElseThrow(), DEGREES)));
+	}
+
+	private static String decode(final String s) {
+		try {
+			return URLDecoder.decode(s, StandardCharsets.UTF_8.name());
+		} catch (final UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
