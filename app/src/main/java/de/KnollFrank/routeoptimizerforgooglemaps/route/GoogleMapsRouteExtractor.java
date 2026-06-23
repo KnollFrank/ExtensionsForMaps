@@ -17,18 +17,14 @@ public class GoogleMapsRouteExtractor {
 		if (!isDirectionsUrl(directionsUrl)) {
 			throw new IllegalArgumentException(String.format("Invalid URL: %s is not a valid Google Maps directions URL.", directionsUrl));
 		}
-
 		final List<StopData> stopDataList = new ArrayList<>();
-		final List<String> segments = SegmentsProvider.getSegments(directionsUrl);
+		final List<String> segments = getNonEmptySegments(directionsUrl);
 		if (segments.isEmpty()) {
 			return new Route(StopDataConverter.asStops(stopDataList));
 		}
 
 		int stopCounter = 1;
 		for (final String segment : segments) {
-			if (segment.isEmpty()) {
-				continue;
-			}
 			final StopData stopData = new StopData();
 			stopData.stopNumber = stopCounter++;
 			stopData.pathName = URLs.decode(segment);
@@ -119,6 +115,14 @@ public class GoogleMapsRouteExtractor {
 		} catch (final Exception e) {
 			return internalId;
 		}
+	}
+
+	private static List<String> getNonEmptySegments(final URL directionsUrl) {
+		return SegmentsProvider
+				.getSegments(directionsUrl)
+				.stream()
+				.filter(segment -> !segment.isEmpty())
+				.toList();
 	}
 
 	private static class SegmentsProvider {
