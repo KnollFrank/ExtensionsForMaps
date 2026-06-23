@@ -4,7 +4,7 @@ import java.util.Base64;
 
 class PlaceIdParser implements Parser<String> {
 
-	private static final String placeIdMarker = "1s";
+	private static final String placeIdMarker = MarkerFactory.createMarker(1, Datatype.STRING);
 
 	@Override
 	public boolean matches(final String token) {

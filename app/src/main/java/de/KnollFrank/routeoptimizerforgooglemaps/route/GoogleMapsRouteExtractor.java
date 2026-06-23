@@ -32,7 +32,7 @@ public class GoogleMapsRouteExtractor {
 			int i = 0;
 			while (i < tokens.length) {
 				final String token = tokens[i++];
-				final String containerMarker = MarkerFactory.createMarker(1, "m");
+				final String containerMarker = MarkerFactory.createMarker(1, Datatype.CONTAINER);
 				if (token.startsWith(containerMarker) && token.length() == 3) {
 					final char numTokenInContainerChar = token.charAt(containerMarker.length());
 					if (numTokenInContainerChar == '0' || numTokenInContainerChar == '2' || numTokenInContainerChar == '5') {

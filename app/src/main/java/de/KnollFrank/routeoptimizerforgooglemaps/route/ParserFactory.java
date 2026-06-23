@@ -3,11 +3,11 @@ package de.KnollFrank.routeoptimizerforgooglemaps.route;
 class ParserFactory {
 
 	public static Parser<Double> createLatitudeParser() {
-		return createDoubleParser(MarkerFactory.createMarker(3, "d"));
+		return createDoubleParser(MarkerFactory.createMarker(3, Datatype.DOUBLE));
 	}
 
 	public static Parser<Double> createLongitudeParser() {
-		return createDoubleParser(MarkerFactory.createMarker(4, "d"));
+		return createDoubleParser(MarkerFactory.createMarker(4, Datatype.DOUBLE));
 	}
 
 	private static Parser<Double> createDoubleParser(final String marker) {
