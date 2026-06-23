@@ -1,7 +1,6 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 import java.net.URL;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,21 +43,17 @@ public class GoogleMapsRouteExtractor {
 						final int windowEnd = i + subTokens;
 						if (waypointIdx < stopDataList.size()) {
 							final StopData stopData = stopDataList.get(waypointIdx);
+							final Parser<String> placeIdParser = new PlaceIdParser();
+							final Parser<Double> latitudeParser = Parsers.createLatitudeParser();
+							final Parser<Double> longitudeParser = Parsers.createLongitudeParser();
 							while (i < windowEnd && i < tokens.length) {
 								final String subToken = tokens[i++];
-								final String placeIdMarker = "1s";
-								if (subToken.startsWith(placeIdMarker)) {
-									stopData.placeId = Optional.of(convertHexToPlaceId(subToken.substring(placeIdMarker.length())));
-								} else {
-									final String latitudeMarker = "3d";
-									if (subToken.startsWith(latitudeMarker)) {
-										stopData.latitude = Optional.of(Double.parseDouble(subToken.substring(latitudeMarker.length())));
-									} else {
-										final String longitudeMarker = "4d";
-										if (subToken.startsWith(longitudeMarker)) {
-											stopData.longitude = Optional.of(Double.parseDouble(subToken.substring(longitudeMarker.length())));
-										}
-									}
+								if (placeIdParser.matches(subToken)) {
+									stopData.placeId = Optional.of(placeIdParser.parse(subToken));
+								} else if (latitudeParser.matches(subToken)) {
+									stopData.latitude = Optional.of(latitudeParser.parse(subToken));
+								} else if (longitudeParser.matches(subToken)) {
+									stopData.longitude = Optional.of(longitudeParser.parse(subToken));
 								}
 							}
 							waypointIdx++;
@@ -76,40 +71,6 @@ public class GoogleMapsRouteExtractor {
 		return "https".equals(url.getProtocol()) &&
 				"www.google.com".equals(url.getHost()) &&
 				url.getPath().startsWith("/maps/dir/");
-	}
-
-	/**
-	 * Converts an internal Google Maps Hex-ID into a standard Web-API Place ID ("ChIJ...").
-	 */
-	private static String convertHexToPlaceId(final String internalId) {
-		if (internalId == null || !internalId.contains(":")) {
-			return internalId;
-		}
-
-		try {
-			final String[] parts = internalId.split(":");
-			long cellId = Long.parseUnsignedLong(parts[0].replace("0x", ""), 16);
-			long featureId = Long.parseUnsignedLong(parts[1].replace("0x", ""), 16);
-
-			byte[] proto = new byte[20];
-			proto[0] = 0x0A;
-			proto[1] = 0x12;
-			proto[2] = 0x09;
-
-			for (int i = 0; i < 8; i++) {
-				proto[3 + i] = (byte) (cellId >> (8 * i));
-			}
-
-			proto[11] = 0x11;
-
-			for (int i = 0; i < 8; i++) {
-				proto[12 + i] = (byte) (featureId >> (8 * i));
-			}
-
-			return Base64.getUrlEncoder().withoutPadding().encodeToString(proto);
-		} catch (final Exception e) {
-			return internalId;
-		}
 	}
 
 	private static List<String> getNonEmptySegments(final URL directionsUrl) {
