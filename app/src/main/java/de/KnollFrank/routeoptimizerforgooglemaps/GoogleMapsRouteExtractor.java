@@ -11,6 +11,9 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
+import de.KnollFrank.routeoptimizerforgooglemaps.common.Optionals;
+import de.KnollFrank.routeoptimizerforgooglemaps.common.Strings;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 
@@ -30,20 +33,13 @@ public class GoogleMapsRouteExtractor {
 			throw new IllegalArgumentException(String.format("Invalid URL: %s is not a valid Google Maps directions URL.", directionsUrl));
 		}
 
-		final List<StopData> stops = new ArrayList<>();
-		final String dirPathSegment = "/dir/";
-		final int startIdx = directionsUrl.getPath().indexOf(dirPathSegment) + dirPathSegment.length();
-		int endIdx = directionsUrl.getPath().contains("/data=") ? directionsUrl.getPath().indexOf("/data=") : directionsUrl.getPath().length();
-		if (directionsUrl.getPath().contains("/@")) {
-			endIdx = Math.min(endIdx, directionsUrl.getPath().indexOf("/@"));
+		final List<StopData> stopDataList = new ArrayList<>();
+		final List<String> segments = SegmentsProvider.getSegments(directionsUrl);
+		if (segments.isEmpty()) {
+			return new Route(asStops(stopDataList));
 		}
-		final String pathPart = directionsUrl.getPath().substring(startIdx, endIdx);
-		if (pathPart.isEmpty()) {
-			return new Route(asStops(stops));
-		}
-		final String[] segments = pathPart.split("/");
-		int stopCounter = 1;
 
+		int stopCounter = 1;
 		for (final String segment : segments) {
 			if (segment.isEmpty()) {
 				continue;
@@ -56,7 +52,7 @@ public class GoogleMapsRouteExtractor {
 				stopData.lat = Optional.of(Double.parseDouble(coords[0]));
 				stopData.lng = Optional.of(Double.parseDouble(coords[1]));
 			}
-			stops.add(stopData);
+			stopDataList.add(stopData);
 		}
 
 		if (directionsUrl.toString().contains("data=")) {
@@ -76,8 +72,8 @@ public class GoogleMapsRouteExtractor {
 						int subTokens = Character.getNumericValue(subTokenCountChar);
 						int windowEnd = i + subTokens;
 
-						if (waypointIdx < stops.size()) {
-							final StopData stopData = stops.get(waypointIdx);
+						if (waypointIdx < stopDataList.size()) {
+							final StopData stopData = stopDataList.get(waypointIdx);
 
 							while (i < windowEnd && i < tokens.length) {
 								String subToken = tokens[i++];
@@ -97,7 +93,7 @@ public class GoogleMapsRouteExtractor {
 				}
 			}
 		}
-		return new Route(asStops(stops));
+		return new Route(asStops(stopDataList));
 	}
 
 	private static class StopData {
@@ -171,6 +167,36 @@ public class GoogleMapsRouteExtractor {
 			return URLDecoder.decode(s, StandardCharsets.UTF_8.name());
 		} catch (final UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	private static class SegmentsProvider {
+
+		public static List<String> getSegments(final URL directionsUrl) {
+			return Lists.toList(
+					SegmentsProvider
+							.getPathPart(directionsUrl.getPath())
+							.split("/"));
+		}
+
+		private static String getPathPart(final String path) {
+			return path.substring(getStartIndex(path), getEndIndex(path));
+		}
+
+		private static int getStartIndex(final String path) {
+			final String dirPathSegment = "/dir/";
+			return Strings.indexOf(path, dirPathSegment).orElseThrow() + dirPathSegment.length();
+		}
+
+		private static int getEndIndex(final String path) {
+			final int endIndex =
+					Strings
+							.indexOf(path, "/data=")
+							.orElseGet(path::length);
+			return Optionals
+					.asOptional(Strings.indexOf(path, "/@"))
+					.map(indexOfAddSegment -> Math.min(endIndex, indexOfAddSegment))
+					.orElse(endIndex);
 		}
 	}
 }
