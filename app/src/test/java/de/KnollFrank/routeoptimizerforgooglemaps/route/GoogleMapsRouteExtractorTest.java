@@ -3,14 +3,12 @@ package de.KnollFrank.routeoptimizerforgooglemaps.route;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-
 import static de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit.DEGREES;
 
 import org.junit.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.NoSuchElementException;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
@@ -77,7 +75,7 @@ public class GoogleMapsRouteExtractorTest {
 
 		// When & Then
 		assertThrows(
-				NoSuchElementException.class,
+				IllegalArgumentException.class,
 				() -> GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(url));
 	}
 

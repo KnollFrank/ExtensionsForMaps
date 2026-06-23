@@ -1,15 +1,11 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
-import com.google.common.collect.ImmutableList;
-
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 public class GoogleMapsRouteExtractor {
-
-	private static String[] tokens = new String[]{};
-	private static int tokenIndex = 0;
 
 	public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) {
 		if (!isDirectionsUrl(directionsUrl)) {
@@ -20,20 +16,14 @@ public class GoogleMapsRouteExtractor {
 			return new Route(List.of());
 		}
 		final List<StopData> stopDataList = SegmentToStopDataFromConverter.convert(segments);
-		final String dataPart = "data=";
-		if (directionsUrl.toString().contains(dataPart)) {
-			final String dataStr = directionsUrl.toString().split(dataPart)[1].split("&")[0];
-			final String delimiter = "!";
-			tokens =
-					dataStr.startsWith(delimiter) ?
-							dataStr.substring(delimiter.length()).split(delimiter) :
-							dataStr.split(delimiter);
+		final String dataPartMarker = "data=";
+		if (directionsUrl.toString().contains(dataPartMarker)) {
+			final TokenIterator tokenIterator = createTokenIterator(directionsUrl, dataPartMarker);
 			int stopDataListIndex = 0;
-			reset();
-			while (hasTokens()) {
-				final String token = nextToken();
+			while (tokenIterator.hasNext()) {
+				final String token = tokenIterator.next();
 				if (ContainerReader.isContainer(token)) {
-					final List<String> containerTokens = ContainerReader.readTokensInContainer(token);
+					final List<String> containerTokens = ContainerReader.readTokensInContainer(token, tokenIterator);
 					if (List.of(0, 2, 5).contains(containerTokens.size()) && stopDataListIndex < stopDataList.size()) {
 						final StopData stopData = stopDataList.get(stopDataListIndex++);
 						for (final String containerToken : containerTokens) {
@@ -46,41 +36,33 @@ public class GoogleMapsRouteExtractor {
 		return new Route(StopDataConverter.asStops(stopDataList));
 	}
 
-	private static void reset() {
-		tokenIndex = 0;
+	private static TokenIterator createTokenIterator(final URL directionsUrl, final String dataPartMarker) {
+		return new TokenIterator(
+				getTokens(
+						getPartFromUrlAfterMarker(
+								directionsUrl,
+								dataPartMarker)));
 	}
 
-	private static boolean hasTokens() {
-		return tokenIndex < tokens.length;
+	private static String getPartFromUrlAfterMarker(final URL url, final String marker) {
+		return url
+				.toString()
+				.split(marker)[1]
+				.split("&")[0];
 	}
 
-	private static String nextToken() {
-		return tokens[tokenIndex++];
+	private static List<String> getTokens(final String dataPart) {
+		final String delimiter = "!";
+		return Arrays.asList(
+				GoogleMapsRouteExtractor
+						.withoutDelimiterAtStart(dataPart, delimiter)
+						.split(delimiter));
 	}
 
-	private static class ContainerReader {
-
-		private static final String containerMarker = MarkerFactory.createMarker(1, Datatype.CONTAINER);
-
-		public static boolean isContainer(final String token) {
-			return token.startsWith(containerMarker);
-		}
-
-		public static List<String> readTokensInContainer(final String token) {
-			return getNextTokens(getNumTokensInContainer(token));
-		}
-
-		private static int getNumTokensInContainer(final String token) {
-			return Character.getNumericValue(token.charAt(containerMarker.length()));
-		}
-
-		private static List<String> getNextTokens(final int numTokens) {
-			final ImmutableList.Builder<String> nextTokensBuilder = ImmutableList.builder();
-			for (int i = 0; i < numTokens; i++) {
-				nextTokensBuilder.add(nextToken());
-			}
-			return nextTokensBuilder.build();
-		}
+	private static String withoutDelimiterAtStart(final String str, final String delimiter) {
+		return str.startsWith(delimiter) ?
+				str.substring(delimiter.length()) :
+				str;
 	}
 
 	private static void parseTokenThenAssignToStopData(final String token, final StopData stopData) {
@@ -97,8 +79,8 @@ public class GoogleMapsRouteExtractor {
 	}
 
 	private static boolean isDirectionsUrl(final URL url) {
-		return "https".equals(url.getProtocol()) &&
-				"www.google.com".equals(url.getHost()) &&
+		return List.of("http", "https").contains(url.getProtocol()) &&
+				url.getHost().contains("google") &&
 				url.getPath().startsWith("/maps/dir/");
 	}
 

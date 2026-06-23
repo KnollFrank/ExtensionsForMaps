@@ -3,6 +3,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps.route;
 import static de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit.DEGREES;
 
 import java.util.List;
+import java.util.Locale;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
@@ -22,7 +23,22 @@ class StopDataConverter {
 				stopData.pathName,
 				stopData.placeId,
 				Geodetic.fromLatitudeLongitude(
-						new Angle(stopData.latitude.orElseThrow(), DEGREES),
-						new Angle(stopData.longitude.orElseThrow(), DEGREES)));
+						new Angle(
+								stopData.latitude.orElseThrow(() -> createMissingCoordinateException("latitude", stopData)),
+								DEGREES),
+						new Angle(
+								stopData.longitude.orElseThrow(() -> createMissingCoordinateException("longitude", stopData)),
+								DEGREES)));
+	}
+
+	private static IllegalArgumentException createMissingCoordinateException(final String missingValue, final StopData stopData) {
+		return new IllegalArgumentException(
+				String.format(
+						Locale.ROOT,
+						"Missing %s for stop %d ('%s').",
+						missingValue,
+						stopData.stopNumber,
+						stopData.pathName)
+		);
 	}
 }
