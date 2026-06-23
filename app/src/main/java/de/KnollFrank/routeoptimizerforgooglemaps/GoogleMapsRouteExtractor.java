@@ -1,6 +1,6 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
-import androidx.annotation.NonNull;
+import static de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit.DEGREES;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -9,44 +9,38 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
+
+import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
+import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 
 public class GoogleMapsRouteExtractor {
 
-	public static class MissingCoordinateException extends Exception {
-
-		public MissingCoordinateException(final String message) {
-			super(message);
-		}
+	public record Stop(int stopNumber,
+	                   String pathName,
+	                   Optional<String> placeId,
+	                   Geodetic geodetic) {
 	}
 
-	public static class Stop {
+	private static class StopData {
 
 		public int stopNumber;
 		public String pathName;
 		// FK-TODO: make placeId Optional
-		public String placeId = null;
-		// FK-TODO: use Labyrinth:org.labyrinth.coordinate.Geodetic instead of lat/lng at all places in this app
-		public Double lat = null;
-		public Double lng = null;
-
-		@NonNull
-		@Override
-		public String toString() {
-			return String.format(
-					"Stop %d [%s] -> PlaceID: %s, Lat: %s, Lng: %s",
-					stopNumber, pathName, placeId, lat, lng);
-		}
+		public Optional<String> placeId = Optional.empty();
+		public Optional<Double> lat = Optional.empty();
+		public Optional<Double> lng = Optional.empty();
 	}
 
 	public record Route(List<Stop> stops) {
 	}
 
-	public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) throws MissingCoordinateException {
+	public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) {
 		if (!isDirectionsUrl(directionsUrl)) {
 			throw new IllegalArgumentException(String.format("Invalid URL: %s is not a valid Google Maps directions URL.", directionsUrl));
 		}
 
-		final List<Stop> stops = new ArrayList<>();
+		final List<StopData> stops = new ArrayList<>();
 		final int startIdx = directionsUrl.getPath().indexOf("/dir/") + 5;
 		int endIdx = directionsUrl.getPath().contains("/data=") ? directionsUrl.getPath().indexOf("/data=") : directionsUrl.getPath().length();
 		if (directionsUrl.getPath().contains("/@")) {
@@ -54,30 +48,32 @@ public class GoogleMapsRouteExtractor {
 		}
 		final String pathPart = directionsUrl.getPath().substring(startIdx, endIdx);
 		if (pathPart.isEmpty()) {
-			return new Route(stops);
+			return new Route(asStops(stops));
 		}
 		final String[] segments = pathPart.split("/");
 		int stopCounter = 1;
 
 		for (final String segment : segments) {
-			if (segment.isEmpty()) continue;
-			final Stop wp = new Stop();
-			wp.stopNumber = stopCounter++;
+			if (segment.isEmpty()) {
+				continue;
+			}
+			final StopData stopData = new StopData();
+			stopData.stopNumber = stopCounter++;
 
 			// FK-TODO: extract method
 			try {
-				wp.pathName = URLDecoder.decode(segment, StandardCharsets.UTF_8.name());
+				stopData.pathName = URLDecoder.decode(segment, StandardCharsets.UTF_8.name());
 			} catch (final UnsupportedEncodingException e) {
 				// Fallback, falls UTF-8 absolut unerwartet nicht unterstützt wird
-				wp.pathName = segment;
+				stopData.pathName = segment;
 			}
 
 			if (segment.matches("-?\\d+\\.\\d+,-?\\d+\\.\\d+")) {
 				final String[] coords = segment.split(",");
-				wp.lat = Double.parseDouble(coords[0]);
-				wp.lng = Double.parseDouble(coords[1]);
+				stopData.lat = Optional.of(Double.parseDouble(coords[0]));
+				stopData.lng = Optional.of(Double.parseDouble(coords[1]));
 			}
-			stops.add(wp);
+			stops.add(stopData);
 		}
 
 		if (directionsUrl.toString().contains("data=")) {
@@ -98,16 +94,16 @@ public class GoogleMapsRouteExtractor {
 						int windowEnd = i + subTokens;
 
 						if (waypointIdx < stops.size()) {
-							Stop wp = stops.get(waypointIdx);
+							final StopData stopData = stops.get(waypointIdx);
 
 							while (i < windowEnd && i < tokens.length) {
 								String subToken = tokens[i++];
 								if (subToken.startsWith("1s")) {
-									wp.placeId = convertHexToPlaceId(subToken.substring(2));
+									stopData.placeId = Optional.of(convertHexToPlaceId(subToken.substring(2)));
 								} else if (subToken.startsWith("3d")) {
-									wp.lat = Double.parseDouble(subToken.substring(2));
+									stopData.lat = Optional.of(Double.parseDouble(subToken.substring(2)));
 								} else if (subToken.startsWith("4d")) {
-									wp.lng = Double.parseDouble(subToken.substring(2));
+									stopData.lng = Optional.of(Double.parseDouble(subToken.substring(2)));
 								}
 							}
 							waypointIdx++;
@@ -118,17 +114,7 @@ public class GoogleMapsRouteExtractor {
 				}
 			}
 		}
-
-		for (final Stop wp : stops) {
-			if (wp.lat == null || wp.lng == null) {
-				throw new MissingCoordinateException(
-						"Missing coordinates for Stop " + wp.stopNumber + " ('" + wp.pathName + "'). " +
-								"A GPS fallback is strictly required for this type of Google Maps URL."
-				);
-			}
-		}
-
-		return new Route(stops);
+		return new Route(asStops(stops));
 	}
 
 	private static boolean isDirectionsUrl(final URL url) {
@@ -169,5 +155,22 @@ public class GoogleMapsRouteExtractor {
 		} catch (final Exception e) {
 			return internalId;
 		}
+	}
+
+	private static List<Stop> asStops(final List<StopData> stopDataList) {
+		return stopDataList
+				.stream()
+				.map(GoogleMapsRouteExtractor::asStop)
+				.toList();
+	}
+
+	private static Stop asStop(final StopData stopData) {
+		return new Stop(
+				stopData.stopNumber,
+				stopData.pathName,
+				stopData.placeId,
+				Geodetic.fromLatitudeLongitude(
+						new Angle(stopData.lat.orElseThrow(), DEGREES),
+						new Angle(stopData.lng.orElseThrow(), DEGREES)));
 	}
 }
