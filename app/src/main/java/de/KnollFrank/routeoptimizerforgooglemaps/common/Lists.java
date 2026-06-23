@@ -12,10 +12,10 @@ public class Lists {
 	public record IndexedElement<T>(int index, T element) {
 	}
 
-	public static <T> List<IndexedElement<T>> asIndexedElements(final List<T> ts) {
+	public static <T> List<IndexedElement<T>> asIndexedElements(final List<T> elements) {
 		return IntStream
-				.range(0, ts.size())
-				.mapToObj(index -> new IndexedElement<>(index, ts.get(index)))
+				.range(0, elements.size())
+				.mapToObj(index -> new IndexedElement<>(index, elements.get(index)))
 				.toList();
 	}
 
