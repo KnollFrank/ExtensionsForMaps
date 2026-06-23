@@ -1,7 +1,5 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
-import static de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit.DEGREES;
-
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -12,8 +10,6 @@ import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Optionals;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Strings;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
-import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
-import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 
 public class GoogleMapsRouteExtractor {
 
@@ -25,7 +21,7 @@ public class GoogleMapsRouteExtractor {
 		final List<StopData> stopDataList = new ArrayList<>();
 		final List<String> segments = SegmentsProvider.getSegments(directionsUrl);
 		if (segments.isEmpty()) {
-			return new Route(asStops(stopDataList));
+			return new Route(StopDataConverter.asStops(stopDataList));
 		}
 
 		int stopCounter = 1;
@@ -82,16 +78,7 @@ public class GoogleMapsRouteExtractor {
 				}
 			}
 		}
-		return new Route(asStops(stopDataList));
-	}
-
-	private static class StopData {
-
-		public int stopNumber;
-		public String pathName;
-		public Optional<String> placeId = Optional.empty();
-		public Optional<Double> lat = Optional.empty();
-		public Optional<Double> lng = Optional.empty();
+		return new Route(StopDataConverter.asStops(stopDataList));
 	}
 
 	private static boolean isDirectionsUrl(final URL url) {
@@ -132,23 +119,6 @@ public class GoogleMapsRouteExtractor {
 		} catch (final Exception e) {
 			return internalId;
 		}
-	}
-
-	private static List<Stop> asStops(final List<StopData> stopDataList) {
-		return stopDataList
-				.stream()
-				.map(GoogleMapsRouteExtractor::asStop)
-				.toList();
-	}
-
-	private static Stop asStop(final StopData stopData) {
-		return new Stop(
-				stopData.stopNumber,
-				stopData.pathName,
-				stopData.placeId,
-				Geodetic.fromLatitudeLongitude(
-						new Angle(stopData.lat.orElseThrow(), DEGREES),
-						new Angle(stopData.lng.orElseThrow(), DEGREES)));
 	}
 
 	private static class SegmentsProvider {
