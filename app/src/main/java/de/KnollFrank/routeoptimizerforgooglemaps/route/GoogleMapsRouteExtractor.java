@@ -2,10 +2,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 import static de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit.DEGREES;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -14,19 +11,11 @@ import java.util.Optional;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Optionals;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Strings;
+import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 
 public class GoogleMapsRouteExtractor {
-
-	public record Route(List<Stop> stops) {
-	}
-
-	public record Stop(int stopNumber,
-	                   String pathName,
-	                   Optional<String> placeId,
-	                   Geodetic geodetic) {
-	}
 
 	public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) {
 		if (!isDirectionsUrl(directionsUrl)) {
@@ -46,7 +35,7 @@ public class GoogleMapsRouteExtractor {
 			}
 			final StopData stopData = new StopData();
 			stopData.stopNumber = stopCounter++;
-			stopData.pathName = decode(segment);
+			stopData.pathName = URLs.decode(segment);
 			if (segment.matches("-?\\d+\\.\\d+,-?\\d+\\.\\d+")) {
 				final String[] coords = segment.split(",");
 				stopData.lat = Optional.of(Double.parseDouble(coords[0]));
@@ -160,14 +149,6 @@ public class GoogleMapsRouteExtractor {
 				Geodetic.fromLatitudeLongitude(
 						new Angle(stopData.lat.orElseThrow(), DEGREES),
 						new Angle(stopData.lng.orElseThrow(), DEGREES)));
-	}
-
-	private static String decode(final String s) {
-		try {
-			return URLDecoder.decode(s, StandardCharsets.UTF_8.name());
-		} catch (final UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	private static class SegmentsProvider {
