@@ -32,12 +32,12 @@ public class GoogleMapsRouteExtractor {
 			int i = 0;
 			while (i < tokens.length) {
 				final String token = tokens[i++];
-				final String messageMarker = "1m";
-				if (token.startsWith(messageMarker) && token.length() == 3) {
-					final char subTokenCountChar = token.charAt(messageMarker.length());
-					if (subTokenCountChar == '0' || subTokenCountChar == '2' || subTokenCountChar == '5') {
-						final int subTokenCount = Character.getNumericValue(subTokenCountChar);
-						final int windowEnd = i + subTokenCount;
+				final String containerMarker = MarkerFactory.createMarker(1, "m");
+				if (token.startsWith(containerMarker) && token.length() == 3) {
+					final char numTokenInContainerChar = token.charAt(containerMarker.length());
+					if (numTokenInContainerChar == '0' || numTokenInContainerChar == '2' || numTokenInContainerChar == '5') {
+						final int numTokenInContainer = Character.getNumericValue(numTokenInContainerChar);
+						final int windowEnd = i + numTokenInContainer;
 						if (waypointIdx < stopDataList.size()) {
 							final StopData stopData = stopDataList.get(waypointIdx);
 							while (i < windowEnd && i < tokens.length) {
