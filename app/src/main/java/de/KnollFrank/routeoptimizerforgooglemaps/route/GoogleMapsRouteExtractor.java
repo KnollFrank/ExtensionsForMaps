@@ -28,33 +28,21 @@ public class GoogleMapsRouteExtractor {
 					dataStr.startsWith(delimiter) ?
 							dataStr.substring(delimiter.length()).split(delimiter) :
 							dataStr.split(delimiter);
-
 			int waypointIdx = 0;
 			int i = 0;
-
 			while (i < tokens.length) {
 				final String token = tokens[i++];
-
 				final String messageMarker = "1m";
 				if (token.startsWith(messageMarker) && token.length() == 3) {
 					final char subTokenCountChar = token.charAt(messageMarker.length());
 					if (subTokenCountChar == '0' || subTokenCountChar == '2' || subTokenCountChar == '5') {
-						final int subTokens = Character.getNumericValue(subTokenCountChar);
-						final int windowEnd = i + subTokens;
+						final int subTokenCount = Character.getNumericValue(subTokenCountChar);
+						final int windowEnd = i + subTokenCount;
 						if (waypointIdx < stopDataList.size()) {
 							final StopData stopData = stopDataList.get(waypointIdx);
-							final Parser<String> placeIdParser = new PlaceIdParser();
-							final Parser<Double> latitudeParser = Parsers.createLatitudeParser();
-							final Parser<Double> longitudeParser = Parsers.createLongitudeParser();
 							while (i < windowEnd && i < tokens.length) {
 								final String subToken = tokens[i++];
-								if (placeIdParser.matches(subToken)) {
-									stopData.placeId = Optional.of(placeIdParser.parse(subToken));
-								} else if (latitudeParser.matches(subToken)) {
-									stopData.latitude = Optional.of(latitudeParser.parse(subToken));
-								} else if (longitudeParser.matches(subToken)) {
-									stopData.longitude = Optional.of(longitudeParser.parse(subToken));
-								}
+								assignParsedTokenToStopData(subToken, stopData);
 							}
 							waypointIdx++;
 						} else {
@@ -65,6 +53,19 @@ public class GoogleMapsRouteExtractor {
 			}
 		}
 		return new Route(StopDataConverter.asStops(stopDataList));
+	}
+
+	private static void assignParsedTokenToStopData(final String token, final StopData stopData) {
+		final Parser<String> placeIdParser = new PlaceIdParser();
+		final Parser<Double> latitudeParser = Parsers.createLatitudeParser();
+		final Parser<Double> longitudeParser = Parsers.createLongitudeParser();
+		if (placeIdParser.matches(token)) {
+			stopData.placeId = Optional.of(placeIdParser.parse(token));
+		} else if (latitudeParser.matches(token)) {
+			stopData.latitude = Optional.of(latitudeParser.parse(token));
+		} else if (longitudeParser.matches(token)) {
+			stopData.longitude = Optional.of(longitudeParser.parse(token));
+		}
 	}
 
 	private static boolean isDirectionsUrl(final URL url) {
