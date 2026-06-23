@@ -1,7 +1,6 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -21,24 +20,12 @@ public class GoogleMapsRouteExtractor {
 		if (segments.isEmpty()) {
 			return new Route(List.of());
 		}
-
-		final List<StopData> stopDataList = new ArrayList<>();
-		int stopCounter = 1;
-		for (final String segment : segments) {
-			final StopData stopData = new StopData();
-			stopData.stopNumber = stopCounter++;
-			stopData.pathName = URLs.decode(segment);
-			if (segment.matches("-?\\d+\\.\\d+,-?\\d+\\.\\d+")) {
-				final String[] coords = segment.split(",");
-				stopData.latitude = Optional.of(Double.parseDouble(coords[0]));
-				stopData.longitude = Optional.of(Double.parseDouble(coords[1]));
-			}
-			stopDataList.add(stopData);
-		}
-
-		if (directionsUrl.toString().contains("data=")) {
-			String dataStr = directionsUrl.toString().split("data=")[1].split("&")[0];
-			String[] tokens = dataStr.startsWith("!") ? dataStr.substring(1).split("!") : dataStr.split("!");
+		final List<StopData> stopDataList = SegmentToStopDataFromConverter.convert(segments);
+		final String dataPart = "data=";
+		if (directionsUrl.toString().contains(dataPart)) {
+			final String dataStr = directionsUrl.toString().split(dataPart)[1].split("&")[0];
+			final String delimiter = "!";
+			final String[] tokens = dataStr.startsWith(delimiter) ? dataStr.substring(delimiter.length()).split(delimiter) : dataStr.split(delimiter);
 
 			int waypointIdx = 0;
 			int i = 0;
@@ -152,6 +139,29 @@ public class GoogleMapsRouteExtractor {
 					.asOptional(Strings.indexOf(path, "/@"))
 					.map(indexOfAddSegment -> Math.min(endIndex, indexOfAddSegment))
 					.orElse(endIndex);
+		}
+	}
+
+	private static class SegmentToStopDataFromConverter {
+
+		public static List<StopData> convert(final List<String> segments) {
+			return Lists
+					.asIndexedElements(segments)
+					.stream()
+					.map(indexedSegment -> convert(indexedSegment.element(), indexedSegment.index() + 1))
+					.toList();
+		}
+
+		private static StopData convert(final String segment, final int stopNumber) {
+			final StopData stopData = new StopData();
+			stopData.stopNumber = stopNumber;
+			stopData.pathName = URLs.decode(segment);
+			if (segment.matches("-?\\d+\\.\\d+,-?\\d+\\.\\d+")) {
+				final String[] coords = segment.split(",");
+				stopData.latitude = Optional.of(Double.parseDouble(coords[0]));
+				stopData.longitude = Optional.of(Double.parseDouble(coords[1]));
+			}
+			return stopData;
 		}
 	}
 }
