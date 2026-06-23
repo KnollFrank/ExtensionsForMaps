@@ -1,4 +1,4 @@
-package de.KnollFrank.routeoptimizerforgooglemaps;
+package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 import static de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit.DEGREES;
 
