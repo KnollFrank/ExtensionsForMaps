@@ -36,6 +36,20 @@ public class GoogleMapsRouteExtractor {
 		return new Route(StopDataConverter.asStops(stopDataList));
 	}
 
+	private static boolean isDirectionsUrl(final URL url) {
+		return List.of("http", "https").contains(url.getProtocol()) &&
+				url.getHost().contains("google") &&
+				url.getPath().startsWith("/maps/dir/");
+	}
+
+	private static List<String> getNonEmptySegments(final URL directionsUrl) {
+		return SegmentsProvider
+				.getSegments(directionsUrl)
+				.stream()
+				.filter(segment -> !segment.isEmpty())
+				.toList();
+	}
+
 	private static TokenIterator createTokenIterator(final URL directionsUrl, final String dataPartMarker) {
 		return new TokenIterator(
 				getTokens(
@@ -76,19 +90,5 @@ public class GoogleMapsRouteExtractor {
 		} else if (longitudeParser.matches(token)) {
 			stopData.longitude = Optional.of(longitudeParser.parse(token));
 		}
-	}
-
-	private static boolean isDirectionsUrl(final URL url) {
-		return List.of("http", "https").contains(url.getProtocol()) &&
-				url.getHost().contains("google") &&
-				url.getPath().startsWith("/maps/dir/");
-	}
-
-	private static List<String> getNonEmptySegments(final URL directionsUrl) {
-		return SegmentsProvider
-				.getSegments(directionsUrl)
-				.stream()
-				.filter(segment -> !segment.isEmpty())
-				.toList();
 	}
 }
