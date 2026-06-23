@@ -30,8 +30,8 @@ public class GoogleMapsRouteExtractor {
 			stopData.pathName = URLs.decode(segment);
 			if (segment.matches("-?\\d+\\.\\d+,-?\\d+\\.\\d+")) {
 				final String[] coords = segment.split(",");
-				stopData.lat = Optional.of(Double.parseDouble(coords[0]));
-				stopData.lng = Optional.of(Double.parseDouble(coords[1]));
+				stopData.latitude = Optional.of(Double.parseDouble(coords[0]));
+				stopData.longitude = Optional.of(Double.parseDouble(coords[1]));
 			}
 			stopDataList.add(stopData);
 		}
@@ -61,9 +61,9 @@ public class GoogleMapsRouteExtractor {
 								if (subToken.startsWith("1s")) {
 									stopData.placeId = Optional.of(convertHexToPlaceId(subToken.substring(2)));
 								} else if (subToken.startsWith("3d")) {
-									stopData.lat = Optional.of(Double.parseDouble(subToken.substring(2)));
+									stopData.latitude = Optional.of(Double.parseDouble(subToken.substring(2)));
 								} else if (subToken.startsWith("4d")) {
-									stopData.lng = Optional.of(Double.parseDouble(subToken.substring(2)));
+									stopData.longitude = Optional.of(Double.parseDouble(subToken.substring(2)));
 								}
 							}
 							waypointIdx++;

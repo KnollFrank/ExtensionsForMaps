@@ -22,7 +22,7 @@ class StopDataConverter {
 				stopData.pathName,
 				stopData.placeId,
 				Geodetic.fromLatitudeLongitude(
-						new Angle(stopData.lat.orElseThrow(), DEGREES),
-						new Angle(stopData.lng.orElseThrow(), DEGREES)));
+						new Angle(stopData.latitude.orElseThrow(), DEGREES),
+						new Angle(stopData.longitude.orElseThrow(), DEGREES)));
 	}
 }
