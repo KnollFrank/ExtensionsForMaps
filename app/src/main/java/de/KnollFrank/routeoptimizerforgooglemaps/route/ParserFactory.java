@@ -1,6 +1,6 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
-class Parsers {
+class ParserFactory {
 
 	public static Parser<Double> createLatitudeParser() {
 		return createDoubleParser("3d");

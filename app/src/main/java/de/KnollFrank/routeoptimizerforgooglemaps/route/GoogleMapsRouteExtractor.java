@@ -57,8 +57,8 @@ public class GoogleMapsRouteExtractor {
 
 	private static void assignParsedTokenToStopData(final String token, final StopData stopData) {
 		final Parser<String> placeIdParser = new PlaceIdParser();
-		final Parser<Double> latitudeParser = Parsers.createLatitudeParser();
-		final Parser<Double> longitudeParser = Parsers.createLongitudeParser();
+		final Parser<Double> latitudeParser = ParserFactory.createLatitudeParser();
+		final Parser<Double> longitudeParser = ParserFactory.createLongitudeParser();
 		if (placeIdParser.matches(token)) {
 			stopData.placeId = Optional.of(placeIdParser.parse(token));
 		} else if (latitudeParser.matches(token)) {
