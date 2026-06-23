@@ -17,12 +17,12 @@ public class GoogleMapsRouteExtractor {
 		if (!isDirectionsUrl(directionsUrl)) {
 			throw new IllegalArgumentException(String.format("Invalid URL: %s is not a valid Google Maps directions URL.", directionsUrl));
 		}
-		final List<StopData> stopDataList = new ArrayList<>();
 		final List<String> segments = getNonEmptySegments(directionsUrl);
 		if (segments.isEmpty()) {
-			return new Route(StopDataConverter.asStops(stopDataList));
+			return new Route(List.of());
 		}
 
+		final List<StopData> stopDataList = new ArrayList<>();
 		int stopCounter = 1;
 		for (final String segment : segments) {
 			final StopData stopData = new StopData();
