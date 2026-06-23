@@ -25,32 +25,40 @@ public class GoogleMapsRouteExtractor {
 		if (directionsUrl.toString().contains(dataPart)) {
 			final String dataStr = directionsUrl.toString().split(dataPart)[1].split("&")[0];
 			final String delimiter = "!";
-			final String[] tokens = dataStr.startsWith(delimiter) ? dataStr.substring(delimiter.length()).split(delimiter) : dataStr.split(delimiter);
+			final String[] tokens =
+					dataStr.startsWith(delimiter) ?
+							dataStr.substring(delimiter.length()).split(delimiter) :
+							dataStr.split(delimiter);
 
 			int waypointIdx = 0;
 			int i = 0;
 
 			while (i < tokens.length) {
-				String token = tokens[i++];
+				final String token = tokens[i++];
 
-				if (token.startsWith("1m") && token.length() == 3) {
-					char subTokenCountChar = token.charAt(2);
-
+				final String messageMarker = "1m";
+				if (token.startsWith(messageMarker) && token.length() == 3) {
+					final char subTokenCountChar = token.charAt(messageMarker.length());
 					if (subTokenCountChar == '0' || subTokenCountChar == '2' || subTokenCountChar == '5') {
-						int subTokens = Character.getNumericValue(subTokenCountChar);
-						int windowEnd = i + subTokens;
-
+						final int subTokens = Character.getNumericValue(subTokenCountChar);
+						final int windowEnd = i + subTokens;
 						if (waypointIdx < stopDataList.size()) {
 							final StopData stopData = stopDataList.get(waypointIdx);
-
 							while (i < windowEnd && i < tokens.length) {
-								String subToken = tokens[i++];
-								if (subToken.startsWith("1s")) {
-									stopData.placeId = Optional.of(convertHexToPlaceId(subToken.substring(2)));
-								} else if (subToken.startsWith("3d")) {
-									stopData.latitude = Optional.of(Double.parseDouble(subToken.substring(2)));
-								} else if (subToken.startsWith("4d")) {
-									stopData.longitude = Optional.of(Double.parseDouble(subToken.substring(2)));
+								final String subToken = tokens[i++];
+								final String placeIdMarker = "1s";
+								if (subToken.startsWith(placeIdMarker)) {
+									stopData.placeId = Optional.of(convertHexToPlaceId(subToken.substring(placeIdMarker.length())));
+								} else {
+									final String latitudeMarker = "3d";
+									if (subToken.startsWith(latitudeMarker)) {
+										stopData.latitude = Optional.of(Double.parseDouble(subToken.substring(latitudeMarker.length())));
+									} else {
+										final String longitudeMarker = "4d";
+										if (subToken.startsWith(longitudeMarker)) {
+											stopData.longitude = Optional.of(Double.parseDouble(subToken.substring(longitudeMarker.length())));
+										}
+									}
 								}
 							}
 							waypointIdx++;
