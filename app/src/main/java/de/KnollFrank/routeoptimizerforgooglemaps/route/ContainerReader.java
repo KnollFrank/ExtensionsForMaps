@@ -6,25 +6,25 @@ import java.util.List;
 
 class ContainerReader {
 
-	private static final String containerMarker = MarkerFactory.createMarker(1, Datatype.CONTAINER);
+    private static final String containerMarker = MarkerFactory.createMarker(1, Datatype.CONTAINER);
 
-	public static boolean isContainer(final String token) {
-		return token.startsWith(containerMarker);
-	}
+    public static boolean isContainer(final String token) {
+        return token.startsWith(containerMarker);
+    }
 
-	public static List<String> readTokensInContainer(final String token, final TokenIterator tokenIterator) {
-		return getNextTokens(getNumTokensInContainer(token), tokenIterator);
-	}
+    public static List<String> readTokensInContainer(final String token, final TokenIterator tokenIterator) {
+        return getNextTokens(getNumTokensInContainer(token), tokenIterator);
+    }
 
-	private static int getNumTokensInContainer(final String token) {
-		return Character.getNumericValue(token.charAt(containerMarker.length()));
-	}
+    private static int getNumTokensInContainer(final String token) {
+        return Character.getNumericValue(token.charAt(containerMarker.length()));
+    }
 
-	private static List<String> getNextTokens(final int numTokens, final TokenIterator tokenIterator) {
-		final ImmutableList.Builder<String> nextTokensBuilder = ImmutableList.builder();
-		for (int i = 0; i < numTokens; i++) {
-			nextTokensBuilder.add(tokenIterator.next());
-		}
-		return nextTokensBuilder.build();
-	}
+    private static List<String> getNextTokens(final int numTokens, final TokenIterator tokenIterator) {
+        final ImmutableList.Builder<String> nextTokensBuilder = ImmutableList.builder();
+        for (int i = 0; i < numTokens; i++) {
+            nextTokensBuilder.add(tokenIterator.next());
+        }
+        return nextTokensBuilder.build();
+    }
 }

@@ -6,14 +6,14 @@ import java.nio.charset.StandardCharsets;
 
 public class URLs {
 
-	private URLs() {
-	}
+    private URLs() {
+    }
 
-	public static String decode(final String s) {
-		try {
-			return URLDecoder.decode(s, StandardCharsets.UTF_8.name());
-		} catch (final UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    public static String decode(final String s) {
+        try {
+            return URLDecoder.decode(s, StandardCharsets.UTF_8.name());
+        } catch (final UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

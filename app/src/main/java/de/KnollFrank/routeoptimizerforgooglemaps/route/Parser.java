@@ -2,7 +2,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 interface Parser<T> {
 
-	boolean matches(String token);
+    boolean matches(String token);
 
-	T parse(String token);
+    T parse(String token);
 }

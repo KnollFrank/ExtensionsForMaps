@@ -10,22 +10,22 @@ import okhttp3.Response;
 
 public class UrlExpander {
 
-	private static final OkHttpClient client =
-			new OkHttpClient
-					.Builder()
-					.followRedirects(true)
-					.followSslRedirects(true)
-					.connectTimeout(5, TimeUnit.SECONDS)
-					.readTimeout(5, TimeUnit.SECONDS)
-					.build();
+    private static final OkHttpClient client =
+            new OkHttpClient
+                    .Builder()
+                    .followRedirects(true)
+                    .followSslRedirects(true)
+                    .connectTimeout(5, TimeUnit.SECONDS)
+                    .readTimeout(5, TimeUnit.SECONDS)
+                    .build();
 
-	public static URL expandUrl(final URL shortenedUrl) throws IOException {
-		try (final Response response = client.newCall(createRequest(shortenedUrl)).execute()) {
-			return response.request().url().url();
-		}
-	}
+    public static URL expandUrl(final URL shortenedUrl) throws IOException {
+        try (final Response response = client.newCall(createRequest(shortenedUrl)).execute()) {
+            return response.request().url().url();
+        }
+    }
 
-	private static Request createRequest(final URL url) {
-		return new Request.Builder().url(url).head().build();
-	}
+    private static Request createRequest(final URL url) {
+        return new Request.Builder().url(url).head().build();
+    }
 }

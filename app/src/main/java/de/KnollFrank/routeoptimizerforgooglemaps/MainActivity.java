@@ -15,54 +15,54 @@ import java.util.Optional;
 
 public class MainActivity extends AppCompatActivity implements RouteOptimizationOrchestrator.Callback {
 
-	private View progressBar;
-	private RouteOptimizationOrchestrator orchestrator;
+    private View progressBar;
+    private RouteOptimizationOrchestrator orchestrator;
 
-	@Override
-	protected void onCreate(@Nullable final Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		progressBar = findViewById(R.id.progressBar);
-		orchestrator = new RouteOptimizationOrchestrator(this, this);
-		handleIntent(getIntent());
-	}
+    @Override
+    protected void onCreate(@Nullable final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        progressBar = findViewById(R.id.progressBar);
+        orchestrator = new RouteOptimizationOrchestrator(this, this);
+        handleIntent(getIntent());
+    }
 
-	@Override
-	protected void onNewIntent(@NonNull final Intent intent) {
-		super.onNewIntent(intent);
-		handleIntent(intent);
-	}
+    @Override
+    protected void onNewIntent(@NonNull final Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
+    }
 
-	private void handleIntent(final Intent intent) {
-		if (Intent.ACTION_SEND.equals(intent.getAction()) && ClipDescription.MIMETYPE_TEXT_PLAIN.equals(intent.getType())) {
-			Optional
-					.ofNullable(intent.getStringExtra(Intent.EXTRA_TEXT))
-					.ifPresent(orchestrator::processSharedText);
-		} else {
-			finish();
-		}
-	}
+    private void handleIntent(final Intent intent) {
+        if (Intent.ACTION_SEND.equals(intent.getAction()) && ClipDescription.MIMETYPE_TEXT_PLAIN.equals(intent.getType())) {
+            Optional
+                    .ofNullable(intent.getStringExtra(Intent.EXTRA_TEXT))
+                    .ifPresent(orchestrator::processSharedText);
+        } else {
+            finish();
+        }
+    }
 
-	@Override
-	public void onOptimizationStarted() {
-		runOnUiThread(() -> progressBar.setVisibility(View.VISIBLE));
-	}
+    @Override
+    public void onOptimizationStarted() {
+        runOnUiThread(() -> progressBar.setVisibility(View.VISIBLE));
+    }
 
-	@Override
-	public void onOptimizationSuccess(final List<RouteOptimizer.Stop> finalRoute) {
-		runOnUiThread(() -> {
-			progressBar.setVisibility(View.GONE);
-			GoogleMapsNavigator.launchRouteOverview(this, finalRoute);
-			finish();
-		});
-	}
+    @Override
+    public void onOptimizationSuccess(final List<RouteOptimizer.Stop> finalRoute) {
+        runOnUiThread(() -> {
+            progressBar.setVisibility(View.GONE);
+            GoogleMapsNavigator.launchRouteOverview(this, finalRoute);
+            finish();
+        });
+    }
 
-	@Override
-	public void onError(final String message) {
-		runOnUiThread(() -> {
-			progressBar.setVisibility(View.GONE);
-			Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-			finish();
-		});
-	}
+    @Override
+    public void onError(final String message) {
+        runOnUiThread(() -> {
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            finish();
+        });
+    }
 }
