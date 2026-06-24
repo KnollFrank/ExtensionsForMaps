@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+// FK-TODO: brauchen Gesamtunittest, der eine Google Maps Directions URL entgegennimmt und eine korrekt sortierte (optimierte) Google Maps Directions URL erzeugt.
 public class GoogleMapsRouteExtractor {
 
 	public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) {
