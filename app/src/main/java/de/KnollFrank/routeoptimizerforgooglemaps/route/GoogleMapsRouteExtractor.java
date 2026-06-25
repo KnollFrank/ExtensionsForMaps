@@ -1,10 +1,12 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+
+import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.Node;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.NodeFinder;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.NodeParser;
 
 // FK-TODO: brauchen Gesamtunittest, der eine Google Maps Directions URL entgegennimmt und eine korrekt sortierte (optimierte) Google Maps Directions URL erzeugt.
 public class GoogleMapsRouteExtractor {
@@ -22,8 +24,8 @@ public class GoogleMapsRouteExtractor {
         directionsUrl
                 .getTokensFromDataPart()
                 .map(List::iterator)
-                .map(GoogleMapsRouteExtractor::parseAllNodes)
-                .map(rootNodes -> findWaypointContainers(rootNodes, stopDataList.size()))
+                .map(NodeParser::parseAllNodes)
+                .map(rootNodes -> NodeFinder.findWaypointContainers(rootNodes, stopDataList.size()))
                 .ifPresent(
                         waypointContainers -> {
                             // 3. Extrahiere die Daten für jeden Stopp aus seinem jeweiligen Sub-Baum
@@ -34,73 +36,6 @@ public class GoogleMapsRouteExtractor {
                             }
                         });
         return new Route(StopDataConverter.asStops(stopDataList));
-    }
-
-    // --- REKURSIVER BAUM-PARSER (Tree Builder) ---
-    // FK-TODO: refactor
-    private static List<Node> parseAllNodes(final Iterator<String> stream) {
-        final List<Node> nodes = new ArrayList<>();
-        while (stream.hasNext()) {
-            final String token = stream.next();
-            final Node node = new Node(token);
-            if (node.isContainer()) {
-                final int subCount = node.getContainerSize();
-                final List<Node> subNodes = parseNodes(stream, subCount);
-                node.children.addAll(subNodes);
-            }
-            nodes.add(node);
-        }
-        return nodes;
-    }
-
-    // FK-TODO: refactor
-    private static List<Node> parseNodes(final Iterator<String> stream, final int toConsume) {
-        final List<Node> nodes = new ArrayList<>();
-        int consumed = 0;
-        while (consumed < toConsume && stream.hasNext()) {
-            final String token = stream.next();
-            consumed++;
-
-            final Node node = new Node(token);
-            if (node.isContainer()) {
-                final int subCount = node.getContainerSize();
-                final List<Node> subNodes = parseNodes(stream, subCount);
-                node.children.addAll(subNodes);
-                consumed += subCount;
-            }
-            nodes.add(node);
-        }
-        return nodes;
-    }
-
-    // --- GEZIELTE WAYPOINT-SUCHE IM BAUM ---
-    // FK-TODO: refactor
-    private static List<Node> findWaypointContainers(final List<Node> rootNodes, final int expectedCount) {
-        final List<Node> all4mContainers = new ArrayList<>();
-        findAllContainersByFieldId(rootNodes, 4, all4mContainers);
-        for (final Node container4m : all4mContainers) {
-            final List<Node> waypointChildrenOf4mContainer = new ArrayList<>();
-            for (final Node child : container4m.children) {
-                if (child.fieldId == 1 && child.isContainer()) {
-                    waypointChildrenOf4mContainer.add(child);
-                }
-            }
-            // Wir suchen den 4m-Container, der EXAKT so viele 1m-Kinder hat, wie wir Wegpunkte im Pfad gefunden haben
-            if (waypointChildrenOf4mContainer.size() == expectedCount) {
-                return waypointChildrenOf4mContainer;
-            }
-        }
-        return List.of();
-    }
-
-    // FK-TODO: refactor
-    private static void findAllContainersByFieldId(final List<Node> nodes, final int fieldId, final List<Node> result) {
-        for (final Node node : nodes) {
-            if (node.fieldId == fieldId && node.isContainer()) {
-                result.add(node);
-            }
-            findAllContainersByFieldId(node.children, fieldId, result);
-        }
     }
 
     // --- FLEXIBLE DATEN-EXTRAKTION AUS DEM SUB-BAUM ---
@@ -123,52 +58,6 @@ public class GoogleMapsRouteExtractor {
         // Rekursiv tiefer suchen
         for (final Node child : node.children) {
             extractDataFromSubtree(child, stopData);
-        }
-    }
-
-    // --- REPRÄSENTATION EINES PROTOBUF-KNOTENS ---
-    // FK-TODO: refactor
-    private static class Node {
-
-        public final String token;
-        // FK-TODO: fieldId und type in einer Markerklasse zusammenfassen, und hier als Optional<Marker> verwenden?
-        public final int fieldId;
-        // FK-TODO: use Datatype for type
-        public final char type;
-        public final List<Node> children = new ArrayList<>();
-
-        public Node(final String token) {
-            this.token = token;
-            int typeIdx = 0;
-            while (typeIdx < token.length() && Character.isDigit(token.charAt(typeIdx))) {
-                typeIdx++;
-            }
-            if (typeIdx < token.length()) {
-                this.fieldId = Integer.parseInt(token.substring(0, typeIdx));
-                this.type = token.charAt(typeIdx);
-            } else {
-                this.fieldId = -1;
-                this.type = '?';
-            }
-        }
-
-        public boolean isContainer() {
-            return type == 'm';
-        }
-
-        public int getContainerSize() {
-            int typeIdx = 0;
-            while (typeIdx < token.length() && Character.isDigit(token.charAt(typeIdx))) {
-                typeIdx++;
-            }
-            if (typeIdx + 1 <= token.length()) {
-                try {
-                    return Integer.parseInt(token.substring(typeIdx + 1));
-                } catch (final NumberFormatException e) {
-                    return 0;
-                }
-            }
-            return 0;
         }
     }
 }
