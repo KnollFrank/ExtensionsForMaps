@@ -7,13 +7,17 @@ import de.KnollFrank.routeoptimizerforgooglemaps.common.Optionals;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Strings;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 
+// FK-TODO: add unit test
 class AddressesProvider {
 
     public static List<String> getUrlDecodedAddresses(final URL directionsUrl) {
-        return URLs.decode(
-                Strings.split(
-                        getPathPart(directionsUrl.getPath()),
-                        "/"));
+        return URLs.decode(getPathParts(directionsUrl));
+    }
+
+    private static List<String> getPathParts(final URL directionsUrl) {
+        return Strings.split(
+                getPathPart(directionsUrl.getPath()),
+                "/");
     }
 
     private static String getPathPart(final String path) {
