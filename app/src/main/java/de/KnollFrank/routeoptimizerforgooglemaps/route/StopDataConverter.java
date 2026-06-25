@@ -20,7 +20,7 @@ class StopDataConverter {
     public static Stop asStop(final StopData stopData) {
         return new Stop(
                 stopData.stopNumber,
-                stopData.pathName,
+                stopData.address,
                 stopData.placeId,
                 Geodetic.fromLatitudeLongitude(
                         new Angle(
@@ -38,7 +38,7 @@ class StopDataConverter {
                         "Missing %s for stop %d ('%s').",
                         missingValue,
                         stopData.stopNumber,
-                        stopData.pathName)
+                        stopData.address)
         );
     }
 }

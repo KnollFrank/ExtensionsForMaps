@@ -18,8 +18,8 @@ class DirectionsUrl {
         this.url = url;
     }
 
-    public List<String> getSegments() {
-        return SegmentsProvider.getSegments(url);
+    public List<String> getAddresses() {
+        return AddressesProvider.getAddresses(url);
     }
 
     public Optional<List<String>> getTokensFromDataPart() {

@@ -91,7 +91,7 @@ public class GoogleMapsRouteExtractorTest {
         assertEquals(3, route.stops().size());
 
         // Check Stop 1
-        assertEquals("Central-Apotheke", route.stops().get(0).pathName());
+        assertEquals("Central-Apotheke", route.stops().get(0).address());
         assertEquals(
                 Geodetic.fromLatitudeLongitude(
                         new Angle(48.4765345, DEGREES),
@@ -100,7 +100,7 @@ public class GoogleMapsRouteExtractorTest {
         assertEquals("ChIJ1V1RE0v8mUcROpsR_6oBUjQ", route.stops().get(0).placeId().orElseThrow());
 
         // Check Stop 3 (Unterhausen)
-        assertEquals("Unterhausen", route.stops().get(2).pathName());
+        assertEquals("Unterhausen", route.stops().get(2).address());
         assertEquals(
                 Geodetic.fromLatitudeLongitude(
                         new Angle(48.430628399999996, DEGREES),

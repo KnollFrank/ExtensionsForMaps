@@ -5,7 +5,7 @@ import java.util.Optional;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 
 public record Stop(int stopNumber,
-                   String pathName,
+                   String address,
                    Optional<String> placeId,
                    Geodetic geodetic) {
 }

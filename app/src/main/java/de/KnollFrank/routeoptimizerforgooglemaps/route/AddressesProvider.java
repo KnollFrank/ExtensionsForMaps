@@ -7,11 +7,12 @@ import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Optionals;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Strings;
 
-class SegmentsProvider {
+class AddressesProvider {
 
-    public static List<String> getSegments(final URL directionsUrl) {
+    public static List<String> getAddresses(final URL directionsUrl) {
+        // FK-TODO: hier schon URLs.decode() aufrufen, später nicht mehr
         return Lists.toList(
-                SegmentsProvider
+                AddressesProvider
                         .getPathPart(directionsUrl.getPath())
                         .split("/"));
     }
