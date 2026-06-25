@@ -21,7 +21,7 @@ class TokenProvider {
                         directionsUrl
                         .toString()
                         .split(DATA_PART_MARKER)[1]
-                        .split("&")[0]) :
+                        .split("\\?")[0]) :
                 Optional.empty();
     }
 

@@ -4,6 +4,7 @@ import java.util.Base64;
 
 class PlaceIdParser implements Parser<String> {
 
+    // FK-TODO: introduce Marker class instead of String
     private static final String placeIdMarker = MarkerFactory.createMarker(1, Datatype.STRING);
 
     @Override
@@ -20,6 +21,7 @@ class PlaceIdParser implements Parser<String> {
      * Converts an internal Google Maps Hex-ID into a standard Web-API Place ID ("ChIJ...").
      */
     // FK-TODO: add unit test
+    // FK-TODO: refactor
     private static String convertHexToPlaceId(final String internalId) {
         if (internalId == null || !internalId.contains(":")) {
             return internalId;

@@ -57,7 +57,6 @@ public class GoogleMapsRouteExtractor {
     private static List<Node> parseNodes(final Iterator<String> stream, final int toConsume) {
         final List<Node> nodes = new ArrayList<>();
         int consumed = 0;
-
         while (consumed < toConsume && stream.hasNext()) {
             final String token = stream.next();
             consumed++;
@@ -79,17 +78,16 @@ public class GoogleMapsRouteExtractor {
     private static List<Node> findWaypointContainers(final List<Node> rootNodes, final int expectedCount) {
         final List<Node> all4mContainers = new ArrayList<>();
         findAllContainersByFieldId(rootNodes, 4, all4mContainers);
-
-        for (final Node container : all4mContainers) {
-            final List<Node> waypointChildren = new ArrayList<>();
-            for (final Node child : container.children) {
+        for (final Node container4m : all4mContainers) {
+            final List<Node> waypointChildrenOf4mContainer = new ArrayList<>();
+            for (final Node child : container4m.children) {
                 if (child.fieldId == 1 && child.isContainer()) {
-                    waypointChildren.add(child);
+                    waypointChildrenOf4mContainer.add(child);
                 }
             }
             // Wir suchen den 4m-Container, der EXAKT so viele 1m-Kinder hat, wie wir Wegpunkte im Pfad gefunden haben
-            if (waypointChildren.size() == expectedCount) {
-                return waypointChildren;
+            if (waypointChildrenOf4mContainer.size() == expectedCount) {
+                return waypointChildrenOf4mContainer;
             }
         }
         return List.of();
@@ -109,25 +107,19 @@ public class GoogleMapsRouteExtractor {
     // FK-TODO: refactor
     private static void extractDataFromSubtree(final Node node, final StopData stopData) {
         final Parser<String> placeIdParser = new PlaceIdParser();
-
         if (node.type == 's' && node.fieldId == 1) {
             if (placeIdParser.matches(node.token)) {
                 stopData.placeId = Optional.of(placeIdParser.parse(node.token));
             }
         } else if (node.type == 'd') {
-            try {
-                final double value = Double.parseDouble(node.token.substring(String.valueOf(node.fieldId).length() + 1));
-
-                // Flexibles Mapping für beide bekannten Google-Koordinatenformate (alt: 3d/4d, neu: 2d/1d)
-                if (node.fieldId == 3 || node.fieldId == 2) {
-                    stopData.latitude = Optional.of(value);
-                } else if (node.fieldId == 4 || node.fieldId == 1) {
-                    stopData.longitude = Optional.of(value);
-                }
-            } catch (final Exception ignored) {
+            final double value = Double.parseDouble(node.token.substring(String.valueOf(node.fieldId).length() + 1));
+            // Flexibles Mapping für beide bekannten Google-Koordinatenformate (alt: 3d/4d, neu: 2d/1d)
+            if (node.fieldId == 3 || node.fieldId == 2) {
+                stopData.latitude = Optional.of(value);
+            } else if (node.fieldId == 4 || node.fieldId == 1) {
+                stopData.longitude = Optional.of(value);
             }
         }
-
         // Rekursiv tiefer suchen
         for (final Node child : node.children) {
             extractDataFromSubtree(child, stopData);
@@ -137,12 +129,15 @@ public class GoogleMapsRouteExtractor {
     // --- REPRÄSENTATION EINES PROTOBUF-KNOTENS ---
     // FK-TODO: refactor
     private static class Node {
-        final String token;
-        final int fieldId;
-        final char type;
-        final List<Node> children = new ArrayList<>();
 
-        Node(final String token) {
+        public final String token;
+        // FK-TODO: fieldId und type in einer Markerklasse zusammenfassen, und hier als Optional<Marker> verwenden?
+        public final int fieldId;
+        // FK-TODO: use Datatype for type
+        public final char type;
+        public final List<Node> children = new ArrayList<>();
+
+        public Node(final String token) {
             this.token = token;
             int typeIdx = 0;
             while (typeIdx < token.length() && Character.isDigit(token.charAt(typeIdx))) {
@@ -157,11 +152,11 @@ public class GoogleMapsRouteExtractor {
             }
         }
 
-        boolean isContainer() {
+        public boolean isContainer() {
             return type == 'm';
         }
 
-        int getContainerSize() {
+        public int getContainerSize() {
             int typeIdx = 0;
             while (typeIdx < token.length() && Character.isDigit(token.charAt(typeIdx))) {
                 typeIdx++;
