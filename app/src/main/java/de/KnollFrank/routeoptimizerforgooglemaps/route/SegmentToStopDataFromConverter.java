@@ -12,7 +12,7 @@ class SegmentToStopDataFromConverter {
         return Lists
                 .asIndexedElements(segments)
                 .stream()
-                .map(indexedSegment -> convert(indexedSegment.element(), indexedSegment.index() + 1))
+                .map(indexedSegment -> convert(indexedSegment.element(), indexedSegment.index()))
                 .toList();
     }
 
