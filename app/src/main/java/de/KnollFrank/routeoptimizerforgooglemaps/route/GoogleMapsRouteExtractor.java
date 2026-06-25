@@ -23,7 +23,6 @@ public class GoogleMapsRouteExtractor {
         final List<StopData> stopDataList = SegmentToStopDataFromConverter.convert(directionsUrl.getSegments());
         directionsUrl
                 .getTokensFromDataPart()
-                .map(List::iterator)
                 .map(NodeParser::parseAllNodes)
                 .map(rootNodes -> NodeFinder.findWaypointContainers(rootNodes, stopDataList.size()))
                 .ifPresent(

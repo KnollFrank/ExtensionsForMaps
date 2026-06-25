@@ -8,14 +8,18 @@ public class NodeParser {
 
     // --- REKURSIVER BAUM-PARSER (Tree Builder) ---
     // FK-TODO: refactor
-    public static List<Node> parseAllNodes(final Iterator<String> stream) {
+    public static List<Node> parseAllNodes(final List<String> tokens) {
+        return parseAllNodes(tokens.iterator());
+    }
+
+    private static List<Node> parseAllNodes(final Iterator<String> tokens) {
         final List<Node> nodes = new ArrayList<>();
-        while (stream.hasNext()) {
-            final String token = stream.next();
+        while (tokens.hasNext()) {
+            final String token = tokens.next();
             final Node node = new Node(token);
             if (node.isContainer()) {
                 final int subCount = node.getContainerSize();
-                final List<Node> subNodes = parseNodes(stream, subCount);
+                final List<Node> subNodes = parseNodes(tokens, subCount);
                 node.children.addAll(subNodes);
             }
             nodes.add(node);
@@ -24,17 +28,17 @@ public class NodeParser {
     }
 
     // FK-TODO: refactor
-    private static List<Node> parseNodes(final Iterator<String> stream, final int toConsume) {
+    private static List<Node> parseNodes(final Iterator<String> tokens, final int toConsume) {
         final List<Node> nodes = new ArrayList<>();
         int consumed = 0;
-        while (consumed < toConsume && stream.hasNext()) {
-            final String token = stream.next();
+        while (consumed < toConsume && tokens.hasNext()) {
+            final String token = tokens.next();
             consumed++;
 
             final Node node = new Node(token);
             if (node.isContainer()) {
                 final int subCount = node.getContainerSize();
-                final List<Node> subNodes = parseNodes(stream, subCount);
+                final List<Node> subNodes = parseNodes(tokens, subCount);
                 node.children.addAll(subNodes);
                 consumed += subCount;
             }
