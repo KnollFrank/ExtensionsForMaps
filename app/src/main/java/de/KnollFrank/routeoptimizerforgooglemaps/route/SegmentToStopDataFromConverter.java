@@ -18,6 +18,7 @@ class SegmentToStopDataFromConverter {
 
     private static StopData convert(final String segment, final int stopNumber) {
         final StopData stopData = new StopData();
+        // FK-TODO: stopNumber und pathName als Konstruktorparameter von StopData übergeben
         stopData.stopNumber = stopNumber;
         stopData.pathName = URLs.decode(segment);
         if (segment.matches("-?\\d+\\.\\d+,-?\\d+\\.\\d+")) {
