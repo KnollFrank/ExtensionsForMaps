@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
-import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 
 class AddressToStopDataConverter {
 
@@ -17,7 +16,7 @@ class AddressToStopDataConverter {
     }
 
     private static StopData convert(final String address, final int stopNumber) {
-        final StopData stopData = new StopData(URLs.decode(address), stopNumber);
+        final StopData stopData = new StopData(address, stopNumber);
         if (address.matches("-?\\d+\\.\\d+,-?\\d+\\.\\d+")) {
             final String[] coords = address.split(",");
             stopData.latitude = Optional.of(Double.parseDouble(coords[0]));

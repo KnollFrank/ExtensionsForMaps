@@ -3,17 +3,25 @@ package de.KnollFrank.routeoptimizerforgooglemaps.common;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class URLs {
 
     private URLs() {
     }
 
-    public static String decode(final String s) {
+    public static String decode(final String str) {
         try {
-            return URLDecoder.decode(s, StandardCharsets.UTF_8.name());
+            return URLDecoder.decode(str, StandardCharsets.UTF_8.name());
         } catch (final UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static List<String> decode(final List<String> strs) {
+        return strs
+                .stream()
+                .map(URLs::decode)
+                .toList();
     }
 }

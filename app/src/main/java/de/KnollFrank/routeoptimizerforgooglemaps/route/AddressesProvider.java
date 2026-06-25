@@ -3,18 +3,17 @@ package de.KnollFrank.routeoptimizerforgooglemaps.route;
 import java.net.URL;
 import java.util.List;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Optionals;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Strings;
+import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 
 class AddressesProvider {
 
     public static List<String> getAddresses(final URL directionsUrl) {
-        // FK-TODO: hier schon URLs.decode() aufrufen, später nicht mehr
-        return Lists.toList(
-                AddressesProvider
-                        .getPathPart(directionsUrl.getPath())
-                        .split("/"));
+        return URLs.decode(
+                Strings.split(
+                        getPathPart(directionsUrl.getPath()),
+                        "/"));
     }
 
     private static String getPathPart(final String path) {
