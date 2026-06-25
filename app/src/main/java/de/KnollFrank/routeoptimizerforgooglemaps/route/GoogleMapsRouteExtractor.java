@@ -20,7 +20,7 @@ public class GoogleMapsRouteExtractor {
 
     // FK-TODO: refactor
     private static Route extractRoute(final DirectionsUrl directionsUrl) {
-        final List<StopData> stopDataList = AddressToStopDataConverter.convert(directionsUrl.getAddresses());
+        final List<StopData> stopDataList = AddressToStopDataConverter.convert(directionsUrl.getUrlDecodedAddresses());
         directionsUrl
                 .getTokensFromDataPart()
                 .map(NodeParser::parseAllNodes)

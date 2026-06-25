@@ -9,7 +9,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 
 class AddressesProvider {
 
-    public static List<String> getAddresses(final URL directionsUrl) {
+    public static List<String> getUrlDecodedAddresses(final URL directionsUrl) {
         return URLs.decode(
                 Strings.split(
                         getPathPart(directionsUrl.getPath()),
