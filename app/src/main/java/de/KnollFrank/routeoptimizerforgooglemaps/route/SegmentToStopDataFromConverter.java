@@ -17,10 +17,7 @@ class SegmentToStopDataFromConverter {
     }
 
     private static StopData convert(final String segment, final int stopNumber) {
-        final StopData stopData = new StopData();
-        // FK-TODO: stopNumber und pathName als Konstruktorparameter von StopData übergeben
-        stopData.stopNumber = stopNumber;
-        stopData.pathName = URLs.decode(segment);
+        final StopData stopData = new StopData(stopNumber, URLs.decode(segment));
         if (segment.matches("-?\\d+\\.\\d+,-?\\d+\\.\\d+")) {
             final String[] coords = segment.split(",");
             stopData.latitude = Optional.of(Double.parseDouble(coords[0]));
