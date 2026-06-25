@@ -18,11 +18,7 @@ public class GoogleMapsRouteExtractor {
 
     // FK-TODO: refactor
     private static Route extractRoute(final DirectionsUrl directionsUrl) {
-        final List<String> segments = directionsUrl.getSegments();
-        if (segments.isEmpty()) {
-            return new Route(List.of());
-        }
-        final List<StopData> stopDataList = SegmentToStopDataFromConverter.convert(segments);
+        final List<StopData> stopDataList = SegmentToStopDataFromConverter.convert(directionsUrl.getSegments());
         directionsUrl
                 .getTokensFromDataPart()
                 .map(List::iterator)
