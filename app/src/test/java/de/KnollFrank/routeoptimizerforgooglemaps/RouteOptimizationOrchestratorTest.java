@@ -90,8 +90,7 @@ public class RouteOptimizationOrchestratorTest {
         return new RoutingMatricesProvider() {
 
             @Override
-            public RouteOptimizer.RoutingMatrices getRoutingMatrices(final Geodetic start,
-                                                                     final List<Stop> stops) {
+            public RouteOptimizer.RoutingMatrices getRoutingMatrices(final Geodetic start, final List<Stop> stops) {
                 return new RouteOptimizer.RoutingMatrices(
                         new double[][]{
                                 new double[]{0.0, 709743.3, 32104.7},
