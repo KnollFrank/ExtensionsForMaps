@@ -3,7 +3,6 @@ package de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf;
 import java.util.ArrayList;
 import java.util.List;
 
-// --- REPRÄSENTATION EINES PROTOBUF-KNOTENS ---
 // FK-TODO: refactor
 public class Node {
 

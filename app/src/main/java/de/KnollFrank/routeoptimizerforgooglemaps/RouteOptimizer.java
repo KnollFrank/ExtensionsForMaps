@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
+
+// FK-TODO: refactor
 public class RouteOptimizer {
 
     private final RoutingMatricesProvider routingMatricesProvider;
@@ -42,10 +46,6 @@ public class RouteOptimizer {
         OSRM
     }
 
-    // FK-TODO: remove Stop and use de.KnollFrank.routeoptimizerforgooglemaps.route.Stop and Route instead
-    public record Stop(String address, double lat, double lng) {
-    }
-
     // Interner Container für die OSRM Distanz- und Dauer-Matrizen
     public record RoutingMatrices(double[][] distances, double[][] durations) {
 
@@ -60,8 +60,7 @@ public class RouteOptimizer {
 
     // FK-TODO: geschätzte Ersparnis in km und Zeit berechnen und anzeigen
     // FK-TODO: Routen optimieren für Auto, Fußgänger, Fahrrad und öffentliche Verkehrsmittel
-    public List<Stop> optimize(final double startLat,
-                               final double startLng,
+    public List<Stop> optimize(final Geodetic start,
                                final List<Stop> stops,
                                final OptimizationStrategy strategy) throws Exception {
         final List<Stop> optimizedRoute = new ArrayList<>();
@@ -77,7 +76,7 @@ public class RouteOptimizer {
                         .Builder
                         .newInstance()
                         .setId("0")
-                        .setCoordinate(Coordinate.newInstance(startLng, startLat))
+                        .setCoordinate(getCoordinate(start))
                         .build();
         vrpBuilder.addVehicle(
                 VehicleImpl
@@ -98,7 +97,7 @@ public class RouteOptimizer {
         final VehicleRoutingTransportCosts transportCosts =
                 switch (strategy) {
                     case OSRM ->
-                            new OsrmTransportCosts(routingMatricesProvider.getRoutingMatrices(startLat, startLng, stops));
+                            new OsrmTransportCosts(routingMatricesProvider.getRoutingMatrices(start, stops));
                     case HAVERSINE -> new HaversineTransportCosts();
                 };
 
@@ -108,12 +107,12 @@ public class RouteOptimizer {
         // Stopps definieren (IDs "1", "2", "3" usw. für die Matrix)
         for (int i = 0; i < stops.size(); i++) {
             final Stop stop = stops.get(i);
-            final String jobId = stop.address + "___" + i;
+            final String jobId = stop.address() + "___" + i;
             stopMap.put(jobId, stop);
 
             final Location stopLocation = Location.Builder.newInstance()
                     .setId(String.valueOf(i + 1))
-                    .setCoordinate(Coordinate.newInstance(stop.lng, stop.lat))
+                    .setCoordinate(getCoordinate(stop.geodetic()))
                     .build();
 
             final Service service =
@@ -157,6 +156,12 @@ public class RouteOptimizer {
             optimizedRoute.addAll(stops);
         }
         return optimizedRoute;
+    }
+
+    private static Coordinate getCoordinate(final Geodetic geodetic) {
+        return Coordinate.newInstance(
+                geodetic.getLongitude().toDegrees(),
+                geodetic.getLatitude().toDegrees());
     }
 
     // =========================================================================================

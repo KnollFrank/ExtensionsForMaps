@@ -15,7 +15,8 @@ public class RouteOptimizationOrchestrator {
 
         void onOptimizationStarted();
 
-        void onOptimizationSuccess(List<RouteOptimizer.Stop> finalRoute);
+        // FK-TODO: use de.KnollFrank.routeoptimizerforgooglemaps.route.Route instead of List<Stop>
+        void onOptimizationSuccess(List<Stop> finalRoute);
 
         void onError(String message);
     }
@@ -34,16 +35,15 @@ public class RouteOptimizationOrchestrator {
         new Thread(() -> {
             try {
                 final URL expandedDirectionsUrl = expandShortDirectionsUrl(new URL(directionsUrl));
-                final List<RouteOptimizer.Stop> stops =
-                        convert(
-                                GoogleMapsRouteExtractor
-                                        .extractRouteFromDirectionsUrl(expandedDirectionsUrl)
-                                        .stops());
+                final List<Stop> stops =
+                        GoogleMapsRouteExtractor
+                                .extractRouteFromDirectionsUrl(expandedDirectionsUrl)
+                                .stops();
                 if (stops.isEmpty()) {
                     callback.onError("No stops found in URL.");
                     return;
                 }
-                final List<RouteOptimizer.Stop> finalRoute =
+                final List<Stop> finalRoute =
                         stops.size() < 2 ?
                                 stops :
                                 optimizeRoute(stops);
@@ -62,31 +62,16 @@ public class RouteOptimizationOrchestrator {
                 directionsUrl;
     }
 
-    private static List<RouteOptimizer.Stop> convert(final List<Stop> stops) {
-        return stops
-                .stream()
-                .map(RouteOptimizationOrchestrator::convert)
-                .toList();
-    }
-
-    private static RouteOptimizer.Stop convert(final Stop stop) {
-        return new RouteOptimizer.Stop(
-                stop.address(),
-                stop.geodetic().getLatitude().toDegrees(),
-                stop.geodetic().getLongitude().toDegrees());
-    }
-
-    private List<RouteOptimizer.Stop> optimizeRoute(final List<RouteOptimizer.Stop> stops) throws Exception {
-        final RouteOptimizer.Stop start = stops.get(0);
-        final List<RouteOptimizer.Stop> intermediate = stops.subList(1, stops.size());
-        final List<RouteOptimizer.Stop> optimizedIntermediate =
+    private List<Stop> optimizeRoute(final List<Stop> stops) throws Exception {
+        final Stop start = stops.get(0);
+        final List<Stop> intermediate = stops.subList(1, stops.size());
+        final List<Stop> optimizedIntermediate =
                 routeOptimizer.optimize(
-                        start.lat(),
-                        start.lng(),
+                        start.geodetic(),
                         intermediate,
                         RouteOptimizer.OptimizationStrategy.OSRM);
         // FK-TODO: use guava ImmutableList
-        final List<RouteOptimizer.Stop> finalRoute = new ArrayList<>();
+        final List<Stop> finalRoute = new ArrayList<>();
         finalRoute.add(start);
         finalRoute.addAll(optimizedIntermediate);
         return finalRoute;

@@ -1,127 +1,171 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+
+import static de.KnollFrank.routeoptimizerforgooglemaps.RouteOptimizationOrchestratorTest.getAddresses;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
+
+import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
+import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
+import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
 @RunWith(RobolectricTestRunner.class)
 public class RouteOptimizerTest {
 
     @Test
     public void testOptimize_sortsByShortestDistance() throws Exception {
+        // Given
         final RouteOptimizer routeOptimizer = new RouteOptimizer(new OsrmRoutingMatricesProvider());
+        final Geodetic berlin_start =
+                Geodetic.fromLatitudeLongitude(
+                        new Angle(52.5200, Unit.DEGREES),
+                        new Angle(13.4050, Unit.DEGREES));
+        final Stop munich_far =
+                new Stop(
+                        0,
+                        "Munich",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(48.1351, Unit.DEGREES),
+                                new Angle(11.5820, Unit.DEGREES)));
+        final Stop potsdam_very_close =
+                new Stop(
+                        1,
+                        "Potsdam",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(52.3906, Unit.DEGREES),
+                                new Angle(13.0645, Unit.DEGREES)));
+        final Stop leipzig_medium =
+                new Stop(
+                        2,
+                        "Leipzig",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(51.3397, Unit.DEGREES),
+                                new Angle(12.3731, Unit.DEGREES)));
 
-        // Start: Berlin (52.5200, 13.4050)
-        final double startLat = 52.5200;
-        final double startLng = 13.4050;
-
-        final List<RouteOptimizer.Stop> stops = new ArrayList<>();
-        // Stop A: Munich (far)
-        stops.add(new RouteOptimizer.Stop("Munich", 48.1351, 11.5820));
-        // Stop B: Potsdam (very close)
-        stops.add(new RouteOptimizer.Stop("Potsdam", 52.3906, 13.0645));
-        // Stop C: Leipzig (medium)
-        stops.add(new RouteOptimizer.Stop("Leipzig", 51.3397, 12.3731));
-
-        final List<RouteOptimizer.Stop> optimized =
+        // When
+        final List<Stop> optimized =
                 routeOptimizer.optimize(
-                        startLat,
-                        startLng,
-                        stops,
+                        berlin_start,
+                        List.of(munich_far, potsdam_very_close, leipzig_medium),
                         RouteOptimizer.OptimizationStrategy.HAVERSINE);
 
-        assertFalse(optimized.isEmpty());
-        assertEquals(3, optimized.size());
-
-        // Expected order: Potsdam -> Leipzig -> Munich
-        List<String> addresses = optimized.stream().map(RouteOptimizer.Stop::address).collect(Collectors.toList());
-        assertEquals(List.of("Potsdam", "Leipzig", "Munich"), addresses);
+        // Then
+        assertEquals(
+                getAddresses(List.of(potsdam_very_close, leipzig_medium, munich_far)),
+                getAddresses(optimized));
     }
 
     @Test
     public void testOptimize_userBugReproduction_Exact() throws Exception {
+        // Given
         final RouteOptimizer routeOptimizer = new RouteOptimizer(new OsrmRoutingMatricesProvider());
-        // Exact coordinates from user URL
-        double startLat = 48.4765345;
-        double startLng = 8.9349008;
+        final Geodetic start =
+                Geodetic.fromLatitudeLongitude(
+                        new Angle(48.4765345, Unit.DEGREES),
+                        new Angle(8.9349008, Unit.DEGREES));
+        final Stop hamburg =
+                new Stop(
+                        0,
+                        "Hamburg",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(53.548828, Unit.DEGREES),
+                                new Angle(9.987170, Unit.DEGREES)));
+        final Stop unterhausen =
+                new Stop(
+                        1,
+                        "Unterhausen",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(48.430628, Unit.DEGREES),
+                                new Angle(9.2546378, Unit.DEGREES)));
 
-        List<RouteOptimizer.Stop> stops = new ArrayList<>();
-        // Hamburg
-        stops.add(new RouteOptimizer.Stop("Hamburg", 53.548828, 9.987170));
-        // Unterhausen
-        stops.add(new RouteOptimizer.Stop("Unterhausen", 48.430628, 9.2546378));
-
-        List<RouteOptimizer.Stop> optimized =
+        // When
+        final List<Stop> optimized =
                 routeOptimizer.optimize(
-                        startLat,
-                        startLng,
-                        stops,
+                        start,
+                        List.of(hamburg, unterhausen),
                         RouteOptimizer.OptimizationStrategy.HAVERSINE);
 
-        // Expect both intermediate stops to be present
-        assertEquals(2, optimized.size());
-        // Verify names
-        List<String> addresses = optimized.stream().map(RouteOptimizer.Stop::address).toList();
-        assertTrue(addresses.contains("Hamburg"));
-        assertTrue(addresses.contains("Unterhausen"));
+        // Then
+        assertEquals(
+                getAddresses(List.of(unterhausen, hamburg)),
+                getAddresses(optimized));
     }
 
     @Test
     public void testOptimize_osrmVsHaversine_LakeGarda() throws Exception {
+        // Given
         final RouteOptimizer routeOptimizer = new RouteOptimizer(new OsrmRoutingMatricesProvider());
-
         // Geografisches Hindernis: Der Gardasee (Lago di Garda) in Italien
         // Start: Limone sul Garda (am Westufer des Sees)
-        final double startLat = 45.8156;
-        final double startLng = 10.7904;
-
-        final List<RouteOptimizer.Stop> stops = new ArrayList<>();
-
+        final Geodetic start_LimoneSulGarda =
+                Geodetic.fromLatitudeLongitude(
+                        new Angle(45.8156, Unit.DEGREES),
+                        new Angle(10.7904, Unit.DEGREES));
         // Stop A: Malcesine
         // (Liegt am Ostufer, genau gegenüber von Limone. Luftlinie: ~6 km. Auto: ~30 km, da man um den See fahren muss)
-        stops.add(new RouteOptimizer.Stop("Malcesine", 45.7656, 10.8092));
-
+        final Stop malcesine =
+                new Stop(
+                        0,
+                        "Malcesine",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(45.7656, Unit.DEGREES),
+                                new Angle(10.8092, Unit.DEGREES)));
         // Stop B: Riva del Garda
         // (Liegt an der Nordspitze. Luftlinie: ~9 km. Auto: ~11 km, da auf derselben Uferseite über direkte Straße erreichbar)
-        stops.add(new RouteOptimizer.Stop("Riva del Garda", 45.8893, 10.8430));
+        final Stop rivaDelGarda =
+                new Stop(
+                        1,
+                        "Riva del Garda",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(45.8893, Unit.DEGREES),
+                                new Angle(10.8430, Unit.DEGREES)));
+        final List<Stop> stops = List.of(malcesine, rivaDelGarda);
 
         // ==========================================================
         // TEST 1: Haversine-Strategie (Luftlinie ignoriert den See)
         // Erwartung: Limone -> Malcesine (6km) -> Riva del Garda
         // ==========================================================
-        final List<RouteOptimizer.Stop> haversineRoute =
+        // When
+        final List<Stop> haversineRoute =
                 routeOptimizer.optimize(
-                        startLat,
-                        startLng,
+                        start_LimoneSulGarda,
                         stops,
                         RouteOptimizer.OptimizationStrategy.HAVERSINE);
 
-        assertEquals(2, haversineRoute.size());
-        assertEquals("Malcesine", haversineRoute.get(0).address());
-        assertEquals("Riva del Garda", haversineRoute.get(1).address());
+        // Then
+        assertEquals(
+                getAddresses(List.of(malcesine, rivaDelGarda)),
+                getAddresses(haversineRoute));
 
         // ==========================================================
         // TEST 2: OSRM-Strategie (Echte Straßenführung)
         // Erwartung: Limone -> Riva del Garda (11km) -> Malcesine (weitere 19km)
         // ==========================================================
         // FK-TODO: für diesen Unittest bitte kein Internetzugriff, sondern hart codierte RoutingMatrices verwenden.
-        final List<RouteOptimizer.Stop> osrmRoute =
+        // When
+        final List<Stop> osrmRoute =
                 routeOptimizer.optimize(
-                        startLat,
-                        startLng,
+                        start_LimoneSulGarda,
                         stops,
                         RouteOptimizer.OptimizationStrategy.OSRM);
 
-        assertEquals(2, osrmRoute.size());
-        assertEquals("Riva del Garda", osrmRoute.get(0).address()); // OSRM erkennt, dass Riva näher zu befahren ist!
-        assertEquals("Malcesine", osrmRoute.get(1).address());
+        // Then
+        assertEquals(
+                getAddresses(List.of(rivaDelGarda, malcesine)),
+                getAddresses(osrmRoute));
     }
 }

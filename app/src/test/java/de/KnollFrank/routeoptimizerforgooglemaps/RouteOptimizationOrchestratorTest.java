@@ -10,6 +10,9 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
+
 @RunWith(RobolectricTestRunner.class)
 public class RouteOptimizationOrchestratorTest {
 
@@ -22,9 +25,8 @@ public class RouteOptimizationOrchestratorTest {
                 new RoutingMatricesProvider() {
 
                     @Override
-                    public RouteOptimizer.RoutingMatrices getRoutingMatrices(final double startLat,
-                                                                             final double startLng,
-                                                                             final List<RouteOptimizer.Stop> stops) {
+                    public RouteOptimizer.RoutingMatrices getRoutingMatrices(final Geodetic start,
+                                                                             final List<Stop> stops) {
                         return new RouteOptimizer.RoutingMatrices(
                                 new double[][]{
                                         new double[]{0.0, 709743.3, 32104.7},
@@ -40,7 +42,7 @@ public class RouteOptimizationOrchestratorTest {
                 };
 
         // When
-        final List<RouteOptimizer.Stop> route = getRoute(routeUrl, routingMatricesProvider);
+        final List<Stop> route = getRoute(routeUrl, routingMatricesProvider);
 
         // Then
         Assert.assertEquals(
@@ -48,9 +50,9 @@ public class RouteOptimizationOrchestratorTest {
                 getAddresses(route));
     }
 
-    private static List<RouteOptimizer.Stop> getRoute(final String directionsUrl,
-                                                      final RoutingMatricesProvider routingMatricesProvider) throws InterruptedException {
-        final AtomicReference<Optional<List<RouteOptimizer.Stop>>> route = new AtomicReference<>(Optional.empty());
+    private static List<Stop> getRoute(final String directionsUrl,
+                                       final RoutingMatricesProvider routingMatricesProvider) throws InterruptedException {
+        final AtomicReference<Optional<List<Stop>>> route = new AtomicReference<>(Optional.empty());
         final CountDownLatch latch = new CountDownLatch(1);
         final RouteOptimizationOrchestrator orchestrator =
                 new RouteOptimizationOrchestrator(
@@ -62,7 +64,7 @@ public class RouteOptimizationOrchestratorTest {
     }
 
     private static RouteOptimizationOrchestrator.Callback createCallback(
-            final AtomicReference<Optional<List<RouteOptimizer.Stop>>> route,
+            final AtomicReference<Optional<List<Stop>>> route,
             final CountDownLatch latch) {
         return new RouteOptimizationOrchestrator.Callback() {
 
@@ -71,7 +73,7 @@ public class RouteOptimizationOrchestratorTest {
             }
 
             @Override
-            public void onOptimizationSuccess(final List<RouteOptimizer.Stop> finalRoute) {
+            public void onOptimizationSuccess(final List<Stop> finalRoute) {
                 route.set(Optional.of(finalRoute));
                 latch.countDown();
             }
@@ -84,10 +86,11 @@ public class RouteOptimizationOrchestratorTest {
         };
     }
 
-    private static List<String> getAddresses(final List<RouteOptimizer.Stop> stops) {
+    // FK-TODO: move method to Stops class
+    public static List<String> getAddresses(final List<Stop> stops) {
         return stops
                 .stream()
-                .map(RouteOptimizer.Stop::address)
+                .map(Stop::address)
                 .toList();
     }
 }

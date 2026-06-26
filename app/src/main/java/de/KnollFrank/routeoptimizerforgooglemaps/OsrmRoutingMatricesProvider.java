@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -21,13 +23,12 @@ class OsrmRoutingMatricesProvider implements RoutingMatricesProvider {
                     .build();
 
     @Override
-    public RouteOptimizer.RoutingMatrices getRoutingMatrices(final double startLat,
-                                                             final double startLng,
-                                                             final List<RouteOptimizer.Stop> stops) throws Exception {
+    public RouteOptimizer.RoutingMatrices getRoutingMatrices(final Geodetic start,
+                                                             final List<Stop> stops) throws Exception {
         final StringBuilder coordinatesStr = new StringBuilder();
-        coordinatesStr.append(String.format(Locale.US, "%f,%f", startLng, startLat));
-        for (final RouteOptimizer.Stop stop : stops) {
-            coordinatesStr.append(";").append(String.format(Locale.US, "%f,%f", stop.lng(), stop.lat()));
+        coordinatesStr.append(String.format(Locale.US, "%f,%f", start.getLongitude().toDegrees(), start.getLatitude().toDegrees()));
+        for (final Stop stop : stops) {
+            coordinatesStr.append(";").append(String.format(Locale.US, "%f,%f", stop.geodetic().getLongitude().toDegrees(), stop.geodetic().getLatitude().toDegrees()));
         }
 
         final String url = "https://router.project-osrm.org/table/v1/driving/" + coordinatesStr
