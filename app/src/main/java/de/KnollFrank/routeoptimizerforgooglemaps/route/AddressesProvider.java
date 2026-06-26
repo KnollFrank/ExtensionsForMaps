@@ -2,6 +2,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 import java.net.URL;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Optionals;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Strings;
@@ -17,7 +18,7 @@ class AddressesProvider {
     private static List<String> getPathParts(final URL directionsUrl) {
         return Strings.split(
                 getPathPart(directionsUrl.getPath()),
-                "/");
+                Pattern.compile("/"));
     }
 
     private static String getPathPart(final String path) {

@@ -4,6 +4,7 @@ import static de.KnollFrank.routeoptimizerforgooglemaps.common.IndexSearchResult
 
 import java.util.List;
 import java.util.OptionalInt;
+import java.util.regex.Pattern;
 
 public class Strings {
 
@@ -18,7 +19,7 @@ public class Strings {
         return indexOf(haystack, needle, 0);
     }
 
-    public static List<String> split(final String str, final String regex) {
-        return Lists.toList(str.split(regex));
+    public static List<String> split(final String str, final Pattern regex) {
+        return List.of(regex.split(str));
     }
 }

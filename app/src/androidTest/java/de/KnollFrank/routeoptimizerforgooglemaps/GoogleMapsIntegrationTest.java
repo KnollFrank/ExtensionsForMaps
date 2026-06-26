@@ -63,8 +63,10 @@ public class GoogleMapsIntegrationTest {
         device.wait(Until.hasObject(By.pkg(MAPS_PACKAGE).depth(0)), TIMEOUT);
         device.waitForIdle();
 
-        UiObject2 gotIt = device.findObject(By.text(Pattern.compile("Got it|Verstanden", Pattern.CASE_INSENSITIVE)));
-        if (gotIt != null) gotIt.click();
+        final UiObject2 gotIt = device.findObject(By.text(Pattern.compile("Got it|Verstanden", Pattern.CASE_INSENSITIVE)));
+        if (gotIt != null) {
+            gotIt.click();
+        }
 
         // 2. Trigger "Share directions" directly from the Bottom-Sheet
         Pattern sharePattern = Pattern.compile("Share|Share directions|Teilen|Wegbeschreibung teilen", Pattern.CASE_INSENSITIVE);
@@ -137,12 +139,12 @@ public class GoogleMapsIntegrationTest {
 
     private void dumpWindowHierarchy() {
         try {
-            File dumpFile = new File(InstrumentationRegistry.getInstrumentation().getTargetContext().getExternalFilesDir(null), "ui_dump.xml");
+            final File dumpFile = new File(InstrumentationRegistry.getInstrumentation().getTargetContext().getExternalFilesDir(null), "ui_dump.xml");
             device.dumpWindowHierarchy(dumpFile);
             Log.e(TAG, "==================================================");
             Log.e(TAG, "UI DUMP SAVED TO: " + dumpFile.getAbsolutePath());
             Log.e(TAG, "==================================================");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.e(TAG, "Failed to dump window hierarchy", e);
         }
     }

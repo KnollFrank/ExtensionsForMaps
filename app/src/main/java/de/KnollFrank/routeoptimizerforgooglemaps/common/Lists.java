@@ -1,6 +1,5 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.common;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -17,9 +16,5 @@ public class Lists {
                 .range(0, elements.size())
                 .mapToObj(index -> new IndexedElement<>(index, elements.get(index)))
                 .toList();
-    }
-
-    public static <T> List<T> toList(final T[] ts) {
-        return Arrays.stream(ts).toList();
     }
 }
