@@ -1,10 +1,8 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +23,7 @@ class OsrmRoutingMatricesProvider implements RoutingMatricesProvider {
     @Override
     public RouteOptimizer.RoutingMatrices getRoutingMatrices(final double startLat,
                                                              final double startLng,
-                                                             final List<RouteOptimizer.Stop> stops) throws JSONException, IOException {
+                                                             final List<RouteOptimizer.Stop> stops) throws Exception {
         final StringBuilder coordinatesStr = new StringBuilder();
         coordinatesStr.append(String.format(Locale.US, "%f,%f", startLng, startLat));
         for (final RouteOptimizer.Stop stop : stops) {
