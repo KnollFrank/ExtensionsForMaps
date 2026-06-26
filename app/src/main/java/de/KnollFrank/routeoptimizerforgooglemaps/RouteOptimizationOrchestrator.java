@@ -27,11 +27,11 @@ public class RouteOptimizationOrchestrator {
         this.callback = callback;
     }
 
-    public void processSharedText(final String sharedText) {
+    public void processSharedText(final String routeUrl) {
         callback.onOptimizationStarted();
         new Thread(() -> {
             try {
-                final String url = RouteInputParser.extractUrl(sharedText);
+                final String url = RouteInputParser.extractUrl(routeUrl);
                 String processingUrl = url;
                 if (url.contains("maps.app.goo.gl") || url.contains("goo.gl/maps")) {
                     processingUrl = UrlExpander.expandUrl(new URL(url)).toString();
@@ -51,7 +51,7 @@ public class RouteOptimizationOrchestrator {
                         finalRoute = optimizeRoute(completeStops);
                     }
                 } else {
-                    final List<String> addressList = RouteInputParser.parseAddresses(processingUrl.isEmpty() ? sharedText : processingUrl);
+                    final List<String> addressList = RouteInputParser.parseAddresses(processingUrl.isEmpty() ? routeUrl : processingUrl);
                     if (addressList.isEmpty()) {
                         callback.onError("No addresses found to optimize.");
                         return;
