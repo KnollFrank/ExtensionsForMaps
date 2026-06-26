@@ -10,10 +10,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.List;
 import java.util.Optional;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 
 public class MainActivity extends AppCompatActivity implements RouteOptimizationOrchestrator.Callback {
 
@@ -54,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
     }
 
     @Override
-    public void onOptimizationSuccess(final List<Stop> finalRoute) {
+    public void onOptimizationSuccess(final Route finalRoute) {
         runOnUiThread(() -> {
             progressBar.setVisibility(View.GONE);
             GoogleMapsNavigator.launchRouteOverview(this, finalRoute);

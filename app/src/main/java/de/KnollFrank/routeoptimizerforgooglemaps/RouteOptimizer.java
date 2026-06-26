@@ -60,9 +60,9 @@ public class RouteOptimizer {
 
     // FK-TODO: geschätzte Ersparnis in km und Zeit berechnen und anzeigen
     // FK-TODO: Routen optimieren für Auto, Fußgänger, Fahrrad und öffentliche Verkehrsmittel
-    public List<Stop> optimize(final Geodetic start,
-                               final List<Stop> stops,
-                               final OptimizationStrategy strategy) throws Exception {
+    public List<Stop> optimizeStops(final Geodetic start,
+                                    final List<Stop> stops,
+                                    final OptimizationStrategy strategy) throws Exception {
         final List<Stop> optimizedRoute = new ArrayList<>();
         if (stops.isEmpty()) {
             return optimizedRoute;
@@ -109,12 +109,13 @@ public class RouteOptimizer {
             final Stop stop = stops.get(i);
             final String jobId = stop.address() + "___" + i;
             stopMap.put(jobId, stop);
-
-            final Location stopLocation = Location.Builder.newInstance()
-                    .setId(String.valueOf(i + 1))
-                    .setCoordinate(getCoordinate(stop.geodetic()))
-                    .build();
-
+            final Location stopLocation =
+                    Location
+                            .Builder
+                            .newInstance()
+                            .setId(String.valueOf(i + 1))
+                            .setCoordinate(getCoordinate(stop.geodetic()))
+                            .build();
             final Service service =
                     Service
                             .Builder

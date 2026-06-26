@@ -1,12 +1,15 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
+import com.google.common.collect.ImmutableList;
+
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.common.HeadAndTail;
+import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.DirectionsUrlPredicate;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.GoogleMapsRouteExtractor;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
 public class RouteOptimizationOrchestrator {
@@ -15,8 +18,7 @@ public class RouteOptimizationOrchestrator {
 
         void onOptimizationStarted();
 
-        // FK-TODO: use de.KnollFrank.routeoptimizerforgooglemaps.route.Route instead of List<Stop>
-        void onOptimizationSuccess(List<Stop> finalRoute);
+        void onOptimizationSuccess(Route finalRoute);
 
         void onError(String message);
     }
@@ -35,18 +37,12 @@ public class RouteOptimizationOrchestrator {
         new Thread(() -> {
             try {
                 final URL expandedDirectionsUrl = expandShortDirectionsUrl(new URL(directionsUrl));
-                final List<Stop> stops =
-                        GoogleMapsRouteExtractor
-                                .extractRouteFromDirectionsUrl(expandedDirectionsUrl)
-                                .stops();
-                if (stops.isEmpty()) {
+                final Route route = GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(expandedDirectionsUrl);
+                if (route.stops().isEmpty()) {
                     callback.onError("No stops found in URL.");
                     return;
                 }
-                final List<Stop> finalRoute =
-                        stops.size() < 2 ?
-                                stops :
-                                optimizeRoute(stops);
+                final Route finalRoute = optimizeRoute(route);
                 callback.onOptimizationSuccess(finalRoute);
             } catch (final IOException e) {
                 callback.onError("Network error: " + e.getMessage());
@@ -62,18 +58,20 @@ public class RouteOptimizationOrchestrator {
                 directionsUrl;
     }
 
-    private List<Stop> optimizeRoute(final List<Stop> stops) throws Exception {
-        final Stop start = stops.get(0);
-        final List<Stop> intermediate = stops.subList(1, stops.size());
-        final List<Stop> optimizedIntermediate =
-                routeOptimizer.optimize(
-                        start.geodetic(),
-                        intermediate,
-                        RouteOptimizer.OptimizationStrategy.OSRM);
-        // FK-TODO: use guava ImmutableList
-        final List<Stop> finalRoute = new ArrayList<>();
-        finalRoute.add(start);
-        finalRoute.addAll(optimizedIntermediate);
-        return finalRoute;
+    private Route optimizeRoute(final Route route) throws Exception {
+        final HeadAndTail<Stop> startAndIntermediate =
+                Lists
+                        .asHeadAndTail(route.stops())
+                        .orElseThrow();
+        return new Route(
+                ImmutableList
+                        .<Stop>builder()
+                        .add(startAndIntermediate.head())
+                        .addAll(
+                                routeOptimizer.optimizeStops(
+                                        startAndIntermediate.head().geodetic(),
+                                        startAndIntermediate.tail(),
+                                        RouteOptimizer.OptimizationStrategy.OSRM))
+                        .build());
     }
 }

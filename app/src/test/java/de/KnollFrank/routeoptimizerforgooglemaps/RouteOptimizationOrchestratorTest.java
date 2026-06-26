@@ -11,6 +11,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
 @RunWith(RobolectricTestRunner.class)
@@ -42,17 +43,17 @@ public class RouteOptimizationOrchestratorTest {
                 };
 
         // When
-        final List<Stop> route = getRoute(routeUrl, routingMatricesProvider);
+        final Route route = getRoute(routeUrl, routingMatricesProvider);
 
         // Then
         Assert.assertEquals(
                 List.of("Central-Apotheke", "Unterhausen", "Hamburg"),
-                getAddresses(route));
+                getAddresses(route.stops()));
     }
 
-    private static List<Stop> getRoute(final String directionsUrl,
-                                       final RoutingMatricesProvider routingMatricesProvider) throws InterruptedException {
-        final AtomicReference<Optional<List<Stop>>> route = new AtomicReference<>(Optional.empty());
+    private static Route getRoute(final String directionsUrl,
+                                  final RoutingMatricesProvider routingMatricesProvider) throws InterruptedException {
+        final AtomicReference<Optional<Route>> route = new AtomicReference<>(Optional.empty());
         final CountDownLatch latch = new CountDownLatch(1);
         final RouteOptimizationOrchestrator orchestrator =
                 new RouteOptimizationOrchestrator(
@@ -64,7 +65,7 @@ public class RouteOptimizationOrchestratorTest {
     }
 
     private static RouteOptimizationOrchestrator.Callback createCallback(
-            final AtomicReference<Optional<List<Stop>>> route,
+            final AtomicReference<Optional<Route>> route,
             final CountDownLatch latch) {
         return new RouteOptimizationOrchestrator.Callback() {
 
@@ -73,7 +74,7 @@ public class RouteOptimizationOrchestratorTest {
             }
 
             @Override
-            public void onOptimizationSuccess(final List<Stop> finalRoute) {
+            public void onOptimizationSuccess(final Route finalRoute) {
                 route.set(Optional.of(finalRoute));
                 latch.countDown();
             }

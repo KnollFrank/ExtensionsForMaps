@@ -20,7 +20,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 public class RouteOptimizerTest {
 
     @Test
-    public void testOptimize_sortsByShortestDistance() throws Exception {
+    public void testOptimizeStops_sortsByShortestDistance() throws Exception {
         // Given
         final RouteOptimizer routeOptimizer = new RouteOptimizer(new OsrmRoutingMatricesProvider());
         final Geodetic berlin_start =
@@ -54,7 +54,7 @@ public class RouteOptimizerTest {
 
         // When
         final List<Stop> optimized =
-                routeOptimizer.optimize(
+                routeOptimizer.optimizeStops(
                         berlin_start,
                         List.of(munich_far, potsdam_very_close, leipzig_medium),
                         RouteOptimizer.OptimizationStrategy.HAVERSINE);
@@ -66,7 +66,7 @@ public class RouteOptimizerTest {
     }
 
     @Test
-    public void testOptimize_userBugReproduction_Exact() throws Exception {
+    public void testOptimizeStops_userBugReproduction_Exact() throws Exception {
         // Given
         final RouteOptimizer routeOptimizer = new RouteOptimizer(new OsrmRoutingMatricesProvider());
         final Geodetic start =
@@ -92,7 +92,7 @@ public class RouteOptimizerTest {
 
         // When
         final List<Stop> optimized =
-                routeOptimizer.optimize(
+                routeOptimizer.optimizeStops(
                         start,
                         List.of(hamburg, unterhausen),
                         RouteOptimizer.OptimizationStrategy.HAVERSINE);
@@ -104,7 +104,7 @@ public class RouteOptimizerTest {
     }
 
     @Test
-    public void testOptimize_osrmVsHaversine_LakeGarda() throws Exception {
+    public void testOptimizeStops_osrmVsHaversine_LakeGarda() throws Exception {
         // Given
         final RouteOptimizer routeOptimizer = new RouteOptimizer(new OsrmRoutingMatricesProvider());
         // Geografisches Hindernis: Der Gardasee (Lago di Garda) in Italien
@@ -141,7 +141,7 @@ public class RouteOptimizerTest {
         // ==========================================================
         // When
         final List<Stop> haversineRoute =
-                routeOptimizer.optimize(
+                routeOptimizer.optimizeStops(
                         start_LimoneSulGarda,
                         stops,
                         RouteOptimizer.OptimizationStrategy.HAVERSINE);
@@ -158,7 +158,7 @@ public class RouteOptimizerTest {
         // FK-TODO: für diesen Unittest bitte kein Internetzugriff, sondern hart codierte RoutingMatrices verwenden.
         // When
         final List<Stop> osrmRoute =
-                routeOptimizer.optimize(
+                routeOptimizer.optimizeStops(
                         start_LimoneSulGarda,
                         stops,
                         RouteOptimizer.OptimizationStrategy.OSRM);

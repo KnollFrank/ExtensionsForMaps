@@ -3,8 +3,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import android.app.Application; // <-- Neuer Import
-import android.content.Context;
+import android.app.Application;
 import android.content.Intent;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -12,16 +11,16 @@ import androidx.test.core.app.ApplicationProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows; // <-- Wichtiger neuer Import
+import org.robolectric.Shadows;
 import org.robolectric.shadows.ShadowApplication;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
 @RunWith(RobolectricTestRunner.class)
@@ -30,33 +29,35 @@ public class GoogleMapsNavigatorTest {
     @Test
     public void testLaunchRouteOverview_buildsCorrectIntentAndUrl() {
         // Arrange
-        final Context context = ApplicationProvider.getApplicationContext();
-        final List<Stop> optimizedStops =
-                Arrays.asList(
-                        new Stop(
-                                0,
-                                "Start",
-                                Optional.empty(),
-                                Geodetic.fromLatitudeLongitude(
-                                        new Angle(48.5216, Unit.DEGREES),
-                                        new Angle(9.0576, Unit.DEGREES))),
-                        new Stop(
-                                1,
-                                "Waypoint1",
-                                Optional.empty(),
-                                Geodetic.fromLatitudeLongitude(
-                                        new Angle(47.3769, Unit.DEGREES),
-                                        new Angle(8.5417, Unit.DEGREES))),
-                        new Stop(
-                                2,
-                                "Destination",
-                                Optional.empty(),
-                                Geodetic.fromLatitudeLongitude(
-                                        new Angle(45.4642, Unit.DEGREES),
-                                        new Angle(9.1900, Unit.DEGREES))));
+        final Route route =
+                new Route(
+                        List.of(
+                                new Stop(
+                                        0,
+                                        "Start",
+                                        Optional.empty(),
+                                        Geodetic.fromLatitudeLongitude(
+                                                new Angle(48.5216, Unit.DEGREES),
+                                                new Angle(9.0576, Unit.DEGREES))),
+                                new Stop(
+                                        1,
+                                        "Waypoint1",
+                                        Optional.empty(),
+                                        Geodetic.fromLatitudeLongitude(
+                                                new Angle(47.3769, Unit.DEGREES),
+                                                new Angle(8.5417, Unit.DEGREES))),
+                                new Stop(
+                                        2,
+                                        "Destination",
+                                        Optional.empty(),
+                                        Geodetic.fromLatitudeLongitude(
+                                                new Angle(45.4642, Unit.DEGREES),
+                                                new Angle(9.1900, Unit.DEGREES)))));
 
         // Act
-        GoogleMapsNavigator.launchRouteOverview(context, optimizedStops);
+        GoogleMapsNavigator.launchRouteOverview(
+                ApplicationProvider.getApplicationContext(),
+                route);
 
         // Assert
         // NEU: So holst du dir den gefeuerten Intent in aktuellen Robolectric-Versionen:
