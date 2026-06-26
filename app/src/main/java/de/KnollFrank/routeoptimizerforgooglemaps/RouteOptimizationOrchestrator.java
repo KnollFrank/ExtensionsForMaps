@@ -7,6 +7,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.route.GoogleMapsRouteExtractor;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
+
 public class RouteOptimizationOrchestrator {
 
     public interface Callback {
@@ -43,7 +46,11 @@ public class RouteOptimizationOrchestrator {
 
                 final List<RouteOptimizer.Stop> finalRoute;
                 if (processingUrl.contains("/maps/dir/")) {
-                    final List<RouteOptimizer.Stop> stops = RouteInputParser.extractStopsFromUrl(processingUrl);
+                    final List<RouteOptimizer.Stop> stops =
+                            convert(
+                                    GoogleMapsRouteExtractor
+                                            .extractRouteFromDirectionsUrl(new URL(processingUrl))
+                                            .stops());
                     if (stops.isEmpty()) {
                         callback.onError("No stops found in URL.");
                         return;
@@ -70,6 +77,20 @@ public class RouteOptimizationOrchestrator {
                 callback.onError("Error: " + e.getMessage());
             }
         }).start();
+    }
+
+    private static List<RouteOptimizer.Stop> convert(final List<Stop> stops) {
+        return stops
+                .stream()
+                .map(RouteOptimizationOrchestrator::convert)
+                .toList();
+    }
+
+    private static RouteOptimizer.Stop convert(final Stop stop) {
+        return new RouteOptimizer.Stop(
+                stop.address(),
+                stop.geodetic().getLatitude().toDegrees(),
+                stop.geodetic().getLongitude().toDegrees());
     }
 
     private List<RouteOptimizer.Stop> optimizeRoute(final List<RouteOptimizer.Stop> stops) throws Exception {

@@ -42,7 +42,7 @@ public class RouteOptimizer {
         OSRM
     }
 
-    // FK-TODO: use Labyrinth:org.labyrinth.coordinate.Geodetic instead of lat/lng at all places in this app
+    // FK-TODO: remove Stop and use  de.KnollFrank.routeoptimizerforgooglemaps.route.Stop and Route instead
     public record Stop(String address, double lat, double lng) {
     }
 

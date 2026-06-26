@@ -30,6 +30,7 @@ public class RouteInputParser {
         return url;
     }
 
+    // FK-TODO: remove method
     public static List<RouteOptimizer.Stop> extractStopsFromUrl(final String url) {
         final List<RouteOptimizer.Stop> stops = new ArrayList<>();
         final List<String> labels = new ArrayList<>();
