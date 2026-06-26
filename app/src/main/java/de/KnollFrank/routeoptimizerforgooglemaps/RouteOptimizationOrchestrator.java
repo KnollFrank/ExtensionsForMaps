@@ -18,7 +18,7 @@ public class RouteOptimizationOrchestrator {
 
         void onOptimizationStarted();
 
-        void onOptimizationSuccess(Route finalRoute);
+        void onOptimizationSuccess(Route optimizedRoute);
 
         void onError(String message);
     }

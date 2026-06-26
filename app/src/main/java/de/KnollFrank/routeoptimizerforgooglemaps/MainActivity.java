@@ -53,10 +53,10 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
     }
 
     @Override
-    public void onOptimizationSuccess(final Route finalRoute) {
+    public void onOptimizationSuccess(final Route optimizedRoute) {
         runOnUiThread(() -> {
             progressBar.setVisibility(View.GONE);
-            GoogleMapsNavigator.launchRouteOverview(this, finalRoute);
+            GoogleMapsNavigator.launchRouteOverview(this, optimizedRoute);
             finish();
         });
     }
