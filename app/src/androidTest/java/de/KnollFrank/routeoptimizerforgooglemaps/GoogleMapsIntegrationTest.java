@@ -69,7 +69,7 @@ public class GoogleMapsIntegrationTest {
         }
 
         // 2. Trigger "Share directions" directly from the Bottom-Sheet
-        Pattern sharePattern = Pattern.compile("Share|Share directions|Teilen|Wegbeschreibung teilen", Pattern.CASE_INSENSITIVE);
+        final Pattern sharePattern = Pattern.compile("Share|Share directions|Teilen|Wegbeschreibung teilen", Pattern.CASE_INSENSITIVE);
 
         UiObject2 shareBtn = device.wait(Until.findObject(By.desc(sharePattern)), TIMEOUT * 2);
         if (shareBtn == null) {
@@ -87,7 +87,7 @@ public class GoogleMapsIntegrationTest {
         boolean appFound = false;
 
         for (int i = 0; i < 7; i++) {
-            UiObject2 appInShareSheet = device.findObject(By.textContains("Routeopt"));
+            final UiObject2 appInShareSheet = device.findObject(By.textContains("Routeopt"));
 
             if (appInShareSheet != null) {
                 appInShareSheet.click();
@@ -95,9 +95,9 @@ public class GoogleMapsIntegrationTest {
                 break;
             }
 
-            int startX = device.getDisplayWidth() / 2;
-            int startY = (int) (device.getDisplayHeight() * 0.8);
-            int endY = (int) (device.getDisplayHeight() * 0.3);
+            final int startX = device.getDisplayWidth() / 2;
+            final int startY = (int) (device.getDisplayHeight() * 0.8);
+            final int endY = (int) (device.getDisplayHeight() * 0.3);
 
             device.swipe(startX, startY, startX, endY, 20);
             device.waitForIdle();
@@ -113,16 +113,16 @@ public class GoogleMapsIntegrationTest {
         // =====================================================================
 
         // Erhöhtes Timeout für die Hintergrundberechnung (UrlExpander + Geocoder + Jsprit)
-        boolean backInMaps = device.wait(Until.hasObject(By.pkg(MAPS_PACKAGE)), TIMEOUT * 3);
+        final boolean backInMaps = device.wait(Until.hasObject(By.pkg(MAPS_PACKAGE)), TIMEOUT * 3);
         assertTrue("Rückkehr zu Google Maps nach der Optimierung fehlgeschlagen", backInMaps);
 
         // Sicherstellen, dass die transparente Routeoptimizer-Activity ordnungsgemäß schließt
-        boolean appGone = device.wait(Until.gone(By.pkg(APP_PACKAGE)), TIMEOUT);
+        final boolean appGone = device.wait(Until.gone(By.pkg(APP_PACKAGE)), TIMEOUT);
         assertTrue("Routeoptimizer Activity wurde nach dem Prozess nicht beendet", appGone);
 
         // Überprüfung, ob die neue Route geladen wurde.
         // Da kein "Start"-Button angezeigt wird, prüfen wir auf das Vorhandensein des "Preview"-Buttons.
-        Pattern previewButtonPattern = Pattern.compile("^Preview$|^Preview route$", Pattern.CASE_INSENSITIVE);
+        final Pattern previewButtonPattern = Pattern.compile("^Preview$|^Preview route$", Pattern.CASE_INSENSITIVE);
 
         // Bis zu 30 Sekunden Geduld für das Rendern der geänderten Stopps durch Maps
         UiObject2 previewBtn = device.wait(Until.findObject(By.text(previewButtonPattern)), TIMEOUT * 2);
