@@ -20,11 +20,15 @@ public class RouteOptimizationOrchestrator {
 
     private final AddressResolver addressResolver;
     private final Callback callback;
+    private final RouteOptimizer routeOptimizer;
 
-    public RouteOptimizationOrchestrator(final Context context, final Callback callback) {
+    public RouteOptimizationOrchestrator(final Context context,
+                                         final Callback callback,
+                                         final RouteOptimizer routeOptimizer) {
         // Verwendung des ApplicationContext verhindert Memory Leaks im Hintergrund-Thread
         this.addressResolver = new AddressResolver(context.getApplicationContext());
         this.callback = callback;
+        this.routeOptimizer = routeOptimizer;
     }
 
     public void processSharedText(final String routeUrl) {
@@ -72,7 +76,7 @@ public class RouteOptimizationOrchestrator {
         final RouteOptimizer.Stop start = stops.get(0);
         final List<RouteOptimizer.Stop> intermediate = stops.subList(1, stops.size());
         final List<RouteOptimizer.Stop> optimizedIntermediate =
-                RouteOptimizer.optimize(
+                routeOptimizer.optimize(
                         start.lat(),
                         start.lng(),
                         intermediate,

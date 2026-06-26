@@ -17,6 +17,8 @@ public class RouteOptimizerTest {
 
     @Test
     public void testOptimize_sortsByShortestDistance() throws Exception {
+        final RouteOptimizer routeOptimizer = new RouteOptimizer(new OsrmRoutingMatricesProvider());
+
         // Start: Berlin (52.5200, 13.4050)
         final double startLat = 52.5200;
         final double startLng = 13.4050;
@@ -30,7 +32,7 @@ public class RouteOptimizerTest {
         stops.add(new RouteOptimizer.Stop("Leipzig", 51.3397, 12.3731));
 
         final List<RouteOptimizer.Stop> optimized =
-                RouteOptimizer.optimize(
+                routeOptimizer.optimize(
                         startLat,
                         startLng,
                         stops,
@@ -46,6 +48,7 @@ public class RouteOptimizerTest {
 
     @Test
     public void testOptimize_userBugReproduction_Exact() throws Exception {
+        final RouteOptimizer routeOptimizer = new RouteOptimizer(new OsrmRoutingMatricesProvider());
         // Exact coordinates from user URL
         double startLat = 48.4765345;
         double startLng = 8.9349008;
@@ -57,7 +60,7 @@ public class RouteOptimizerTest {
         stops.add(new RouteOptimizer.Stop("Unterhausen", 48.430628, 9.2546378));
 
         List<RouteOptimizer.Stop> optimized =
-                RouteOptimizer.optimize(
+                routeOptimizer.optimize(
                         startLat,
                         startLng,
                         stops,
@@ -73,6 +76,8 @@ public class RouteOptimizerTest {
 
     @Test
     public void testOptimize_osrmVsHaversine_LakeGarda() throws Exception {
+        final RouteOptimizer routeOptimizer = new RouteOptimizer(new OsrmRoutingMatricesProvider());
+
         // Geografisches Hindernis: Der Gardasee (Lago di Garda) in Italien
         // Start: Limone sul Garda (am Westufer des Sees)
         final double startLat = 45.8156;
@@ -93,7 +98,7 @@ public class RouteOptimizerTest {
         // Erwartung: Limone -> Malcesine (6km) -> Riva del Garda
         // ==========================================================
         final List<RouteOptimizer.Stop> haversineRoute =
-                RouteOptimizer.optimize(
+                routeOptimizer.optimize(
                         startLat,
                         startLng,
                         stops,
@@ -109,7 +114,7 @@ public class RouteOptimizerTest {
         // ==========================================================
         // FK-TODO: für diesen Unittest bitte kein Internetzugriff, sondern hart codierte RoutingMatrices verwenden.
         final List<RouteOptimizer.Stop> osrmRoute =
-                RouteOptimizer.optimize(
+                routeOptimizer.optimize(
                         startLat,
                         startLng,
                         stops,

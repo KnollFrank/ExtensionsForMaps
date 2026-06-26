@@ -23,7 +23,11 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         progressBar = findViewById(R.id.progressBar);
-        orchestrator = new RouteOptimizationOrchestrator(this, this);
+        orchestrator =
+                new RouteOptimizationOrchestrator(
+                        this,
+                        this,
+                        new RouteOptimizer(new OsrmRoutingMatricesProvider()));
         handleIntent(getIntent());
     }
 

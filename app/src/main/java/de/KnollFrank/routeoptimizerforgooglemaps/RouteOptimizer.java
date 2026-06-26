@@ -17,24 +17,21 @@ import com.graphhopper.jsprit.core.problem.vehicle.VehicleTypeImpl;
 import com.graphhopper.jsprit.core.util.Coordinate;
 import com.graphhopper.jsprit.core.util.Solutions;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import java.util.StringJoiner;
 
 public class RouteOptimizer {
+
+    private final RoutingMatricesProvider routingMatricesProvider;
+
+    public RouteOptimizer(final RoutingMatricesProvider routingMatricesProvider) {
+        this.routingMatricesProvider = routingMatricesProvider;
+    }
 
     // FK-FEATURE: biete neben der HaversineDistance auch folgendes an:
     //  + Embedded GraphHopper + GitHub-Download
@@ -45,27 +42,28 @@ public class RouteOptimizer {
         OSRM
     }
 
-    private static final OkHttpClient httpClient =
-            new OkHttpClient
-                    .Builder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(10, TimeUnit.SECONDS)
-                    .build();
-
     // FK-TODO: use Labyrinth:org.labyrinth.coordinate.Geodetic instead of lat/lng at all places in this app
     public record Stop(String address, double lat, double lng) {
     }
 
     // Interner Container für die OSRM Distanz- und Dauer-Matrizen
-    private record RoutingMatrices(double[][] distances, double[][] durations) {
+    public record RoutingMatrices(double[][] distances, double[][] durations) {
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", RoutingMatrices.class.getSimpleName() + "[", "]")
+                    .add("distances=" + Arrays.deepToString(distances))
+                    .add("durations=" + Arrays.deepToString(durations))
+                    .toString();
+        }
     }
 
     // FK-TODO: geschätzte Ersparnis in km und Zeit berechnen und anzeigen
     // FK-TODO: Routen optimieren für Auto, Fußgänger, Fahrrad und öffentliche Verkehrsmittel
-    public static List<Stop> optimize(final double startLat,
-                                      final double startLng,
-                                      final List<Stop> stops,
-                                      final OptimizationStrategy strategy) throws Exception {
+    public List<Stop> optimize(final double startLat,
+                               final double startLng,
+                               final List<Stop> stops,
+                               final OptimizationStrategy strategy) throws Exception {
         final List<Stop> optimizedRoute = new ArrayList<>();
         if (stops.isEmpty()) {
             return optimizedRoute;
@@ -100,7 +98,7 @@ public class RouteOptimizer {
         final VehicleRoutingTransportCosts transportCosts =
                 switch (strategy) {
                     case OSRM ->
-                            new OsrmTransportCosts(fetchOsrmMatrices(startLat, startLng, stops));
+                            new OsrmTransportCosts(routingMatricesProvider.getRoutingMatrices(startLat, startLng, stops));
                     case HAVERSINE -> new HaversineTransportCosts();
                 };
 
@@ -159,51 +157,6 @@ public class RouteOptimizer {
             optimizedRoute.addAll(stops);
         }
         return optimizedRoute;
-    }
-
-    private static RoutingMatrices fetchOsrmMatrices(final double startLat,
-                                                     final double startLng,
-                                                     final List<Stop> stops) throws JSONException, IOException {
-        final StringBuilder coordinatesStr = new StringBuilder();
-        coordinatesStr.append(String.format(Locale.US, "%f,%f", startLng, startLat));
-        for (final Stop stop : stops) {
-            coordinatesStr.append(";").append(String.format(Locale.US, "%f,%f", stop.lng, stop.lat));
-        }
-
-        final String url = "https://router.project-osrm.org/table/v1/driving/" + coordinatesStr
-                + "?annotations=distance,duration";
-
-        final Request request = new Request.Builder().url(url).build();
-        try (final Response response = httpClient.newCall(request).execute()) {
-            if (response.isSuccessful()) {
-                final JSONObject json = new JSONObject(response.body().string());
-                if (json.has("code") && "Ok".equals(json.getString("code"))) {
-
-                    final JSONArray distancesArray = json.getJSONArray("distances");
-                    final JSONArray durationsArray = json.getJSONArray("durations");
-
-                    final int size = distancesArray.length();
-                    final double[][] distances = new double[size][size];
-                    final double[][] durations = new double[size][size];
-
-                    for (int i = 0; i < size; i++) {
-                        final JSONArray rowDist = distancesArray.getJSONArray(i);
-                        final JSONArray rowDur = durationsArray.getJSONArray(i);
-                        for (int j = 0; j < size; j++) {
-                            if (rowDist.isNull(j) || rowDur.isNull(j)) {
-                                distances[i][j] = Double.MAX_VALUE;
-                                durations[i][j] = Double.MAX_VALUE;
-                            } else {
-                                distances[i][j] = rowDist.getDouble(j);
-                                durations[i][j] = rowDur.getDouble(j);
-                            }
-                        }
-                    }
-                    return new RoutingMatrices(distances, durations);
-                }
-            }
-        }
-        throw new IllegalStateException();
     }
 
     // =========================================================================================
