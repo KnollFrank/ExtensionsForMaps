@@ -42,7 +42,7 @@ public class RouteOptimizer {
         OSRM
     }
 
-    // FK-TODO: remove Stop and use  de.KnollFrank.routeoptimizerforgooglemaps.route.Stop and Route instead
+    // FK-TODO: remove Stop and use de.KnollFrank.routeoptimizerforgooglemaps.route.Stop and Route instead
     public record Stop(String address, double lat, double lng) {
     }
 

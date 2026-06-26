@@ -24,21 +24,21 @@ public class GoogleMapsNavigatorTest {
     @Test
     public void testLaunchRouteOverview_buildsCorrectIntentAndUrl() {
         // Arrange
-        Context context = ApplicationProvider.getApplicationContext();
-        List<RouteOptimizer.Stop> optimizedStops = Arrays.asList(
-                new RouteOptimizer.Stop("Start", 48.5216, 9.0576),      // Start
-                new RouteOptimizer.Stop("Waypoint1", 47.3769, 8.5417),  // Zwischenstopp
-                new RouteOptimizer.Stop("Destination", 45.4642, 9.1900) // Ziel
-                                                                );
+        final Context context = ApplicationProvider.getApplicationContext();
+        final List<RouteOptimizer.Stop> optimizedStops =
+                Arrays.asList(
+                        new RouteOptimizer.Stop("Start", 48.5216, 9.0576),      // Start
+                        new RouteOptimizer.Stop("Waypoint1", 47.3769, 8.5417),  // Zwischenstopp
+                        new RouteOptimizer.Stop("Destination", 45.4642, 9.1900) // Ziel
+                             );
 
         // Act
         GoogleMapsNavigator.launchRouteOverview(context, optimizedStops);
 
         // Assert
         // NEU: So holst du dir den gefeuerten Intent in aktuellen Robolectric-Versionen:
-        Application application = ApplicationProvider.getApplicationContext();
-        ShadowApplication shadowApp = Shadows.shadowOf(application);
-        Intent nextStartedActivity = shadowApp.getNextStartedActivity();
+        final ShadowApplication shadowApp = Shadows.shadowOf(ApplicationProvider.<Application>getApplicationContext());
+        final Intent nextStartedActivity = shadowApp.getNextStartedActivity();
 
         assertNotNull("Es wurde kein Intent gestartet", nextStartedActivity);
 
@@ -46,10 +46,11 @@ public class GoogleMapsNavigatorTest {
         assertEquals("com.google.android.apps.maps", nextStartedActivity.getPackage());
 
         // Prüfen, ob die URL exakt nach der offiziellen Maps Directions API gebaut wurde
-        String expectedUrl = "https://www.google.com/maps/dir/?api=1" +
-                "&origin=48.5216,9.0576" +
-                "&destination=45.4642,9.19" +
-                "&waypoints=47.3769,8.5417";
+        final String expectedUrl =
+                "https://www.google.com/maps/dir/?api=1" +
+                        "&origin=48.5216,9.0576" +
+                        "&destination=45.4642,9.19" +
+                        "&waypoints=47.3769,8.5417";
         assertEquals(expectedUrl, nextStartedActivity.getData().toString());
     }
 }

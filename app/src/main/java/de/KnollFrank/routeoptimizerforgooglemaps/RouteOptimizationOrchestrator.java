@@ -1,12 +1,11 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
-import android.content.Context;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.route.DirectionsUrlPredicate;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.GoogleMapsRouteExtractor;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
@@ -21,55 +20,33 @@ public class RouteOptimizationOrchestrator {
         void onError(String message);
     }
 
-    private final AddressResolver addressResolver;
     private final Callback callback;
     private final RouteOptimizer routeOptimizer;
 
-    public RouteOptimizationOrchestrator(final Context context,
-                                         final Callback callback,
-                                         final RouteOptimizer routeOptimizer) {
-        // Verwendung des ApplicationContext verhindert Memory Leaks im Hintergrund-Thread
-        this.addressResolver = new AddressResolver(context.getApplicationContext());
+    public RouteOptimizationOrchestrator(final Callback callback, final RouteOptimizer routeOptimizer) {
         this.callback = callback;
         this.routeOptimizer = routeOptimizer;
     }
 
-    public void processSharedText(final String routeUrl) {
+    // FK-TODO: refactor
+    public void optimizeRouteOfDirectionsUrl(final String directionsUrl) {
         callback.onOptimizationStarted();
         new Thread(() -> {
             try {
-                final String url = RouteInputParser.extractUrl(routeUrl);
-                String processingUrl = url;
-                if (url.contains("maps.app.goo.gl") || url.contains("goo.gl/maps")) {
-                    processingUrl = UrlExpander.expandUrl(new URL(url)).toString();
+                final URL expandedDirectionsUrl = expandShortDirectionsUrl(new URL(directionsUrl));
+                final List<RouteOptimizer.Stop> stops =
+                        convert(
+                                GoogleMapsRouteExtractor
+                                        .extractRouteFromDirectionsUrl(expandedDirectionsUrl)
+                                        .stops());
+                if (stops.isEmpty()) {
+                    callback.onError("No stops found in URL.");
+                    return;
                 }
-
-                final List<RouteOptimizer.Stop> finalRoute;
-                if (processingUrl.contains("/maps/dir/")) {
-                    final List<RouteOptimizer.Stop> stops =
-                            convert(
-                                    GoogleMapsRouteExtractor
-                                            .extractRouteFromDirectionsUrl(new URL(processingUrl))
-                                            .stops());
-                    if (stops.isEmpty()) {
-                        callback.onError("No stops found in URL.");
-                        return;
-                    }
-                    final List<RouteOptimizer.Stop> completeStops = addressResolver.resolveCoordinatesForStops(stops);
-                    if (completeStops.size() < 2) {
-                        finalRoute = completeStops;
-                    } else {
-                        finalRoute = optimizeRoute(completeStops);
-                    }
-                } else {
-                    final List<String> addressList = RouteInputParser.parseAddresses(processingUrl.isEmpty() ? routeUrl : processingUrl);
-                    if (addressList.isEmpty()) {
-                        callback.onError("No addresses found to optimize.");
-                        return;
-                    }
-                    final List<RouteOptimizer.Stop> resolvedStops = addressResolver.resolveAddressesToStops(addressList);
-                    finalRoute = optimizeRoute(resolvedStops);
-                }
+                final List<RouteOptimizer.Stop> finalRoute =
+                        stops.size() < 2 ?
+                                stops :
+                                optimizeRoute(stops);
                 callback.onOptimizationSuccess(finalRoute);
             } catch (final IOException e) {
                 callback.onError("Network error: " + e.getMessage());
@@ -77,6 +54,12 @@ public class RouteOptimizationOrchestrator {
                 callback.onError("Error: " + e.getMessage());
             }
         }).start();
+    }
+
+    private static URL expandShortDirectionsUrl(final URL directionsUrl) throws IOException {
+        return DirectionsUrlPredicate.isShortDirectionsUrl(directionsUrl) ?
+                UrlExpander.expandUrl(directionsUrl) :
+                directionsUrl;
     }
 
     private static List<RouteOptimizer.Stop> convert(final List<Stop> stops) {

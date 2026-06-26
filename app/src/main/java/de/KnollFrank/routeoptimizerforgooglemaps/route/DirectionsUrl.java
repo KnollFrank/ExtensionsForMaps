@@ -9,7 +9,7 @@ class DirectionsUrl {
     private final URL url;
 
     public static Optional<DirectionsUrl> of(final URL url) {
-        return isDirectionsUrl(url) ?
+        return DirectionsUrlPredicate.isDirectionsUrl(url) ?
                 Optional.of(new DirectionsUrl(url)) :
                 Optional.empty();
     }
@@ -24,11 +24,5 @@ class DirectionsUrl {
 
     public Optional<List<String>> getTokensFromDataPart() {
         return TokenProvider.getTokensFromDataPart(url);
-    }
-
-    private static boolean isDirectionsUrl(final URL url) {
-        return List.of("http", "https").contains(url.getProtocol()) &&
-                url.getHost().contains("google") &&
-                url.getPath().startsWith("/maps/dir/");
     }
 }

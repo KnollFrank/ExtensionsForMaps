@@ -1,0 +1,25 @@
+package de.KnollFrank.routeoptimizerforgooglemaps.route;
+
+import java.net.URL;
+import java.util.List;
+
+public class DirectionsUrlPredicate {
+
+    public static boolean isDirectionsUrl(final URL url) {
+        return List.of("http", "https").contains(url.getProtocol()) &&
+                url.getHost().contains("google") &&
+                url.getPath().startsWith("/maps/dir/");
+    }
+
+    public static boolean isShortDirectionsUrl(final URL url) {
+        return isShortDirectionsUrlNewType(url) || isShortDirectionsUrlOldType(url);
+    }
+
+    private static boolean isShortDirectionsUrlNewType(final URL url) {
+        return "maps.app.goo.gl".equals(url.getHost());
+    }
+
+    private static boolean isShortDirectionsUrlOldType(final URL url) {
+        return "goo.gl".equals(url.getHost()) && url.getPath().startsWith("/maps");
+    }
+}

@@ -26,7 +26,6 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
         orchestrator =
                 new RouteOptimizationOrchestrator(
                         this,
-                        this,
                         new RouteOptimizer(new OsrmRoutingMatricesProvider()));
         handleIntent(getIntent());
     }
@@ -41,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
         if (Intent.ACTION_SEND.equals(intent.getAction()) && ClipDescription.MIMETYPE_TEXT_PLAIN.equals(intent.getType())) {
             Optional
                     .ofNullable(intent.getStringExtra(Intent.EXTRA_TEXT))
-                    .ifPresent(orchestrator::processSharedText);
+                    .ifPresent(orchestrator::optimizeRouteOfDirectionsUrl);
         } else {
             finish();
         }
