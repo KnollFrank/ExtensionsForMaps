@@ -26,7 +26,6 @@
             android:name=".MainActivity"
             android:excludeFromRecents="true"
             android:exported="true"
-            android:icon="@mipmap/ic_route_optimizer"
             android:launchMode="singleTask"
             android:theme="@style/Theme.Transparent"
             android:windowSoftInputMode="adjustResize">
