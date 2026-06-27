@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RoutingMatrices;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RoutingMatricesProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
@@ -94,8 +95,8 @@ public class RouteOptimizationOrchestratorTest {
         return new RoutingMatricesProvider() {
 
             @Override
-            public RouteOptimizer.RoutingMatrices getRoutingMatrices(final Geodetic start, final List<Stop> stops) {
-                return new RouteOptimizer.RoutingMatrices(
+            public RoutingMatrices getRoutingMatrices(final Geodetic start, final List<Stop> stops) {
+                return new RoutingMatrices(
                         new double[][]{
                                 new double[]{0.0, 709743.3, 32104.7},
                                 new double[]{708177.6, 0.0, 716507.1},

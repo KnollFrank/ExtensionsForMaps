@@ -8,5 +8,5 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 @FunctionalInterface
 public interface RoutingMatricesProvider {
 
-    RouteOptimizer.RoutingMatrices getRoutingMatrices(final Geodetic start, final List<Stop> stops) throws Exception;
+    RoutingMatrices getRoutingMatrices(final Geodetic start, final List<Stop> stops) throws Exception;
 }

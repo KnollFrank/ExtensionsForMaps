@@ -57,7 +57,7 @@ public class RouteOptimizerTest {
                 routeOptimizer.optimizeStops(
                         berlin_start,
                         List.of(munich_far, potsdam_very_close, leipzig_medium),
-                        RouteOptimizer.OptimizationStrategy.HAVERSINE);
+                        OptimizationStrategy.HAVERSINE);
 
         // Then
         assertEquals(
@@ -95,7 +95,7 @@ public class RouteOptimizerTest {
                 routeOptimizer.optimizeStops(
                         start,
                         List.of(hamburg, unterhausen),
-                        RouteOptimizer.OptimizationStrategy.HAVERSINE);
+                        OptimizationStrategy.HAVERSINE);
 
         // Then
         assertEquals(
@@ -144,7 +144,7 @@ public class RouteOptimizerTest {
                 routeOptimizer.optimizeStops(
                         start_LimoneSulGarda,
                         stops,
-                        RouteOptimizer.OptimizationStrategy.HAVERSINE);
+                        OptimizationStrategy.HAVERSINE);
 
         // Then
         assertEquals(
@@ -161,7 +161,7 @@ public class RouteOptimizerTest {
                 routeOptimizer.optimizeStops(
                         start_LimoneSulGarda,
                         stops,
-                        RouteOptimizer.OptimizationStrategy.OSRM);
+                        OptimizationStrategy.OSRM);
 
         // Then
         assertEquals(

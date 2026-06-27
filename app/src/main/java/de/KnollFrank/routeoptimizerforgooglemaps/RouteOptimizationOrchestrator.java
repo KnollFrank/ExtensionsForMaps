@@ -7,6 +7,7 @@ import java.net.URL;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.common.HeadAndTail;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OptimizationStrategy;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.DirectionsUrlPredicate;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.GoogleMapsRouteExtractor;
@@ -72,7 +73,7 @@ public class RouteOptimizationOrchestrator {
                                 routeOptimizer.optimizeStops(
                                         startAndIntermediate.head().geodetic(),
                                         startAndIntermediate.tail(),
-                                        RouteOptimizer.OptimizationStrategy.OSRM))
+                                        OptimizationStrategy.OSRM))
                         .build());
     }
 }

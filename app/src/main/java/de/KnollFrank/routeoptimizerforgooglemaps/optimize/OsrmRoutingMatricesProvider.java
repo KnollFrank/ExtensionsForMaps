@@ -23,8 +23,8 @@ public class OsrmRoutingMatricesProvider implements RoutingMatricesProvider {
                     .build();
 
     @Override
-    public RouteOptimizer.RoutingMatrices getRoutingMatrices(final Geodetic start,
-                                                             final List<Stop> stops) throws Exception {
+    public RoutingMatrices getRoutingMatrices(final Geodetic start,
+                                              final List<Stop> stops) throws Exception {
         final StringBuilder coordinatesStr = new StringBuilder();
         coordinatesStr.append(String.format(Locale.US, "%f,%f", start.getLongitude().toDegrees(), start.getLatitude().toDegrees()));
         for (final Stop stop : stops) {
@@ -60,7 +60,7 @@ public class OsrmRoutingMatricesProvider implements RoutingMatricesProvider {
                             }
                         }
                     }
-                    return new RouteOptimizer.RoutingMatrices(distances, durations);
+                    return new RoutingMatrices(distances, durations);
                 }
             }
         }
