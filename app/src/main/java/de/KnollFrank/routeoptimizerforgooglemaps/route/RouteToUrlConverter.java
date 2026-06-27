@@ -1,5 +1,7 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
+import android.net.Uri;
+
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -17,55 +19,51 @@ public class RouteToUrlConverter {
         if (route.stops().size() < 2) {
             throw new IllegalArgumentException("Route must have at least an origin and a destination.");
         }
-        final StringBuilder urlBuilder = new StringBuilder("https://www.google.com/maps/dir/?api=1");
-        appendPoint(urlBuilder, "origin", route.getOrigin());
-        appendPoint(urlBuilder, "destination", route.getDestination());
-        appendWaypoints(urlBuilder, route);
-        return URLs.createUrl(urlBuilder.toString());
+        final Uri.Builder builder = creaetUriBuilder();
+        appendPoint(builder, "origin", route.getOrigin());
+        appendPoint(builder, "destination", route.getDestination());
+        appendWaypoints(builder, route.getWaypoints());
+        return URLs.createUrl(builder.build().toString());
     }
 
-    private static void appendPoint(final StringBuilder sb,
-                                    final String prefix,
-                                    final Stop stop) {
-        sb
-                .append("&")
-                .append(prefix)
-                .append("=")
-                .append(formatStop(stop));
-        stop
-                .placeId()
-                .ifPresent(
-                        placeId ->
-                                sb
-                                        .append("&")
-                                        .append(prefix)
-                                        .append("_place_id=")
-                                        .append(placeId));
+    private static Uri.Builder creaetUriBuilder() {
+        return new Uri
+                .Builder()
+                .scheme("https")
+                .authority("www.google.com")
+                .path("/maps/dir/")
+                .appendQueryParameter("api", "1");
     }
 
-    // FK-TODO: refactor
-    private static void appendWaypoints(final StringBuilder urlBuilder, final Route route) {
-        if (route.stops().size() > 2) {
-            final List<Stop> waypoints = route.getWaypoints();
-            urlBuilder
-                    .append("&waypoints=")
-                    .append(formatStops(waypoints));
-            if (waypoints.stream().anyMatch(waypoint -> waypoint.placeId().isPresent())) {
-                final String waypointPlaceIds =
-                        waypoints
-                                .stream()
-                                .map(stop -> stop.placeId().orElse(""))
-                                .collect(Collectors.joining("|"));
-                urlBuilder
-                        .append("&waypoint_place_ids=")
-                        .append(waypointPlaceIds);
-            }
+    private static void appendPoint(final Uri.Builder builder, final String key, final Stop stop) {
+        builder.appendQueryParameter(key, formatStop(stop));
+        stop.placeId().ifPresent(placeId -> builder.appendQueryParameter(key + "_place_id", placeId));
+    }
+
+    private static void appendWaypoints(final Uri.Builder builder, final List<Stop> waypoints) {
+        if (waypoints.isEmpty()) {
+            return;
         }
+        builder.appendQueryParameter("waypoints", formatStops(waypoints));
+        if (hasAnyPlaceId(waypoints)) {
+            builder.appendQueryParameter("waypoint_place_ids", formatPlaceIds(waypoints));
+        }
+    }
+
+    private static boolean hasAnyPlaceId(final List<Stop> stops) {
+        return stops.stream().anyMatch(stop -> stop.placeId().isPresent());
+    }
+
+    private static String formatPlaceIds(final List<Stop> stops) {
+        return stops
+                .stream()
+                .map(stop -> stop.placeId().orElse(""))
+                .collect(Collectors.joining("|"));
     }
 
     private static String formatStop(final Stop stop) {
         return stop.placeId().isPresent() ?
-                URLs.encode(stop.address()) :
+                stop.address() :
                 formatCoordinates(stop);
     }
 

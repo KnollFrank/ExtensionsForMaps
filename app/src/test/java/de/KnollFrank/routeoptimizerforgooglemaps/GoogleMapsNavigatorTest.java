@@ -70,9 +70,9 @@ public class GoogleMapsNavigatorTest {
         // Prüfen, ob die URL exakt nach der offiziellen Maps Directions API gebaut wurde
         final String expectedUrl =
                 "https://www.google.com/maps/dir/?api=1" +
-                        "&origin=48.5216,9.0576" +
-                        "&destination=45.4642,9.19" +
-                        "&waypoints=47.3769,8.5417";
+                        "&origin=48.5216%2C9.0576" +
+                        "&destination=45.4642%2C9.19" +
+                        "&waypoints=47.3769%2C8.5417";
         assertEquals(expectedUrl, nextStartedActivity.getData().toString());
     }
 }

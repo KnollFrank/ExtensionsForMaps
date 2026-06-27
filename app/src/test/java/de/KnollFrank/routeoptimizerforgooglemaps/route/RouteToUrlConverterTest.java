@@ -5,6 +5,8 @@ import static org.junit.Assert.assertThrows;
 import static de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit.DEGREES;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import java.net.URL;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.Optional;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 
+@RunWith(RobolectricTestRunner.class)
 public class RouteToUrlConverterTest {
 
     @Test
@@ -41,7 +44,7 @@ public class RouteToUrlConverterTest {
 
         // Then
         assertEquals(
-                "https://www.google.com/maps/dir/?api=1&origin=48.5016154,8.9930185&destination=48.476549,8.9349058",
+                "https://www.google.com/maps/dir/?api=1&origin=48.5016154%2C8.9930185&destination=48.476549%2C8.9349058",
                 result.toString());
     }
 
@@ -79,7 +82,7 @@ public class RouteToUrlConverterTest {
 
         // Then
         assertEquals(
-                "https://www.google.com/maps/dir/?api=1&origin=10,20&destination=30,40&waypoints=15,25",
+                "https://www.google.com/maps/dir/?api=1&origin=10%2C20&destination=30%2C40&waypoints=15%2C25",
                 result.toString());
     }
 
@@ -125,7 +128,7 @@ public class RouteToUrlConverterTest {
 
         // Then
         assertEquals(
-                "https://www.google.com/maps/dir/?api=1&origin=10,20&destination=30,40&waypoints=15,25|20,30",
+                "https://www.google.com/maps/dir/?api=1&origin=10%2C20&destination=30%2C40&waypoints=15%2C25%7C20%2C30",
                 result.toString());
     }
 
@@ -163,7 +166,7 @@ public class RouteToUrlConverterTest {
 
         // Then
         assertEquals(
-                "https://www.google.com/maps/dir/?api=1&origin=Origin+City&origin_place_id=place1&destination=Destination+Landmark&destination_place_id=place3&waypoints=Waypoint+Street&waypoint_place_ids=place2",
+                "https://www.google.com/maps/dir/?api=1&origin=Origin%20City&origin_place_id=place1&destination=Destination%20Landmark&destination_place_id=place3&waypoints=Waypoint%20Street&waypoint_place_ids=place2",
                 result.toString());
     }
 
@@ -209,7 +212,7 @@ public class RouteToUrlConverterTest {
 
         // Then
         assertEquals(
-                "https://www.google.com/maps/dir/?api=1&origin=Origin&origin_place_id=place1&destination=Destination&destination_place_id=place3&waypoints=W1|20,30&waypoint_place_ids=placeW1|",
+                "https://www.google.com/maps/dir/?api=1&origin=Origin&origin_place_id=place1&destination=Destination&destination_place_id=place3&waypoints=W1%7C20%2C30&waypoint_place_ids=placeW1%7C",
                 result.toString());
     }
 
