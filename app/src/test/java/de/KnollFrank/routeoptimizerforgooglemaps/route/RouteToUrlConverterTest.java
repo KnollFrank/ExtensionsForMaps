@@ -135,7 +135,7 @@ public class RouteToUrlConverterTest {
         final Stop origin =
                 new Stop(
                         1,
-                        "Origin",
+                        "Origin City",
                         Optional.of("place1"),
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(10.0, DEGREES),
@@ -143,7 +143,7 @@ public class RouteToUrlConverterTest {
         final Stop waypoint =
                 new Stop(
                         2,
-                        "Waypoint",
+                        "Waypoint Street",
                         Optional.of("place2"),
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(15.0, DEGREES),
@@ -151,7 +151,7 @@ public class RouteToUrlConverterTest {
         final Stop destination =
                 new Stop(
                         3,
-                        "Destination",
+                        "Destination Landmark",
                         Optional.of("place3"),
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(30.0, DEGREES),
@@ -163,7 +163,7 @@ public class RouteToUrlConverterTest {
 
         // Then
         assertEquals(
-                "https://www.google.com/maps/dir/?api=1&origin=10,20&origin_place_id=place1&destination=30,40&destination_place_id=place3&waypoints=15,25&waypoint_place_ids=place2",
+                "https://www.google.com/maps/dir/?api=1&origin=Origin+City&origin_place_id=place1&destination=Destination+Landmark&destination_place_id=place3&waypoints=Waypoint+Street&waypoint_place_ids=place2",
                 result.toString());
     }
 
@@ -209,7 +209,7 @@ public class RouteToUrlConverterTest {
 
         // Then
         assertEquals(
-                "https://www.google.com/maps/dir/?api=1&origin=10,20&origin_place_id=place1&destination=30,40&destination_place_id=place3&waypoints=15,25|20,30&waypoint_place_ids=placeW1|",
+                "https://www.google.com/maps/dir/?api=1&origin=Origin&origin_place_id=place1&destination=Destination&destination_place_id=place3&waypoints=W1|20,30&waypoint_place_ids=placeW1|",
                 result.toString());
     }
 

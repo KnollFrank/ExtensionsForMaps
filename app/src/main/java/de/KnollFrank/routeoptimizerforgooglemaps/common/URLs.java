@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -16,6 +17,15 @@ public class URLs {
         try {
             return new URL(url);
         } catch (final MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // FK-TODO: DRY with decode()
+    public static String encode(final String str) {
+        try {
+            return URLEncoder.encode(str, StandardCharsets.UTF_8.name());
+        } catch (final UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }

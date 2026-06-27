@@ -24,16 +24,32 @@ public class RouteToUrlConverter {
         return URLs.createUrl(urlBuilder.toString());
     }
 
+    private static void appendPoint(final StringBuilder sb,
+                                    final String prefix,
+                                    final Stop stop) {
+        sb
+                .append("&")
+                .append(prefix)
+                .append("=")
+                .append(formatStop(stop));
+        stop
+                .placeId()
+                .ifPresent(
+                        placeId ->
+                                sb
+                                        .append("&")
+                                        .append(prefix)
+                                        .append("_place_id=")
+                                        .append(placeId));
+    }
+
+    // FK-TODO: refactor
     private static void appendWaypoints(final StringBuilder urlBuilder, final Route route) {
         if (route.stops().size() > 2) {
             final List<Stop> waypoints = route.getWaypoints();
             urlBuilder
                     .append("&waypoints=")
-                    .append(
-                            waypoints
-                                    .stream()
-                                    .map(RouteToUrlConverter::formatCoordinates)
-                                    .collect(Collectors.joining("|")));
+                    .append(formatStops(waypoints));
             if (waypoints.stream().anyMatch(waypoint -> waypoint.placeId().isPresent())) {
                 final String waypointPlaceIds =
                         waypoints
@@ -47,23 +63,17 @@ public class RouteToUrlConverter {
         }
     }
 
-    private static void appendPoint(final StringBuilder sb,
-                                    final String prefix,
-                                    final Stop stop) {
-        sb
-                .append("&")
-                .append(prefix)
-                .append("=")
-                .append(formatCoordinates(stop));
-        stop
-                .placeId()
-                .ifPresent(
-                        placeId ->
-                                sb
-                                        .append("&")
-                                        .append(prefix)
-                                        .append("_place_id=")
-                                        .append(placeId));
+    private static String formatStop(final Stop stop) {
+        return stop.placeId().isPresent() ?
+                URLs.encode(stop.address()) :
+                formatCoordinates(stop);
+    }
+
+    private static String formatStops(final List<Stop> stops) {
+        return stops
+                .stream()
+                .map(RouteToUrlConverter::formatStop)
+                .collect(Collectors.joining("|"));
     }
 
     private static String formatCoordinates(final Stop stop) {
