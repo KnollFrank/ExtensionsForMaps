@@ -55,9 +55,7 @@ public class GoogleMapsNavigatorTest {
                                                 new Angle(9.1900, Unit.DEGREES)))));
 
         // Act
-        GoogleMapsNavigator.launchRouteOverview(
-                ApplicationProvider.getApplicationContext(),
-                route);
+        GoogleMapsNavigator.launchRouteOverview(route, ApplicationProvider.getApplicationContext());
 
         // Assert
         // NEU: So holst du dir den gefeuerten Intent in aktuellen Robolectric-Versionen:
