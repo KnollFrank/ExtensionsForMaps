@@ -3,6 +3,8 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import static de.KnollFrank.routeoptimizerforgooglemaps.route.Stops.getAddresses;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -104,13 +106,5 @@ public class RouteOptimizationOrchestratorTest {
                         });
             }
         };
-    }
-
-    // FK-TODO: move method to Stops class
-    public static List<String> getAddresses(final List<Stop> stops) {
-        return stops
-                .stream()
-                .map(Stop::address)
-                .toList();
     }
 }

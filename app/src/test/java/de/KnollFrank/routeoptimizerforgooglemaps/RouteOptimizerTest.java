@@ -2,7 +2,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import static org.junit.Assert.assertEquals;
 
-import static de.KnollFrank.routeoptimizerforgooglemaps.RouteOptimizationOrchestratorTest.getAddresses;
+import static de.KnollFrank.routeoptimizerforgooglemaps.route.Stops.getAddresses;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
