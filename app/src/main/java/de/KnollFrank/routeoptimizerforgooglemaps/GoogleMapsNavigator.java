@@ -12,10 +12,6 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteToUrlConverter;
 public class GoogleMapsNavigator {
 
     public static void launchRouteOverview(final Route route, final Context context) {
-        if (route.stops().size() < 2) {
-            // FK-TODO: anders behandeln, nicht einfach stillschweigend mit "return" nichts tun
-            return;
-        }
         launchUrl(RouteToUrlConverter.getUrl(route), context);
     }
 

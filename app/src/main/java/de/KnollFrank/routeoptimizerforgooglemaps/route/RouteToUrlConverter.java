@@ -1,51 +1,73 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 import java.net.URL;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
+import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 
 public class RouteToUrlConverter {
 
     // FK-TODO: add unit test for building the URL.
     public static URL getUrl(final Route route) {
-        // 1. The modern, official Google Maps Directions API endpoint
+        if (route.stops().size() < 2) {
+            throw new IllegalArgumentException("Route must have at least an origin and a destination.");
+        }
         final StringBuilder urlBuilder = new StringBuilder("https://www.google.com/maps/dir/?api=1");
+        appendPoint(urlBuilder, "origin", route.getOrigin());
+        appendPoint(urlBuilder, "destination", route.getDestination());
+        appendWaypoints(urlBuilder, route);
+        return URLs.createUrl(urlBuilder.toString());
+    }
 
-        // 2. Set the exact coordinates for the starting point
-        final Stop origin = Lists.getHead(route.stops()).orElseThrow();
-        // FK-TODO: add origin_place_id
-        urlBuilder
-                .append("&origin=")
-                .append(origin.geodetic().getLatitude().toDegrees())
-                .append(",")
-                .append(origin.geodetic().getLongitude().toDegrees());
-
-        // 3. Set the exact coordinates for the final destination
-        final Stop destination = Lists.getLastElement(route.stops()).orElseThrow();
-        // FK-TODO: add destination_place_id
-        urlBuilder
-                .append("&destination=")
-                .append(destination.geodetic().getLatitude().toDegrees())
-                .append(",")
-                .append(destination.geodetic().getLongitude().toDegrees());
-
-        // 4. Handle intermediate waypoints if there are any stops in between
+    private static void appendWaypoints(final StringBuilder urlBuilder, final Route route) {
         if (route.stops().size() > 2) {
-            // FK-TODO: add waypoint_place_ids
-            urlBuilder.append("&waypoints=");
-            for (int i = 1; i < route.stops().size() - 1; i++) {
-                final Stop waypoint = route.stops().get(i);
+            final List<Stop> waypoints = route.getWaypoints();
+            urlBuilder
+                    .append("&waypoints=")
+                    .append(
+                            waypoints
+                                    .stream()
+                                    .map(RouteToUrlConverter::formatCoordinates)
+                                    .collect(Collectors.joining("|")));
+            if (waypoints.stream().anyMatch(waypoint -> waypoint.placeId().isPresent())) {
+                final String waypointPlaceIds =
+                        waypoints
+                                .stream()
+                                .map(stop -> stop.placeId().orElse(""))
+                                .collect(Collectors.joining("|"));
                 urlBuilder
-                        .append(waypoint.geodetic().getLatitude().toDegrees())
-                        .append(",")
-                        .append(waypoint.geodetic().getLongitude().toDegrees());
-                // Modern API separates multiple waypoints using the pipe character '|'
-                if (i < route.stops().size() - 2) {
-                    urlBuilder.append("|");
-                }
+                        .append("&waypoint_place_ids=")
+                        .append(waypointPlaceIds);
             }
         }
-        return URLs.createUrl(urlBuilder.toString());
+    }
+
+    private static void appendPoint(final StringBuilder sb,
+                                    final String prefix,
+                                    final Stop stop) {
+        sb
+                .append("&")
+                .append(prefix)
+                .append("=")
+                .append(formatCoordinates(stop));
+        stop
+                .placeId()
+                .ifPresent(
+                        placeId ->
+                                sb
+                                        .append("&")
+                                        .append(prefix)
+                                        .append("_place_id=")
+                                        .append(placeId));
+    }
+
+    private static String formatCoordinates(final Stop stop) {
+        return format(stop.geodetic().getLatitude()) + "," + format(stop.geodetic().getLongitude());
+    }
+
+    private static String format(final Angle angle) {
+        return String.valueOf(angle.toDegrees());
     }
 }
