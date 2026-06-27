@@ -16,13 +16,10 @@ public class RouteToUrlConverter {
 
     // FK-TODO: refactor
     public static URL getUrl(final Route route) {
-        if (route.stops().size() < 2) {
-            throw new IllegalArgumentException("Route must have at least an origin and a destination.");
-        }
         final Uri.Builder builder = creaetUriBuilder();
-        appendPoint(builder, "origin", route.getOrigin());
-        appendPoint(builder, "destination", route.getDestination());
-        appendWaypoints(builder, route.getWaypoints());
+        appendPoint(builder, "origin", route.origin());
+        appendPoint(builder, "destination", route.destination());
+        appendWaypoints(builder, route.waypoints());
         return URLs.createUrl(builder.build().toString());
     }
 

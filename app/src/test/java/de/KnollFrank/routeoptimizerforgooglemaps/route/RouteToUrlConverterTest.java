@@ -1,7 +1,6 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 import static de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit.DEGREES;
 
 import org.junit.Test;
@@ -214,24 +213,5 @@ public class RouteToUrlConverterTest {
         assertEquals(
                 "https://www.google.com/maps/dir/?api=1&origin=Origin&origin_place_id=place1&destination=Destination&destination_place_id=place3&waypoints=W1%7C20%2C30&waypoint_place_ids=placeW1%7C",
                 result.toString());
-    }
-
-    @Test
-    public void testGetUrl_TooFewStops_ThrowsException() {
-        // Given
-        final Stop origin =
-                new Stop(
-                        1,
-                        "Origin",
-                        Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(10.0, DEGREES),
-                                new Angle(20.0, DEGREES)));
-        final Route route = new Route(List.of(origin));
-
-        // When & Then
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> RouteToUrlConverter.getUrl(route));
     }
 }
