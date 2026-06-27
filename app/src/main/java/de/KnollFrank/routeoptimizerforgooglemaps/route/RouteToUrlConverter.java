@@ -1,7 +1,10 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
@@ -9,7 +12,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 
 public class RouteToUrlConverter {
 
-    // FK-TODO: add unit test for building the URL.
+    // FK-TODO: refactor
     public static URL getUrl(final Route route) {
         if (route.stops().size() < 2) {
             throw new IllegalArgumentException("Route must have at least an origin and a destination.");
@@ -68,6 +71,7 @@ public class RouteToUrlConverter {
     }
 
     private static String format(final Angle angle) {
-        return String.valueOf(angle.toDegrees());
+        final DecimalFormat df = new DecimalFormat("#.#######", DecimalFormatSymbols.getInstance(Locale.US));
+        return df.format(angle.toDegrees());
     }
 }
