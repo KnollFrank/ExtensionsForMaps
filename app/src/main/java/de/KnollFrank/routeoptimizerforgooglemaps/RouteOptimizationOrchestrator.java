@@ -7,6 +7,7 @@ import java.net.URL;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.common.HeadAndTail;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.DirectionsUrlPredicate;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.GoogleMapsRouteExtractor;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;

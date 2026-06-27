@@ -1,4 +1,4 @@
-package de.KnollFrank.routeoptimizerforgooglemaps;
+package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
 
 import java.util.List;
 
