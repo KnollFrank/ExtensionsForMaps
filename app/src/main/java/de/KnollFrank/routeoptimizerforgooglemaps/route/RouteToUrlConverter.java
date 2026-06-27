@@ -1,11 +1,14 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
+import java.net.URL;
+
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
+import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 
 public class RouteToUrlConverter {
 
     // FK-TODO: add unit test for building the URL.
-    public static String getUrl(final Route route) {
+    public static URL getUrl(final Route route) {
         // 1. The modern, official Google Maps Directions API endpoint
         final StringBuilder urlBuilder = new StringBuilder("https://www.google.com/maps/dir/?api=1");
 
@@ -43,6 +46,6 @@ public class RouteToUrlConverter {
                 }
             }
         }
-        return urlBuilder.toString();
+        return URLs.createUrl(urlBuilder.toString());
     }
 }

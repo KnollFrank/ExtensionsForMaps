@@ -1,6 +1,8 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.common;
 
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -8,6 +10,14 @@ import java.util.List;
 public class URLs {
 
     private URLs() {
+    }
+
+    public static URL createUrl(final String url) {
+        try {
+            return new URL(url);
+        } catch (final MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static String decode(final String str) {
