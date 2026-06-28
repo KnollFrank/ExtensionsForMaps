@@ -1,6 +1,5 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
 
-import com.google.common.collect.ImmutableList;
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
 import com.graphhopper.jsprit.core.problem.Location;
@@ -22,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
@@ -64,11 +64,7 @@ public class RouteOptimizer {
                     case OSRM -> new OsrmTransportCosts(
                             routingMatricesProvider.getRoutingMatrices(
                                     route.origin().geodetic(),
-                                    ImmutableList
-                                            .<Stop>builder()
-                                            .addAll(route.waypoints())
-                                            .add(route.destination())
-                                            .build()));
+                                    getGeodetics(Lists.concat(route.waypoints(), route.destination()))));
                     case HAVERSINE -> new HaversineTransportCosts();
                 };
 
@@ -135,5 +131,12 @@ public class RouteOptimizer {
         return Coordinate.newInstance(
                 geodetic.getLongitude().toDegrees(),
                 geodetic.getLatitude().toDegrees());
+    }
+
+    private static List<Geodetic> getGeodetics(final List<Stop> stops) {
+        return stops
+                .stream()
+                .map(Stop::geodetic)
+                .toList();
     }
 }

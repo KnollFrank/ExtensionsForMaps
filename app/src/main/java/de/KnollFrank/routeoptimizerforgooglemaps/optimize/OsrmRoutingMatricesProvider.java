@@ -6,9 +6,10 @@ import org.json.JSONObject;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
-import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -23,17 +24,9 @@ public class OsrmRoutingMatricesProvider implements RoutingMatricesProvider {
                     .build();
 
     @Override
-    // FK-TODO: es reicht "final List<Geodetic/* statt Stop*/> stops"
-    public RoutingMatrices getRoutingMatrices(final Geodetic start, final List<Stop> stops) throws Exception {
-        final StringBuilder coordinatesStr = new StringBuilder();
-        coordinatesStr.append(String.format(Locale.US, "%f,%f", start.getLongitude().toDegrees(), start.getLatitude().toDegrees()));
-        for (final Stop stop : stops) {
-            coordinatesStr.append(";").append(String.format(Locale.US, "%f,%f", stop.geodetic().getLongitude().toDegrees(), stop.geodetic().getLatitude().toDegrees()));
-        }
-
-        final String url = "https://router.project-osrm.org/table/v1/driving/" + coordinatesStr
-                + "?annotations=distance,duration";
-
+    // FK-TODO: refactor
+    public RoutingMatrices getRoutingMatrices(final Geodetic start, final List<Geodetic> stops) throws Exception {
+        final String url = "https://router.project-osrm.org/table/v1/driving/" + format(start, stops) + "?annotations=distance,duration";
         final Request request = new Request.Builder().url(url).build();
         try (final Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful()) {
@@ -65,5 +58,17 @@ public class OsrmRoutingMatricesProvider implements RoutingMatricesProvider {
             }
         }
         throw new IllegalStateException();
+    }
+
+    private static String format(final Geodetic start, final List<Geodetic> stops) {
+        return Lists
+                .concat(start, stops)
+                .stream()
+                .map(OsrmRoutingMatricesProvider::format)
+                .collect(Collectors.joining(";"));
+    }
+
+    private static String format(final Geodetic geodetic) {
+        return String.format(Locale.US, "%f,%f", geodetic.getLongitude().toDegrees(), geodetic.getLatitude().toDegrees());
     }
 }

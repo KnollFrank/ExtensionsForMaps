@@ -1,5 +1,7 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.common;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -43,5 +45,21 @@ public class Lists {
         return ts.isEmpty() ?
                 Optional.empty() :
                 Optional.of(ts.subList(1, ts.size()));
+    }
+
+    public static <T> List<T> concat(final T head, final List<T> tail) {
+        return ImmutableList
+                .<T>builder()
+                .add(head)
+                .addAll(tail)
+                .build();
+    }
+
+    public static <T> List<T> concat(final List<T> ts, final T t) {
+        return ImmutableList
+                .<T>builder()
+                .addAll(ts)
+                .add(t)
+                .build();
     }
 }

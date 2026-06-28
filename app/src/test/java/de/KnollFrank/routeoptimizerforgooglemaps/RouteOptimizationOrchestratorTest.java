@@ -2,7 +2,6 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import static de.KnollFrank.routeoptimizerforgooglemaps.route.Stops.getAddresses;
 
 import org.junit.Test;
@@ -19,7 +18,6 @@ import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RoutingMatrices;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RoutingMatricesProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
-import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
 @RunWith(RobolectricTestRunner.class)
 public class RouteOptimizationOrchestratorTest {
@@ -95,7 +93,7 @@ public class RouteOptimizationOrchestratorTest {
         return new RoutingMatricesProvider() {
 
             @Override
-            public RoutingMatrices getRoutingMatrices(final Geodetic start, final List<Stop> stops) {
+            public RoutingMatrices getRoutingMatrices(final Geodetic start, final List<Geodetic> stops) {
                 return new RoutingMatrices(
                         new double[][]{
                                 new double[]{0.0, 709743.3, 32104.7},
