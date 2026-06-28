@@ -53,12 +53,6 @@ public class RouteOptimizationOrchestrator {
     }
 
     private Route optimizeRoute(final Route route) throws Exception {
-        return new Route(
-                route.origin(),
-                routeOptimizer.optimizeStops(
-                        route.origin().geodetic(),
-                        route.waypoints(),
-                        OptimizationStrategy.OSRM),
-                route.destination());
+        return routeOptimizer.optimizeRoute(route, OptimizationStrategy.OSRM);
     }
 }

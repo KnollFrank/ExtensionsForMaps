@@ -23,8 +23,8 @@ public class OsrmRoutingMatricesProvider implements RoutingMatricesProvider {
                     .build();
 
     @Override
-    public RoutingMatrices getRoutingMatrices(final Geodetic start,
-                                              final List<Stop> stops) throws Exception {
+    // FK-TODO: es reicht "final List<Geodetic/* statt Stop*/> stops"
+    public RoutingMatrices getRoutingMatrices(final Geodetic start, final List<Stop> stops) throws Exception {
         final StringBuilder coordinatesStr = new StringBuilder();
         coordinatesStr.append(String.format(Locale.US, "%f,%f", start.getLongitude().toDegrees(), start.getLatitude().toDegrees()));
         for (final Stop stop : stops) {

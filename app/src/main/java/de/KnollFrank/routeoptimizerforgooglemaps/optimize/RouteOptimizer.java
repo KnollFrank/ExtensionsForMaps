@@ -1,5 +1,6 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
 
+import com.google.common.collect.ImmutableList;
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
 import com.graphhopper.jsprit.core.problem.Location;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
 // FK-TODO: refactor
@@ -35,30 +37,17 @@ public class RouteOptimizer {
 
     // FK-TODO: geschätzte Ersparnis in km und Zeit berechnen und anzeigen
     // FK-TODO: Routen optimieren für Auto, Fußgänger, Fahrrad und öffentliche Verkehrsmittel
-    // FK-TODO: es muß eine Route optimiert werden, nicht irgendwelche Stops: optimizeRoute(final Route route, final OptimizationStrategy strategy)
-    public List<Stop> optimizeStops(final Geodetic start,
-                                    final List<Stop> stops,
-                                    final OptimizationStrategy strategy) throws Exception {
+    public Route optimizeRoute(final Route route, final OptimizationStrategy strategy) throws Exception {
         final List<Stop> optimizedRoute = new ArrayList<>();
-        if (stops.isEmpty()) {
-            return optimizedRoute;
-        }
-
         final Map<String, Stop> stopMap = new HashMap<>();
         final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
         // Start-Location definieren (ID "0" für den OSRM Matrix-Index)
-        final Location startLocation =
-                Location
-                        .Builder
-                        .newInstance()
-                        .setId("0")
-                        .setCoordinate(getCoordinate(start))
-                        .build();
         vrpBuilder.addVehicle(
                 VehicleImpl
                         .Builder
                         .newInstance("vehicle")
-                        .setStartLocation(startLocation)
+                        .setStartLocation(createLocation(route.origin()))
+                        .setEndLocation(createLocation(route.destination()))
                         .setType(
                                 VehicleTypeImpl
                                         .Builder
@@ -72,8 +61,14 @@ public class RouteOptimizer {
         // ---------------------------------------------------------
         final VehicleRoutingTransportCosts transportCosts =
                 switch (strategy) {
-                    case OSRM ->
-                            new OsrmTransportCosts(routingMatricesProvider.getRoutingMatrices(start, stops));
+                    case OSRM -> new OsrmTransportCosts(
+                            routingMatricesProvider.getRoutingMatrices(
+                                    route.origin().geodetic(),
+                                    ImmutableList
+                                            .<Stop>builder()
+                                            .addAll(route.waypoints())
+                                            .add(route.destination())
+                                            .build()));
                     case HAVERSINE -> new HaversineTransportCosts();
                 };
 
@@ -81,26 +76,16 @@ public class RouteOptimizer {
         // ---------------------------------------------------------
 
         // Stopps definieren (IDs "1", "2", "3" usw. für die Matrix)
-        for (int i = 0; i < stops.size(); i++) {
-            final Stop stop = stops.get(i);
-            final String jobId = stop.address() + "___" + i;
-            stopMap.put(jobId, stop);
-            final Location stopLocation =
-                    Location
-                            .Builder
-                            .newInstance()
-                            .setId(String.valueOf(i + 1))
-                            .setCoordinate(getCoordinate(stop.geodetic()))
-                            .build();
-            final Service service =
+        for (final Stop waypoint : route.waypoints()) {
+            final String jobId = String.valueOf(waypoint.stopNumber());
+            stopMap.put(jobId, waypoint);
+            vrpBuilder.addJob(
                     Service
                             .Builder
                             .newInstance(jobId)
-                            .setLocation(stopLocation)
-                            .build();
-            vrpBuilder.addJob(service);
+                            .setLocation(createLocation(waypoint))
+                            .build());
         }
-
         final VehicleRoutingProblem problem =
                 vrpBuilder
                         .setFleetSize(VehicleRoutingProblem.FleetSize.FINITE)
@@ -109,10 +94,9 @@ public class RouteOptimizer {
         final VehicleRoutingAlgorithm algorithm = Jsprit.createAlgorithm(problem);
         final Collection<VehicleRoutingProblemSolution> solutions = algorithm.searchSolutions();
         final VehicleRoutingProblemSolution bestSolution = Solutions.bestOf(solutions);
-
         if (bestSolution != null) {
-            for (final VehicleRoute route : bestSolution.getRoutes()) {
-                for (final TourActivity activity : route.getActivities()) {
+            for (final VehicleRoute _route : bestSolution.getRoutes()) {
+                for (final TourActivity activity : _route.getActivities()) {
                     if (activity instanceof final TourActivity.JobActivity jobActivity) {
                         final String rawId = jobActivity.getJob().getId();
                         final Stop originalStop = stopMap.get(rawId);
@@ -130,9 +114,21 @@ public class RouteOptimizer {
             }
         }
         if (optimizedRoute.isEmpty()) {
-            optimizedRoute.addAll(stops);
+            optimizedRoute.addAll(route.waypoints());
         }
-        return optimizedRoute;
+        return new Route(
+                route.origin(),
+                optimizedRoute,
+                route.destination());
+    }
+
+    private static Location createLocation(final Stop stop) {
+        return Location
+                .Builder
+                .newInstance()
+                .setId(String.valueOf(stop.stopNumber()))
+                .setCoordinate(getCoordinate(stop.geodetic()))
+                .build();
     }
 
     private static Coordinate getCoordinate(final Geodetic geodetic) {
