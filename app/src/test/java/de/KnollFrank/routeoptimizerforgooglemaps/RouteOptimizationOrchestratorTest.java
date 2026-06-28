@@ -36,7 +36,7 @@ public class RouteOptimizationOrchestratorTest {
         // Then
         assertTrue(optimizedRoute.isPresent());
         assertEquals(
-                List.of("Central-Apotheke", "Unterhausen", "Hamburg"),
+                List.of("Central-Apotheke", "Hamburg", "Unterhausen"),
                 getAddresses(optimizedRoute.orElseThrow().stops()));
     }
 

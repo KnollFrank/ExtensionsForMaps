@@ -19,6 +19,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 @RunWith(RobolectricTestRunner.class)
 public class RouteOptimizerTest {
 
+    // FK-TOD: ergänze einen Test, der verlangt, dass origin und destination einer zu optimierenden Route immer erhalten bleiben und nur die waypoints der Route in ihrer Reihenfolge geändert werden.
     @Test
     public void testOptimizeStops_sortsByShortestDistance() throws Exception {
         // Given
@@ -69,7 +70,7 @@ public class RouteOptimizerTest {
     public void testOptimizeStops_userBugReproduction_Exact() throws Exception {
         // Given
         final RouteOptimizer routeOptimizer = new RouteOptimizer(new OsrmRoutingMatricesProvider());
-        final Geodetic start =
+        final Geodetic rottenburg_CentralApotheke =
                 Geodetic.fromLatitudeLongitude(
                         new Angle(48.4765345, Unit.DEGREES),
                         new Angle(8.9349008, Unit.DEGREES));
@@ -93,7 +94,7 @@ public class RouteOptimizerTest {
         // When
         final List<Stop> optimized =
                 routeOptimizer.optimizeStops(
-                        start,
+                        rottenburg_CentralApotheke,
                         List.of(hamburg, unterhausen),
                         OptimizationStrategy.HAVERSINE);
 

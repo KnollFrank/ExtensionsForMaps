@@ -34,7 +34,7 @@ public class GoogleMapsRouteExtractor {
                                 extractDataFromSubtree(waypointNode, stopData);
                             }
                         });
-        return new Route(StopDataConverter.asStops(stopDataList));
+        return RouteFactory.createRoute(StopDataConverter.asStops(stopDataList));
     }
 
     // --- FLEXIBLE DATEN-EXTRAKTION AUS DEM SUB-BAUM ---

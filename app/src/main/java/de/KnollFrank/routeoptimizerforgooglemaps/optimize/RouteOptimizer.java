@@ -35,6 +35,7 @@ public class RouteOptimizer {
 
     // FK-TODO: geschätzte Ersparnis in km und Zeit berechnen und anzeigen
     // FK-TODO: Routen optimieren für Auto, Fußgänger, Fahrrad und öffentliche Verkehrsmittel
+    // FK-TODO: es muß eine Route optimiert werden, nicht irgendwelche Stops: optimizeRoute(final Route route, final OptimizationStrategy strategy)
     public List<Stop> optimizeStops(final Geodetic start,
                                     final List<Stop> stops,
                                     final OptimizationStrategy strategy) throws Exception {
