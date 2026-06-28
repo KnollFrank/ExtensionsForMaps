@@ -71,7 +71,7 @@ public class RouteOptimizerTest {
         assertEquals(
                 new Route(
                         berlin_origin_destination,
-                        List.of(potsdam_very_close, leipzig_medium, munich_far),
+                        List.of(munich_far, leipzig_medium, potsdam_very_close),
                         berlin_origin_destination),
                 optimized);
     }
@@ -129,7 +129,7 @@ public class RouteOptimizerTest {
         final RouteOptimizer routeOptimizer = new RouteOptimizer(new OsrmRoutingMatricesProvider());
         // Geografisches Hindernis: Der Gardasee (Lago di Garda) in Italien
         // Start: Limone sul Garda (am Westufer des Sees)
-        final Stop start_LimoneSulGarda =
+        final Stop start_LimoneSulGarda_west =
                 new Stop(
                         0,
                         "Limone sul Garda",
@@ -139,7 +139,7 @@ public class RouteOptimizerTest {
                                 new Angle(10.7904, Unit.DEGREES)));
         // Stop A: Malcesine
         // (Liegt am Ostufer, genau gegenüber von Limone. Luftlinie: ~6 km. Auto: ~30 km, da man um den See fahren muss)
-        final Stop malcesine =
+        final Stop malcesine_east =
                 new Stop(
                         1,
                         "Malcesine",
@@ -149,7 +149,7 @@ public class RouteOptimizerTest {
                                 new Angle(10.8092, Unit.DEGREES)));
         // Stop B: Riva del Garda
         // (Liegt an der Nordspitze. Luftlinie: ~9 km. Auto: ~11 km, da auf derselben Uferseite über direkte Straße erreichbar)
-        final Stop rivaDelGarda =
+        final Stop rivaDelGarda_north =
                 new Stop(
                         2,
                         "Riva del Garda",
@@ -157,28 +157,24 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(45.8893, Unit.DEGREES),
                                 new Angle(10.8430, Unit.DEGREES)));
-        final List<Stop> stops = List.of(malcesine, rivaDelGarda);
 
         // ==========================================================
         // TEST 1: Haversine-Strategie (Luftlinie ignoriert den See)
         // Erwartung: Limone -> Malcesine (6km) -> Riva del Garda
         // ==========================================================
         // When
+        final Route west_east_north_west =
+                new Route(
+                        start_LimoneSulGarda_west,
+                        List.of(malcesine_east, rivaDelGarda_north),
+                        start_LimoneSulGarda_west);
         final Route haversineRoute =
                 routeOptimizer.optimizeRoute(
-                        new Route(
-                                start_LimoneSulGarda,
-                                stops,
-                                start_LimoneSulGarda),
+                        west_east_north_west,
                         OptimizationStrategy.HAVERSINE);
 
         // Then
-        assertEquals(
-                new Route(
-                        start_LimoneSulGarda,
-                        List.of(malcesine, rivaDelGarda),
-                        start_LimoneSulGarda),
-                haversineRoute);
+        assertEquals(west_east_north_west, haversineRoute);
 
         // ==========================================================
         // TEST 2: OSRM-Strategie (Echte Straßenführung)
@@ -189,17 +185,18 @@ public class RouteOptimizerTest {
         final Route osrmRoute =
                 routeOptimizer.optimizeRoute(
                         new Route(
-                                start_LimoneSulGarda,
-                                stops,
-                                start_LimoneSulGarda),
+                                start_LimoneSulGarda_west,
+                                List.of(malcesine_east, rivaDelGarda_north),
+                                malcesine_east),
                         OptimizationStrategy.OSRM);
 
         // Then
         assertEquals(
+                // FK-TODO: RouteOptimizer soll den doppelten Stop malcesine_east aus der optimierten Route (waypoints) entfernen, d.h. die Route Normalisieren: wenn zwei direkt aufeinander folgende Stops gleich sind, dann einen der beiden entfernen.
                 new Route(
-                        start_LimoneSulGarda,
-                        List.of(rivaDelGarda, malcesine),
-                        start_LimoneSulGarda),
+                        start_LimoneSulGarda_west,
+                        List.of(rivaDelGarda_north, malcesine_east),
+                        malcesine_east),
                 osrmRoute);
     }
 }

@@ -54,7 +54,7 @@ public class RouteOptimizer {
                                         .newInstance("car")
                                         .setCostPerDistance(1.0)
                                         .build())
-                        .setReturnToDepot(false)
+                        .setReturnToDepot(true)
                         .build());
         // ---------------------------------------------------------
         // STRATEGY PATTERN: Auswahl der korrekten Kosten-Implementierung
