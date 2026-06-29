@@ -27,9 +27,15 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 // FK-TODO: refactor
 public class RouteOptimizer {
 
+    private final VehicleRoutingTransportCostsProvider vehicleRoutingTransportCostsProvider;
+
+    public RouteOptimizer(final VehicleRoutingTransportCostsProvider vehicleRoutingTransportCostsProvider) {
+        this.vehicleRoutingTransportCostsProvider = vehicleRoutingTransportCostsProvider;
+    }
+
     // FK-TODO: geschätzte Ersparnis in km und Zeit berechnen und anzeigen
     // FK-TODO: Routen optimieren für Auto, Fußgänger, Fahrrad und öffentliche Verkehrsmittel
-    public Route optimizeRoute(final Route route, final VehicleRoutingTransportCostsProvider vehicleRoutingTransportCostsProvider) throws Exception {
+    public Route optimize(final Route route) throws Exception {
         final List<Stop> optimizedRoute = new ArrayList<>();
         final Map<String, Stop> stopMap = new HashMap<>();
         final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();

@@ -61,8 +61,7 @@ public class RouteOptimizationOrchestratorTest {
         final RouteOptimizationOrchestrator orchestrator =
                 new RouteOptimizationOrchestrator(
                         createCallback(optimizedRoute, latch),
-                        new RouteOptimizer(),
-                        new OsrmVehicleRoutingTransportCostsProvider(routingMatricesProvider));
+                        new RouteOptimizer(new OsrmVehicleRoutingTransportCostsProvider(routingMatricesProvider)));
         orchestrator.optimizeRouteOfDirectionsUrl(directionsUrl);
         latch.await();
         return optimizedRoute.get();

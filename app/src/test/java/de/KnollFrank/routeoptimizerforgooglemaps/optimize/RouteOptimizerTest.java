@@ -20,9 +20,11 @@ public class RouteOptimizerTest {
 
     // FK-TOD: ergänze einen Test, der verlangt, dass origin und destination einer zu optimierenden Route immer erhalten bleiben und nur die waypoints der Route in ihrer Reihenfolge geändert werden.
     @Test
-    public void testOptimizeRoute_sortsByShortestDistance() throws Exception {
+    public void testOptimize_sortsByShortestDistance() throws Exception {
         // Given
-        final RouteOptimizer routeOptimizer = new RouteOptimizer();
+        final RouteOptimizer routeOptimizer =
+                new RouteOptimizer(
+                        new HaversineVehicleRoutingTransportCostsProvider());
         final Stop berlin_origin_destination =
                 new Stop(
                         0,
@@ -62,10 +64,7 @@ public class RouteOptimizerTest {
                         berlin_origin_destination);
 
         // When
-        final Route optimized =
-                routeOptimizer.optimizeRoute(
-                        route,
-                        new HaversineVehicleRoutingTransportCostsProvider());
+        final Route optimized = routeOptimizer.optimize(route);
 
         // Then
         assertEquals(
@@ -77,9 +76,11 @@ public class RouteOptimizerTest {
     }
 
     @Test
-    public void testOptimizeRoute_userBugReproduction_Exact() throws Exception {
+    public void testOptimize_userBugReproduction_Exact() throws Exception {
         // Given
-        final RouteOptimizer routeOptimizer = new RouteOptimizer();
+        final RouteOptimizer routeOptimizer =
+                new RouteOptimizer(
+                        new HaversineVehicleRoutingTransportCostsProvider());
         final Stop rottenburg_CentralApotheke =
                 new Stop(
                         0,
@@ -107,12 +108,11 @@ public class RouteOptimizerTest {
 
         // When
         final Route optimized =
-                routeOptimizer.optimizeRoute(
+                routeOptimizer.optimize(
                         new Route(
                                 rottenburg_CentralApotheke,
                                 List.of(hamburg, unterhausen),
-                                hamburg),
-                        new HaversineVehicleRoutingTransportCostsProvider());
+                                hamburg));
 
         // Then
         assertEquals(
@@ -124,9 +124,15 @@ public class RouteOptimizerTest {
     }
 
     @Test
-    public void testOptimizeRoute_osrmVsHaversine_LakeGarda() throws Exception {
+    public void testOptimize_osrmVsHaversine_LakeGarda() throws Exception {
         // Given
-        final RouteOptimizer routeOptimizer = new RouteOptimizer();
+        final RouteOptimizer haversineRouteOptimizer =
+                new RouteOptimizer(
+                        new HaversineVehicleRoutingTransportCostsProvider());
+        final RouteOptimizer osrmRouteOptimizer =
+                new RouteOptimizer(
+                        new OsrmVehicleRoutingTransportCostsProvider(
+                                new OsrmRoutingMatricesProvider()));
         // Geografisches Hindernis: Der Gardasee (Lago di Garda) in Italien
         // Start: Limone sul Garda (am Westufer des Sees)
         final Stop start_LimoneSulGarda_west =
@@ -168,10 +174,7 @@ public class RouteOptimizerTest {
                         start_LimoneSulGarda_west,
                         List.of(malcesine_east, rivaDelGarda_north),
                         start_LimoneSulGarda_west);
-        final Route haversineRoute =
-                routeOptimizer.optimizeRoute(
-                        west_east_north_west,
-                        new HaversineVehicleRoutingTransportCostsProvider());
+        final Route haversineRoute = haversineRouteOptimizer.optimize(west_east_north_west);
 
         // Then
         assertEquals(west_east_north_west, haversineRoute);
@@ -183,12 +186,11 @@ public class RouteOptimizerTest {
         // FK-TODO: für diesen Unittest bitte kein Internetzugriff, sondern hart codierte RoutingMatrices verwenden.
         // When
         final Route osrmRoute =
-                routeOptimizer.optimizeRoute(
+                osrmRouteOptimizer.optimize(
                         new Route(
                                 start_LimoneSulGarda_west,
                                 List.of(malcesine_east, rivaDelGarda_north),
-                                malcesine_east),
-                        new OsrmVehicleRoutingTransportCostsProvider(new OsrmRoutingMatricesProvider()));
+                                malcesine_east));
 
         // Then
         assertEquals(

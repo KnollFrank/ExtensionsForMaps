@@ -30,8 +30,7 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
         orchestrator =
                 new RouteOptimizationOrchestrator(
                         this,
-                        new RouteOptimizer(),
-                        new OsrmVehicleRoutingTransportCostsProvider(new OsrmRoutingMatricesProvider()));
+                        new RouteOptimizer(new OsrmVehicleRoutingTransportCostsProvider(new OsrmRoutingMatricesProvider())));
         handleIntent(getIntent());
     }
 
