@@ -21,7 +21,6 @@ public class URLs {
         }
     }
 
-    // FK-TODO: DRY with decode()
     public static String encode(final String str) {
         try {
             return URLEncoder.encode(str, StandardCharsets.UTF_8.name());
