@@ -1,0 +1,72 @@
+FK-TODO: Zeitbeschränkungen für Stopps in der Routenoptimierung
+FK-TODO: Mehr als 10 Stopps pro Route
+FK-TODO: Teile des UIs (Optimierung nach Zeit oder Entfernung, Rundreise) von https://www.mapquest.com/routeplanner/ umsetzen
+FK-TODO: Adresseingabefeld von Google Maps um Scannfunktion der Adresse erweitern
+FK-TODO: Fahrt-/Reiseoptionen (z.B. "keine Autobahn") von Google Maps berücksichtigen
+         Das ist ein absolut kritischer Einwand für die Routenplanung! Wenn der Apotheken-Bote mit einem klapprigen 50ccm-Roller unterwegs ist oder absichtlich die verstopfte Stadtautobahn meiden möchte, wird deine jsprit-Optimierung komplett unbrauchbar, wenn sie ihn trotzdem über die Schnellstraße schickt.
+         Die großartige Nachricht ist: Google Maps übergibt diese Routing-Optionen (Autobahnen vermeiden, Mautstraßen vermeiden, Fähren vermeiden) **vollständig innerhalb der URL**. Da du ohnehin schon unseren !data-Parser gebaut hast, musst du im Grunde nur drei neue Filtermuster hinzufügen.
+         Google nutzt hierfür zwei unterschiedliche Wege, je nachdem, ob es sich um eine interne App-URL oder einen universellen Web-Link handelt. Dein Parser sollte einfach beide abdecken.
+         ## Weg A: Die Erkennung im !data-Block (Protobuf)
+         Da du den data=-String bereits an jedem Ausrufezeichen (!) in einzelne Tokens aufsplittest, kannst du dort nach den spezifischen **Protobuf-Boolean-Flags** suchen.
+         Google nutzt hier eine logische Codierung: Die Zahl steht für das Feature, das b steht für Boolean und die 1 steht für true.
+          * **1b1** \rightarrow Feld 1 (Highways), Boolean, True \rightarrow **Autobahnen vermeiden**
+          * **2b1** \rightarrow Feld 2 (Tolls), Boolean, True \rightarrow **Mautstraßen vermeiden**
+          * **3b1** \rightarrow Feld 3 (Ferries), Boolean, True \rightarrow **Fähren vermeiden**
+         ### Die Erweiterung für deinen Java-Parser
+         Du kannst dir eine kleine Hilfsklasse für die Routing-Optionen anlegen und diese während deiner bestehenden Token-Schleife füttern:
+         ```java
+         public class RoutingOptions {
+             public boolean avoidHighways = false;
+             public boolean avoidTolls = false;
+             public boolean avoidFerries = false;
+         }
+
+         // Innerhalb deiner bestehenden Parsing-Schleife:
+         String[] tokens = dataString.split("!");
+         RoutingOptions options = new RoutingOptions();
+
+         for (String token : tokens) {
+             // Koordinaten-Parsing läuft hier normal weiter...
+
+             // Neue Abfrage für die Routen-Einschränkungen:
+             if (token.equals("1b1")) {
+                 options.avoidHighways = true;
+             } else if (token.equals("2b1")) {
+                 options.avoidTolls = true;
+             } else if (token.equals("3b1")) {
+                 options.avoidFerries = true;
+             }
+         }
+
+         ```
+         ## Weg B: Das Sicherheitsnetz für Standard-Query-Parameter
+         Falls Google Maps bei einem Update oder über ein geteiltes Browser-Fenster klassische Web-Parameter mitschickt, solltest du die rohe URL vor dem Splitten zusätzlich auf zwei ältere, aber immer noch aktive Standard-Formate prüfen:
+          1. **Das moderne API-Format:** &avoid=highways, &avoid=tolls oder &avoid=ferries
+          2. **Das klassische Legacy-Format:** &dirflg=h (Highways vermeiden) oder &dirflg=t (Maut vermeiden)
+         Das lässt sich in Java mit einer einfachen Zeile vorab abfangen:
+         ```java
+         if (rawUrl.contains("avoid=highways") || rawUrl.contains("dirflg=h")) {
+             options.avoidHighways = true;
+         }
+         if (rawUrl.contains("avoid=tolls") || rawUrl.contains("dirflg=t")) {
+             options.avoidTolls = true;
+         }
+
+         ```
+         ## Wie deine App diese Optionen an Heidelberg & jsprit übergibt
+         Sobald dein Parser die Flags (z. B. avoidHighways = true) erfolgreich aus der URL extrahiert hat, reichst du diese Information an deine Matrix-Berechnung weiter.
+         Da du die Entfernungs- und Zeitdaten von der **Heidelberger OpenRouteService API** holt, kannst du die Autobahnen dort direkt im JSON-Request der Matrix-Anfrage blockieren. Das OpenRouteService-Protokoll besitzt dafür das Feld avoid_features.
+         ### Der POST-Request an die Heidelberger API:
+         ```json
+         {
+           "locations": [[9.05, 48.52], [9.06, 48.53]],
+           "metrics": ["duration", "distance"],
+           "options": {
+             "avoid_features": ["highways"]
+           }
+         }
+
+         ```
+         Wenn du "highways" in dieses Array packst, berechnet Heidelberg die Fahrtzeiten zwischen den Apotheken-Kunden ausschließlich über Land- und Stadtstraßen.
+         ### Der Effekt auf jsprit:
+         Dein jsprit-Algorithmus bekommt im Anschluss eine Matrix gefüttert, in der die Fahrtzeiten über die Autobahn gar nicht erst existieren oder künstlich extrem hochgerechnet wurden. Dadurch optimiert jsprit die Stopps vollkommen automatisch so, dass der Bote
