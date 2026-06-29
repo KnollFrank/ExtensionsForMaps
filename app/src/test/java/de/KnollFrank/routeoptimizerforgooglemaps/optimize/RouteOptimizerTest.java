@@ -22,7 +22,7 @@ public class RouteOptimizerTest {
     @Test
     public void testOptimizeRoute_sortsByShortestDistance() throws Exception {
         // Given
-        final RouteOptimizer routeOptimizer = new RouteOptimizer(new OsrmRoutingMatricesProvider());
+        final RouteOptimizer routeOptimizer = new RouteOptimizer();
         final Stop berlin_origin_destination =
                 new Stop(
                         0,
@@ -65,7 +65,7 @@ public class RouteOptimizerTest {
         final Route optimized =
                 routeOptimizer.optimizeRoute(
                         route,
-                        OptimizationStrategy.HAVERSINE);
+                        new HaversineVehicleRoutingTransportCostsProvider());
 
         // Then
         assertEquals(
@@ -79,7 +79,7 @@ public class RouteOptimizerTest {
     @Test
     public void testOptimizeRoute_userBugReproduction_Exact() throws Exception {
         // Given
-        final RouteOptimizer routeOptimizer = new RouteOptimizer(new OsrmRoutingMatricesProvider());
+        final RouteOptimizer routeOptimizer = new RouteOptimizer();
         final Stop rottenburg_CentralApotheke =
                 new Stop(
                         0,
@@ -112,7 +112,7 @@ public class RouteOptimizerTest {
                                 rottenburg_CentralApotheke,
                                 List.of(hamburg, unterhausen),
                                 hamburg),
-                        OptimizationStrategy.HAVERSINE);
+                        new HaversineVehicleRoutingTransportCostsProvider());
 
         // Then
         assertEquals(
@@ -126,7 +126,7 @@ public class RouteOptimizerTest {
     @Test
     public void testOptimizeRoute_osrmVsHaversine_LakeGarda() throws Exception {
         // Given
-        final RouteOptimizer routeOptimizer = new RouteOptimizer(new OsrmRoutingMatricesProvider());
+        final RouteOptimizer routeOptimizer = new RouteOptimizer();
         // Geografisches Hindernis: Der Gardasee (Lago di Garda) in Italien
         // Start: Limone sul Garda (am Westufer des Sees)
         final Stop start_LimoneSulGarda_west =
@@ -171,7 +171,7 @@ public class RouteOptimizerTest {
         final Route haversineRoute =
                 routeOptimizer.optimizeRoute(
                         west_east_north_west,
-                        OptimizationStrategy.HAVERSINE);
+                        new HaversineVehicleRoutingTransportCostsProvider());
 
         // Then
         assertEquals(west_east_north_west, haversineRoute);
@@ -188,7 +188,7 @@ public class RouteOptimizerTest {
                                 start_LimoneSulGarda_west,
                                 List.of(malcesine_east, rivaDelGarda_north),
                                 malcesine_east),
-                        OptimizationStrategy.OSRM);
+                        new OsrmVehicleRoutingTransportCostsProvider(new OsrmRoutingMatricesProvider()));
 
         // Then
         assertEquals(

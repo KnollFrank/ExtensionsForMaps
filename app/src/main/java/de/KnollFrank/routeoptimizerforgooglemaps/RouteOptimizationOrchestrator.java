@@ -3,8 +3,8 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 import java.io.IOException;
 import java.net.URL;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OptimizationStrategy;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.VehicleRoutingTransportCostsProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.DirectionsUrlPredicate;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.GoogleMapsRouteExtractor;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
@@ -22,10 +22,14 @@ public class RouteOptimizationOrchestrator {
 
     private final Callback callback;
     private final RouteOptimizer routeOptimizer;
+    private final VehicleRoutingTransportCostsProvider vehicleRoutingTransportCostsProvider;
 
-    public RouteOptimizationOrchestrator(final Callback callback, final RouteOptimizer routeOptimizer) {
+    public RouteOptimizationOrchestrator(final Callback callback,
+                                         final RouteOptimizer routeOptimizer,
+                                         final VehicleRoutingTransportCostsProvider vehicleRoutingTransportCostsProvider) {
         this.callback = callback;
         this.routeOptimizer = routeOptimizer;
+        this.vehicleRoutingTransportCostsProvider = vehicleRoutingTransportCostsProvider;
     }
 
     // FK-TODO: refactor
@@ -53,6 +57,6 @@ public class RouteOptimizationOrchestrator {
     }
 
     private Route optimizeRoute(final Route route) throws Exception {
-        return routeOptimizer.optimizeRoute(route, OptimizationStrategy.OSRM);
+        return routeOptimizer.optimizeRoute(route, vehicleRoutingTransportCostsProvider);
     }
 }

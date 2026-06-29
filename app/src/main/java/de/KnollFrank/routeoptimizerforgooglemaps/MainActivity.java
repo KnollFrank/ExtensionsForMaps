@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OsrmRoutingMatricesProvider;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OsrmVehicleRoutingTransportCostsProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 
@@ -29,7 +30,8 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
         orchestrator =
                 new RouteOptimizationOrchestrator(
                         this,
-                        new RouteOptimizer(new OsrmRoutingMatricesProvider()));
+                        new RouteOptimizer(),
+                        new OsrmVehicleRoutingTransportCostsProvider(new OsrmRoutingMatricesProvider()));
         handleIntent(getIntent());
     }
 

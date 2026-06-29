@@ -14,6 +14,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OsrmVehicleRoutingTransportCostsProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RoutingMatrices;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RoutingMatricesProvider;
@@ -60,7 +61,8 @@ public class RouteOptimizationOrchestratorTest {
         final RouteOptimizationOrchestrator orchestrator =
                 new RouteOptimizationOrchestrator(
                         createCallback(optimizedRoute, latch),
-                        new RouteOptimizer(routingMatricesProvider));
+                        new RouteOptimizer(),
+                        new OsrmVehicleRoutingTransportCostsProvider(routingMatricesProvider));
         orchestrator.optimizeRouteOfDirectionsUrl(directionsUrl);
         latch.await();
         return optimizedRoute.get();

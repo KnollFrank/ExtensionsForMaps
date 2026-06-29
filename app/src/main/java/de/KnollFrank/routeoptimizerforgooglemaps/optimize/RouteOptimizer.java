@@ -4,7 +4,6 @@ import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
 import com.graphhopper.jsprit.core.problem.Location;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
-import com.graphhopper.jsprit.core.problem.cost.VehicleRoutingTransportCosts;
 import com.graphhopper.jsprit.core.problem.job.Job;
 import com.graphhopper.jsprit.core.problem.job.Service;
 import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
@@ -21,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
@@ -29,15 +27,9 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 // FK-TODO: refactor
 public class RouteOptimizer {
 
-    private final RoutingMatricesProvider routingMatricesProvider;
-
-    public RouteOptimizer(final RoutingMatricesProvider routingMatricesProvider) {
-        this.routingMatricesProvider = routingMatricesProvider;
-    }
-
     // FK-TODO: geschätzte Ersparnis in km und Zeit berechnen und anzeigen
     // FK-TODO: Routen optimieren für Auto, Fußgänger, Fahrrad und öffentliche Verkehrsmittel
-    public Route optimizeRoute(final Route route, final OptimizationStrategy strategy) throws Exception {
+    public Route optimizeRoute(final Route route, final VehicleRoutingTransportCostsProvider vehicleRoutingTransportCostsProvider) throws Exception {
         final List<Stop> optimizedRoute = new ArrayList<>();
         final Map<String, Stop> stopMap = new HashMap<>();
         final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
@@ -56,21 +48,7 @@ public class RouteOptimizer {
                                         .build())
                         .setReturnToDepot(true)
                         .build());
-        // ---------------------------------------------------------
-        // STRATEGY PATTERN: Auswahl der korrekten Kosten-Implementierung
-        // ---------------------------------------------------------
-        final VehicleRoutingTransportCosts transportCosts =
-                switch (strategy) {
-                    case OSRM -> new OsrmTransportCosts(
-                            routingMatricesProvider.getRoutingMatrices(
-                                    route.origin().geodetic(),
-                                    getGeodetics(Lists.concat(route.waypoints(), route.destination()))));
-                    case HAVERSINE -> new HaversineTransportCosts();
-                };
-
-        vrpBuilder.setRoutingCost(transportCosts);
-        // ---------------------------------------------------------
-
+        vrpBuilder.setRoutingCost(vehicleRoutingTransportCostsProvider.getVehicleRoutingTransportCosts(route));
         // Stopps definieren (IDs "1", "2", "3" usw. für die Matrix)
         for (final Stop waypoint : route.waypoints()) {
             final String jobId = String.valueOf(waypoint.stopNumber());
@@ -131,12 +109,5 @@ public class RouteOptimizer {
         return Coordinate.newInstance(
                 geodetic.getLongitude().toDegrees(),
                 geodetic.getLatitude().toDegrees());
-    }
-
-    private static List<Geodetic> getGeodetics(final List<Stop> stops) {
-        return stops
-                .stream()
-                .map(Stop::geodetic)
-                .toList();
     }
 }
