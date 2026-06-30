@@ -10,10 +10,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
@@ -31,8 +31,8 @@ public class OsrmRoutingMatrixProvider implements RoutingMatrixProvider {
                     .build();
 
     @Override
-    public RoutingMatrix getRoutingMatrix(final Stop start, final List<Stop> stops) throws Exception {
-        return getRoutingMatrix(Lists.distinct(Lists.concat(start, stops)));
+    public RoutingMatrix getRoutingMatrix(final Set<Stop> stops) throws Exception {
+        return getRoutingMatrix(stops.stream().toList());
     }
 
     // FK-TODO: refactor

@@ -2,7 +2,10 @@ package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
 
 import com.graphhopper.jsprit.core.problem.cost.VehicleRoutingTransportCosts;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 
 public class OsrmVehicleRoutingTransportCostsProvider implements VehicleRoutingTransportCostsProvider {
@@ -15,9 +18,14 @@ public class OsrmVehicleRoutingTransportCostsProvider implements VehicleRoutingT
 
     @Override
     public VehicleRoutingTransportCosts getVehicleRoutingTransportCosts(final Route route) throws Exception {
-        return new OsrmTransportCosts(
-                routingMatrixProvider.getRoutingMatrix(
-                        route.origin(),
-                        Lists.concat(route.waypoints(), route.destination())));
+        return new OsrmTransportCosts(getRoutingMatrix(route));
+    }
+
+    private RoutingMatrix getRoutingMatrix(final Route route) throws Exception {
+        return routingMatrixProvider.getRoutingMatrix(toSet(route.stops()));
+    }
+
+    private static <T> Set<T> toSet(final List<T> ts) {
+        return ts.stream().collect(Collectors.toUnmodifiableSet());
     }
 }

@@ -12,6 +12,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -97,24 +98,32 @@ public class RouteOptimizationOrchestratorTest {
         return new RoutingMatrixProvider() {
 
             @Override
-            public RoutingMatrix getRoutingMatrix(final Stop start, final List<Stop> stops) {
-                if (stops.size() != 2) {
+            public RoutingMatrix getRoutingMatrix(final Set<Stop> stops) {
+                return getRoutingMatrix(List.copyOf(stops));
+            }
+
+            private RoutingMatrix getRoutingMatrix(final List<Stop> stops) {
+                if (stops.size() != 3) {
                     throw new IllegalArgumentException("" + stops);
                 }
+                return getRoutingMatrix(stops.get(0), stops.get(1), stops.get(2));
+            }
+
+            private static RoutingMatrix getRoutingMatrix(final Stop stop0, final Stop stop1, final Stop stop2) {
                 return new RoutingMatrix(
                         ImmutableTable
                                 .<Stop, Stop, DistanceDuration>builder()
-                                .put(start, start, new DistanceDuration(0.0, 0.0))
-                                .put(start, stops.get(0), new DistanceDuration(709743.3, 25712.7))
-                                .put(start, stops.get(1), new DistanceDuration(32104.7, 2338.5))
+                                .put(stop0, stop0, new DistanceDuration(0.0, 0.0))
+                                .put(stop0, stop1, new DistanceDuration(709743.3, 25712.7))
+                                .put(stop0, stop2, new DistanceDuration(32104.7, 2338.5))
 
-                                .put(stops.get(0), start, new DistanceDuration(708177.6, 25609.3))
-                                .put(stops.get(0), stops.get(0), new DistanceDuration(0.0, 0.0))
-                                .put(stops.get(0), stops.get(1), new DistanceDuration(716507.1, 26124.7))
+                                .put(stop1, stop0, new DistanceDuration(708177.6, 25609.3))
+                                .put(stop1, stop1, new DistanceDuration(0.0, 0.0))
+                                .put(stop1, stop2, new DistanceDuration(716507.1, 26124.7))
 
-                                .put(stops.get(1), start, new DistanceDuration(32159.8, 2373.0))
-                                .put(stops.get(1), stops.get(0), new DistanceDuration(717982.8, 26136.4))
-                                .put(stops.get(1), stops.get(1), new DistanceDuration(0.0, 0.0))
+                                .put(stop2, stop0, new DistanceDuration(32159.8, 2373.0))
+                                .put(stop2, stop1, new DistanceDuration(717982.8, 26136.4))
+                                .put(stop2, stop2, new DistanceDuration(0.0, 0.0))
                                 .build());
             }
         };
