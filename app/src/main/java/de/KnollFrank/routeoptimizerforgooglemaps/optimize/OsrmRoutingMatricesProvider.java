@@ -3,13 +3,16 @@ package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
+import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -25,8 +28,8 @@ public class OsrmRoutingMatricesProvider implements RoutingMatricesProvider {
 
     @Override
     // FK-TODO: refactor
-    public RoutingMatrices getRoutingMatrices(final Geodetic start, final List<Geodetic> stops) throws Exception {
-        final String url = "https://router.project-osrm.org/table/v1/driving/" + format(start, stops) + "?annotations=distance,duration";
+    public RoutingMatrices getRoutingMatrices(final Stop start, final List<Stop> stops) throws Exception {
+        final URL url = createRequestUrl(start, stops);
         final Request request = new Request.Builder().url(url).build();
         try (final Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful()) {
@@ -58,6 +61,20 @@ public class OsrmRoutingMatricesProvider implements RoutingMatricesProvider {
             }
         }
         throw new IllegalStateException();
+    }
+
+    private static URL createRequestUrl(final Stop start, final List<Stop> stops) {
+        return URLs.createUrl(
+                String.format(
+                        "https://router.project-osrm.org/table/v1/driving/%s?annotations=distance,duration",
+                        format(start.geodetic(), getGeodetics(stops))));
+    }
+
+    private static List<Geodetic> getGeodetics(final List<Stop> stops) {
+        return stops
+                .stream()
+                .map(Stop::geodetic)
+                .toList();
     }
 
     private static String format(final Geodetic start, final List<Geodetic> stops) {

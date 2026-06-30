@@ -13,12 +13,12 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OsrmVehicleRoutingTransportCostsProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RoutingMatrices;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RoutingMatricesProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
 @RunWith(RobolectricTestRunner.class)
 public class RouteOptimizationOrchestratorTest {
@@ -94,7 +94,7 @@ public class RouteOptimizationOrchestratorTest {
         return new RoutingMatricesProvider() {
 
             @Override
-            public RoutingMatrices getRoutingMatrices(final Geodetic start, final List<Geodetic> stops) {
+            public RoutingMatrices getRoutingMatrices(final Stop start, final List<Stop> stops) {
                 return new RoutingMatrices(
                         new double[][]{
                                 new double[]{0.0, 709743.3, 32104.7},
