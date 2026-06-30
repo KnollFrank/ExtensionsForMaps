@@ -19,7 +19,7 @@ class StopDataConverter {
 
     public static Stop asStop(final StopData stopData) {
         return new Stop(
-                stopData.stopNumber,
+                stopData.id,
                 stopData.address,
                 stopData.placeId,
                 Geodetic.fromLatitudeLongitude(
@@ -31,14 +31,15 @@ class StopDataConverter {
                                 DEGREES)));
     }
 
-    private static IllegalArgumentException createMissingCoordinateException(final String missingValue, final StopData stopData) {
+    private static IllegalArgumentException createMissingCoordinateException(
+            final String missingValue,
+            final StopData stopData) {
         return new IllegalArgumentException(
                 String.format(
                         Locale.ROOT,
-                        "Missing %s for stop %d ('%s').",
+                        "Missing %s for stop %s ('%s').",
                         missingValue,
-                        stopData.stopNumber,
-                        stopData.address)
-        );
+                        stopData.id,
+                        stopData.address));
     }
 }

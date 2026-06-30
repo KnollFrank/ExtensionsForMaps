@@ -27,7 +27,7 @@ public class RouteOptimizerTest {
                         new HaversineVehicleRoutingTransportCostsProvider());
         final Stop berlin_origin_destination =
                 new Stop(
-                        0,
+                        "0",
                         "Berlin",
                         Optional.empty(),
                         Geodetic.fromLatitudeLongitude(
@@ -35,7 +35,7 @@ public class RouteOptimizerTest {
                                 new Angle(13.4050, Unit.DEGREES)));
         final Stop munich_far =
                 new Stop(
-                        1,
+                        "1",
                         "Munich",
                         Optional.empty(),
                         Geodetic.fromLatitudeLongitude(
@@ -43,7 +43,7 @@ public class RouteOptimizerTest {
                                 new Angle(11.5820, Unit.DEGREES)));
         final Stop potsdam_very_close =
                 new Stop(
-                        2,
+                        "2",
                         "Potsdam",
                         Optional.empty(),
                         Geodetic.fromLatitudeLongitude(
@@ -51,7 +51,7 @@ public class RouteOptimizerTest {
                                 new Angle(13.0645, Unit.DEGREES)));
         final Stop leipzig_medium =
                 new Stop(
-                        3,
+                        "3",
                         "Leipzig",
                         Optional.empty(),
                         Geodetic.fromLatitudeLongitude(
@@ -83,7 +83,7 @@ public class RouteOptimizerTest {
                         new HaversineVehicleRoutingTransportCostsProvider());
         final Stop rottenburg_CentralApotheke =
                 new Stop(
-                        0,
+                        "0",
                         "Central Apotheke",
                         Optional.empty(),
                         Geodetic.fromLatitudeLongitude(
@@ -91,7 +91,7 @@ public class RouteOptimizerTest {
                                 new Angle(8.9349008, Unit.DEGREES)));
         final Stop hamburg =
                 new Stop(
-                        1,
+                        "1",
                         "Hamburg",
                         Optional.empty(),
                         Geodetic.fromLatitudeLongitude(
@@ -99,7 +99,7 @@ public class RouteOptimizerTest {
                                 new Angle(9.987170, Unit.DEGREES)));
         final Stop unterhausen =
                 new Stop(
-                        2,
+                        "2",
                         "Unterhausen",
                         Optional.empty(),
                         Geodetic.fromLatitudeLongitude(
@@ -137,7 +137,7 @@ public class RouteOptimizerTest {
         // Start: Limone sul Garda (am Westufer des Sees)
         final Stop start_LimoneSulGarda_west =
                 new Stop(
-                        0,
+                        "0",
                         "Limone sul Garda",
                         Optional.empty(),
                         Geodetic.fromLatitudeLongitude(
@@ -147,7 +147,7 @@ public class RouteOptimizerTest {
         // (Liegt am Ostufer, genau gegenüber von Limone. Luftlinie: ~6 km. Auto: ~30 km, da man um den See fahren muss)
         final Stop malcesine_east =
                 new Stop(
-                        1,
+                        "1",
                         "Malcesine",
                         Optional.empty(),
                         Geodetic.fromLatitudeLongitude(
@@ -157,7 +157,7 @@ public class RouteOptimizerTest {
         // (Liegt an der Nordspitze. Luftlinie: ~9 km. Auto: ~11 km, da auf derselben Uferseite über direkte Straße erreichbar)
         final Stop rivaDelGarda_north =
                 new Stop(
-                        2,
+                        "2",
                         "Riva del Garda",
                         Optional.empty(),
                         Geodetic.fromLatitudeLongitude(

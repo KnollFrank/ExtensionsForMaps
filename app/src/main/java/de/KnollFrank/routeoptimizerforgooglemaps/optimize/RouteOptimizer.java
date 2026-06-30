@@ -57,7 +57,7 @@ public class RouteOptimizer {
         vrpBuilder.setRoutingCost(vehicleRoutingTransportCostsProvider.getVehicleRoutingTransportCosts(route));
         // Stopps definieren (IDs "1", "2", "3" usw. für die Matrix)
         for (final Stop waypoint : route.waypoints()) {
-            final String jobId = String.valueOf(waypoint.stopNumber());
+            final String jobId = waypoint.id();
             stopMap.put(jobId, waypoint);
             vrpBuilder.addJob(
                     Service
@@ -106,7 +106,7 @@ public class RouteOptimizer {
         return Location
                 .Builder
                 .newInstance()
-                .setId(String.valueOf(stop.stopNumber()))
+                .setId(stop.id())
                 .setCoordinate(getCoordinate(stop.geodetic()))
                 .build();
     }

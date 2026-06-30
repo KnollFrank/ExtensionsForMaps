@@ -15,8 +15,8 @@ class AddressToStopDataConverter {
                 .toList();
     }
 
-    private static StopData convert(final String address, final int stopNumber) {
-        final StopData stopData = new StopData(address, stopNumber);
+    private static StopData convert(final String address, final int index) {
+        final StopData stopData = new StopData(address, String.valueOf(index));
         if (address.matches("-?\\d+\\.\\d+,-?\\d+\\.\\d+")) {
             final String[] coords = address.split(",");
             stopData.latitude = Optional.of(Double.parseDouble(coords[0]));

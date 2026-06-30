@@ -32,7 +32,7 @@ public class GoogleMapsNavigatorTest {
         final Route route =
                 new Route(
                         new Stop(
-                                0,
+                                "0",
                                 "Start",
                                 Optional.empty(),
                                 Geodetic.fromLatitudeLongitude(
@@ -40,14 +40,14 @@ public class GoogleMapsNavigatorTest {
                                         new Angle(9.0576, Unit.DEGREES))),
                         List.of(
                                 new Stop(
-                                        1,
+                                        "1",
                                         "Waypoint1",
                                         Optional.empty(),
                                         Geodetic.fromLatitudeLongitude(
                                                 new Angle(47.3769, Unit.DEGREES),
                                                 new Angle(8.5417, Unit.DEGREES)))),
                         new Stop(
-                                2,
+                                "2",
                                 "Destination",
                                 Optional.empty(),
                                 Geodetic.fromLatitudeLongitude(

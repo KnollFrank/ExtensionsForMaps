@@ -133,7 +133,7 @@ public class GoogleMapsRouteExtractorTest {
     private static Route route_CentralApotheke_Hamburg_Unterhausen() {
         return new Route(
                 new Stop(
-                        0,
+                        "0",
                         "Central-Apotheke",
                         Optional.of("ChIJ1V1RE0v8mUcROpsR_6oBUjQ"),
                         Geodetic.fromLatitudeLongitude(
@@ -141,14 +141,14 @@ public class GoogleMapsRouteExtractorTest {
                                 new Angle(8.934900899999999, DEGREES))),
                 List.of(
                         new Stop(
-                                1,
+                                "1",
                                 "Hamburg",
                                 Optional.of("ChIJuRMYfoNhsUcRoDrWe_I9JgQ"),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(53.548828199999996, DEGREES),
                                         new Angle(9.987170299999999, DEGREES)))),
                 new Stop(
-                        2,
+                        "2",
                         "Unterhausen",
                         Optional.of("ChIJsYBbyF7zmUcREc3DW6XSMuQ"),
                         Geodetic.fromLatitudeLongitude(
