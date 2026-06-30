@@ -10,20 +10,19 @@ import com.graphhopper.jsprit.core.problem.vehicle.Vehicle;
 // =========================================================================================
 class OsrmTransportCosts implements VehicleRoutingTransportCosts {
 
-    private final RoutingMatrices matrices;
+    private final RoutingMatrix routingMatrix;
+    // FK-TODO: remove fallback
     // Eingebautes Fallback, falls bei einzelnen Koordinaten ein Fehler auftritt
     private final HaversineTransportCosts fallback = new HaversineTransportCosts();
 
-    public OsrmTransportCosts(final RoutingMatrices matrices) {
-        this.matrices = matrices;
+    public OsrmTransportCosts(final RoutingMatrix routingMatrix) {
+        this.routingMatrix = routingMatrix;
     }
 
     @Override
     public double getTransportTime(final Location from, final Location to, final double departureTime, final Driver driver, final Vehicle vehicle) {
         try {
-            final int fromIdx = Integer.parseInt(from.getId());
-            final int toIdx = Integer.parseInt(to.getId());
-            return matrices.durations()[fromIdx][toIdx];
+            return getDistanceDuration(from, to).duration();
         } catch (final Exception e) {
             return fallback.getTransportTime(from, to, departureTime, driver, vehicle);
         }
@@ -42,9 +41,7 @@ class OsrmTransportCosts implements VehicleRoutingTransportCosts {
     @Override
     public double getDistance(final Location from, final Location to, final double departureTime, final Vehicle vehicle) {
         try {
-            final int fromIdx = Integer.parseInt(from.getId());
-            final int toIdx = Integer.parseInt(to.getId());
-            return matrices.distances()[fromIdx][toIdx];
+            return getDistanceDuration(from, to).distance();
         } catch (final Exception e) {
             return fallback.getDistance(from, to, departureTime, vehicle);
         }
@@ -56,5 +53,11 @@ class OsrmTransportCosts implements VehicleRoutingTransportCosts {
         // Du kannst hier bei Bedarf auch die Fahrzeit (getTransportTime) zurückgeben,
         // wenn Jsprit primär auf Zeit optimieren soll.
         return getDistance(from, to, departureTime, vehicle);
+    }
+
+    private DistanceDuration getDistanceDuration(final Location from, final Location to) {
+        return routingMatrix
+                .getDistanceDurationByStopIdTable()
+                .get(from.getId(), to.getId());
     }
 }

@@ -62,4 +62,8 @@ public class Lists {
                 .add(t)
                 .build();
     }
+
+    public static <T> List<T> distinct(final List<T> ts) {
+        return ts.stream().distinct().toList();
+    }
 }

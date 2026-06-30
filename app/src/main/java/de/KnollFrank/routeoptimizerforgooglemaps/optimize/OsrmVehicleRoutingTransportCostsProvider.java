@@ -7,16 +7,16 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 
 public class OsrmVehicleRoutingTransportCostsProvider implements VehicleRoutingTransportCostsProvider {
 
-    private final RoutingMatricesProvider routingMatricesProvider;
+    private final RoutingMatrixProvider routingMatrixProvider;
 
-    public OsrmVehicleRoutingTransportCostsProvider(final RoutingMatricesProvider routingMatricesProvider) {
-        this.routingMatricesProvider = routingMatricesProvider;
+    public OsrmVehicleRoutingTransportCostsProvider(final RoutingMatrixProvider routingMatrixProvider) {
+        this.routingMatrixProvider = routingMatrixProvider;
     }
 
     @Override
     public VehicleRoutingTransportCosts getVehicleRoutingTransportCosts(final Route route) throws Exception {
         return new OsrmTransportCosts(
-                routingMatricesProvider.getRoutingMatrices(
+                routingMatrixProvider.getRoutingMatrix(
                         route.origin(),
                         Lists.concat(route.waypoints(), route.destination())));
     }

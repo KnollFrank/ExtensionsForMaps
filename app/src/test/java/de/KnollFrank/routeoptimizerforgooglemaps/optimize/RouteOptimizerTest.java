@@ -132,7 +132,7 @@ public class RouteOptimizerTest {
         final RouteOptimizer osrmRouteOptimizer =
                 new RouteOptimizer(
                         new OsrmVehicleRoutingTransportCostsProvider(
-                                new OsrmRoutingMatricesProvider()));
+                                new OsrmRoutingMatrixProvider()));
         // Geografisches Hindernis: Der Gardasee (Lago di Garda) in Italien
         // Start: Limone sul Garda (am Westufer des Sees)
         final Stop start_LimoneSulGarda_west =
