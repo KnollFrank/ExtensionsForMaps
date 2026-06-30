@@ -194,7 +194,7 @@ public class RouteOptimizerTest {
 
         // Then
         assertEquals(
-                // FK-TODO: RouteOptimizer soll den doppelten Stop malcesine_east aus der optimierten Route (waypoints) entfernen, d.h. die Route Normalisieren: wenn zwei direkt aufeinander folgende Stops gleich sind, dann einen der beiden entfernen.
+                // FK-TODO: RouteOptimizer soll den doppelten Stop malcesine_east aus der optimierten Route (waypoints) entfernen, d.h. die Route normalisieren: wenn zwei direkt aufeinander folgende Stops gleich sind, dann einen der beiden entfernen.
                 new Route(
                         start_LimoneSulGarda_west,
                         List.of(rivaDelGarda_north, malcesine_east),
