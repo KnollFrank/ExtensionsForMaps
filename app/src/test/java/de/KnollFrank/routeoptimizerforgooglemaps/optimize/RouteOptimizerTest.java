@@ -18,6 +18,65 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 @RunWith(RobolectricTestRunner.class)
 public class RouteOptimizerTest {
 
+    @Test
+    public void testOptimize_respectsPriorities() throws Exception {
+        // Given
+        final RouteOptimizer routeOptimizer =
+                new RouteOptimizer(
+                        new HaversineVehicleRoutingTransportCostsProvider());
+
+        // Berlin (Origin/Destination)
+        final Stop berlin =
+                new Stop(
+                        "0",
+                        "Berlin",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(52.5200, Unit.DEGREES),
+                                new Angle(13.4050, Unit.DEGREES)));
+
+        // Potsdam (Very close to Berlin, ~30km)
+        final Stop potsdam_low_priority =
+                new Stop(
+                        "1",
+                        "Potsdam",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(52.3906, Unit.DEGREES),
+                                new Angle(13.0645, Unit.DEGREES)),
+                        10);
+
+        // Munich (Very far from Berlin, ~600km)
+        final Stop munich_high_priority =
+                new Stop(
+                        "2",
+                        "Munich",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(48.1351, Unit.DEGREES),
+                                new Angle(11.5820, Unit.DEGREES)),
+                        1);
+
+        // Route: Berlin -> Potsdam (low prio) -> Munich (high prio) -> Berlin
+        final Route route =
+                new Route(
+                        berlin,
+                        List.of(potsdam_low_priority, munich_high_priority),
+                        berlin);
+
+        // When
+        final Route optimized = routeOptimizer.optimize(route);
+
+        // Then
+        // Despite the distance, Munich should be visited first because of its higher priority (1 vs 10)
+        assertEquals(
+                new Route(
+                        berlin,
+                        List.of(munich_high_priority, potsdam_low_priority),
+                        berlin),
+                optimized);
+    }
+
     // FK-TOD: ergänze einen Test, der verlangt, dass origin und destination einer zu optimierenden Route immer erhalten bleiben und nur die waypoints der Route in ihrer Reihenfolge geändert werden.
     @Test
     public void testOptimize_sortsByShortestDistance() throws Exception {

@@ -56,6 +56,7 @@ public class RouteOptimizer {
                         .build());
         vrpBuilder.setRoutingCost(vehicleRoutingTransportCostsProvider.getVehicleRoutingTransportCosts(route));
         // Stopps definieren (IDs "1", "2", "3" usw. für die Matrix)
+        // FK-TODO: refactor using Streams
         for (final Stop waypoint : route.waypoints()) {
             final String jobId = waypoint.id();
             stopMap.put(jobId, waypoint);
@@ -64,6 +65,7 @@ public class RouteOptimizer {
                             .Builder
                             .newInstance(jobId)
                             .setLocation(createLocation(waypoint))
+                            .setPriority(waypoint.priority())
                             .build());
         }
         final VehicleRoutingProblem problem =

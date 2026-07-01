@@ -60,36 +60,50 @@ public class RouteOptimizationOrchestratorTest {
 
     private static Optional<Route> optimizeRouteOfDirectionsUrl(final String directionsUrl,
                                                                 final RoutingMatrixProvider routingMatrixProvider) throws InterruptedException {
+        final AtomicReference<Optional<Route>> extractedRoute = new AtomicReference<>(Optional.empty());
         final AtomicReference<Optional<Route>> optimizedRoute = new AtomicReference<>(Optional.empty());
-        final CountDownLatch latch = new CountDownLatch(1);
+        final CountDownLatch extractionLatch = new CountDownLatch(1);
+        final CountDownLatch optimizationLatch = new CountDownLatch(1);
         final RouteOptimizationOrchestrator orchestrator =
                 new RouteOptimizationOrchestrator(
-                        createCallback(optimizedRoute, latch),
+                        createCallback(extractedRoute, extractionLatch, optimizedRoute, optimizationLatch),
                         new RouteOptimizer(new OsrmVehicleRoutingTransportCostsProvider(routingMatrixProvider)));
-        orchestrator.optimizeRouteOfDirectionsUrl(directionsUrl);
-        latch.await();
+        orchestrator.extractRouteFromDirectionsUrl(directionsUrl);
+        extractionLatch.await();
+        if (extractedRoute.get().isPresent()) {
+            orchestrator.optimizeRoute(extractedRoute.get().get());
+            optimizationLatch.await();
+        }
         return optimizedRoute.get();
     }
 
-    private static RouteOptimizationOrchestrator.Callback createCallback(
-            final AtomicReference<Optional<Route>> optimizedRoute,
-            final CountDownLatch latch) {
+    private static RouteOptimizationOrchestrator.Callback createCallback(final AtomicReference<Optional<Route>> extractedRoute, final CountDownLatch extractionLatch, final AtomicReference<Optional<Route>> optimizedRoute, final CountDownLatch optimizationLatch) {
         return new RouteOptimizationOrchestrator.Callback() {
+
+            @Override
+            public void onExtractRouteFromDirectionsUrlStarted() {
+            }
+
+            @Override
+            public void onExtractRouteFromDirectionsUrlSuccess(Route route) {
+                extractedRoute.set(Optional.of(route));
+                extractionLatch.countDown();
+            }
 
             @Override
             public void onOptimizationStarted() {
             }
 
             @Override
-            public void onOptimizationSuccess(final Route finalRoute) {
-                optimizedRoute.set(Optional.of(finalRoute));
-                latch.countDown();
+            public void onOptimizationSuccess(Route route) {
+                optimizedRoute.set(Optional.of(route));
+                optimizationLatch.countDown();
             }
 
             @Override
-            public void onError(final String message) {
-                optimizedRoute.set(Optional.empty());
-                latch.countDown();
+            public void onError(String message) {
+                extractionLatch.countDown();
+                optimizationLatch.countDown();
             }
         };
     }

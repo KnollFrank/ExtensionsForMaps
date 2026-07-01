@@ -12,6 +12,10 @@ public class RouteOptimizationOrchestrator {
 
     public interface Callback {
 
+        void onExtractRouteFromDirectionsUrlStarted();
+
+        void onExtractRouteFromDirectionsUrlSuccess(Route route);
+
         void onOptimizationStarted();
 
         void onOptimizationSuccess(Route optimizedRoute);
@@ -27,20 +31,31 @@ public class RouteOptimizationOrchestrator {
         this.routeOptimizer = routeOptimizer;
     }
 
-    // FK-TODO: refactor
-    public void optimizeRouteOfDirectionsUrl(final String directionsUrl) {
-        callback.onOptimizationStarted();
+    // FK-TODO: spezialisierten callback mit den Methoden onExtractRouteFromDirectionsUrlStarted(), onExtractRouteFromDirectionsUrlSuccess() und onError() direkt als Parameter übergeben oder als Continuation zurückgeben.
+    public void extractRouteFromDirectionsUrl(final String directionsUrl) {
+        callback.onExtractRouteFromDirectionsUrlStarted();
         new Thread(() -> {
             try {
-                callback.onOptimizationSuccess(
-                        routeOptimizer.optimize(
-                                GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(
-                                        expandShortDirectionsUrl(
-                                                new URL(directionsUrl)))));
+                callback.onExtractRouteFromDirectionsUrlSuccess(
+                        GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(
+                                expandShortDirectionsUrl(
+                                        new URL(directionsUrl))));
             } catch (final IOException e) {
                 callback.onError("Network error: " + e.getMessage());
             } catch (final Exception e) {
                 callback.onError("Error: " + e.getMessage());
+            }
+        }).start();
+    }
+
+    // FK-TODO: spezialisierten callback mit den Methoden onOptimizationStarted(), onOptimizationSuccess() und onError() direkt als Parameter übergeben oder als Continuation zurückgeben.
+    public void optimizeRoute(final Route route) {
+        callback.onOptimizationStarted();
+        new Thread(() -> {
+            try {
+                callback.onOptimizationSuccess(routeOptimizer.optimize(route));
+            } catch (final Exception e) {
+                callback.onError("Optimization error: " + e.getMessage());
             }
         }).start();
     }

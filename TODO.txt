@@ -1,4 +1,4 @@
-FK-TODO: Zeitbeschränkungen für Stopps in der Routenoptimierung
+FK-TODO: Zeitfenster für Stopps in der Routenoptimierung
 FK-TODO: Mehr als 10 Stopps pro Route
 FK-TODO: Teile des UIs (Optimierung nach Zeit oder Entfernung, Rundreise) von https://www.mapquest.com/routeplanner/ umsetzen
 FK-TODO: Adresseingabefeld von Google Maps um Scannfunktion der Adresse erweitern

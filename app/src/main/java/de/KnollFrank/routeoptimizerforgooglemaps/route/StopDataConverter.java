@@ -28,7 +28,8 @@ class StopDataConverter {
                                 DEGREES),
                         new Angle(
                                 stopData.longitude.orElseThrow(() -> createMissingCoordinateException("longitude", stopData)),
-                                DEGREES)));
+                                DEGREES)),
+                2); // FK-TODO: Default priority (2) darf es gar nicht geben, sondern nur OptionalInt.empty()
     }
 
     private static IllegalArgumentException createMissingCoordinateException(
