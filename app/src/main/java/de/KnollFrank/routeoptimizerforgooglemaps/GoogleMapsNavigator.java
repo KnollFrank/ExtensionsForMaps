@@ -16,9 +16,13 @@ public class GoogleMapsNavigator {
     }
 
     private static void launchUrl(final URL url, final Context context) {
+        context.startActivity(createMapIntent(url));
+    }
+
+    private static Intent createMapIntent(final URL url) {
         final Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url.toString()));
         mapIntent.setPackage("com.google.android.apps.maps");
         mapIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(mapIntent);
+        return mapIntent;
     }
 }
