@@ -1,5 +1,7 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
+import androidx.annotation.NonNull;
+
 public enum Priority {
 
     _1_VeryHigh(1, "1 - very high"),
@@ -19,5 +21,11 @@ public enum Priority {
     Priority(final int priority, final String name) {
         this.priority = priority;
         this.name = name;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return name;
     }
 }
