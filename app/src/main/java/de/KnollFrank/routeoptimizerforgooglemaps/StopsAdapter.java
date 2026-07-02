@@ -10,6 +10,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -119,7 +120,23 @@ class StopsAdapter extends RecyclerView.Adapter<StopsAdapter.ViewHolder> {
                     new ArrayAdapter<>(
                             context,
                             android.R.layout.simple_spinner_item,
-                            Priority.values());
+                            Priority.values()) {
+
+                        @NonNull
+                        @Override
+                        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                            final TextView tv = (TextView) super.getView(position, convertView, parent);
+                            tv.setText(getItem(position).name);
+                            return tv;
+                        }
+
+                        @Override
+                        public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                            final TextView tv = (TextView) super.getDropDownView(position, convertView, parent);
+                            tv.setText(getItem(position).name);
+                            return tv;
+                        }
+                    };
             spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             return spinnerAdapter;
         }
