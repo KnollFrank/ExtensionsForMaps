@@ -65,7 +65,7 @@ public class RouteOptimizer {
                             .Builder
                             .newInstance(jobId)
                             .setLocation(createLocation(waypoint))
-                            .setPriority(waypoint.priority())
+                            .setPriority(waypoint.priority().priority)
                             .build());
         }
         final VehicleRoutingProblem problem =

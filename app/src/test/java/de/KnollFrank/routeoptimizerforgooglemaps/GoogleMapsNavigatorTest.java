@@ -20,6 +20,7 @@ import java.util.Optional;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Priority;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
@@ -37,7 +38,8 @@ public class GoogleMapsNavigatorTest {
                                 Optional.empty(),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(48.5216, Unit.DEGREES),
-                                        new Angle(9.0576, Unit.DEGREES))),
+                                        new Angle(9.0576, Unit.DEGREES)),
+                                Priority._2_Default),
                         List.of(
                                 new Stop(
                                         "1",
@@ -45,14 +47,16 @@ public class GoogleMapsNavigatorTest {
                                         Optional.empty(),
                                         Geodetic.fromLatitudeLongitude(
                                                 new Angle(47.3769, Unit.DEGREES),
-                                                new Angle(8.5417, Unit.DEGREES)))),
+                                                new Angle(8.5417, Unit.DEGREES)),
+                                        Priority._2_Default)),
                         new Stop(
                                 "2",
                                 "Destination",
                                 Optional.empty(),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(45.4642, Unit.DEGREES),
-                                        new Angle(9.1900, Unit.DEGREES))));
+                                        new Angle(9.1900, Unit.DEGREES)),
+                                Priority._2_Default));
 
         // Act
         GoogleMapsNavigator.launchRouteOverview(route, ApplicationProvider.getApplicationContext());

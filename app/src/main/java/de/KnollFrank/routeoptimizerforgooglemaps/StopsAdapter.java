@@ -14,15 +14,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Priority;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
 class StopsAdapter extends RecyclerView.Adapter<StopsAdapter.ViewHolder> {
 
     private List<Stop> stops = List.of();
-    private final List<Integer> priorities = new ArrayList<>();
+    private final List<Priority> priorities = new ArrayList<>();
 
     public void setStops(final List<Stop> newStops) {
         stops = newStops;
@@ -41,26 +41,22 @@ class StopsAdapter extends RecyclerView.Adapter<StopsAdapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
-        return new ViewHolder(
-                LayoutInflater
-                        .from(parent.getContext())
-                        .inflate(R.layout.item_stop, parent, false));
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-        final Stop stop = stops.get(position);
-        holder.tvAddress.setText(stop.address());
-        holder.spinnerPriority.setAdapter(createAndConfigureSpinnerAdapter(holder.itemView.getContext()));
-        holder.spinnerPriority.setSelection(priorities.get(position) - 1);
+        final ViewHolder holder =
+                new ViewHolder(
+                        LayoutInflater
+                                .from(parent.getContext())
+                                .inflate(R.layout.item_stop, parent, false));
         holder.spinnerPriority.setOnItemSelectedListener(
                 new AdapterView.OnItemSelectedListener() {
 
                     @Override
-                    public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
+                    public void onItemSelected(final AdapterView<?> parent,
+                                               final View view,
+                                               final int spinnerPosition,
+                                               final long id) {
                         final int adapterPos = holder.getBindingAdapterPosition();
                         if (adapterPos != RecyclerView.NO_POSITION) {
-                            priorities.set(adapterPos, position + 1);
+                            priorities.set(adapterPos, (Priority) parent.getItemAtPosition(spinnerPosition));
                         }
                     }
 
@@ -68,6 +64,14 @@ class StopsAdapter extends RecyclerView.Adapter<StopsAdapter.ViewHolder> {
                     public void onNothingSelected(final AdapterView<?> parent) {
                     }
                 });
+        return holder;
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
+        final Stop stop = stops.get(position);
+        holder.tvAddress.setText(stop.address());
+        holder.spinnerPriority.setSelection(holder.spinnerAdapter.getPosition(priorities.get(position)));
     }
 
     @Override
@@ -75,29 +79,19 @@ class StopsAdapter extends RecyclerView.Adapter<StopsAdapter.ViewHolder> {
         return stops.size();
     }
 
-    private void setPriorities(final List<Integer> priorities) {
+    private void setPriorities(final List<Priority> priorities) {
         this.priorities.clear();
         this.priorities.addAll(priorities);
     }
 
-    private static ArrayAdapter<Integer> createAndConfigureSpinnerAdapter(final Context context) {
-        final ArrayAdapter<Integer> spinnerAdapter =
-                new ArrayAdapter<>(
-                        context,
-                        android.R.layout.simple_spinner_item,
-                        IntStream.rangeClosed(1, 10).boxed().toList());
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        return spinnerAdapter;
-    }
-
-    private static List<Integer> getPriorities(final List<Stop> stops) {
+    private static List<Priority> getPriorities(final List<Stop> stops) {
         return stops
                 .stream()
                 .map(Stop::priority)
                 .toList();
     }
 
-    private static Stop asStopWithPriority(final Stop stop, final int priority) {
+    private static Stop asStopWithPriority(final Stop stop, final Priority priority) {
         return new Stop(
                 stop.id(),
                 stop.address(),
@@ -108,13 +102,26 @@ class StopsAdapter extends RecyclerView.Adapter<StopsAdapter.ViewHolder> {
 
     protected static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView tvAddress;
-        public Spinner spinnerPriority;
+        public final TextView tvAddress;
+        public final Spinner spinnerPriority;
+        public final ArrayAdapter<Priority> spinnerAdapter;
 
         public ViewHolder(final View itemView) {
             super(itemView);
             tvAddress = itemView.findViewById(R.id.tvAddress);
             spinnerPriority = itemView.findViewById(R.id.spinnerPriority);
+            spinnerAdapter = createAndConfigureSpinnerAdapter(itemView.getContext());
+            spinnerPriority.setAdapter(spinnerAdapter);
+        }
+
+        private static ArrayAdapter<Priority> createAndConfigureSpinnerAdapter(final Context context) {
+            final ArrayAdapter<Priority> spinnerAdapter =
+                    new ArrayAdapter<>(
+                            context,
+                            android.R.layout.simple_spinner_item,
+                            Priority.values());
+            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            return spinnerAdapter;
         }
     }
 }
