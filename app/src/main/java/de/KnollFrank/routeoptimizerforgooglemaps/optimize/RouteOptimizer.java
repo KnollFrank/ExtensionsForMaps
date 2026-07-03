@@ -2,9 +2,10 @@ package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
 
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
+import com.graphhopper.jsprit.core.algorithm.state.StateManager;
 import com.graphhopper.jsprit.core.problem.Location;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
-import com.graphhopper.jsprit.core.problem.job.Job;
+import com.graphhopper.jsprit.core.problem.constraint.ConstraintManager;
 import com.graphhopper.jsprit.core.problem.job.Service;
 import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
 import com.graphhopper.jsprit.core.problem.solution.route.VehicleRoute;
@@ -33,13 +34,12 @@ public class RouteOptimizer {
         this.vehicleRoutingTransportCostsProvider = vehicleRoutingTransportCostsProvider;
     }
 
-    // FK-TODO: geschätzte Ersparnis in km und Zeit berechnen und anzeigen
-    // FK-TODO: Routen optimieren für Auto, Fußgänger, Fahrrad und öffentliche Verkehrsmittel
     public Route optimize(final Route route) throws Exception {
         final List<Stop> optimizedRoute = new ArrayList<>();
         final Map<String, Stop> stopMap = new HashMap<>();
         final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
-        // Start-Location definieren (ID "0" für den OSRM Matrix-Index)
+
+        // ANFORDERUNG 1: Eiserne Zustellungs-Garantie wird am Ende durch unassignedJobs Check erzwungen.
         vrpBuilder.addVehicle(
                 VehicleImpl
                         .Builder
@@ -53,32 +53,57 @@ public class RouteOptimizer {
                                         .setCostPerDistance(1.0)
                                         .build())
                         .setReturnToDepot(true)
+                        .setEarliestStart(0.0)
+                        .setLatestArrival(Double.MAX_VALUE)
                         .build());
         vrpBuilder.setRoutingCost(vehicleRoutingTransportCostsProvider.getVehicleRoutingTransportCosts(route));
-        // Stopps definieren (IDs "1", "2", "3" usw. für die Matrix)
         // FK-TODO: refactor using Streams
         for (final Stop waypoint : route.waypoints()) {
             final String jobId = waypoint.id();
             stopMap.put(jobId, waypoint);
+
+            // ANFORDERUNG 2: Harte Zeitfenster
+            final double startSec = waypoint.startWindow().toSecondOfDay();
+            final double endSec = waypoint.endWindow().toSecondOfDay();
             vrpBuilder.addJob(
                     Service
                             .Builder
                             .newInstance(jobId)
                             .setLocation(createLocation(waypoint))
-                            .setPriority(waypoint.priority().priority)
+                            // FK-TODO: use com.graphhopper.jsprit.core.problem.solution.route.activity.TimeWindow
+                            .addTimeWindow(startSec, endSec)
+                            // ANFORDERUNG 3: Gruppen-ID im Priority-Feld
+                            .setPriority(waypoint.deliveryGroup().sequenceOrder())
                             .build());
         }
-        final VehicleRoutingProblem problem =
+        final VehicleRoutingProblem vehicleRoutingProblem =
                 vrpBuilder
                         .setFleetSize(VehicleRoutingProblem.FleetSize.FINITE)
                         .build();
-
-        final VehicleRoutingAlgorithm algorithm = Jsprit.createAlgorithm(problem);
+        final StateManager stateManager = new StateManager(vehicleRoutingProblem);
+        // ANFORDERUNG 4: Soft-Constraint für Zonen (Zeitfenster haben Vorrang durch native jsprit-Implementierung)
+        final ConstraintManager constraintManager =
+                new ConstraintManager(
+                        vehicleRoutingProblem,
+                        stateManager,
+                        List.of(new FlexibleGroupConstraint()));
+        final VehicleRoutingAlgorithm algorithm =
+                Jsprit
+                        .Builder
+                        .newInstance(vehicleRoutingProblem)
+                        .setStateAndConstraintManager(stateManager, constraintManager)
+                        .buildAlgorithm();
         final Collection<VehicleRoutingProblemSolution> solutions = algorithm.searchSolutions();
+        // FK-TODO: use Optional.ofNullable()
         final VehicleRoutingProblemSolution bestSolution = Solutions.bestOf(solutions);
         if (bestSolution != null) {
-            for (final VehicleRoute _route : bestSolution.getRoutes()) {
-                for (final TourActivity activity : _route.getActivities()) {
+            // ANFORDERUNG 1: Check ob alle Jobs zugewiesen wurden
+            if (!bestSolution.getUnassignedJobs().isEmpty()) {
+                throw new IllegalStateException("Unassigned jobs:" + bestSolution.getUnassignedJobs());
+            }
+
+            for (final VehicleRoute vehicleRoute : bestSolution.getRoutes()) {
+                for (final TourActivity activity : vehicleRoute.getActivities()) {
                     if (activity instanceof final TourActivity.JobActivity jobActivity) {
                         final String rawId = jobActivity.getJob().getId();
                         final Stop originalStop = stopMap.get(rawId);
@@ -86,12 +111,6 @@ public class RouteOptimizer {
                             optimizedRoute.add(originalStop);
                         }
                     }
-                }
-            }
-            for (final Job job : bestSolution.getUnassignedJobs()) {
-                final Stop originalStop = stopMap.get(job.getId());
-                if (originalStop != null && !optimizedRoute.contains(originalStop)) {
-                    optimizedRoute.add(originalStop);
                 }
             }
         }

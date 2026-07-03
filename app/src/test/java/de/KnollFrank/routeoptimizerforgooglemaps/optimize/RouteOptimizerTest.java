@@ -1,17 +1,20 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.DeliveryGroup;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Priority;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
@@ -20,63 +23,52 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 public class RouteOptimizerTest {
 
     @Test
-    public void testOptimize_respectsPriorities() throws Exception {
+    public void testOptimize_respectsTimeWindows() throws Exception {
         // Given
         final RouteOptimizer routeOptimizer =
                 new RouteOptimizer(
                         new HaversineVehicleRoutingTransportCostsProvider());
 
-        // Berlin (Origin/Destination)
-        final Stop berlin =
-                new Stop(
-                        "0",
-                        "Berlin",
-                        Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(52.5200, Unit.DEGREES),
-                                new Angle(13.4050, Unit.DEGREES)),
-                        Priority._2_Default);
+        // Given: Berlin start.
+        // Stop A (farther): early window. 
+        // Stop B (closer): late window.
+        // Costs: 1 unit/sec. Berlin (0,0), A (0.1, 0.1) ~15km, B (0.05, 0.05) ~7km.
+        final Stop berlin = createStop("0", "Berlin", 52.52, 13.40);
 
-        // Potsdam (Very close to Berlin, ~30km)
-        final Stop potsdam_low_priority =
+        final Stop far_early =
                 new Stop(
                         "1",
-                        "Potsdam",
+                        "FarEarly",
                         Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(52.3906, Unit.DEGREES),
-                                new Angle(13.0645, Unit.DEGREES)),
-                        Priority._10_VeryLow);
-
-        // Munich (Very far from Berlin, ~600km)
-        final Stop munich_high_priority =
+                        createGeodetic(52.62, 13.50),
+                        DeliveryGroup.DEFAULT,
+                        LocalTime.of(8, 0),
+                        LocalTime.of(10, 0));
+        final Stop close_late =
                 new Stop(
                         "2",
-                        "Munich",
+                        "CloseLate",
                         Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(48.1351, Unit.DEGREES),
-                                new Angle(11.5820, Unit.DEGREES)),
-                        Priority._1_VeryHigh);
-
-        // Route: Berlin -> Potsdam (low prio) -> Munich (high prio) -> Berlin
+                        createGeodetic(52.55, 13.45),
+                        DeliveryGroup.DEFAULT,
+                        LocalTime.of(14, 0),
+                        LocalTime.of(16, 0));
         final Route route =
                 new Route(
                         berlin,
-                        List.of(potsdam_low_priority, munich_high_priority),
+                        List.of(close_late, far_early),
                         berlin);
 
         // When
-        final Route optimized = routeOptimizer.optimize(route);
+        final Route optimizedRoute = routeOptimizer.optimize(route);
 
-        // Then
-        // Despite the distance, Munich should be visited first because of its higher priority (1 vs 10)
+        // Then: Should visit FarEarly FIRST to satisfy window, even if it's farther
         assertEquals(
                 new Route(
                         berlin,
-                        List.of(munich_high_priority, potsdam_low_priority),
+                        List.of(far_early, close_late),
                         berlin),
-                optimized);
+                optimizedRoute);
     }
 
     // FK-TOD: ergänze einen Test, der verlangt, dass origin und destination einer zu optimierenden Route immer erhalten bleiben und nur die waypoints der Route in ihrer Reihenfolge geändert werden.
@@ -129,7 +121,7 @@ public class RouteOptimizerTest {
                         berlin_origin_destination);
 
         // When
-        final Route optimized = routeOptimizer.optimize(route);
+        final Route optimizedRoute = routeOptimizer.optimize(route);
 
         // Then
         assertEquals(
@@ -137,58 +129,173 @@ public class RouteOptimizerTest {
                         berlin_origin_destination,
                         List.of(munich_far, leipzig_medium, potsdam_very_close),
                         berlin_origin_destination),
-                optimized);
+                optimizedRoute);
     }
 
     @Test
-    public void testOptimize_userBugReproduction_Exact() throws Exception {
+    public void testOptimize_respectsGroupSequence() throws Exception {
         // Given
         final RouteOptimizer routeOptimizer =
                 new RouteOptimizer(
                         new HaversineVehicleRoutingTransportCostsProvider());
-        final Stop rottenburg_CentralApotheke =
-                new Stop(
+
+        // Kernstadt (Group 1), Dörfer (Group 2)
+        final DeliveryGroup kernstadt =
+                new DeliveryGroup(
+                        "ks",
+                        "Kernstadt",
+                        1);
+        final DeliveryGroup doerfer =
+                new DeliveryGroup(
+                        "df",
+                        "Dörfer",
+                        2);
+        final Stop berlin =
+                createStop(
                         "0",
-                        "Central Apotheke",
-                        Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(48.4765345, Unit.DEGREES),
-                                new Angle(8.9349008, Unit.DEGREES)),
-                        Priority._2_Default);
-        final Stop hamburg =
+                        "Berlin",
+                        52.52,
+                        13.40);
+        // Dorf is closer to Berlin than Stadt
+        final Stop dorf_close =
                 new Stop(
                         "1",
-                        "Hamburg",
+                        "Dorf",
                         Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(53.548828, Unit.DEGREES),
-                                new Angle(9.987170, Unit.DEGREES)),
-                        Priority._2_Default);
-        final Stop unterhausen =
+                        createGeodetic(52.53, 13.41),
+                        doerfer,
+                        // FK-TODO: verwende Optional.empty()
+                        LocalTime.MIN,
+                        LocalTime.MAX);
+        final Stop stadt_far =
                 new Stop(
                         "2",
-                        "Unterhausen",
+                        "Stadt",
                         Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(48.430628, Unit.DEGREES),
-                                new Angle(9.2546378, Unit.DEGREES)),
-                        Priority._2_Default);
+                        createGeodetic(52.60, 13.50),
+                        kernstadt,
+                        LocalTime.MIN,
+                        LocalTime.MAX);
+        final Route route =
+                new Route(
+                        berlin,
+                        List.of(dorf_close, stadt_far),
+                        berlin);
 
         // When
-        final Route optimized =
-                routeOptimizer.optimize(
-                        new Route(
-                                rottenburg_CentralApotheke,
-                                List.of(hamburg, unterhausen),
-                                hamburg));
+        final Route optimizedRoute = routeOptimizer.optimize(route);
 
-        // Then
+        // Then: Should visit Stadt FIRST because it's in Group 1, even if Dorf is closer
         assertEquals(
                 new Route(
-                        rottenburg_CentralApotheke,
-                        List.of(unterhausen, hamburg),
-                        hamburg),
-                optimized);
+                        berlin,
+                        List.of(stadt_far, dorf_close),
+                        berlin),
+                optimizedRoute);
+    }
+
+    @Test
+    public void testOptimize_breaksGroupSequenceForTimeWindows() throws Exception {
+        // Given
+        final RouteOptimizer routeOptimizer =
+                new RouteOptimizer(
+                        new HaversineVehicleRoutingTransportCostsProvider());
+
+        // Requirement 4: Time Windows > Zones
+        final DeliveryGroup kernstadt =
+                new DeliveryGroup(
+                        "ks",
+                        "Kernstadt",
+                        1);
+        final DeliveryGroup doerfer =
+                new DeliveryGroup(
+                        "df",
+                        "Dörfer",
+                        2);
+        final Stop berlin =
+                createStop(
+                        "0",
+                        "Berlin",
+                        52.52,
+                        13.40);
+        // Kernstadt stop has LATE window
+        final Stop stadt_late =
+                new Stop(
+                        "1",
+                        "Stadt",
+                        Optional.empty(),
+                        createGeodetic(52.60, 13.50),
+                        kernstadt,
+                        LocalTime.of(15, 0),
+                        LocalTime.of(17, 0));
+        // Dorf stop has EARLY window
+        final Stop dorf_early =
+                new Stop(
+                        "2",
+                        "Dorf",
+                        Optional.empty(),
+                        createGeodetic(52.53, 13.41),
+                        doerfer,
+                        LocalTime.of(8, 0),
+                        LocalTime.of(10, 0));
+        final Route route =
+                new Route(
+                        berlin,
+                        List.of(stadt_late, dorf_early),
+                        berlin);
+
+        // When
+        final Route optimizedRoute = routeOptimizer.optimize(route);
+
+        // Then: Should visit Dorf FIRST to satisfy time window, breaking group sequence
+        assertEquals(
+                new Route(
+                        berlin,
+                        List.of(dorf_early, stadt_late),
+                        berlin),
+                optimizedRoute);
+    }
+
+    @Test
+    public void testOptimize_unassignedJobsThrowsException() {
+        // Given
+        final RouteOptimizer routeOptimizer =
+                new RouteOptimizer(
+                        new HaversineVehicleRoutingTransportCostsProvider());
+        final Stop berlin =
+                createStop(
+                        "0",
+                        "Berlin",
+                        52.52,
+                        13.40);
+        final Stop s1 =
+                new Stop(
+                        "1",
+                        "S1",
+                        Optional.empty(),
+                        createGeodetic(52.53, 13.41),
+                        DeliveryGroup.DEFAULT,
+                        LocalTime.of(9, 0),
+                        LocalTime.of(9, 1)); // 1 min window
+        final Stop s2 =
+                new Stop(
+                        "2",
+                        "S2",
+                        Optional.empty(),
+                        createGeodetic(53.53, 14.41),
+                        DeliveryGroup.DEFAULT,
+                        LocalTime.of(9, 0),
+                        LocalTime.of(9, 1)); // Same window, but far away
+        final Route route =
+                new Route(
+                        berlin,
+                        List.of(s1, s2),
+                        berlin);
+
+        // When / Then
+        assertThrows(
+                IllegalStateException.class,
+                () -> routeOptimizer.optimize(route));
     }
 
     @Test
@@ -271,5 +378,24 @@ public class RouteOptimizerTest {
                         List.of(rivaDelGarda_north, malcesine_east),
                         malcesine_east),
                 osrmRoute);
+    }
+
+    // FK-TODO: inline method
+    private Stop createStop(final String id,
+                            final String address,
+                            final double lat,
+                            final double lon) {
+        return new Stop(
+                id,
+                address,
+                Optional.empty(),
+                createGeodetic(lat, lon));
+    }
+
+    // FK-TODO: inline method
+    private Geodetic createGeodetic(final double lat, final double lon) {
+        return Geodetic.fromLatitudeLongitude(
+                new Angle(lat, Unit.DEGREES),
+                new Angle(lon, Unit.DEGREES));
     }
 }
