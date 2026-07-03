@@ -11,7 +11,7 @@ public class JspritTimeUtils {
     private JspritTimeUtils() {
     }
 
-    public static TimeWindow toJspritWindow(Range<LocalDateTime> range) {
+    public static TimeWindow toJspritWindow(final Range<LocalDateTime> range) {
         return TimeWindow.newInstance(getStart(range), getEnd(range));
     }
 

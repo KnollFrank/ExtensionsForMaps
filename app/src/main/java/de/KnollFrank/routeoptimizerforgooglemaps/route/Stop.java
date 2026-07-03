@@ -14,14 +14,14 @@ public record Stop(String id,
                    Geodetic geodetic,
                    // FK-TODO: make deliveryGroup Optional
                    DeliveryGroup deliveryGroup,
-                   Range<LocalDateTime> timeWindow) {
+                   Optional<Range<LocalDateTime>> timeWindow) {
 
     // FK-TODO: entferne alle überladenen Konstruktoren
     public Stop(final String id,
                 final String address,
                 final Optional<String> placeId,
                 final Geodetic geodetic) {
-        this(id, address, placeId, geodetic, DeliveryGroup.DEFAULT, Range.all());
+        this(id, address, placeId, geodetic, DeliveryGroup.DEFAULT, Optional.empty());
     }
 
     public Stop(final String id,
@@ -29,7 +29,7 @@ public record Stop(String id,
                 final Optional<String> placeId,
                 final Geodetic geodetic,
                 final Priority priority) {
-        this(id, address, placeId, geodetic, new DeliveryGroup(priority.name(), priority.name(), priority.priority), Range.all());
+        this(id, address, placeId, geodetic, new DeliveryGroup(priority.name(), priority.name(), priority.priority), Optional.empty());
     }
 
     public Priority priority() {

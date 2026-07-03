@@ -1,5 +1,6 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
 
+import com.google.common.collect.Range;
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
 import com.graphhopper.jsprit.core.algorithm.state.StateManager;
@@ -15,11 +16,13 @@ import com.graphhopper.jsprit.core.problem.vehicle.VehicleTypeImpl;
 import com.graphhopper.jsprit.core.util.Coordinate;
 import com.graphhopper.jsprit.core.util.Solutions;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
@@ -61,17 +64,7 @@ public class RouteOptimizer {
         for (final Stop waypoint : route.waypoints()) {
             final String jobId = waypoint.id();
             stopMap.put(jobId, waypoint);
-
-            // ANFORDERUNG 2: Harte Zeitfenster
-            vrpBuilder.addJob(
-                    Service
-                            .Builder
-                            .newInstance(jobId)
-                            .setLocation(createLocation(waypoint))
-                            .addTimeWindow(JspritTimeUtils.toJspritWindow(waypoint.timeWindow()))
-                            // ANFORDERUNG 3: Gruppen-ID im Priority-Feld
-                            .setPriority(waypoint.deliveryGroup().sequenceOrder())
-                            .build());
+            vrpBuilder.addJob(createService(waypoint, jobId));
         }
         final VehicleRoutingProblem vehicleRoutingProblem =
                 vrpBuilder
@@ -118,6 +111,26 @@ public class RouteOptimizer {
                 route.origin(),
                 optimizedRoute,
                 route.destination());
+    }
+
+    private static Service createService(final Stop waypoint, final String jobId) {
+        // ANFORDERUNG 2: Harte Zeitfenster
+        final Service.Builder<Service> serviceBuilder =
+                Service
+                        .Builder
+                        .newInstance(jobId)
+                        .setLocation(createLocation(waypoint))
+                        // ANFORDERUNG 3: Gruppen-ID im Priority-Feld
+                        .setPriority(waypoint.deliveryGroup().sequenceOrder());
+        setTimeWindowIfPresent(serviceBuilder, waypoint.timeWindow());
+        return serviceBuilder.build();
+    }
+
+    private static void setTimeWindowIfPresent(final Service.Builder<Service> serviceBuilder,
+                                               final Optional<Range<LocalDateTime>> timeWindow) {
+        timeWindow
+                .map(JspritTimeUtils::toJspritWindow)
+                .ifPresent(serviceBuilder::setTimeWindow);
     }
 
     private static Location createLocation(final Stop stop) {
