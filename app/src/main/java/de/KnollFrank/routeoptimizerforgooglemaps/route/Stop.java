@@ -21,7 +21,12 @@ public record Stop(String id,
                 final String address,
                 final Optional<String> placeId,
                 final Geodetic geodetic) {
-        this(id, address, placeId, geodetic, DeliveryGroup.DEFAULT, Optional.empty());
+        this(id,
+             address,
+             placeId,
+             geodetic,
+             DeliveryGroup.DEFAULT,
+             Optional.empty());
     }
 
     public Stop(final String id,
@@ -29,7 +34,15 @@ public record Stop(String id,
                 final Optional<String> placeId,
                 final Geodetic geodetic,
                 final Priority priority) {
-        this(id, address, placeId, geodetic, new DeliveryGroup(priority.name(), priority.name(), priority.priority), Optional.empty());
+        this(id,
+             address,
+             placeId,
+             geodetic,
+             new DeliveryGroup(
+                     priority.name(),
+                     priority.name(),
+                     priority.priority),
+             Optional.empty());
     }
 
     public Priority priority() {
