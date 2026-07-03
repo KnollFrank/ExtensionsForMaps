@@ -17,6 +17,7 @@ public class FlexibleGroupConstraint implements SoftActivityConstraint {
     // ist aber WEIT unter der Strafe für den Ausfall eines Jobs (1.000.000)
     private static final double GROUP_VIOLATION_PENALTY = 50_000.0;
 
+    // FK-TODO: refactor
     @Override
     public double getCosts(final JobInsertionContext context,
                            final TourActivity prevAct,
@@ -58,11 +59,12 @@ public class FlexibleGroupConstraint implements SoftActivityConstraint {
 
     private static Optional<Integer> getSequenceOrder(final Job job) {
         if (job instanceof final AbstractJob abstractJob) {
-            if (abstractJob.getUserData() instanceof Optional) {
-                final Optional<DeliveryGroup> group = (Optional<DeliveryGroup>) abstractJob.getUserData();
+            final Object userData = abstractJob.getUserData();
+            if (userData instanceof Optional<?>) {
+                final Optional<DeliveryGroup> group = (Optional<DeliveryGroup>) userData;
                 return group.map(DeliveryGroup::sequenceOrder);
             }
         }
-        throw new IllegalStateException();
+        return Optional.empty();
     }
 }
