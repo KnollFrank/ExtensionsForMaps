@@ -1,5 +1,7 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
+import com.google.common.collect.Range;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,16 +14,14 @@ public record Stop(String id,
                    Geodetic geodetic,
                    // FK-TODO: make deliveryGroup Optional
                    DeliveryGroup deliveryGroup,
-                   // FK-TODO: introduce Optional<TimeWindow> for startWindow and endWindow
-                   LocalDateTime startWindow,
-                   LocalDateTime endWindow) {
+                   Range<LocalDateTime> timeWindow) {
 
     // FK-TODO: entferne alle überladenen Konstruktoren
     public Stop(final String id,
                 final String address,
                 final Optional<String> placeId,
                 final Geodetic geodetic) {
-        this(id, address, placeId, geodetic, DeliveryGroup.DEFAULT, LocalDateTime.MIN, LocalDateTime.MAX);
+        this(id, address, placeId, geodetic, DeliveryGroup.DEFAULT, Range.all());
     }
 
     public Stop(final String id,
@@ -29,7 +29,7 @@ public record Stop(String id,
                 final Optional<String> placeId,
                 final Geodetic geodetic,
                 final Priority priority) {
-        this(id, address, placeId, geodetic, new DeliveryGroup(priority.name(), priority.name(), priority.priority), LocalDateTime.MIN, LocalDateTime.MAX);
+        this(id, address, placeId, geodetic, new DeliveryGroup(priority.name(), priority.name(), priority.priority), Range.all());
     }
 
     public Priority priority() {

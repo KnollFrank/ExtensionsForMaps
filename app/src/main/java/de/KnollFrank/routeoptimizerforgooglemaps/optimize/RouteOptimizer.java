@@ -68,10 +68,7 @@ public class RouteOptimizer {
                             .Builder
                             .newInstance(jobId)
                             .setLocation(createLocation(waypoint))
-                            .addTimeWindow(
-                                    JspritTimeUtils.toJspritWindow(
-                                            waypoint.startWindow(),
-                                            waypoint.endWindow()))
+                            .addTimeWindow(JspritTimeUtils.toJspritWindow(waypoint.timeWindow()))
                             // ANFORDERUNG 3: Gruppen-ID im Priority-Feld
                             .setPriority(waypoint.deliveryGroup().sequenceOrder())
                             .build());
