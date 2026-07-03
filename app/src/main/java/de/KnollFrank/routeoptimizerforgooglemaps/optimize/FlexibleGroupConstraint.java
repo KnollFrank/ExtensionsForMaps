@@ -1,9 +1,13 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
 
+import com.graphhopper.jsprit.core.problem.AbstractJob;
 import com.graphhopper.jsprit.core.problem.constraint.SoftActivityConstraint;
+import com.graphhopper.jsprit.core.problem.job.Job;
 import com.graphhopper.jsprit.core.problem.misc.JobInsertionContext;
 import com.graphhopper.jsprit.core.problem.solution.route.VehicleRoute;
 import com.graphhopper.jsprit.core.problem.solution.route.activity.TourActivity;
+
+import de.KnollFrank.routeoptimizerforgooglemaps.route.DeliveryGroup;
 
 public class FlexibleGroupConstraint implements SoftActivityConstraint {
 
@@ -17,9 +21,9 @@ public class FlexibleGroupConstraint implements SoftActivityConstraint {
                            final TourActivity newAct,
                            final TourActivity nextAct,
                            final double prevActDepTime) {
-        
+
         // Anforderung 3: Wir holen uns die Gruppen-ID, die wir im Priority-Feld geparkt haben
-        final int newJobGroup = context.getJob().getPriority(); 
+        final int newJobGroupOrder = getSequenceOrder(context.getJob());
         double totalPenalty = 0.0;
         final VehicleRoute route = context.getRoute();
 
@@ -32,18 +36,18 @@ public class FlexibleGroupConstraint implements SoftActivityConstraint {
             }
 
             if (act instanceof final TourActivity.JobActivity jobAct) {
-                final int existingJobGroup = jobAct.getJob().getPriority();
+                final int existingJobGroupOrder = getSequenceOrder(jobAct.getJob());
 
                 if (!pastInsertionPoint) {
                     // VOR dem Einfügepunkt darf keine logisch spätere Gruppe liegen
                     // (z.B. Dorf [2] darf nicht vor Kernstadt [1] beliefert werden)
-                    if (existingJobGroup > newJobGroup) {
+                    if (existingJobGroupOrder > newJobGroupOrder) {
                         totalPenalty += GROUP_VIOLATION_PENALTY;
                     }
                 } else {
                     // NACH dem Einfügepunkt darf keine logisch frühere Gruppe liegen
                     // (z.B. Kernstadt [1] darf nicht hinter einem Dorf [2] liegen)
-                    if (existingJobGroup < newJobGroup) {
+                    if (existingJobGroupOrder < newJobGroupOrder) {
                         totalPenalty += GROUP_VIOLATION_PENALTY;
                     }
                 }
@@ -51,5 +55,14 @@ public class FlexibleGroupConstraint implements SoftActivityConstraint {
         }
 
         return totalPenalty;
+    }
+
+    private static int getSequenceOrder(final Job job) {
+        if (job instanceof final AbstractJob abstractJob) {
+            if (abstractJob.getUserData() instanceof final DeliveryGroup group) {
+                return group.sequenceOrder();
+            }
+        }
+        throw new IllegalStateException();
     }
 }

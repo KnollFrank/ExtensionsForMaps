@@ -12,6 +12,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,45 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 @RunWith(RobolectricTestRunner.class)
 public class RouteOptimizerTest {
 
+    // FK-TODO: refactor
+    @Test
+    public void testOptimize_supportsManyGroups() throws Exception {
+        // Given
+        final RouteOptimizer routeOptimizer =
+                new RouteOptimizer(
+                        new HaversineVehicleRoutingTransportCostsProvider());
+        // Dieser Test verifiziert, dass mehr als 10 Gruppen unterstützt werden (durch UserData)
+        final int numGroups = 15;
+        final List<Stop> waypoints = new ArrayList<>();
+        final Stop berlin = createStop("0", "Berlin", 52.52, 13.40);
+        // Wir erstellen 15 Stopps in umgekehrter Reihenfolge ihrer geografischen Nähe,
+        // aber mit aufsteigender Gruppen-Sequenz.
+        for (int i = 1; i <= numGroups; i++) {
+            // Je kleiner i, desto weiter weg, aber desto wichtiger die Gruppe
+            final double offset = (numGroups - i) * 0.01;
+            waypoints.add(
+                    new Stop(
+                            "s" + i,
+                            "Addr" + i,
+                            Optional.empty(),
+                            createGeodetic(52.52 + offset, 13.40 + offset),
+                            new DeliveryGroup("id" + i, "Group " + i, i),
+                            Optional.empty()));
+        }
+
+        // Route: Berlin -> [S15 (nah, Prio 15) ... S1 (fern, Prio 1)] -> Berlin
+        // Erwartung: S1 zuerst, S15 zuletzt (wegen sequenceOrder 1 bis 15)
+        final Route route = new Route(berlin, waypoints, berlin);
+
+        // When
+        final Route optimizedRoute = routeOptimizer.optimize(route);
+
+        // Then
+        for (int i = 0; i < numGroups; i++) {
+            assertEquals("s" + (i + 1), optimizedRoute.waypoints().get(i).id());
+        }
+    }
+
     @Test
     public void testOptimize_respectsTimeWindows() throws Exception {
         // Given
@@ -36,7 +76,6 @@ public class RouteOptimizerTest {
         // Given: Berlin start.
         // Stop A (farther): early window. 
         // Stop B (closer): late window.
-        // Costs: 1 unit/sec. Berlin (0,0), A (0.1, 0.1) ~15km, B (0.05, 0.05) ~7km.
         final Stop berlin = createStop("0", "Berlin", 52.52, 13.40);
 
         final Stop far_early =
@@ -142,11 +181,10 @@ public class RouteOptimizerTest {
 
     @Test
     public void testOptimize_respectsGroupSequence() throws Exception {
-        // Given
+        // Given: Kernstadt (Group 1), Dörfer (Group 2)
         final RouteOptimizer routeOptimizer =
                 new RouteOptimizer(
                         new HaversineVehicleRoutingTransportCostsProvider());
-
         // Kernstadt (Group 1), Dörfer (Group 2)
         final DeliveryGroup kernstadt =
                 new DeliveryGroup(

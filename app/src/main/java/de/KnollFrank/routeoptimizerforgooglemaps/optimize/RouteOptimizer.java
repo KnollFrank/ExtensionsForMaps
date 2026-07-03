@@ -120,8 +120,8 @@ public class RouteOptimizer {
                         .Builder
                         .newInstance(jobId)
                         .setLocation(createLocation(waypoint))
-                        // ANFORDERUNG 3: Gruppen-ID im Priority-Feld
-                        .setPriority(waypoint.deliveryGroup().sequenceOrder());
+                        // ANFORDERUNG 3: DeliveryGroup in UserData speichern
+                        .setUserData(waypoint.deliveryGroup());
         setTimeWindowIfPresent(serviceBuilder, waypoint.timeWindow());
         return serviceBuilder.build();
     }
