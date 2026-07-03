@@ -5,11 +5,11 @@ public class DeliveryGroups {
     public static final DeliveryGroup KERNSTADT =
             new DeliveryGroup(
                     "ks",
-                    "Kernstadt",
+                    "Kernstadt (zuerst beliefern)",
                     1);
     public static final DeliveryGroup DOERFER =
             new DeliveryGroup(
                     "df",
-                    "Dörfer",
+                    "Dörfer (als zweites beliefern)",
                     2);
 }

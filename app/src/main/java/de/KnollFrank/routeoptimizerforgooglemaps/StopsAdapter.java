@@ -151,7 +151,7 @@ class StopsAdapter extends RecyclerView.Adapter<StopsAdapter.ViewHolder> {
                             return this
                                     .getItem(position)
                                     .map(DeliveryGroup::name)
-                                    .orElse("empty");
+                                    .orElse("keine Liefergruppe ausgewählt");
                         }
                     };
             spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
