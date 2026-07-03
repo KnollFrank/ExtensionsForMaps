@@ -63,15 +63,15 @@ public class RouteOptimizer {
             stopMap.put(jobId, waypoint);
 
             // ANFORDERUNG 2: Harte Zeitfenster
-            final double startSec = waypoint.startWindow().toSecondOfDay();
-            final double endSec = waypoint.endWindow().toSecondOfDay();
             vrpBuilder.addJob(
                     Service
                             .Builder
                             .newInstance(jobId)
                             .setLocation(createLocation(waypoint))
-                            // FK-TODO: use com.graphhopper.jsprit.core.problem.solution.route.activity.TimeWindow
-                            .addTimeWindow(startSec, endSec)
+                            .addTimeWindow(
+                                    JspritTimeUtils.toJspritWindow(
+                                            waypoint.startWindow(),
+                                            waypoint.endWindow()))
                             // ANFORDERUNG 3: Gruppen-ID im Priority-Feld
                             .setPriority(waypoint.deliveryGroup().sequenceOrder())
                             .build());

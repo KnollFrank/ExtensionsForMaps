@@ -7,6 +7,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -42,8 +44,8 @@ public class RouteOptimizerTest {
                         Optional.empty(),
                         createGeodetic(52.62, 13.50),
                         DeliveryGroup.DEFAULT,
-                        LocalTime.of(8, 0),
-                        LocalTime.of(10, 0));
+                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(8, 0)),
+                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(10, 0)));
         final Stop close_late =
                 new Stop(
                         "2",
@@ -51,8 +53,8 @@ public class RouteOptimizerTest {
                         Optional.empty(),
                         createGeodetic(52.55, 13.45),
                         DeliveryGroup.DEFAULT,
-                        LocalTime.of(14, 0),
-                        LocalTime.of(16, 0));
+                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(14, 0)),
+                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(16, 0)));
         final Route route =
                 new Route(
                         berlin,
@@ -165,8 +167,8 @@ public class RouteOptimizerTest {
                         createGeodetic(52.53, 13.41),
                         doerfer,
                         // FK-TODO: verwende Optional.empty()
-                        LocalTime.MIN,
-                        LocalTime.MAX);
+                        LocalDateTime.MIN,
+                        LocalDateTime.MAX);
         final Stop stadt_far =
                 new Stop(
                         "2",
@@ -174,8 +176,8 @@ public class RouteOptimizerTest {
                         Optional.empty(),
                         createGeodetic(52.60, 13.50),
                         kernstadt,
-                        LocalTime.MIN,
-                        LocalTime.MAX);
+                        LocalDateTime.MIN,
+                        LocalDateTime.MAX);
         final Route route =
                 new Route(
                         berlin,
@@ -226,8 +228,8 @@ public class RouteOptimizerTest {
                         Optional.empty(),
                         createGeodetic(52.60, 13.50),
                         kernstadt,
-                        LocalTime.of(15, 0),
-                        LocalTime.of(17, 0));
+                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(15, 0)),
+                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(17, 0)));
         // Dorf stop has EARLY window
         final Stop dorf_early =
                 new Stop(
@@ -236,8 +238,8 @@ public class RouteOptimizerTest {
                         Optional.empty(),
                         createGeodetic(52.53, 13.41),
                         doerfer,
-                        LocalTime.of(8, 0),
-                        LocalTime.of(10, 0));
+                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(8, 0)),
+                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(10, 0)));
         final Route route =
                 new Route(
                         berlin,
@@ -275,8 +277,8 @@ public class RouteOptimizerTest {
                         Optional.empty(),
                         createGeodetic(52.53, 13.41),
                         DeliveryGroup.DEFAULT,
-                        LocalTime.of(9, 0),
-                        LocalTime.of(9, 1)); // 1 min window
+                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(9, 0)),
+                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(9, 1))); // 1 min window
         final Stop s2 =
                 new Stop(
                         "2",
@@ -284,8 +286,8 @@ public class RouteOptimizerTest {
                         Optional.empty(),
                         createGeodetic(53.53, 14.41),
                         DeliveryGroup.DEFAULT,
-                        LocalTime.of(9, 0),
-                        LocalTime.of(9, 1)); // Same window, but far away
+                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(9, 0)),
+                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(9, 1))); // Same window, but far away
         final Route route =
                 new Route(
                         berlin,
