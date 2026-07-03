@@ -27,6 +27,18 @@ public class Geodetic {
         return longitude;
     }
 
+    public Geodetic add(final Geodetic other) {
+        return Geodetic.fromLatitudeLongitude(
+                this.latitude.add(other.latitude),
+                this.longitude.add(other.longitude));
+    }
+
+    public Geodetic mul(final double factor) {
+        return Geodetic.fromLatitudeLongitude(
+                latitude.mul(factor),
+                longitude.mul(factor));
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;

@@ -1,5 +1,7 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.coordinate;
 
+import static de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit.RADIANS;
+
 import androidx.annotation.NonNull;
 
 import java.util.Objects;
@@ -18,6 +20,24 @@ public class Angle {
 
     public double toRadians() {
         return angleInRadians;
+    }
+
+    public Angle add(final Angle other) {
+        return new Angle(
+                this.angleInRadians + other.angleInRadians,
+                RADIANS);
+    }
+
+    public Angle sub(final Angle other) {
+        return new Angle(
+                this.angleInRadians - other.angleInRadians,
+                RADIANS);
+    }
+
+    public Angle mul(final double factor) {
+        return new Angle(
+                angleInRadians * factor,
+                RADIANS);
     }
 
     @Override
