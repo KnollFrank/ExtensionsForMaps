@@ -1,43 +1,74 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
-import android.content.Context;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
+import com.google.common.collect.Range;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.DeliveryGroup;
-import de.KnollFrank.routeoptimizerforgooglemaps.route.DeliveryGroups;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
-class StopsAdapter extends RecyclerView.Adapter<StopsAdapter.ViewHolder> {
+class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
 
     private List<Stop> stops = List.of();
     private final List<Optional<DeliveryGroup>> deliveryGroups = new ArrayList<>();
+    private final List<Optional<LocalDateTime>> windowStarts = new ArrayList<>();
+    private final List<Optional<LocalDateTime>> windowEnds = new ArrayList<>();
 
+    // FK-TODO: refactor
     public void setStops(final List<Stop> newStops) {
         stops = newStops;
-        setDeliveryGroups(getDeliveryGroups(newStops));
+        deliveryGroups.clear();
+        windowStarts.clear();
+        windowEnds.clear();
+        for (final Stop stop : newStops) {
+            deliveryGroups.add(stop.deliveryGroup());
+            windowStarts.add(
+                    stop
+                            .timeWindow()
+                            .flatMap(
+                                    range ->
+                                            range.hasLowerBound() ?
+                                                    Optional.of(range.lowerEndpoint()) :
+                                                    Optional.empty()));
+            windowEnds.add(
+                    stop
+                            .timeWindow()
+                            .flatMap(
+                                    range ->
+                                            range.hasUpperBound() ?
+                                                    Optional.of(range.upperEndpoint()) :
+                                                    Optional.empty()));
+        }
         notifyDataSetChanged();
     }
 
     public List<Stop> getStops() {
-        return Lists
-                .zip(stops, deliveryGroups)
-                .stream()
-                .map(stop_deliveryGroup -> asStopWithDeliveryGroup(stop_deliveryGroup.first, stop_deliveryGroup.second))
+        return IntStream
+                .range(0, stops.size())
+                .mapToObj(this::createStopWithUiData)
                 .toList();
     }
 
@@ -49,7 +80,7 @@ class StopsAdapter extends RecyclerView.Adapter<StopsAdapter.ViewHolder> {
                         LayoutInflater
                                 .from(parent.getContext())
                                 .inflate(R.layout.item_stop, parent, false));
-        holder.spinnerPriority.setOnItemSelectedListener(
+        holder.spinnerDeliveryGroup.setOnItemSelectedListener(
                 new AdapterView.OnItemSelectedListener() {
 
                     @Override
@@ -64,9 +95,44 @@ class StopsAdapter extends RecyclerView.Adapter<StopsAdapter.ViewHolder> {
                     }
 
                     @Override
-                    public void onNothingSelected(final AdapterView<?> parent) {
+                    public void onNothingSelected(AdapterView<?> parent) {
                     }
                 });
+        holder.tvWindowStart.setOnClickListener(
+                new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(final View view) {
+                        pickDateTime(view, holder, true);
+                    }
+                });
+        holder.tvWindowEnd.setOnClickListener(
+                new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(final View view) {
+                        pickDateTime(view, holder, false);
+                    }
+                });
+        holder.tvWindowStart.setOnLongClickListener(
+                new View.OnLongClickListener() {
+
+                    @Override
+                    public boolean onLongClick(final View view) {
+                        clearDateTime(holder, true);
+                        return true;
+                    }
+                });
+        holder.tvWindowEnd.setOnLongClickListener(
+                new View.OnLongClickListener() {
+
+                    @Override
+                    public boolean onLongClick(final View view) {
+                        clearDateTime(holder, false);
+                        return true;
+                    }
+                });
+
         return holder;
     }
 
@@ -74,7 +140,11 @@ class StopsAdapter extends RecyclerView.Adapter<StopsAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         final Stop stop = stops.get(position);
         holder.tvAddress.setText(stop.address());
-        holder.spinnerPriority.setSelection(holder.spinnerAdapter.getPosition(deliveryGroups.get(position)));
+        holder.spinnerDeliveryGroup.setSelection(
+                holder.spinnerDeliveryGroupAdapter.getPosition(
+                        deliveryGroups.get(position)));
+        holder.tvWindowStart.setText(getText(windowStarts.get(position)));
+        holder.tvWindowEnd.setText(getText(windowEnds.get(position)));
     }
 
     @Override
@@ -82,80 +152,95 @@ class StopsAdapter extends RecyclerView.Adapter<StopsAdapter.ViewHolder> {
         return stops.size();
     }
 
-    private void setDeliveryGroups(final List<Optional<DeliveryGroup>> deliveryGroups) {
-        this.deliveryGroups.clear();
-        this.deliveryGroups.addAll(deliveryGroups);
+    private String getText(final Optional<LocalDateTime> localDateTime) {
+        return localDateTime
+                .map(_localDateTime -> _localDateTime.format(DATE_TIME_FORMATTER))
+                .orElse("");
     }
 
-    private static List<Optional<DeliveryGroup>> getDeliveryGroups(final List<Stop> stops) {
-        return stops
-                .stream()
-                .map(Stop::deliveryGroup)
-                .toList();
-    }
-
-    private static Stop asStopWithDeliveryGroup(final Stop stop, final Optional<DeliveryGroup> deliveryGroup) {
+    private Stop createStopWithUiData(int index) {
+        final Stop stop = stops.get(index);
         return new Stop(
                 stop.id(),
                 stop.address(),
                 stop.placeId(),
                 stop.geodetic(),
-                deliveryGroup,
-                stop.timeWindow());
+                deliveryGroups.get(index),
+                createRange(windowStarts.get(index), windowEnds.get(index)));
     }
 
-    protected static class ViewHolder extends RecyclerView.ViewHolder {
-
-        public final TextView tvAddress;
-        public final Spinner spinnerPriority;
-        public final ArrayAdapter<Optional<DeliveryGroup>> spinnerAdapter;
-
-        public ViewHolder(final View itemView) {
-            super(itemView);
-            tvAddress = itemView.findViewById(R.id.tvAddress);
-            spinnerPriority = itemView.findViewById(R.id.spinnerPriority);
-            spinnerAdapter = createAndConfigureSpinnerAdapter(itemView.getContext());
-            spinnerPriority.setAdapter(spinnerAdapter);
+    private Optional<Range<LocalDateTime>> createRange(final Optional<LocalDateTime> start,
+                                                       final Optional<LocalDateTime> end) {
+        if (start.isPresent() && end.isPresent()) {
+            return Optional.of(Range.closed(start.get(), end.get()));
+        } else {
+            return start
+                    .map(Range::atLeast)
+                    .or(() -> end.map(Range::atMost));
         }
+    }
 
-        private static ArrayAdapter<Optional<DeliveryGroup>> createAndConfigureSpinnerAdapter(final Context context) {
-            final ArrayAdapter<Optional<DeliveryGroup>> spinnerAdapter =
-                    new ArrayAdapter<Optional<DeliveryGroup>>(
-                            context,
-                            android.R.layout.simple_spinner_item,
-                            new Optional[]{
-                                    Optional.empty(),
-                                    Optional.of(DeliveryGroups.KERNSTADT),
-                                    Optional.of(DeliveryGroups.DOERFER)}) {
+    private void pickDateTime(final View view, final ViewHolder holder, final boolean isStart) {
+        if (view.getContext() instanceof final FragmentActivity activity) {
+            pickDateTime(activity, holder, isStart);
+        }
+    }
 
-                        @NonNull
-                        @Override
-                        public View getView(final int position,
-                                            @Nullable final View convertView,
-                                            @NonNull final ViewGroup parent) {
-                            final TextView tv = (TextView) super.getView(position, convertView, parent);
-                            tv.setText(getText(position));
-                            return tv;
-                        }
+    private void pickDateTime(final FragmentActivity activity, final ViewHolder holder, final boolean isStart) {
+        final MaterialDatePicker<Long> datePicker =
+                MaterialDatePicker
+                        .Builder
+                        .datePicker()
+                        .setTitleText(isStart ? "Start-Datum wählen" : "End-Datum wählen")
+                        .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                        .build();
+        datePicker.addOnPositiveButtonClickListener(
+                new MaterialPickerOnPositiveButtonClickListener<>() {
 
-                        @Override
-                        public View getDropDownView(final int position,
-                                                    @Nullable final View convertView,
-                                                    @NonNull final ViewGroup parent) {
-                            final TextView tv = (TextView) super.getDropDownView(position, convertView, parent);
-                            tv.setText(getText(position));
-                            return tv;
-                        }
+                    @Override
+                    public void onPositiveButtonClick(final Long selection) {
+                        final MaterialTimePicker timePicker =
+                                new MaterialTimePicker
+                                        .Builder()
+                                        .setTimeFormat(DateFormat.is24HourFormat(activity) ? TimeFormat.CLOCK_24H : TimeFormat.CLOCK_12H)
+                                        .setHour(8)
+                                        .setMinute(0)
+                                        .setTitleText(isStart ? "Start-Uhrzeit wählen" : "End-Uhrzeit wählen")
+                                        .build();
+                        timePicker.addOnPositiveButtonClickListener(
+                                new View.OnClickListener() {
 
-                        private String getText(final int position) {
-                            return this
-                                    .getItem(position)
-                                    .map(DeliveryGroup::name)
-                                    .orElse("keine Liefergruppe ausgewählt");
-                        }
-                    };
-            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            return spinnerAdapter;
+                                    private final LocalDateTime date =
+                                            Instant
+                                                    .ofEpochMilli(selection)
+                                                    .atZone(ZoneId.systemDefault())
+                                                    .toLocalDateTime();
+
+                                    @Override
+                                    public void onClick(final View _view) {
+                                        final int pos = holder.getBindingAdapterPosition();
+                                        if (pos != RecyclerView.NO_POSITION) {
+                                            (isStart ? windowStarts : windowEnds).set(
+                                                    pos,
+                                                    Optional.of(
+                                                            date
+                                                                    .withHour(timePicker.getHour())
+                                                                    .withMinute(timePicker.getMinute())));
+                                            notifyItemChanged(pos);
+                                        }
+                                    }
+                                });
+                        timePicker.show(activity.getSupportFragmentManager(), "TIME_PICKER");
+                    }
+                });
+        datePicker.show(activity.getSupportFragmentManager(), "DATE_PICKER");
+    }
+
+    private void clearDateTime(final ViewHolder holder, final boolean isStart) {
+        final int pos = holder.getBindingAdapterPosition();
+        if (pos != RecyclerView.NO_POSITION) {
+            (isStart ? windowStarts : windowEnds).set(pos, Optional.empty());
+            notifyItemChanged(pos);
         }
     }
 }
