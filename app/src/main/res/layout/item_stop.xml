@@ -25,55 +25,53 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tvAddress" />
 
-    <TextView
-        android:id="@+id/tvWindowStartLabel"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/llTimeWindow"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Start:"
-        android:textSize="12sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvAddress" />
-
-    <TextView
-        android:id="@+id/tvWindowStart"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:background="?attr/selectableItemBackground"
-        android:hint="nicht gesetzt"
-        android:padding="4dp"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@+id/tvWindowStartLabel"
-        app:layout_constraintEnd_toStartOf="@+id/tvWindowEndLabel"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintStart_toEndOf="@+id/tvWindowStartLabel"
-        app:layout_constraintTop_toTopOf="@+id/tvWindowStartLabel" />
-
-    <TextView
-        android:id="@+id/tvWindowEndLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="Ende:"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@+id/tvWindowStartLabel"
-        app:layout_constraintStart_toEndOf="@+id/tvWindowStart"
-        app:layout_constraintTop_toTopOf="@+id/tvWindowStartLabel" />
-
-    <TextView
-        android:id="@+id/tvWindowEnd"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:background="?attr/selectableItemBackground"
-        android:hint="nicht gesetzt"
-        android:padding="4dp"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@+id/tvWindowStartLabel"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintStart_toEndOf="@+id/tvWindowEndLabel"
-        app:layout_constraintTop_toTopOf="@+id/tvWindowStartLabel" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvAddress">
+
+        <TextView
+            android:id="@+id/tvWindowStartLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start:"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tvWindowStart"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
+            android:hint="nicht gesetzt"
+            android:padding="4dp"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tvWindowEndLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Ende:"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tvWindowEnd"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
+            android:hint="nicht gesetzt"
+            android:padding="4dp"
+            android:textSize="12sp" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
