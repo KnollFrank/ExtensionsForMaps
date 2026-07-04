@@ -18,6 +18,9 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.DeliveryGroups;
 
 class ViewHolder extends RecyclerView.ViewHolder {
 
+    public final TextView tvDotsTop;
+    public final TextView tvDotsBottom;
+    public final TextView tvIndexLetter;
     public final TextView tvAddress;
     public final Spinner spinnerDeliveryGroup;
     public final TextView tvWindowStart;
@@ -26,12 +29,24 @@ class ViewHolder extends RecyclerView.ViewHolder {
 
     public ViewHolder(final View itemView) {
         super(itemView);
+        tvDotsTop = itemView.findViewById(R.id.tvDotsTop);
+        tvDotsBottom = itemView.findViewById(R.id.tvDotsBottom);
+        tvIndexLetter = itemView.findViewById(R.id.tvIndexLetter);
         tvAddress = itemView.findViewById(R.id.tvAddress);
         spinnerDeliveryGroup = itemView.findViewById(R.id.spinnerDeliveryGroup);
         tvWindowStart = itemView.findViewById(R.id.tvWindowStart);
         tvWindowEnd = itemView.findViewById(R.id.tvWindowEnd);
         spinnerDeliveryGroupAdapter = createAndConfigureSpinnerDeliveryGroupAdapter(itemView.getContext());
         spinnerDeliveryGroup.setAdapter(spinnerDeliveryGroupAdapter);
+    }
+
+    public void setDots(final int position, final int numStops) {
+        tvDotsTop.setVisibility(position == 0 ? View.INVISIBLE : View.VISIBLE);
+        tvDotsBottom.setVisibility(position == numStops - 1 ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    public void setIndexLetterForPosition(final int position) {
+        tvIndexLetter.setText(getIndexLetter(position));
     }
 
     private static ArrayAdapter<Optional<DeliveryGroup>> createAndConfigureSpinnerDeliveryGroupAdapter(final Context context) {
@@ -72,5 +87,18 @@ class ViewHolder extends RecyclerView.ViewHolder {
                 };
         spinnerDeliveryGroupAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         return spinnerDeliveryGroupAdapter;
+    }
+
+    private String getIndexLetter(final int position) {
+        if (position < 0) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder();
+        int p = position;
+        do {
+            sb.insert(0, (char) ('A' + (p % 26)));
+            p = (p / 26) - 1;
+        } while (p >= 0);
+        return sb.toString();
     }
 }

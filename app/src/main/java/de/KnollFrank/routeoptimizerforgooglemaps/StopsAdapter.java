@@ -139,6 +139,8 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         final Stop stop = stops.get(position);
+        holder.setIndexLetterForPosition(position);
+        holder.setDots(position, stops.size());
         holder.tvAddress.setText(stop.address());
         holder.spinnerDeliveryGroup.setSelection(
                 holder.spinnerDeliveryGroupAdapter.getPosition(
