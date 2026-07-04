@@ -26,6 +26,132 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 @RunWith(RobolectricTestRunner.class)
 public class RouteOptimizerTest {
 
+    @Test
+    public void testOptimize_reproduceUserScenario_HechingenBeforeNoGroupWurmlingen() throws Exception {
+        // Given
+        final RouteOptimizer routeOptimizer =
+                new RouteOptimizer(
+                        new HaversineVehicleRoutingTransportCostsProvider());
+        // Scenario: Hechingen is Group 1 (Stadt), Wurmlingen has NO GROUP (Optional.empty)
+        // Tübingen -> Wurmlingen (No Group) -> Hechingen (Group 1) -> Tübingen
+        final Stop tuebingen =
+                new Stop(
+                        "0",
+                        "Tuebingen",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(48.5015, Unit.DEGREES),
+                                new Angle(8.9932, Unit.DEGREES)),
+                        Optional.empty(),
+                        Optional.empty());
+        final DeliveryGroup kernstadt = new DeliveryGroup("ks", "Kernstadt", 1);
+        // Hechingen is further away (~16km)
+        final Stop hechingen_stadt =
+                new Stop(
+                        "1",
+                        "Hechingen", Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(48.3539, Unit.DEGREES),
+                                new Angle(8.9614, Unit.DEGREES)),
+                        Optional.of(kernstadt),
+                        Optional.empty());
+
+        // Wurmlingen has NO group
+        final Stop wurmlingen_no_group =
+                new Stop(
+                        "2",
+                        "Wurmlingen",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(48.5030, Unit.DEGREES),
+                                new Angle(8.9625, Unit.DEGREES)),
+                        Optional.empty(),
+                        Optional.empty());
+
+        final Route route =
+                new Route(
+                        tuebingen,
+                        List.of(wurmlingen_no_group, hechingen_stadt),
+                        tuebingen);
+
+        // When
+        final Route optimizedRoute = routeOptimizer.optimize(route);
+
+        // Then: Even if Wurmlingen has no group, Hechingen should be FIRST because it HAS a group with low sequence order.
+        assertEquals(
+                new Route(
+                        tuebingen,
+                        List.of(hechingen_stadt, wurmlingen_no_group),
+                        tuebingen),
+                optimizedRoute);
+    }
+
+    @Test
+    public void testOptimize_reproduceUserScenario_HechingenBeforeWurmlingen() throws Exception {
+        // Given: Tübingen start/end, Hechingen (Group 1 - Kernstadt), Wurmlingen (Group 2 - Dorf)
+        final RouteOptimizer routeOptimizer =
+                new RouteOptimizer(
+                        new HaversineVehicleRoutingTransportCostsProvider());
+        final Stop tuebingen =
+                new Stop(
+                        "0",
+                        "Tuebingen",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(48.5015, Unit.DEGREES),
+                                new Angle(8.9932, Unit.DEGREES)),
+                        Optional.empty(),
+                        Optional.empty());
+        final DeliveryGroup kernstadt =
+                new DeliveryGroup(
+                        "ks",
+                        "Kernstadt",
+                        1);
+        final DeliveryGroup dorf =
+                new DeliveryGroup(
+                        "df",
+                        "Dörfer",
+                        2);
+        // Hechingen is further away (~16km)
+        final Stop hechingen_stadt =
+                new Stop(
+                        "1",
+                        "Hechingen",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(48.3539, Unit.DEGREES),
+                                new Angle(8.9614, Unit.DEGREES)),
+                        Optional.of(kernstadt),
+                        Optional.empty());
+        // Wurmlingen is very close (~2.5km)
+        final Stop wurmlingen_dorf =
+                new Stop(
+                        "2",
+                        "Wurmlingen",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(48.5030, Unit.DEGREES),
+                                new Angle(8.9625, Unit.DEGREES)),
+                        Optional.of(dorf),
+                        Optional.empty());
+        final Route route =
+                new Route(
+                        tuebingen,
+                        List.of(wurmlingen_dorf, hechingen_stadt),
+                        tuebingen);
+
+        // When
+        final Route optimizedRoute = routeOptimizer.optimize(route);
+
+        // Then: Should visit Hechingen FIRST because it's in Group 1, even if Wurmlingen is much closer
+        assertEquals(
+                new Route(
+                        tuebingen,
+                        List.of(hechingen_stadt, wurmlingen_dorf),
+                        tuebingen),
+                optimizedRoute);
+    }
+
     // FK-TODO: refactor
     @Test
     public void testOptimize_supportsManyGroups() throws Exception {
@@ -61,14 +187,15 @@ public class RouteOptimizerTest {
         // Route: Berlin -> [S15 (nah, Prio 15) ... S1 (fern, Prio 1)] -> Berlin
         // Erwartung: S1 zuerst, S15 zuletzt (wegen sequenceOrder 1 bis 15)
         final Stop berlin =
-                new Stop("0",
-                         "Berlin",
-                         Optional.empty(),
-                         Geodetic.fromLatitudeLongitude(
-                                 new Angle(52.52, Unit.DEGREES),
-                                 new Angle(13.40, Unit.DEGREES)),
-                         Optional.empty(),
-                         Optional.empty());
+                new Stop(
+                        "0",
+                        "Berlin",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(52.52, Unit.DEGREES),
+                                new Angle(13.40, Unit.DEGREES)),
+                        Optional.empty(),
+                        Optional.empty());
         final Route route = new Route(berlin, waypoints, berlin);
 
         // When
@@ -88,17 +215,18 @@ public class RouteOptimizerTest {
                         new HaversineVehicleRoutingTransportCostsProvider());
 
         // Given: Berlin start.
-        // Stop A (farther): early window. 
+        // Stop A (farther): early window.
         // Stop B (closer): late window.
         final Stop berlin =
-                new Stop("0",
-                         "Berlin",
-                         Optional.empty(),
-                         Geodetic.fromLatitudeLongitude(
-                                 new Angle(52.52, Unit.DEGREES),
-                                 new Angle(13.40, Unit.DEGREES)),
-                         Optional.empty(),
-                         Optional.empty());
+                new Stop(
+                        "0",
+                        "Berlin",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(52.52, Unit.DEGREES),
+                                new Angle(13.40, Unit.DEGREES)),
+                        Optional.empty(),
+                        Optional.empty());
 
         final Stop far_early =
                 new Stop(
@@ -227,14 +355,15 @@ public class RouteOptimizerTest {
                         "Dörfer",
                         2);
         final Stop berlin =
-                new Stop("0",
-                         "Berlin",
-                         Optional.empty(),
-                         Geodetic.fromLatitudeLongitude(
-                                 new Angle(52.52, Unit.DEGREES),
-                                 new Angle(13.40, Unit.DEGREES)),
-                         Optional.empty(),
-                         Optional.empty());
+                new Stop(
+                        "0",
+                        "Berlin",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(52.52, Unit.DEGREES),
+                                new Angle(13.40, Unit.DEGREES)),
+                        Optional.empty(),
+                        Optional.empty());
         // Dorf is closer to Berlin than Stadt
         final Stop dorf_close =
                 new Stop(
@@ -293,14 +422,15 @@ public class RouteOptimizerTest {
                         "Dörfer",
                         2);
         final Stop berlin =
-                new Stop("0",
-                         "Berlin",
-                         Optional.empty(),
-                         Geodetic.fromLatitudeLongitude(
-                                 new Angle(52.52, Unit.DEGREES),
-                                 new Angle(13.40, Unit.DEGREES)),
-                         Optional.empty(),
-                         Optional.empty());
+                new Stop(
+                        "0",
+                        "Berlin",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(52.52, Unit.DEGREES),
+                                new Angle(13.40, Unit.DEGREES)),
+                        Optional.empty(),
+                        Optional.empty());
         // Kernstadt stop has LATE window
         final Stop stadt_late =
                 new Stop(
@@ -354,14 +484,15 @@ public class RouteOptimizerTest {
                 new RouteOptimizer(
                         new HaversineVehicleRoutingTransportCostsProvider());
         final Stop berlin =
-                new Stop("0",
-                         "Berlin",
-                         Optional.empty(),
-                         Geodetic.fromLatitudeLongitude(
-                                 new Angle(52.52, Unit.DEGREES),
-                                 new Angle(13.40, Unit.DEGREES)),
-                         Optional.empty(),
-                         Optional.empty());
+                new Stop(
+                        "0",
+                        "Berlin",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(52.52, Unit.DEGREES),
+                                new Angle(13.40, Unit.DEGREES)),
+                        Optional.empty(),
+                        Optional.empty());
         final Stop s1 =
                 new Stop(
                         "1",
