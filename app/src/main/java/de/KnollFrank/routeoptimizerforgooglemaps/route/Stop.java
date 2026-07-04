@@ -12,7 +12,6 @@ public record Stop(String id,
                    String address,
                    Optional<String> placeId,
                    Geodetic geodetic,
-                   // FK-TODO: make deliveryGroup Optional
                    Optional<DeliveryGroup> deliveryGroup,
                    Optional<Range<LocalDateTime>> timeWindow) {
 

@@ -2,14 +2,14 @@ package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 public class DeliveryGroups {
 
-    public static final DeliveryGroup KERNSTADT =
+    public static final DeliveryGroup TOWN =
             new DeliveryGroup(
-                    "ks",
-                    "Kernstadt (zuerst beliefern)",
+                    "TOWN",
+                    "Stadt (zuerst beliefern)",
                     1);
-    public static final DeliveryGroup DOERFER =
+    public static final DeliveryGroup VILLAGE =
             new DeliveryGroup(
-                    "df",
-                    "Dörfer (als zweites beliefern)",
+                    "VILLAGE",
+                    "Dorf (als zweites beliefern)",
                     2);
 }

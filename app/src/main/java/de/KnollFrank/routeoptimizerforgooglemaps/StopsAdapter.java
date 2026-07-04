@@ -26,50 +26,40 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.route.DeliveryGroup;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
 class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
 
-    private List<Stop> stops = List.of();
+    private Optional<Route> route = Optional.empty();
     private final List<Optional<DeliveryGroup>> deliveryGroups = new ArrayList<>();
+    // FK-TODO: brauchen record für start und end und dann davon eine List<Optional<>>
     private final List<Optional<LocalDateTime>> windowStarts = new ArrayList<>();
     private final List<Optional<LocalDateTime>> windowEnds = new ArrayList<>();
 
-    // FK-TODO: refactor
-    public void setStops(final List<Stop> newStops) {
-        stops = newStops;
+    public void setRoute(final Route route) {
+        this.route = Optional.of(route);
         deliveryGroups.clear();
         windowStarts.clear();
         windowEnds.clear();
-        for (final Stop stop : newStops) {
+        // FK-TODO: refactor using streams und für jede Variable das clear() und setzen getrennt von den anderen Variablen durchführen
+        for (final Stop stop : route.stops()) {
             deliveryGroups.add(stop.deliveryGroup());
-            windowStarts.add(
-                    stop
-                            .timeWindow()
-                            .flatMap(
-                                    range ->
-                                            range.hasLowerBound() ?
-                                                    Optional.of(range.lowerEndpoint()) :
-                                                    Optional.empty()));
-            windowEnds.add(
-                    stop
-                            .timeWindow()
-                            .flatMap(
-                                    range ->
-                                            range.hasUpperBound() ?
-                                                    Optional.of(range.upperEndpoint()) :
-                                                    Optional.empty()));
+            windowStarts.add(getEndpoint(stop, true));
+            windowEnds.add(getEndpoint(stop, false));
         }
         notifyDataSetChanged();
     }
 
-    public List<Stop> getStops() {
-        return IntStream
-                .range(0, stops.size())
-                .mapToObj(this::createStopWithUiData)
-                .toList();
+    public Optional<Route> getRoute() {
+        return route.map(
+                _route ->
+                        new Route(
+                                _route.origin(),
+                                getWaypointsWithUiData(_route),
+                                _route.destination()));
     }
 
     @NonNull
@@ -98,60 +88,41 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
                     public void onNothingSelected(AdapterView<?> parent) {
                     }
                 });
-        holder.tvWindowStart.setOnClickListener(
-                new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(final View view) {
-                        pickDateTime(view, holder, true);
-                    }
-                });
-        holder.tvWindowEnd.setOnClickListener(
-                new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(final View view) {
-                        pickDateTime(view, holder, false);
-                    }
-                });
-        holder.tvWindowStart.setOnLongClickListener(
-                new View.OnLongClickListener() {
-
-                    @Override
-                    public boolean onLongClick(final View view) {
-                        clearDateTime(holder, true);
-                        return true;
-                    }
-                });
-        holder.tvWindowEnd.setOnLongClickListener(
-                new View.OnLongClickListener() {
-
-                    @Override
-                    public boolean onLongClick(final View view) {
-                        clearDateTime(holder, false);
-                        return true;
-                    }
-                });
-
+        setupDateTimePickers(holder);
         return holder;
     }
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-        final Stop stop = stops.get(position);
-        holder.setIndexLetterForPosition(position);
-        holder.setDots(position, stops.size());
+        final Stop stop = route.orElseThrow().stops().get(position);
         holder.tvAddress.setText(stop.address());
-        holder.spinnerDeliveryGroup.setSelection(
-                holder.spinnerDeliveryGroupAdapter.getPosition(
-                        deliveryGroups.get(position)));
-        holder.tvWindowStart.setText(getText(windowStarts.get(position)));
-        holder.tvWindowEnd.setText(getText(windowEnds.get(position)));
+        holder.setDots(position, getItemCount());
+        // Marker logic
+        holder.tvIndexLetter.setVisibility(View.GONE);
+        holder.viewOriginMarker.setVisibility(View.GONE);
+        holder.ivDestinationMarker.setVisibility(View.GONE);
+        if (isOriginOfRoute(position)) {
+            holder.viewOriginMarker.setVisibility(View.VISIBLE);
+            holder.llEditableFields.setVisibility(View.GONE);
+        } else if (isDestinationOfRoute(position)) {
+            holder.ivDestinationMarker.setVisibility(View.VISIBLE);
+            holder.llEditableFields.setVisibility(View.GONE);
+        } else {
+            holder.setIndexLetterForPosition(position - 1);
+            holder.llEditableFields.setVisibility(View.VISIBLE);
+            holder.spinnerDeliveryGroup.setSelection(
+                    holder.spinnerDeliveryGroupAdapter.getPosition(
+                            deliveryGroups.get(position)));
+            holder.tvWindowStart.setText(getText(windowStarts.get(position)));
+            holder.tvWindowEnd.setText(getText(windowEnds.get(position)));
+        }
     }
 
     @Override
     public int getItemCount() {
-        return stops.size();
+        return route
+                .map(_route -> _route.stops().size())
+                .orElse(0);
     }
 
     private String getText(final Optional<LocalDateTime> localDateTime) {
@@ -160,7 +131,14 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
                 .orElse("");
     }
 
-    private Stop createStopWithUiData(int index) {
+    private List<Stop> getWaypointsWithUiData(final Route route) {
+        return IntStream
+                .range(1, route.waypoints().size() + 1)
+                .mapToObj(index -> getStopWithUiData(route.stops(), index))
+                .toList();
+    }
+
+    private Stop getStopWithUiData(final List<Stop> stops, int index) {
         final Stop stop = stops.get(index);
         return new Stop(
                 stop.id(),
@@ -219,7 +197,7 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
                                                     .toLocalDateTime();
 
                                     @Override
-                                    public void onClick(final View _view) {
+                                    public void onClick(final View view) {
                                         final int pos = holder.getBindingAdapterPosition();
                                         if (pos != RecyclerView.NO_POSITION) {
                                             (isStart ? windowStarts : windowEnds).set(
@@ -244,5 +222,64 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
             (isStart ? windowStarts : windowEnds).set(pos, Optional.empty());
             notifyItemChanged(pos);
         }
+    }
+
+    private Optional<LocalDateTime> getEndpoint(final Stop stop, final boolean lower) {
+        return stop
+                .timeWindow()
+                .flatMap(
+                        timeWindow ->
+                                lower ?
+                                        timeWindow.hasLowerBound() ?
+                                                Optional.of(timeWindow.lowerEndpoint()) :
+                                                Optional.empty() :
+                                        timeWindow.hasUpperBound() ?
+                                                Optional.of(timeWindow.upperEndpoint()) :
+                                                Optional.empty());
+    }
+
+    private void setupDateTimePickers(final ViewHolder holder) {
+        holder.tvWindowStart.setOnClickListener(
+                new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(final View view) {
+                        pickDateTime(view, holder, true);
+                    }
+                });
+        holder.tvWindowEnd.setOnClickListener(
+                new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(final View view) {
+                        pickDateTime(view, holder, false);
+                    }
+                });
+        holder.tvWindowStart.setOnLongClickListener(
+                new View.OnLongClickListener() {
+
+                    @Override
+                    public boolean onLongClick(final View view) {
+                        clearDateTime(holder, true);
+                        return true;
+                    }
+                });
+        holder.tvWindowEnd.setOnLongClickListener(
+                new View.OnLongClickListener() {
+
+                    @Override
+                    public boolean onLongClick(final View view) {
+                        clearDateTime(holder, false);
+                        return true;
+                    }
+                });
+    }
+
+    private static boolean isOriginOfRoute(final int position) {
+        return position == 0;
+    }
+
+    private boolean isDestinationOfRoute(final int position) {
+        return position == getItemCount() - 1;
     }
 }

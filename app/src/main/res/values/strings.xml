@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Routeoptimizer for Google Maps</string>
+    <string name="app_name">10+ Stopps sortieren für Maps</string>
     <string name="fgs_special_use_explanation">The service maintains a floating overlay to guide the user through an optimized route across multiple stops in Google Maps.</string>
 </resources>

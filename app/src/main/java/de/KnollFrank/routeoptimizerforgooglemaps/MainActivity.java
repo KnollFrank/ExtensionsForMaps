@@ -13,14 +13,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.List;
 import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OsrmRoutingMatrixProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OsrmVehicleRoutingTransportCostsProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
-import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
 // FK-TODO: innere Klasse einführen, die statt MainActivity RouteOptimizationOrchestrator.Callback implementiert
 public class MainActivity extends AppCompatActivity implements RouteOptimizationOrchestrator.Callback {
@@ -29,8 +27,6 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
     private Button btnOptimize;
     private RouteOptimizationOrchestrator orchestrator;
     private StopsAdapter stopsAdapter;
-    // FK-TODO: refactor to Optional<Route> or see com.graphhopper.jsprit.core.problem.job.Service.Builder.setPriority(): default is 2
-    private Route currentRoute;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -45,15 +41,11 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
             recyclerViewStops.setAdapter(stopsAdapter);
         }
         btnOptimize.setOnClickListener(
-                view -> {
-                    if (currentRoute != null) {
-                        final List<Stop> waypointsWithPriorities = stopsAdapter.getStops();
-                        final Route routeToOptimize =
-                                new Route(
-                                        currentRoute.origin(),
-                                        waypointsWithPriorities,
-                                        currentRoute.destination());
-                        orchestrator.optimizeRoute(routeToOptimize);
+                new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(final View view) {
+                        stopsAdapter.getRoute().ifPresent(orchestrator::optimizeRoute);
                     }
                 });
         orchestrator =
@@ -89,9 +81,7 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
     public void onExtractRouteFromDirectionsUrlSuccess(final Route route) {
         runOnUiThread(() -> {
             progressBar.setVisibility(View.GONE);
-            currentRoute = route;
-            // FK-TODO: alle Stopps route.stops() der Route anzeigen mit gar keiner vorausgewählten Priority, nämlich OptionalInt.empty(). Für route.origin und route.destination gar keine spinnerPriority zur Verfügung stellen.
-            stopsAdapter.setStops(route.waypoints());
+            stopsAdapter.setRoute(route);
             btnOptimize.setVisibility(View.VISIBLE);
         });
     }
@@ -105,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
     public void onOptimizationSuccess(final Route optimizedRoute) {
         runOnUiThread(() -> {
             progressBar.setVisibility(View.GONE);
+            // FK-FIXME: falls optimizedRoute.stops().size() > 10 ist, dann wird die Route in Google Maps abgeschnitten, was eine Eigenschaft der Standard Google Maps Directions URL ist. Verwende stattdessen eine URL mit data-Part (siehe DirectionsUrlTemplateFactory).
             GoogleMapsNavigator.launchRouteOverview(optimizedRoute, this);
             finish();
         });

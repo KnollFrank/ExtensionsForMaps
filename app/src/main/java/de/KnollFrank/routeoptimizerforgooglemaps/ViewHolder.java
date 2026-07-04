@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -21,7 +22,10 @@ class ViewHolder extends RecyclerView.ViewHolder {
     public final TextView tvDotsTop;
     public final TextView tvDotsBottom;
     public final TextView tvIndexLetter;
+    public final View viewOriginMarker;
+    public final ImageView ivDestinationMarker;
     public final TextView tvAddress;
+    public final View llEditableFields;
     public final Spinner spinnerDeliveryGroup;
     public final TextView tvWindowStart;
     public final TextView tvWindowEnd;
@@ -32,7 +36,10 @@ class ViewHolder extends RecyclerView.ViewHolder {
         tvDotsTop = itemView.findViewById(R.id.tvDotsTop);
         tvDotsBottom = itemView.findViewById(R.id.tvDotsBottom);
         tvIndexLetter = itemView.findViewById(R.id.tvIndexLetter);
+        viewOriginMarker = itemView.findViewById(R.id.viewOriginMarker);
+        ivDestinationMarker = itemView.findViewById(R.id.ivDestinationMarker);
         tvAddress = itemView.findViewById(R.id.tvAddress);
+        llEditableFields = itemView.findViewById(R.id.llEditableFields);
         spinnerDeliveryGroup = itemView.findViewById(R.id.spinnerDeliveryGroup);
         tvWindowStart = itemView.findViewById(R.id.tvWindowStart);
         tvWindowEnd = itemView.findViewById(R.id.tvWindowEnd);
@@ -46,6 +53,7 @@ class ViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void setIndexLetterForPosition(final int position) {
+        tvIndexLetter.setVisibility(View.VISIBLE);
         tvIndexLetter.setText(getIndexLetter(position));
     }
 
@@ -56,8 +64,8 @@ class ViewHolder extends RecyclerView.ViewHolder {
                         android.R.layout.simple_spinner_item,
                         new Optional[]{
                                 Optional.empty(),
-                                Optional.of(DeliveryGroups.KERNSTADT),
-                                Optional.of(DeliveryGroups.DOERFER)}) {
+                                Optional.of(DeliveryGroups.TOWN),
+                                Optional.of(DeliveryGroups.VILLAGE)}) {
 
                     @NonNull
                     @Override
@@ -90,9 +98,6 @@ class ViewHolder extends RecyclerView.ViewHolder {
     }
 
     private String getIndexLetter(final int position) {
-        if (position < 0) {
-            return "";
-        }
         final StringBuilder sb = new StringBuilder();
         int p = position;
         do {
