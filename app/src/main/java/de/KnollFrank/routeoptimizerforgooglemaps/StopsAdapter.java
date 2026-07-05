@@ -19,37 +19,26 @@ import com.google.common.collect.Range;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.common.Ranges;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.DeliveryGroup;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
 class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
-
     private Optional<Route> route = Optional.empty();
     private final List<Optional<DeliveryGroup>> deliveryGroups = new ArrayList<>();
-    // FK-TODO: brauchen record für start und end und dann davon eine List<Optional<>>
-    private final List<Optional<LocalDateTime>> windowStarts = new ArrayList<>();
-    private final List<Optional<LocalDateTime>> windowEnds = new ArrayList<>();
+    private final List<TimeWindow<Optional<LocalDateTime>>> timeWindows = new ArrayList<>();
 
     public void setRoute(final Route route) {
         this.route = Optional.of(route);
-        deliveryGroups.clear();
-        windowStarts.clear();
-        windowEnds.clear();
-        // FK-TODO: refactor using streams und für jede Variable das clear() und setzen getrennt von den anderen Variablen durchführen
-        for (final Stop stop : route.stops()) {
-            deliveryGroups.add(stop.deliveryGroup());
-            windowStarts.add(getEndpoint(stop, true));
-            windowEnds.add(getEndpoint(stop, false));
-        }
+        setDeliveryGroups(getDeliveryGroups(route));
+        setTimeWindows(getTimeWindows(route));
         notifyDataSetChanged();
     }
 
@@ -113,8 +102,7 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
             holder.spinnerDeliveryGroup.setSelection(
                     holder.spinnerDeliveryGroupAdapter.getPosition(
                             deliveryGroups.get(position)));
-            holder.tvWindowStart.setText(getText(windowStarts.get(position)));
-            holder.tvWindowEnd.setText(getText(windowEnds.get(position)));
+            holder.setWindow(timeWindows.get(position));
         }
     }
 
@@ -123,12 +111,6 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
         return route
                 .map(_route -> _route.stops().size())
                 .orElse(0);
-    }
-
-    private String getText(final Optional<LocalDateTime> localDateTime) {
-        return localDateTime
-                .map(_localDateTime -> _localDateTime.format(DATE_TIME_FORMATTER))
-                .orElse("");
     }
 
     private List<Stop> getWaypointsWithUiData(final Route route) {
@@ -146,17 +128,20 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
                 stop.placeId(),
                 stop.geodetic(),
                 deliveryGroups.get(index),
-                createRange(windowStarts.get(index), windowEnds.get(index)));
+                createRange(timeWindows.get(index)));
     }
 
-    private Optional<Range<LocalDateTime>> createRange(final Optional<LocalDateTime> start,
-                                                       final Optional<LocalDateTime> end) {
-        if (start.isPresent() && end.isPresent()) {
-            return Optional.of(Range.closed(start.get(), end.get()));
+    private Optional<Range<LocalDateTime>> createRange(final TimeWindow<Optional<LocalDateTime>> timeWindow) {
+        if (timeWindow.start().isPresent() && timeWindow.end().isPresent()) {
+            return Optional.of(Range.closed(timeWindow.start().get(), timeWindow.end().get()));
         } else {
-            return start
+            return timeWindow
+                    .start()
                     .map(Range::atLeast)
-                    .or(() -> end.map(Range::atMost));
+                    .or(() ->
+                                timeWindow
+                                        .end()
+                                        .map(Range::atMost));
         }
     }
 
@@ -166,7 +151,9 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
         }
     }
 
-    private void pickDateTime(final FragmentActivity activity, final ViewHolder holder, final boolean isStart) {
+    private void pickDateTime(final FragmentActivity activity,
+                              final ViewHolder holder,
+                              final boolean isStart) {
         final MaterialDatePicker<Long> datePicker =
                 MaterialDatePicker
                         .Builder
@@ -200,12 +187,13 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
                                     public void onClick(final View view) {
                                         final int pos = holder.getBindingAdapterPosition();
                                         if (pos != RecyclerView.NO_POSITION) {
-                                            (isStart ? windowStarts : windowEnds).set(
+                                            setTimeWindow(
                                                     pos,
                                                     Optional.of(
                                                             date
                                                                     .withHour(timePicker.getHour())
-                                                                    .withMinute(timePicker.getMinute())));
+                                                                    .withMinute(timePicker.getMinute())),
+                                                    isStart);
                                             notifyItemChanged(pos);
                                         }
                                     }
@@ -216,30 +204,27 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
         datePicker.show(activity.getSupportFragmentManager(), "DATE_PICKER");
     }
 
+    private void setTimeWindow(final int pos,
+                               final Optional<LocalDateTime> startOrEnd,
+                               final boolean isStart) {
+        final TimeWindow<Optional<LocalDateTime>> timeWindow = timeWindows.get(pos);
+        timeWindows.set(
+                pos,
+                isStart ?
+                        timeWindow.withStart(startOrEnd) :
+                        timeWindow.withEnd(startOrEnd));
+    }
+
     private void clearDateTime(final ViewHolder holder, final boolean isStart) {
         final int pos = holder.getBindingAdapterPosition();
         if (pos != RecyclerView.NO_POSITION) {
-            (isStart ? windowStarts : windowEnds).set(pos, Optional.empty());
+            setTimeWindow(pos, Optional.empty(), isStart);
             notifyItemChanged(pos);
         }
     }
 
-    private Optional<LocalDateTime> getEndpoint(final Stop stop, final boolean lower) {
-        return stop
-                .timeWindow()
-                .flatMap(
-                        timeWindow ->
-                                lower ?
-                                        timeWindow.hasLowerBound() ?
-                                                Optional.of(timeWindow.lowerEndpoint()) :
-                                                Optional.empty() :
-                                        timeWindow.hasUpperBound() ?
-                                                Optional.of(timeWindow.upperEndpoint()) :
-                                                Optional.empty());
-    }
-
     private void setupDateTimePickers(final ViewHolder holder) {
-        holder.tvWindowStart.setOnClickListener(
+        holder.tvWindow.start().setOnClickListener(
                 new View.OnClickListener() {
 
                     @Override
@@ -247,7 +232,7 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
                         pickDateTime(view, holder, true);
                     }
                 });
-        holder.tvWindowEnd.setOnClickListener(
+        holder.tvWindow.end().setOnClickListener(
                 new View.OnClickListener() {
 
                     @Override
@@ -255,7 +240,7 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
                         pickDateTime(view, holder, false);
                     }
                 });
-        holder.tvWindowStart.setOnLongClickListener(
+        holder.tvWindow.start().setOnLongClickListener(
                 new View.OnLongClickListener() {
 
                     @Override
@@ -264,7 +249,7 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
                         return true;
                     }
                 });
-        holder.tvWindowEnd.setOnLongClickListener(
+        holder.tvWindow.end().setOnLongClickListener(
                 new View.OnLongClickListener() {
 
                     @Override
@@ -281,5 +266,42 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     private boolean isDestinationOfRoute(final int position) {
         return position == getItemCount() - 1;
+    }
+
+    private void setDeliveryGroups(final List<Optional<DeliveryGroup>> deliveryGroups) {
+        this.deliveryGroups.clear();
+        this.deliveryGroups.addAll(deliveryGroups);
+    }
+
+    private void setTimeWindows(final List<TimeWindow<Optional<LocalDateTime>>> timeWindows) {
+        this.timeWindows.clear();
+        this.timeWindows.addAll(timeWindows);
+    }
+
+    private static List<Optional<DeliveryGroup>> getDeliveryGroups(final Route route) {
+        return route
+                .stops()
+                .stream()
+                .map(Stop::deliveryGroup)
+                .toList();
+    }
+
+    private static List<TimeWindow<Optional<LocalDateTime>>> getTimeWindows(final Route route) {
+        return route
+                .stops()
+                .stream()
+                .map(Stop::timeWindow)
+                .map(StopsAdapter::asTimeWindow)
+                .toList();
+    }
+
+    private static TimeWindow<Optional<LocalDateTime>> asTimeWindow(final Optional<Range<LocalDateTime>> range) {
+        return new TimeWindow<>(
+                getEndpoint(range, true),
+                getEndpoint(range, false));
+    }
+
+    private static <T extends Comparable> Optional<T> getEndpoint(final Optional<Range<T>> range, final boolean lower) {
+        return range.flatMap(_range -> Ranges.getEndpoint(_range, lower));
     }
 }

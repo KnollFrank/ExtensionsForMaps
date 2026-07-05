@@ -12,6 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.route.DeliveryGroup;
@@ -27,9 +29,10 @@ class ViewHolder extends RecyclerView.ViewHolder {
     public final TextView tvAddress;
     public final View llEditableFields;
     public final Spinner spinnerDeliveryGroup;
-    public final TextView tvWindowStart;
-    public final TextView tvWindowEnd;
+    public final TimeWindow<TextView> tvWindow;
     public final ArrayAdapter<Optional<DeliveryGroup>> spinnerDeliveryGroupAdapter;
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
 
     public ViewHolder(final View itemView) {
         super(itemView);
@@ -41,8 +44,10 @@ class ViewHolder extends RecyclerView.ViewHolder {
         tvAddress = itemView.findViewById(R.id.tvAddress);
         llEditableFields = itemView.findViewById(R.id.llEditableFields);
         spinnerDeliveryGroup = itemView.findViewById(R.id.spinnerDeliveryGroup);
-        tvWindowStart = itemView.findViewById(R.id.tvWindowStart);
-        tvWindowEnd = itemView.findViewById(R.id.tvWindowEnd);
+        tvWindow =
+                new TimeWindow<>(
+                        itemView.findViewById(R.id.tvWindowStart),
+                        itemView.findViewById(R.id.tvWindowEnd));
         spinnerDeliveryGroupAdapter = createAndConfigureSpinnerDeliveryGroupAdapter(itemView.getContext());
         spinnerDeliveryGroup.setAdapter(spinnerDeliveryGroupAdapter);
     }
@@ -55,6 +60,11 @@ class ViewHolder extends RecyclerView.ViewHolder {
     public void setIndexLetterForPosition(final int position) {
         tvIndexLetter.setVisibility(View.VISIBLE);
         tvIndexLetter.setText(getIndexLetter(position));
+    }
+
+    public void setWindow(final TimeWindow<Optional<LocalDateTime>> timeWindow) {
+        tvWindow.start().setText(getText(timeWindow.start()));
+        tvWindow.end().setText(getText(timeWindow.end()));
     }
 
     private static ArrayAdapter<Optional<DeliveryGroup>> createAndConfigureSpinnerDeliveryGroupAdapter(final Context context) {
@@ -105,5 +115,11 @@ class ViewHolder extends RecyclerView.ViewHolder {
             p = (p / 26) - 1;
         } while (p >= 0);
         return sb.toString();
+    }
+
+    private String getText(final Optional<LocalDateTime> localDateTime) {
+        return localDateTime
+                .map(_localDateTime -> _localDateTime.format(DATE_TIME_FORMATTER))
+                .orElse("");
     }
 }
