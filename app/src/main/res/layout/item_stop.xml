@@ -109,6 +109,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Hauptstraße 1, 72108 Rottenburg" />
 
+            <!-- FK-TODO: llEditableFields hat nur ein einziges Element, den spinnerDeliveryGroup, der aus llEditableFields herausgeholt werden kann, so dass llEditableFields entfernt werden kann -->
             <LinearLayout
                 android:id="@+id/llEditableFields"
                 android:layout_width="match_parent"
