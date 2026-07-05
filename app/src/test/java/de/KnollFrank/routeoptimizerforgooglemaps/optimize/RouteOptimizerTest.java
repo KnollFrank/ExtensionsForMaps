@@ -1,17 +1,11 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-
-import com.google.common.collect.Range;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,20 +36,18 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.5015, Unit.DEGREES),
                                 new Angle(8.9932, Unit.DEGREES)),
-                        Optional.empty(),
                         Optional.empty());
         final DeliveryGroup kernstadt = new DeliveryGroup("ks", "Kernstadt", 1);
         // Hechingen is further away (~16km)
         final Stop hechingen_stadt =
                 new Stop(
                         "1",
-                        "Hechingen", Optional.empty(),
+                        "Hechingen",
+                        Optional.empty(),
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.3539, Unit.DEGREES),
                                 new Angle(8.9614, Unit.DEGREES)),
-                        Optional.of(kernstadt),
-                        Optional.empty());
-
+                        Optional.of(kernstadt));
         // Wurmlingen has NO group
         final Stop wurmlingen_no_group =
                 new Stop(
@@ -65,9 +57,7 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.5030, Unit.DEGREES),
                                 new Angle(8.9625, Unit.DEGREES)),
-                        Optional.empty(),
                         Optional.empty());
-
         final Route route =
                 new Route(
                         tuebingen,
@@ -100,7 +90,6 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.5015, Unit.DEGREES),
                                 new Angle(8.9932, Unit.DEGREES)),
-                        Optional.empty(),
                         Optional.empty());
         final DeliveryGroup kernstadt =
                 new DeliveryGroup(
@@ -121,8 +110,7 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.3539, Unit.DEGREES),
                                 new Angle(8.9614, Unit.DEGREES)),
-                        Optional.of(kernstadt),
-                        Optional.empty());
+                        Optional.of(kernstadt));
         // Wurmlingen is very close (~2.5km)
         final Stop wurmlingen_dorf =
                 new Stop(
@@ -132,8 +120,7 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.5030, Unit.DEGREES),
                                 new Angle(8.9625, Unit.DEGREES)),
-                        Optional.of(dorf),
-                        Optional.empty());
+                        Optional.of(dorf));
         final Route route =
                 new Route(
                         tuebingen,
@@ -180,8 +167,11 @@ public class RouteOptimizerTest {
                                 "Addr" + i,
                                 Optional.empty(),
                                 berlin.add(offset),
-                                Optional.of(new DeliveryGroup("id" + i, "Group " + i, i)),
-                                Optional.empty()));
+                                Optional.of(
+                                        new DeliveryGroup(
+                                                "id" + i,
+                                                "Group " + i,
+                                                i))));
             }
         }
         // Route: Berlin -> [S15 (nah, Prio 15) ... S1 (fern, Prio 1)] -> Berlin
@@ -194,7 +184,6 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(52.52, Unit.DEGREES),
                                 new Angle(13.40, Unit.DEGREES)),
-                        Optional.empty(),
                         Optional.empty());
         final Route route = new Route(berlin, waypoints, berlin);
 
@@ -205,71 +194,6 @@ public class RouteOptimizerTest {
         for (int i = 0; i < numGroups; i++) {
             assertEquals("s" + (i + 1), optimizedRoute.waypoints().get(i).id());
         }
-    }
-
-    @Test
-    public void testOptimize_respectsTimeWindows() throws Exception {
-        // Given
-        final RouteOptimizer routeOptimizer =
-                new RouteOptimizer(
-                        new HaversineVehicleRoutingTransportCostsProvider());
-
-        // Given: Berlin start.
-        // Stop A (farther): early window.
-        // Stop B (closer): late window.
-        final Stop berlin =
-                new Stop(
-                        "0",
-                        "Berlin",
-                        Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(52.52, Unit.DEGREES),
-                                new Angle(13.40, Unit.DEGREES)),
-                        Optional.empty(),
-                        Optional.empty());
-
-        final Stop far_early =
-                new Stop(
-                        "1",
-                        "FarEarly",
-                        Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(52.62, Unit.DEGREES),
-                                new Angle(13.50, Unit.DEGREES)),
-                        Optional.empty(),
-                        Optional.of(
-                                Range.closed(
-                                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(8, 0)),
-                                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(10, 0)))));
-        final Stop close_late =
-                new Stop(
-                        "2",
-                        "CloseLate",
-                        Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(52.55, Unit.DEGREES),
-                                new Angle(13.45, Unit.DEGREES)),
-                        Optional.empty(),
-                        Optional.of(
-                                Range.closed(
-                                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(14, 0)),
-                                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(16, 0)))));
-        final Route route =
-                new Route(
-                        berlin,
-                        List.of(close_late, far_early),
-                        berlin);
-
-        // When
-        final Route optimizedRoute = routeOptimizer.optimize(route);
-
-        // Then: Should visit FarEarly FIRST to satisfy window, even if it's farther
-        assertEquals(
-                new Route(
-                        berlin,
-                        List.of(far_early, close_late),
-                        berlin),
-                optimizedRoute);
     }
 
     // FK-TOD: ergänze einen Test, der verlangt, dass origin und destination einer zu optimierenden Route immer erhalten bleiben und nur die waypoints der Route in ihrer Reihenfolge geändert werden.
@@ -287,7 +211,6 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(52.5200, Unit.DEGREES),
                                 new Angle(13.4050, Unit.DEGREES)),
-                        Optional.empty(),
                         Optional.empty());
         final Stop munich_far =
                 new Stop(
@@ -297,7 +220,6 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.1351, Unit.DEGREES),
                                 new Angle(11.5820, Unit.DEGREES)),
-                        Optional.empty(),
                         Optional.empty());
         final Stop potsdam_very_close =
                 new Stop(
@@ -307,7 +229,6 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(52.3906, Unit.DEGREES),
                                 new Angle(13.0645, Unit.DEGREES)),
-                        Optional.empty(),
                         Optional.empty());
         final Stop leipzig_medium =
                 new Stop(
@@ -317,7 +238,6 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(51.3397, Unit.DEGREES),
                                 new Angle(12.3731, Unit.DEGREES)),
-                        Optional.empty(),
                         Optional.empty());
         final Route route =
                 new Route(
@@ -339,20 +259,19 @@ public class RouteOptimizerTest {
 
     @Test
     public void testOptimize_respectsGroupSequence() throws Exception {
-        // Given: Kernstadt (Group 1), Dörfer (Group 2)
+        // Given
         final RouteOptimizer routeOptimizer =
                 new RouteOptimizer(
                         new HaversineVehicleRoutingTransportCostsProvider());
-        // Kernstadt (Group 1), Dörfer (Group 2)
-        final DeliveryGroup kernstadt =
+        final DeliveryGroup first =
                 new DeliveryGroup(
-                        "ks",
-                        "Kernstadt",
+                        "TOWN",
+                        "Town",
                         1);
-        final DeliveryGroup doerfer =
+        final DeliveryGroup second =
                 new DeliveryGroup(
-                        "df",
-                        "Dörfer",
+                        "VILLAGE",
+                        "Village",
                         2);
         final Stop berlin =
                 new Stop(
@@ -362,7 +281,6 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(52.52, Unit.DEGREES),
                                 new Angle(13.40, Unit.DEGREES)),
-                        Optional.empty(),
                         Optional.empty());
         // Dorf is closer to Berlin than Stadt
         final Stop dorf_close =
@@ -373,8 +291,7 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(52.53, Unit.DEGREES),
                                 new Angle(13.41, Unit.DEGREES)),
-                        Optional.of(doerfer),
-                        Optional.empty());
+                        Optional.of(second));
         final Stop stadt_far =
                 new Stop(
                         "2",
@@ -383,8 +300,7 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(52.60, Unit.DEGREES),
                                 new Angle(13.50, Unit.DEGREES)),
-                        Optional.of(kernstadt),
-                        Optional.empty());
+                        Optional.of(first));
         final Route route =
                 new Route(
                         berlin,
@@ -401,134 +317,6 @@ public class RouteOptimizerTest {
                         List.of(stadt_far, dorf_close),
                         berlin),
                 optimizedRoute);
-    }
-
-    @Test
-    public void testOptimize_breaksGroupSequenceForTimeWindows() throws Exception {
-        // Given
-        final RouteOptimizer routeOptimizer =
-                new RouteOptimizer(
-                        new HaversineVehicleRoutingTransportCostsProvider());
-
-        // Requirement 4: Time Windows > Zones
-        final DeliveryGroup kernstadt =
-                new DeliveryGroup(
-                        "ks",
-                        "Kernstadt",
-                        1);
-        final DeliveryGroup doerfer =
-                new DeliveryGroup(
-                        "df",
-                        "Dörfer",
-                        2);
-        final Stop berlin =
-                new Stop(
-                        "0",
-                        "Berlin",
-                        Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(52.52, Unit.DEGREES),
-                                new Angle(13.40, Unit.DEGREES)),
-                        Optional.empty(),
-                        Optional.empty());
-        // Kernstadt stop has LATE window
-        final Stop stadt_late =
-                new Stop(
-                        "1",
-                        "Stadt",
-                        Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(52.60, Unit.DEGREES),
-                                new Angle(13.50, Unit.DEGREES)),
-                        Optional.of(kernstadt),
-                        Optional.of(
-                                Range.closed(
-                                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(15, 0)),
-                                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(17, 0)))));
-        // Dorf stop has EARLY window
-        final Stop dorf_early =
-                new Stop(
-                        "2",
-                        "Dorf",
-                        Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(52.53, Unit.DEGREES),
-                                new Angle(13.41, Unit.DEGREES)),
-                        Optional.of(doerfer),
-                        Optional.of(
-                                Range.closed(
-                                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(8, 0)),
-                                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(10, 0)))));
-        final Route route =
-                new Route(
-                        berlin,
-                        List.of(stadt_late, dorf_early),
-                        berlin);
-
-        // When
-        final Route optimizedRoute = routeOptimizer.optimize(route);
-
-        // Then: Should visit Dorf FIRST to satisfy time window, breaking group sequence
-        assertEquals(
-                new Route(
-                        berlin,
-                        List.of(dorf_early, stadt_late),
-                        berlin),
-                optimizedRoute);
-    }
-
-    @Test
-    public void testOptimize_unassignedJobsThrowsException() {
-        // Given
-        final RouteOptimizer routeOptimizer =
-                new RouteOptimizer(
-                        new HaversineVehicleRoutingTransportCostsProvider());
-        final Stop berlin =
-                new Stop(
-                        "0",
-                        "Berlin",
-                        Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(52.52, Unit.DEGREES),
-                                new Angle(13.40, Unit.DEGREES)),
-                        Optional.empty(),
-                        Optional.empty());
-        final Stop s1 =
-                new Stop(
-                        "1",
-                        "S1",
-                        Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(52.53, Unit.DEGREES),
-                                new Angle(13.41, Unit.DEGREES)),
-                        Optional.empty(),
-                        Optional.of(
-                                Range.closed(
-                                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(9, 0)),
-                                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(9, 1))))); // 1 min window
-        final Stop s2 =
-                new Stop(
-                        "2",
-                        "S2",
-                        Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(53.53, Unit.DEGREES),
-                                new Angle(14.41, Unit.DEGREES)),
-                        Optional.empty(),
-                        Optional.of(
-                                Range.closed(
-                                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(9, 0)),
-                                        LocalDateTime.of(LocalDate.EPOCH, LocalTime.of(9, 1))))); // Same window, but far away
-        final Route route =
-                new Route(
-                        berlin,
-                        List.of(s1, s2),
-                        berlin);
-
-        // When / Then
-        assertThrows(
-                IllegalStateException.class,
-                () -> routeOptimizer.optimize(route));
     }
 
     @Test
@@ -551,7 +339,6 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(45.8156, Unit.DEGREES),
                                 new Angle(10.7904, Unit.DEGREES)),
-                        Optional.empty(),
                         Optional.empty());
         // Stop A: Malcesine
         // (Liegt am Ostufer, genau gegenüber von Limone. Luftlinie: ~6 km. Auto: ~30 km, da man um den See fahren muss)
@@ -563,7 +350,6 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(45.7656, Unit.DEGREES),
                                 new Angle(10.8092, Unit.DEGREES)),
-                        Optional.empty(),
                         Optional.empty());
         // Stop B: Riva del Garda
         // (Liegt an der Nordspitze. Luftlinie: ~9 km. Auto: ~11 km, da auf derselben Uferseite über direkte Straße erreichbar)
@@ -575,7 +361,6 @@ public class RouteOptimizerTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(45.8893, Unit.DEGREES),
                                 new Angle(10.8430, Unit.DEGREES)),
-                        Optional.empty(),
                         Optional.empty());
 
         // ==========================================================

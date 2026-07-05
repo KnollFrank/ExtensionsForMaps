@@ -13,12 +13,11 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.DeliveryGroup;
 
 public class FlexibleGroupConstraint implements SoftActivityConstraint {
 
-    // Erhöhte Strafe, um sicherzustellen, dass Gruppenprioritäten fast immer Distanzvorteile schlagen.
-    private static final double GROUP_VIOLATION_PENALTY = 200_000.0;
-    // Ein sehr hoher Index für Jobs ohne explizite Liefergruppe, damit diese NACH 
-    // allen anderen Gruppen eingeplant werden.
-    private static final int NO_GROUP_SEQUENCE_ORDER = 999;
+    // Anforderung 4 & 5: Strafe dominiert Kilometerkosten,
+    // ist aber WEIT unter der Strafe für den Ausfall eines Jobs (1.000.000)
+    private static final double GROUP_VIOLATION_PENALTY = 50_000.0;
 
+    // FK-TODO: refactor
     @Override
     public double getCosts(final JobInsertionContext context,
                            final TourActivity prevAct,
@@ -26,7 +25,7 @@ public class FlexibleGroupConstraint implements SoftActivityConstraint {
                            final TourActivity nextAct,
                            final double prevActDepTime) {
 
-        final int newJobOrder = getSequenceOrderOrDefault(context.getJob());
+        final Optional<Integer> newJobGroupOrder = getSequenceOrder(context.getJob());
         double totalPenalty = 0.0;
         final VehicleRoute route = context.getRoute();
         boolean pastInsertionPoint = false;
@@ -35,15 +34,17 @@ public class FlexibleGroupConstraint implements SoftActivityConstraint {
                 pastInsertionPoint = true;
             }
             if (act instanceof final TourActivity.JobActivity jobAct) {
-                final int existingJobOrder = getSequenceOrderOrDefault(jobAct.getJob());
+                final Optional<Integer> existingJobGroupOrder = getSequenceOrder(jobAct.getJob());
                 if (!pastInsertionPoint) {
-                    // Vor dem neuen Job darf kein Job mit HÖHEREM Index liegen (z.B. Dorf vor Stadt)
-                    if (existingJobOrder > newJobOrder) {
+                    // VOR dem Einfügepunkt darf keine logisch spätere Gruppe liegen
+                    // (z.B. Dorf [2] darf nicht vor Kernstadt [1] beliefert werden)
+                    if (existingJobGroupOrder.isPresent() && newJobGroupOrder.isPresent() && existingJobGroupOrder.orElseThrow() > newJobGroupOrder.orElseThrow()) {
                         totalPenalty += GROUP_VIOLATION_PENALTY;
                     }
                 } else {
-                    // Nach dem neuen Job darf kein Job mit NIEDRIGEREM Index liegen (z.B. Stadt nach Dorf)
-                    if (existingJobOrder < newJobOrder) {
+                    // NACH dem Einfügepunkt darf keine logisch frühere Gruppe liegen
+                    // (z.B. Kernstadt [1] darf nicht hinter einem Dorf [2] liegen)
+                    if (existingJobGroupOrder.isPresent() && newJobGroupOrder.isPresent() && existingJobGroupOrder.orElseThrow() < newJobGroupOrder.orElseThrow()) {
                         totalPenalty += GROUP_VIOLATION_PENALTY;
                     }
                 }
@@ -52,19 +53,14 @@ public class FlexibleGroupConstraint implements SoftActivityConstraint {
         return totalPenalty;
     }
 
-    private static int getSequenceOrderOrDefault(final Job job) {
+    private static Optional<Integer> getSequenceOrder(final Job job) {
         if (job instanceof final AbstractJob abstractJob) {
             final Object userData = abstractJob.getUserData();
-            if (userData instanceof Optional<?> opt) {
-                return opt
-                        .filter(DeliveryGroup.class::isInstance)
-                        .map(DeliveryGroup.class::cast)
-                        .map(DeliveryGroup::sequenceOrder)
-                        .orElse(NO_GROUP_SEQUENCE_ORDER);
-            } else if (userData instanceof DeliveryGroup group) {
-                return group.sequenceOrder();
+            if (userData instanceof Optional<?>) {
+                final Optional<DeliveryGroup> group = (Optional<DeliveryGroup>) userData;
+                return group.map(DeliveryGroup::sequenceOrder);
             }
         }
-        return NO_GROUP_SEQUENCE_ORDER;
+        return Optional.empty();
     }
 }

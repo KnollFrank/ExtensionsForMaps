@@ -38,7 +38,6 @@ public class GoogleMapsNavigatorTest {
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(48.5216, Unit.DEGREES),
                                         new Angle(9.0576, Unit.DEGREES)),
-                                Optional.empty(),
                                 Optional.empty()),
                         List.of(
                                 new Stop(
@@ -48,7 +47,6 @@ public class GoogleMapsNavigatorTest {
                                         Geodetic.fromLatitudeLongitude(
                                                 new Angle(47.3769, Unit.DEGREES),
                                                 new Angle(8.5417, Unit.DEGREES)),
-                                        Optional.empty(),
                                         Optional.empty())),
                         new Stop(
                                 "2",
@@ -57,7 +55,6 @@ public class GoogleMapsNavigatorTest {
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(45.4642, Unit.DEGREES),
                                         new Angle(9.1900, Unit.DEGREES)),
-                                Optional.empty(),
                                 Optional.empty()));
 
         // Act

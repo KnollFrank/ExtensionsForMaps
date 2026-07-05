@@ -1,6 +1,5 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
 
-import com.google.common.collect.Range;
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
 import com.graphhopper.jsprit.core.algorithm.state.StateManager;
@@ -16,13 +15,11 @@ import com.graphhopper.jsprit.core.problem.vehicle.VehicleTypeImpl;
 import com.graphhopper.jsprit.core.util.Coordinate;
 import com.graphhopper.jsprit.core.util.Solutions;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
@@ -56,8 +53,6 @@ public class RouteOptimizer {
                                         .setCostPerDistance(1.0)
                                         .build())
                         .setReturnToDepot(true)
-                        .setEarliestStart(0.0)
-                        .setLatestArrival(Double.MAX_VALUE)
                         .build());
         vrpBuilder.setRoutingCost(vehicleRoutingTransportCostsProvider.getVehicleRoutingTransportCosts(route));
         // FK-TODO: refactor using Streams
@@ -114,23 +109,13 @@ public class RouteOptimizer {
     }
 
     private static Service createService(final Stop waypoint, final String jobId) {
-        // ANFORDERUNG 2: Harte Zeitfenster
-        final Service.Builder<Service> serviceBuilder =
-                Service
-                        .Builder
-                        .newInstance(jobId)
-                        .setLocation(createLocation(waypoint))
-                        // ANFORDERUNG 3: DeliveryGroup in UserData speichern
-                        .setUserData(waypoint.deliveryGroup());
-        setTimeWindowIfPresent(serviceBuilder, waypoint.timeWindow());
-        return serviceBuilder.build();
-    }
-
-    private static void setTimeWindowIfPresent(final Service.Builder<Service> serviceBuilder,
-                                               final Optional<Range<LocalDateTime>> timeWindow) {
-        timeWindow
-                .map(JspritTimeUtils::toJspritWindow)
-                .ifPresent(serviceBuilder::setTimeWindow);
+        return Service
+                .Builder
+                .newInstance(jobId)
+                .setLocation(createLocation(waypoint))
+                // ANFORDERUNG 3: DeliveryGroup in UserData speichern
+                .setUserData(waypoint.deliveryGroup())
+                .build();
     }
 
     private static Location createLocation(final Stop stop) {

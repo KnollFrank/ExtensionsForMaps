@@ -30,7 +30,6 @@ class StopDataConverter {
                         new Angle(
                                 stopData.longitude.orElseThrow(() -> createMissingCoordinateException("longitude", stopData)),
                                 DEGREES)),
-                Optional.empty(),
                 Optional.empty());
     }
 

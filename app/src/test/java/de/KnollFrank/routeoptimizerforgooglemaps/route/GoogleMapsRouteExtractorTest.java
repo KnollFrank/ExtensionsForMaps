@@ -139,7 +139,6 @@ public class GoogleMapsRouteExtractorTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.4765345, DEGREES),
                                 new Angle(8.934900899999999, DEGREES)),
-                        Optional.empty(),
                         Optional.empty()),
                 List.of(
                         new Stop(
@@ -149,7 +148,6 @@ public class GoogleMapsRouteExtractorTest {
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(53.548828199999996, DEGREES),
                                         new Angle(9.987170299999999, DEGREES)),
-                                Optional.empty(),
                                 Optional.empty())),
                 new Stop(
                         "2",
@@ -158,7 +156,6 @@ public class GoogleMapsRouteExtractorTest {
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.430628399999996, DEGREES),
                                 new Angle(9.2546378, DEGREES)),
-                        Optional.empty(),
                         Optional.empty()));
     }
 }

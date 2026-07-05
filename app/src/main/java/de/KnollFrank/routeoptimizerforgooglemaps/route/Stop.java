@@ -1,8 +1,5 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
-import com.google.common.collect.Range;
-
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -12,8 +9,7 @@ public record Stop(String id,
                    String address,
                    Optional<String> placeId,
                    Geodetic geodetic,
-                   Optional<DeliveryGroup> deliveryGroup,
-                   Optional<Range<LocalDateTime>> timeWindow) {
+                   Optional<DeliveryGroup> deliveryGroup) {
 
     @Override
     public boolean equals(final Object o) {
