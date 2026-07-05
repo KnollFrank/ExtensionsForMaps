@@ -25,7 +25,6 @@ class ViewHolder extends RecyclerView.ViewHolder {
     public final View viewOriginMarker;
     public final ImageView ivDestinationMarker;
     public final TextView tvAddress;
-    public final View llEditableFields;
     public final Spinner spinnerDeliveryGroup;
     public final ArrayAdapter<Optional<DeliveryGroup>> spinnerDeliveryGroupAdapter;
 
@@ -37,7 +36,6 @@ class ViewHolder extends RecyclerView.ViewHolder {
         viewOriginMarker = itemView.findViewById(R.id.viewOriginMarker);
         ivDestinationMarker = itemView.findViewById(R.id.ivDestinationMarker);
         tvAddress = itemView.findViewById(R.id.tvAddress);
-        llEditableFields = itemView.findViewById(R.id.llEditableFields);
         spinnerDeliveryGroup = itemView.findViewById(R.id.spinnerDeliveryGroup);
         spinnerDeliveryGroupAdapter = createAndConfigureSpinnerDeliveryGroupAdapter(itemView.getContext());
         spinnerDeliveryGroup.setAdapter(spinnerDeliveryGroupAdapter);

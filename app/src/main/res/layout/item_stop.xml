@@ -109,20 +109,13 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Hauptstraße 1, 72108 Rottenburg" />
 
-            <!-- FK-TODO: llEditableFields hat nur ein einziges Element, den spinnerDeliveryGroup, der aus llEditableFields herausgeholt werden kann, so dass llEditableFields entfernt werden kann -->
-            <LinearLayout
-                android:id="@+id/llEditableFields"
-                android:layout_width="match_parent"
+            <Spinner
+                android:id="@+id/spinnerDeliveryGroup"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintTop_toBottomOf="@+id/tvAddress">
-
-                <Spinner
-                    android:id="@+id/spinnerDeliveryGroup"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
+                android:layout_marginTop="4dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvAddress" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

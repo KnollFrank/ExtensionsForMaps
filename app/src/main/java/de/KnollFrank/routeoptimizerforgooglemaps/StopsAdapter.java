@@ -77,13 +77,13 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
         holder.ivDestinationMarker.setVisibility(View.GONE);
         if (isOriginOfRoute(position)) {
             holder.viewOriginMarker.setVisibility(View.VISIBLE);
-            holder.llEditableFields.setVisibility(View.GONE);
+            holder.spinnerDeliveryGroup.setVisibility(View.GONE);
         } else if (isDestinationOfRoute(position)) {
             holder.ivDestinationMarker.setVisibility(View.VISIBLE);
-            holder.llEditableFields.setVisibility(View.GONE);
+            holder.spinnerDeliveryGroup.setVisibility(View.GONE);
         } else {
             holder.setIndexLetterForPosition(position - 1);
-            holder.llEditableFields.setVisibility(View.VISIBLE);
+            holder.spinnerDeliveryGroup.setVisibility(View.VISIBLE);
             holder.spinnerDeliveryGroup.setSelection(
                     holder.spinnerDeliveryGroupAdapter.getPosition(
                             deliveryGroups.get(position)));
