@@ -16,8 +16,10 @@ import com.graphhopper.jsprit.core.util.Coordinate;
 import com.graphhopper.jsprit.core.util.Solutions;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -37,18 +39,15 @@ public class RouteOptimizer {
     public Route optimize(final Route route) throws Exception {
         final Map<String, Stop> stopById = getStopById(route.waypoints());
         // FK-TODO: use Optional.ofNullable()
-        final VehicleRoutingProblemSolution solution =
-                Solutions.bestOf(
+        final Optional<VehicleRoutingProblemSolution> solution =
+                getBestSolution(
                         this
                                 .createVehicleRoutingAlgorithm(route, stopById)
                                 .searchSolutions());
         final List<Stop> optimizedWaypoints = new ArrayList<>();
-        if (solution != null) {
+        if (solution.isPresent()) {
             // ANFORDERUNG 1: Check ob alle Jobs zugewiesen wurden
-            if (!solution.getUnassignedJobs().isEmpty()) {
-                throw new IllegalStateException("Unassigned jobs:" + solution.getUnassignedJobs());
-            }
-            optimizedWaypoints.addAll(getOptimizedWaypoints(solution, stopById));
+            optimizedWaypoints.addAll(getOptimizedWaypoints(solution.orElseThrow(), stopById));
         }
         if (optimizedWaypoints.isEmpty()) {
             optimizedWaypoints.addAll(route.waypoints());
@@ -57,6 +56,18 @@ public class RouteOptimizer {
                 route.origin(),
                 optimizedWaypoints,
                 route.destination());
+    }
+
+    private static Optional<VehicleRoutingProblemSolution> getBestSolution(final Collection<VehicleRoutingProblemSolution> solutions) {
+        final var bestSolution = Optional.ofNullable(Solutions.bestOf(solutions));
+        bestSolution.ifPresent(RouteOptimizer::assertHasNoUnassignedJobs);
+        return bestSolution;
+    }
+
+    private static void assertHasNoUnassignedJobs(final VehicleRoutingProblemSolution solution) {
+        if (!solution.getUnassignedJobs().isEmpty()) {
+            throw new IllegalStateException("Unassigned jobs:" + solution.getUnassignedJobs());
+        }
     }
 
     private static List<Stop> getOptimizedWaypoints(final VehicleRoutingProblemSolution solution,
