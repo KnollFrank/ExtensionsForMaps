@@ -1,4 +1,4 @@
-package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
+package de.KnollFrank.routeoptimizerforgooglemaps.optimize.osrm;
 
 import com.google.common.collect.ImmutableTable;
 
@@ -11,14 +11,14 @@ import java.util.stream.Collectors;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
-import de.KnollFrank.routeoptimizerforgooglemaps.optimize.osrm.OsrmService;
-import de.KnollFrank.routeoptimizerforgooglemaps.optimize.osrm.OsrmTableResponse;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.DistanceDuration;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RoutingMatrix;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RoutingMatrixProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-// FK-TODO: move class to package de.KnollFrank.routeoptimizerforgooglemaps.optimize.osrm
 public class OsrmRoutingMatrixProvider implements RoutingMatrixProvider {
 
     private final OsrmService osrmService;

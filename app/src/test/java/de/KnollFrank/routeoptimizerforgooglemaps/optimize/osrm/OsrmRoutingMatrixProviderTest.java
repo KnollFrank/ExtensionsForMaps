@@ -1,4 +1,4 @@
-package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
+package de.KnollFrank.routeoptimizerforgooglemaps.optimize.osrm;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RoutingMatrix;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;

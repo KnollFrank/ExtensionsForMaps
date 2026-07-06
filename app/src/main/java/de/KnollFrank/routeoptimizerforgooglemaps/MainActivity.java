@@ -15,9 +15,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Optional;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OsrmRoutingMatrixProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OsrmVehicleRoutingTransportCostsProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.osrm.OsrmRoutingMatrixProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 
 // FK-TODO: innere Klasse einführen, die statt MainActivity RouteOptimizationOrchestrator.Callback implementiert
