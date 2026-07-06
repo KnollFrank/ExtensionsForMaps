@@ -38,21 +38,10 @@ public class RouteOptimizer {
     public Route optimize(final Route route) throws Exception {
         final List<Stop> optimizedRoute = new ArrayList<>();
         final Map<String, Stop> stopById = getStopById(route.waypoints());
-        final VehicleRoutingProblem vehicleRoutingProblem = createVehicleRoutingProblem(route, stopById);
-        final StateManager stateManager = new StateManager(vehicleRoutingProblem);
-        // ANFORDERUNG 4: Soft-Constraint für Zonen (Zeitfenster haben Vorrang durch native jsprit-Implementierung)
-        final ConstraintManager constraintManager =
-                new ConstraintManager(
-                        vehicleRoutingProblem,
-                        stateManager,
-                        List.of(new FlexibleGroupConstraint()));
-        final VehicleRoutingAlgorithm algorithm =
-                Jsprit
-                        .Builder
-                        .newInstance(vehicleRoutingProblem)
-                        .setStateAndConstraintManager(stateManager, constraintManager)
-                        .buildAlgorithm();
-        final Collection<VehicleRoutingProblemSolution> solutions = algorithm.searchSolutions();
+        final Collection<VehicleRoutingProblemSolution> solutions =
+                this
+                        .createVehicleRoutingAlgorithm(route, stopById)
+                        .searchSolutions();
         // FK-TODO: use Optional.ofNullable()
         final VehicleRoutingProblemSolution bestSolution = Solutions.bestOf(solutions);
         if (bestSolution != null) {
@@ -82,6 +71,23 @@ public class RouteOptimizer {
                 route.destination());
     }
 
+    private VehicleRoutingAlgorithm createVehicleRoutingAlgorithm(final Route route,
+                                                                  final Map<String, Stop> stopById) throws Exception {
+        final VehicleRoutingProblem vehicleRoutingProblem = createVehicleRoutingProblem(route, stopById);
+        final StateManager stateManager = new StateManager(vehicleRoutingProblem);
+        return Jsprit
+                .Builder
+                .newInstance(vehicleRoutingProblem)
+                .setStateAndConstraintManager(
+                        stateManager,
+                        // ANFORDERUNG 4: Soft-Constraint für Zonen (Zeitfenster haben Vorrang durch native jsprit-Implementierung)
+                        new ConstraintManager(
+                                vehicleRoutingProblem,
+                                stateManager,
+                                List.of(new FlexibleGroupConstraint())))
+                .buildAlgorithm();
+    }
+
     private static Map<String, Stop> getStopById(final List<Stop> stops) {
         return stops
                 .stream()
@@ -91,7 +97,8 @@ public class RouteOptimizer {
                                 Function.identity()));
     }
 
-    private VehicleRoutingProblem createVehicleRoutingProblem(final Route route, final Map<String, Stop> stopById) throws Exception {
+    private VehicleRoutingProblem createVehicleRoutingProblem(final Route route,
+                                                              final Map<String, Stop> stopById) throws Exception {
         final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
         // ANFORDERUNG 1: Eiserne Zustellungs-Garantie wird am Ende durch unassignedJobs Check erzwungen.
         return vrpBuilder
