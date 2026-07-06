@@ -17,7 +17,7 @@ import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OsrmVehicleRoutingTransportCostsProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
-import de.KnollFrank.routeoptimizerforgooglemaps.optimize.osrm.OsrmRoutingMatrixProvider;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.ors.OpenRouteServiceRoutingMatrixProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 
 // FK-TODO: innere Klasse einführen, die statt MainActivity RouteOptimizationOrchestrator.Callback implementiert
@@ -51,7 +51,9 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
         orchestrator =
                 new RouteOptimizationOrchestrator(
                         this,
-                        new RouteOptimizer(new OsrmVehicleRoutingTransportCostsProvider(new OsrmRoutingMatrixProvider())));
+                        new RouteOptimizer(
+                                new OsrmVehicleRoutingTransportCostsProvider(
+                                        new OpenRouteServiceRoutingMatrixProvider("eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjA0NWE4OGQ0NGUzNTQzOGI5YTNjYTNhMzE3ZTIwOTY3IiwiaCI6Im11cm11cjY0In0="))));
         handleIntent(getIntent());
     }
 
