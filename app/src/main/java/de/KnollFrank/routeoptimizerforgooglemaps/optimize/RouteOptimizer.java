@@ -71,8 +71,9 @@ public class RouteOptimizer {
                 route.destination());
     }
 
-    private VehicleRoutingAlgorithm createVehicleRoutingAlgorithm(final Route route,
-                                                                  final Map<String, Stop> stopById) throws Exception {
+    private VehicleRoutingAlgorithm createVehicleRoutingAlgorithm(
+            final Route route,
+            final Map<String, Stop> stopById) throws Exception {
         final VehicleRoutingProblem vehicleRoutingProblem = createVehicleRoutingProblem(route, stopById);
         final StateManager stateManager = new StateManager(vehicleRoutingProblem);
         return Jsprit
@@ -97,8 +98,9 @@ public class RouteOptimizer {
                                 Function.identity()));
     }
 
-    private VehicleRoutingProblem createVehicleRoutingProblem(final Route route,
-                                                              final Map<String, Stop> stopById) throws Exception {
+    private VehicleRoutingProblem createVehicleRoutingProblem(
+            final Route route,
+            final Map<String, Stop> stopById) throws Exception {
         final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
         // ANFORDERUNG 1: Eiserne Zustellungs-Garantie wird am Ende durch unassignedJobs Check erzwungen.
         return vrpBuilder
