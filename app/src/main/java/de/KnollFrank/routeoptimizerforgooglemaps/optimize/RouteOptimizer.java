@@ -37,55 +37,29 @@ public class RouteOptimizer {
     }
 
     public Route optimize(final Route route) throws Exception {
-        final Map<String, Stop> stopById = getStopById(route.waypoints());
-        // FK-TODO: use Optional.ofNullable()
-        final Optional<VehicleRoutingProblemSolution> solution =
-                getBestSolution(
-                        this
-                                .createVehicleRoutingAlgorithm(route, stopById)
-                                .searchSolutions());
-        final List<Stop> optimizedWaypoints = new ArrayList<>();
-        if (solution.isPresent()) {
-            // ANFORDERUNG 1: Check ob alle Jobs zugewiesen wurden
-            optimizedWaypoints.addAll(getOptimizedWaypoints(solution.orElseThrow(), stopById));
-        }
-        if (optimizedWaypoints.isEmpty()) {
-            optimizedWaypoints.addAll(route.waypoints());
-        }
         return new Route(
                 route.origin(),
-                optimizedWaypoints,
+                getOptimizedWaypoints(route).orElse(route.waypoints()),
                 route.destination());
     }
 
-    private static Optional<VehicleRoutingProblemSolution> getBestSolution(final Collection<VehicleRoutingProblemSolution> solutions) {
-        final var bestSolution = Optional.ofNullable(Solutions.bestOf(solutions));
-        bestSolution.ifPresent(RouteOptimizer::assertHasNoUnassignedJobs);
-        return bestSolution;
+    private Optional<List<Stop>> getOptimizedWaypoints(final Route route) throws Exception {
+        final Map<String, Stop> stopById = getStopById(route.waypoints());
+        return RouteOptimizer
+                .getBestSolution(
+                        this
+                                .createVehicleRoutingAlgorithm(route, stopById)
+                                .searchSolutions())
+                .map(bestSolution -> getStops(bestSolution, stopById));
     }
 
-    private static void assertHasNoUnassignedJobs(final VehicleRoutingProblemSolution solution) {
-        if (!solution.getUnassignedJobs().isEmpty()) {
-            throw new IllegalStateException("Unassigned jobs:" + solution.getUnassignedJobs());
-        }
-    }
-
-    private static List<Stop> getOptimizedWaypoints(final VehicleRoutingProblemSolution solution,
-                                                    final Map<String, Stop> stopById) {
-        // FK-TODO: refactor
-        final List<Stop> optimizedRoute = new ArrayList<>();
-        for (final VehicleRoute vehicleRoute : solution.getRoutes()) {
-            for (final TourActivity activity : vehicleRoute.getActivities()) {
-                if (activity instanceof final TourActivity.JobActivity jobActivity) {
-                    final String rawId = jobActivity.getJob().getId();
-                    final Stop originalStop = stopById.get(rawId);
-                    if (originalStop != null) {
-                        optimizedRoute.add(originalStop);
-                    }
-                }
-            }
-        }
-        return optimizedRoute;
+    private static Map<String, Stop> getStopById(final List<Stop> stops) {
+        return stops
+                .stream()
+                .collect(
+                        Collectors.toUnmodifiableMap(
+                                Stop::id,
+                                Function.identity()));
     }
 
     private VehicleRoutingAlgorithm createVehicleRoutingAlgorithm(
@@ -104,15 +78,6 @@ public class RouteOptimizer {
                                 stateManager,
                                 List.of(new FlexibleGroupConstraint())))
                 .buildAlgorithm();
-    }
-
-    private static Map<String, Stop> getStopById(final List<Stop> stops) {
-        return stops
-                .stream()
-                .collect(
-                        Collectors.toUnmodifiableMap(
-                                Stop::id,
-                                Function.identity()));
     }
 
     private VehicleRoutingProblem createVehicleRoutingProblem(
@@ -175,5 +140,36 @@ public class RouteOptimizer {
         return Coordinate.newInstance(
                 geodetic.getLongitude().toDegrees(),
                 geodetic.getLatitude().toDegrees());
+    }
+
+    private static Optional<VehicleRoutingProblemSolution> getBestSolution(final Collection<VehicleRoutingProblemSolution> solutions) {
+        final var bestSolution = Optional.ofNullable(Solutions.bestOf(solutions));
+        bestSolution.ifPresent(RouteOptimizer::assertHasNoUnassignedJobs);
+        return bestSolution;
+    }
+
+    // ANFORDERUNG 1: Check ob alle Jobs zugewiesen wurden
+    private static void assertHasNoUnassignedJobs(final VehicleRoutingProblemSolution solution) {
+        if (!solution.getUnassignedJobs().isEmpty()) {
+            throw new IllegalStateException("Unassigned jobs:" + solution.getUnassignedJobs());
+        }
+    }
+
+    private static List<Stop> getStops(final VehicleRoutingProblemSolution solution,
+                                       final Map<String, Stop> stopById) {
+        // FK-TODO: refactor
+        final List<Stop> waypoints = new ArrayList<>();
+        for (final VehicleRoute vehicleRoute : solution.getRoutes()) {
+            for (final TourActivity activity : vehicleRoute.getActivities()) {
+                if (activity instanceof final TourActivity.JobActivity jobActivity) {
+                    final String rawId = jobActivity.getJob().getId();
+                    final Stop originalStop = stopById.get(rawId);
+                    if (originalStop != null) {
+                        waypoints.add(originalStop);
+                    }
+                }
+            }
+        }
+        return waypoints;
     }
 }
