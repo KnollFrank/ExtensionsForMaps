@@ -67,6 +67,11 @@ public class OpenRouteServiceRoutingMatrixProviderTest {
                         if (!testApiKey.equals(request.getHeader("Authorization"))) {
                             return new MockResponse().setResponseCode(401);
                         }
+                        // Verifiziere den Body (Koordinaten)
+                        final String body = request.getBody().readUtf8();
+                        if (!body.contains("9.70093,48.477473") || !body.contains("9.207916,49.153868")) {
+                            return new MockResponse().setResponseCode(400).setBody("Invalid coordinates in body");
+                        }
                         return new MockResponse()
                                 .setResponseCode(200)
                                 .setBody("{\"durations\":[[0,5670.16],[5494.1,0]],\"distances\":[[0,140859.05],[139760.8,0]]}");
