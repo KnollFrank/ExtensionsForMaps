@@ -27,7 +27,6 @@ import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
-// FK-TODO: refactor
 public class RouteOptimizer {
 
     private final VehicleRoutingTransportCostsProvider vehicleRoutingTransportCostsProvider;
