@@ -42,20 +42,20 @@ public class RouteOptimizer {
                         this
                                 .createVehicleRoutingAlgorithm(route, stopById)
                                 .searchSolutions());
-        final List<Stop> optimizedRoute = new ArrayList<>();
+        final List<Stop> optimizedWaypoints = new ArrayList<>();
         if (solution != null) {
             // ANFORDERUNG 1: Check ob alle Jobs zugewiesen wurden
             if (!solution.getUnassignedJobs().isEmpty()) {
                 throw new IllegalStateException("Unassigned jobs:" + solution.getUnassignedJobs());
             }
-            optimizedRoute.addAll(getOptimizedWaypoints(solution, stopById));
+            optimizedWaypoints.addAll(getOptimizedWaypoints(solution, stopById));
         }
-        if (optimizedRoute.isEmpty()) {
-            optimizedRoute.addAll(route.waypoints());
+        if (optimizedWaypoints.isEmpty()) {
+            optimizedWaypoints.addAll(route.waypoints());
         }
         return new Route(
                 route.origin(),
-                optimizedRoute,
+                optimizedWaypoints,
                 route.destination());
     }
 
