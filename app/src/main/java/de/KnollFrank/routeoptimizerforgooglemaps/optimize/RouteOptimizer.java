@@ -17,9 +17,10 @@ import com.graphhopper.jsprit.core.util.Solutions;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
@@ -36,35 +37,8 @@ public class RouteOptimizer {
 
     public Route optimize(final Route route) throws Exception {
         final List<Stop> optimizedRoute = new ArrayList<>();
-        final Map<String, Stop> stopMap = new HashMap<>();
-        final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
-
-        // ANFORDERUNG 1: Eiserne Zustellungs-Garantie wird am Ende durch unassignedJobs Check erzwungen.
-        vrpBuilder.addVehicle(
-                VehicleImpl
-                        .Builder
-                        .newInstance("vehicle")
-                        .setStartLocation(createLocation(route.origin()))
-                        .setEndLocation(createLocation(route.destination()))
-                        .setType(
-                                VehicleTypeImpl
-                                        .Builder
-                                        .newInstance("car")
-                                        .setCostPerDistance(1.0)
-                                        .build())
-                        .setReturnToDepot(true)
-                        .build());
-        vrpBuilder.setRoutingCost(vehicleRoutingTransportCostsProvider.getVehicleRoutingTransportCosts(route));
-        // FK-TODO: refactor using Streams
-        for (final Stop waypoint : route.waypoints()) {
-            final String jobId = waypoint.id();
-            stopMap.put(jobId, waypoint);
-            vrpBuilder.addJob(createService(waypoint, jobId));
-        }
-        final VehicleRoutingProblem vehicleRoutingProblem =
-                vrpBuilder
-                        .setFleetSize(VehicleRoutingProblem.FleetSize.FINITE)
-                        .build();
+        final Map<String, Stop> stopById = getStopById(route.waypoints());
+        final VehicleRoutingProblem vehicleRoutingProblem = createVehicleRoutingProblem(route, stopById);
         final StateManager stateManager = new StateManager(vehicleRoutingProblem);
         // ANFORDERUNG 4: Soft-Constraint für Zonen (Zeitfenster haben Vorrang durch native jsprit-Implementierung)
         final ConstraintManager constraintManager =
@@ -91,7 +65,7 @@ public class RouteOptimizer {
                 for (final TourActivity activity : vehicleRoute.getActivities()) {
                     if (activity instanceof final TourActivity.JobActivity jobActivity) {
                         final String rawId = jobActivity.getJob().getId();
-                        final Stop originalStop = stopMap.get(rawId);
+                        final Stop originalStop = stopById.get(rawId);
                         if (originalStop != null) {
                             optimizedRoute.add(originalStop);
                         }
@@ -108,13 +82,57 @@ public class RouteOptimizer {
                 route.destination());
     }
 
-    private static Service createService(final Stop waypoint, final String jobId) {
+    private static Map<String, Stop> getStopById(final List<Stop> stops) {
+        return stops
+                .stream()
+                .collect(
+                        Collectors.toUnmodifiableMap(
+                                Stop::id,
+                                Function.identity()));
+    }
+
+    private VehicleRoutingProblem createVehicleRoutingProblem(final Route route, final Map<String, Stop> stopById) throws Exception {
+        final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
+        // ANFORDERUNG 1: Eiserne Zustellungs-Garantie wird am Ende durch unassignedJobs Check erzwungen.
+        return vrpBuilder
+                .addVehicle(createVehicle(route))
+                .setRoutingCost(vehicleRoutingTransportCostsProvider.getVehicleRoutingTransportCosts(route))
+                .addAllJobs(createServices(stopById))
+                .setFleetSize(VehicleRoutingProblem.FleetSize.FINITE)
+                .build();
+    }
+
+    private static VehicleImpl createVehicle(final Route route) {
+        return VehicleImpl
+                .Builder
+                .newInstance("vehicle")
+                .setType(
+                        VehicleTypeImpl
+                                .Builder
+                                .newInstance("car")
+                                .setCostPerDistance(1.0)
+                                .build())
+                .setStartLocation(createLocation(route.origin()))
+                .setEndLocation(createLocation(route.destination()))
+                .setReturnToDepot(true)
+                .build();
+    }
+
+    private static List<Service> createServices(final Map<String, Stop> stopById) {
+        return stopById
+                .entrySet()
+                .stream()
+                .map(jobIdWaypointEntry -> createService(jobIdWaypointEntry.getValue(), jobIdWaypointEntry.getKey()))
+                .toList();
+    }
+
+    private static Service createService(final Stop stop, final String jobId) {
         return Service
                 .Builder
                 .newInstance(jobId)
-                .setLocation(createLocation(waypoint))
+                .setLocation(createLocation(stop))
                 // ANFORDERUNG 3: DeliveryGroup in UserData speichern
-                .setUserData(waypoint.deliveryGroup())
+                .setUserData(stop.deliveryGroup())
                 .build();
     }
 
