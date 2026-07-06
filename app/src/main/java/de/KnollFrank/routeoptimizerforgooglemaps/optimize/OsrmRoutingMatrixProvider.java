@@ -23,6 +23,8 @@ import okhttp3.Response;
 
 public class OsrmRoutingMatrixProvider implements RoutingMatrixProvider {
 
+    private final URL baseUrl;
+
     private static final OkHttpClient httpClient =
             new OkHttpClient
                     .Builder()
@@ -30,16 +32,29 @@ public class OsrmRoutingMatrixProvider implements RoutingMatrixProvider {
                     .readTimeout(10, TimeUnit.SECONDS)
                     .build();
 
+    public OsrmRoutingMatrixProvider() {
+        this(URLs.createUrl("https://router.project-osrm.org/table/v1/driving/"));
+    }
+
+    public OsrmRoutingMatrixProvider(final URL baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
     @Override
     public RoutingMatrix getRoutingMatrix(final Set<Stop> stops) throws Exception {
         return getRoutingMatrix(stops.stream().toList());
     }
 
-    // FK-TODO: refactor
-    private static RoutingMatrix getRoutingMatrix(final List<Stop> stops) throws JSONException, IOException {
+    private RoutingMatrix getRoutingMatrix(final List<Stop> stops) throws JSONException, IOException {
         final URL url = createRequestUrl(stops);
-        final Request request = new Request.Builder().url(url).build();
-        try (final Response response = httpClient.newCall(request).execute()) {
+        try (final Response response =
+                     httpClient
+                             .newCall(
+                                     new Request
+                                             .Builder()
+                                             .url(url)
+                                             .build())
+                             .execute()) {
             if (response.isSuccessful()) {
                 final JSONObject json = new JSONObject(response.body().string());
                 if (json.has("code") && "Ok".equals(json.getString("code"))) {
@@ -74,10 +89,11 @@ public class OsrmRoutingMatrixProvider implements RoutingMatrixProvider {
         return distanceDurationTableBuilder.build();
     }
 
-    private static URL createRequestUrl(final List<Stop> stops) {
+    private URL createRequestUrl(final List<Stop> stops) {
         return URLs.createUrl(
                 String.format(
-                        "https://router.project-osrm.org/table/v1/driving/%s?annotations=distance,duration",
+                        "%s%s?annotations=distance,duration",
+                        baseUrl,
                         format(getGeodetics(stops))));
     }
 
