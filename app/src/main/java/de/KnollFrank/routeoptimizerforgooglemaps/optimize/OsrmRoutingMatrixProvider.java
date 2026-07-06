@@ -2,42 +2,38 @@ package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
 
 import com.google.common.collect.ImmutableTable;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.osrm.OsrmService;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.osrm.OsrmTableResponse;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class OsrmRoutingMatrixProvider implements RoutingMatrixProvider {
 
-    private final URL baseUrl;
-
-    private static final OkHttpClient httpClient =
-            new OkHttpClient
-                    .Builder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(10, TimeUnit.SECONDS)
-                    .build();
+    private final OsrmService osrmService;
 
     public OsrmRoutingMatrixProvider() {
         this(URLs.createUrl("https://router.project-osrm.org/table/v1/driving/"));
     }
 
     public OsrmRoutingMatrixProvider(final URL baseUrl) {
-        this.baseUrl = baseUrl;
+        osrmService =
+                new Retrofit
+                        .Builder()
+                        .baseUrl(baseUrl)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build()
+                        .create(OsrmService.class);
     }
 
     @Override
@@ -45,56 +41,44 @@ public class OsrmRoutingMatrixProvider implements RoutingMatrixProvider {
         return getRoutingMatrix(stops.stream().toList());
     }
 
-    private RoutingMatrix getRoutingMatrix(final List<Stop> stops) throws JSONException, IOException {
-        final URL url = createRequestUrl(stops);
-        try (final Response response =
-                     httpClient
-                             .newCall(
-                                     new Request
-                                             .Builder()
-                                             .url(url)
-                                             .build())
-                             .execute()) {
-            if (response.isSuccessful()) {
-                final JSONObject json = new JSONObject(response.body().string());
-                if (json.has("code") && "Ok".equals(json.getString("code"))) {
-                    return new RoutingMatrix(getDistanceDurationTable(stops, json));
-                }
+    private RoutingMatrix getRoutingMatrix(final List<Stop> stops) throws IOException {
+        final Response<OsrmTableResponse> response =
+                osrmService
+                        .getTable(
+                                format(getGeodetics(stops)),
+                                "distance,duration")
+                        .execute();
+        if (response.isSuccessful() && response.body() != null) {
+            final OsrmTableResponse osrmResponse = response.body();
+            if ("Ok".equals(osrmResponse.code())) {
+                return new RoutingMatrix(getDistanceDurationTable(stops, osrmResponse));
             }
         }
         throw new IOException("Failed to fetch routing matrix from OSRM");
     }
 
-    private static ImmutableTable<Stop, Stop, DistanceDuration> getDistanceDurationTable(final List<Stop> stops, final JSONObject json) throws JSONException {
+    private static ImmutableTable<Stop, Stop, DistanceDuration> getDistanceDurationTable(
+            final List<Stop> stops,
+            final OsrmTableResponse response) {
         final ImmutableTable.Builder<Stop, Stop, DistanceDuration> distanceDurationTableBuilder = ImmutableTable.builder();
-        final JSONArray distancesArray = json.getJSONArray("distances");
-        final JSONArray durationsArray = json.getJSONArray("durations");
-        final int size = distancesArray.length();
+        final List<List<Double>> distances = response.distances();
+        final List<List<Double>> durations = response.durations();
+        final int size = distances.size();
         for (int i = 0; i < size; i++) {
-            final JSONArray rowDist = distancesArray.getJSONArray(i);
-            final JSONArray rowDur = durationsArray.getJSONArray(i);
+            final List<Double> rowDist = distances.get(i);
+            final List<Double> rowDur = durations.get(i);
             for (int j = 0; j < size; j++) {
+                final Double dist = rowDist.get(j);
+                final Double dur = rowDur.get(j);
                 distanceDurationTableBuilder.put(
                         stops.get(i),
                         stops.get(j),
-                        rowDist.isNull(j) || rowDur.isNull(j) ?
-                                new DistanceDuration(
-                                        Double.MAX_VALUE,
-                                        Double.MAX_VALUE) :
-                                new DistanceDuration(
-                                        rowDist.getDouble(j),
-                                        rowDur.getDouble(j)));
+                        dist == null || dur == null ?
+                                new DistanceDuration(Double.MAX_VALUE, Double.MAX_VALUE) :
+                                new DistanceDuration(dist, dur));
             }
         }
         return distanceDurationTableBuilder.build();
-    }
-
-    private URL createRequestUrl(final List<Stop> stops) {
-        return URLs.createUrl(
-                String.format(
-                        "%s%s?annotations=distance,duration",
-                        baseUrl,
-                        format(getGeodetics(stops))));
     }
 
     private static List<Geodetic> getGeodetics(final List<Stop> stops) {

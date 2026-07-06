@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
@@ -57,19 +58,31 @@ public class OsrmRoutingMatrixProviderTest {
                     @NonNull
                     @Override
                     public MockResponse dispatch(final RecordedRequest request) {
-                        final String expectedCoordsA = "13.400000,52.520000";
-                        final String expectedCoordsB = "13.500000,52.620000";
-                        final String path = request.getPath();
-                        if (path.contains(expectedCoordsA) && path.contains(expectedCoordsB) && path.contains("annotations=distance,duration")) {
-                            return new MockResponse()
-                                    .setResponseCode(200)
-                                    .setBody("{" +
-                                                     "  \"code\": \"Ok\"," +
-                                                     "  \"distances\": [[0, 1000.5], [2000.5, 0]]," +
-                                                     "  \"durations\": [[0, 60.2], [120.4, 0]]" +
-                                                     "}");
-                        }
-                        return new MockResponse().setResponseCode(404);
+                        return checkPath(request.getPath()) ?
+                                new MockResponse()
+                                .setResponseCode(200)
+                                .setBody("{" +
+                                         "  \"code\": \"Ok\"," +
+                                         "  \"distances\": [[0, 1000.5], [2000.5, 0]]," +
+                                         "  \"durations\": [[0, 60.2], [120.4, 0]]" +
+                                         "}") :
+                                new MockResponse().setResponseCode(404);
+                    }
+
+                    private static boolean checkPath(final String path) {
+                        return path != null && checkCoords(path) && checkAnnotations(path);
+                    }
+
+                    private static boolean checkCoords(final String path) {
+                        return Stream
+                                .of("13.400000,52.520000", "13.500000,52.620000")
+                                .allMatch(path::contains);
+                    }
+
+                    private static boolean checkAnnotations(final String path) {
+                        return Stream
+                                .of("annotations=distance,duration", "annotations=distance%2Cduration")
+                                .anyMatch(path::contains);
                     }
                 };
         mockWebServer.setDispatcher(dispatcher);
