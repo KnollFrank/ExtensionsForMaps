@@ -16,7 +16,6 @@ import com.graphhopper.jsprit.core.util.Coordinate;
 import com.graphhopper.jsprit.core.util.Solutions;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -36,31 +35,20 @@ public class RouteOptimizer {
     }
 
     public Route optimize(final Route route) throws Exception {
-        final List<Stop> optimizedRoute = new ArrayList<>();
         final Map<String, Stop> stopById = getStopById(route.waypoints());
-        final Collection<VehicleRoutingProblemSolution> solutions =
-                this
-                        .createVehicleRoutingAlgorithm(route, stopById)
-                        .searchSolutions();
         // FK-TODO: use Optional.ofNullable()
-        final VehicleRoutingProblemSolution bestSolution = Solutions.bestOf(solutions);
-        if (bestSolution != null) {
+        final VehicleRoutingProblemSolution solution =
+                Solutions.bestOf(
+                        this
+                                .createVehicleRoutingAlgorithm(route, stopById)
+                                .searchSolutions());
+        final List<Stop> optimizedRoute = new ArrayList<>();
+        if (solution != null) {
             // ANFORDERUNG 1: Check ob alle Jobs zugewiesen wurden
-            if (!bestSolution.getUnassignedJobs().isEmpty()) {
-                throw new IllegalStateException("Unassigned jobs:" + bestSolution.getUnassignedJobs());
+            if (!solution.getUnassignedJobs().isEmpty()) {
+                throw new IllegalStateException("Unassigned jobs:" + solution.getUnassignedJobs());
             }
-
-            for (final VehicleRoute vehicleRoute : bestSolution.getRoutes()) {
-                for (final TourActivity activity : vehicleRoute.getActivities()) {
-                    if (activity instanceof final TourActivity.JobActivity jobActivity) {
-                        final String rawId = jobActivity.getJob().getId();
-                        final Stop originalStop = stopById.get(rawId);
-                        if (originalStop != null) {
-                            optimizedRoute.add(originalStop);
-                        }
-                    }
-                }
-            }
+            optimizedRoute.addAll(getOptimizedWaypoints(solution, stopById));
         }
         if (optimizedRoute.isEmpty()) {
             optimizedRoute.addAll(route.waypoints());
@@ -69,6 +57,24 @@ public class RouteOptimizer {
                 route.origin(),
                 optimizedRoute,
                 route.destination());
+    }
+
+    private static List<Stop> getOptimizedWaypoints(final VehicleRoutingProblemSolution solution,
+                                                    final Map<String, Stop> stopById) {
+        // FK-TODO: refactor
+        final List<Stop> optimizedRoute = new ArrayList<>();
+        for (final VehicleRoute vehicleRoute : solution.getRoutes()) {
+            for (final TourActivity activity : vehicleRoute.getActivities()) {
+                if (activity instanceof final TourActivity.JobActivity jobActivity) {
+                    final String rawId = jobActivity.getJob().getId();
+                    final Stop originalStop = stopById.get(rawId);
+                    if (originalStop != null) {
+                        optimizedRoute.add(originalStop);
+                    }
+                }
+            }
+        }
+        return optimizedRoute;
     }
 
     private VehicleRoutingAlgorithm createVehicleRoutingAlgorithm(
