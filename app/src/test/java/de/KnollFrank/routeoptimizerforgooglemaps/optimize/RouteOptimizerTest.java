@@ -37,7 +37,11 @@ public class RouteOptimizerTest {
                                 new Angle(48.5015, Unit.DEGREES),
                                 new Angle(8.9932, Unit.DEGREES)),
                         Optional.empty());
-        final DeliveryGroup kernstadt = new DeliveryGroup("ks", "Kernstadt", 1);
+        final DeliveryGroup kernstadt =
+                new DeliveryGroup(
+                        "ks",
+                        "Kernstadt",
+                        1);
         // Hechingen is further away (~16km)
         final Stop hechingen_stadt =
                 new Stop(

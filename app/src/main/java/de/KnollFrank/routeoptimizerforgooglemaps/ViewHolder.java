@@ -12,8 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.List;
 import java.util.Optional;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.DeliveryGroup;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.DeliveryGroups;
 
@@ -37,7 +39,10 @@ class ViewHolder extends RecyclerView.ViewHolder {
         ivDestinationMarker = itemView.findViewById(R.id.ivDestinationMarker);
         tvAddress = itemView.findViewById(R.id.tvAddress);
         spinnerDeliveryGroup = itemView.findViewById(R.id.spinnerDeliveryGroup);
-        spinnerDeliveryGroupAdapter = createAndConfigureSpinnerDeliveryGroupAdapter(itemView.getContext());
+        spinnerDeliveryGroupAdapter =
+                createAndConfigureSpinnerDeliveryGroupAdapter(
+                        getDeliveryGroupOptions(DeliveryGroups.DELIVERY_GROUPS),
+                        itemView.getContext());
         spinnerDeliveryGroup.setAdapter(spinnerDeliveryGroupAdapter);
     }
 
@@ -51,15 +56,25 @@ class ViewHolder extends RecyclerView.ViewHolder {
         tvIndexLetter.setText(getIndexLetter(position));
     }
 
-    private static ArrayAdapter<Optional<DeliveryGroup>> createAndConfigureSpinnerDeliveryGroupAdapter(final Context context) {
+    private static Optional<DeliveryGroup>[] getDeliveryGroupOptions(final List<DeliveryGroup> deliveryGroups) {
+        return Lists
+                .concat(
+                        Optional.empty(),
+                        deliveryGroups
+                                .stream()
+                                .map(Optional::of)
+                                .toList())
+                .toArray(Optional[]::new);
+    }
+
+    private static ArrayAdapter<Optional<DeliveryGroup>> createAndConfigureSpinnerDeliveryGroupAdapter(
+            final Optional<DeliveryGroup>[] deliveryGroupOptions,
+            final Context context) {
         final ArrayAdapter<Optional<DeliveryGroup>> spinnerDeliveryGroupAdapter =
-                new ArrayAdapter<Optional<DeliveryGroup>>(
+                new ArrayAdapter<>(
                         context,
                         android.R.layout.simple_spinner_item,
-                        new Optional[]{
-                                Optional.empty(),
-                                Optional.of(DeliveryGroups.TOWN),
-                                Optional.of(DeliveryGroups.VILLAGE)}) {
+                        deliveryGroupOptions) {
 
                     @NonNull
                     @Override
@@ -84,7 +99,7 @@ class ViewHolder extends RecyclerView.ViewHolder {
                         return this
                                 .getItem(position)
                                 .map(DeliveryGroup::name)
-                                .orElse("keine Liefergruppe");
+                                .orElse("keine Etappe ausgewählt");
                     }
                 };
         spinnerDeliveryGroupAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -100,5 +115,4 @@ class ViewHolder extends RecyclerView.ViewHolder {
         } while (p >= 0);
         return sb.toString();
     }
-
 }
