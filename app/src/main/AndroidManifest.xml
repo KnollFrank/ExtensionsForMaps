@@ -19,13 +19,13 @@
         android:icon="@mipmap/ic_route_optimizer"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_route_optimizer"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:theme="@style/Theme.RouteoptimizerForGoogleMaps">
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.RouteoptimizerForGoogleMaps"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
