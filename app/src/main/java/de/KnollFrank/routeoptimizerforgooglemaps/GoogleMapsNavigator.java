@@ -15,7 +15,7 @@ public class GoogleMapsNavigator {
         launchUrl(RouteToUrlConverter.getUrl(route), context);
     }
 
-    private static void launchUrl(final URL url, final Context context) {
+    public static void launchUrl(final URL url, final Context context) {
         context.startActivity(createMapIntent(url));
     }
 

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -13,8 +14,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Optional;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
+import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
+import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OsrmVehicleRoutingTransportCostsProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.ors.OpenRouteServiceRoutingMatrixProvider;
@@ -51,6 +57,41 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
                         stopsAdapter.getRoute().ifPresent(orchestrator::optimizeRoute);
                     }
                 });
+
+        this
+                .<Button>findViewById(R.id.btnGenerateTemplate)
+                .setOnClickListener(
+                        new View.OnClickListener() {
+
+                            private final EditText etTotalStops = findViewById(R.id.etTotalStops);
+
+                            @Override
+                            public void onClick(final View view) {
+                                try {
+                                    GoogleMapsNavigator.launchUrl(
+                                            createDirectionsUrlTemplate(getTotalStops()),
+                                            MainActivity.this);
+                                } catch (final Exception e) {
+                                    Toast
+                                            .makeText(
+                                                    MainActivity.this,
+                                                    "Fehler beim Generieren des Templates: " + e.getMessage(), Toast.LENGTH_SHORT)
+                                            .show();
+                                }
+                            }
+
+                            private URL createDirectionsUrlTemplate(final int totalStops) throws MalformedURLException {
+                                return DirectionsUrlTemplateFactory.createDirectionsUrlTemplate(
+                                        Geodetic.fromLatitudeLongitude(
+                                                new Angle(48.50248706742132, Unit.DEGREES),
+                                                new Angle(8.992563508173783, Unit.DEGREES)),
+                                        totalStops);
+                            }
+
+                            private int getTotalStops() {
+                                return Integer.parseInt(etTotalStops.getText().toString());
+                            }
+                        });
         checkApiKeyAndInit(getIntent());
     }
 
