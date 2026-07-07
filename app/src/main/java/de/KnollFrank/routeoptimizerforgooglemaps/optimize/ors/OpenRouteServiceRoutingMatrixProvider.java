@@ -64,6 +64,31 @@ public class OpenRouteServiceRoutingMatrixProvider implements RoutingMatrixProvi
         throw new IOException("Failed to fetch routing matrix from OpenRouteService: " + response.code());
     }
 
+    // FK-TODO: DRY with getRoutingMatrix()
+    public static void validateApiKey(final String apiKey) throws IOException {
+        final OpenRouteServiceRoutingMatrixProvider provider = new OpenRouteServiceRoutingMatrixProvider(apiKey);
+        final Response<OrsMatrixResponse> response =
+                provider
+                        .orsService
+                        .getMatrix(
+                                "driving-car",
+                                apiKey,
+                                createDummyRequest())
+                        .execute();
+        if (!response.isSuccessful()) {
+            throw new IOException("API Key validation failed: " + response.code());
+        }
+    }
+
+    private static OrsMatrixRequest createDummyRequest() {
+        return new OrsMatrixRequest(
+                Arrays.asList(
+                        Arrays.asList(8.681495, 49.41461),
+                        Arrays.asList(8.687872, 49.420318)),
+                List.of("distance"),
+                "m");
+    }
+
     private static ImmutableTable<Stop, Stop, DistanceDuration> getDistanceDurationTable(final List<Stop> stops, final OrsMatrixResponse response) {
         final ImmutableTable.Builder<Stop, Stop, DistanceDuration> distanceDurationTableBuilder = ImmutableTable.builder();
         final List<List<Double>> distances = response.distances();

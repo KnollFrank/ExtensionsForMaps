@@ -27,6 +27,9 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
     private Button btnOptimize;
     private RouteOptimizationOrchestrator orchestrator;
     private StopsAdapter stopsAdapter;
+    // FK-TODO: make Optional<Intent>
+    private Intent pendingIntent;
+    private static final int REQUEST_CODE = 1001;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -48,26 +51,36 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
                         stopsAdapter.getRoute().ifPresent(orchestrator::optimizeRoute);
                     }
                 });
-        orchestrator =
-                new RouteOptimizationOrchestrator(
-                        this,
-                        new RouteOptimizer(
-                                new OsrmVehicleRoutingTransportCostsProvider(
-                                        new OpenRouteServiceRoutingMatrixProvider("eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjA0NWE4OGQ0NGUzNTQzOGI5YTNjYTNhMzE3ZTIwOTY3IiwiaCI6Im11cm11cjY0In0="))));
-        handleIntent(getIntent());
+        checkApiKeyAndInit(getIntent());
     }
 
     @Override
     protected void onNewIntent(@NonNull final Intent intent) {
         super.onNewIntent(intent);
-        handleIntent(intent);
+        if (orchestrator == null) {
+            checkApiKeyAndInit(intent);
+        } else {
+            handleIntent(intent);
+        }
     }
 
-    private void handleIntent(final Intent intent) {
-        if (Intent.ACTION_SEND.equals(intent.getAction()) && ClipDescription.MIMETYPE_TEXT_PLAIN.equals(intent.getType())) {
-            Optional
-                    .ofNullable(intent.getStringExtra(Intent.EXTRA_TEXT))
-                    .ifPresent(orchestrator::extractRouteFromDirectionsUrl);
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                initOrchestrator(
+                        ApiKeyRepository
+                                .getApiKey(this)
+                                .orElseThrow());
+                if (pendingIntent != null) {
+                    handleIntent(pendingIntent);
+                    pendingIntent = null;
+                }
+            } else {
+                Toast.makeText(this, "API Key wird benötigt!", Toast.LENGTH_LONG).show();
+                finish();
+            }
         }
     }
 
@@ -111,5 +124,36 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
                     .makeText(this, message, Toast.LENGTH_LONG)
                     .show();
         });
+    }
+
+    private void initOrchestrator(final String apiKey) {
+        orchestrator =
+                new RouteOptimizationOrchestrator(
+                        this,
+                        new RouteOptimizer(
+                                new OsrmVehicleRoutingTransportCostsProvider(
+                                        new OpenRouteServiceRoutingMatrixProvider(apiKey))));
+    }
+
+    private void checkApiKeyAndInit(final Intent intent) {
+        ApiKeyRepository
+                .getApiKey(this)
+                .ifPresentOrElse(
+                        apiKey -> {
+                            initOrchestrator(apiKey);
+                            handleIntent(intent);
+                        },
+                        () -> {
+                            pendingIntent = intent;
+                            startActivityForResult(new Intent(this, ApiKeyActivity.class), REQUEST_CODE);
+                        });
+    }
+
+    private void handleIntent(final Intent intent) {
+        if (Intent.ACTION_SEND.equals(intent.getAction()) && ClipDescription.MIMETYPE_TEXT_PLAIN.equals(intent.getType())) {
+            Optional
+                    .ofNullable(intent.getStringExtra(Intent.EXTRA_TEXT))
+                    .ifPresent(orchestrator::extractRouteFromDirectionsUrl);
+        }
     }
 }
