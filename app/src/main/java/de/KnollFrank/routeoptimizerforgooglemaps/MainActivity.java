@@ -145,7 +145,9 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
                         },
                         () -> {
                             pendingIntent = intent;
-                            startActivityForResult(new Intent(this, ApiKeyActivity.class), REQUEST_CODE);
+                            startActivityForResult(
+                                    new Intent(this, ApiKeyActivity.class),
+                                    REQUEST_CODE);
                         });
     }
 
