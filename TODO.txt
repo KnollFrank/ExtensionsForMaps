@@ -1,5 +1,7 @@
-FK-TODO: Zeitfenster für Stopps in der Routenoptimierung
+NEXT:
 FK-TODO: Mehr als 10 Stopps pro Route
+FK-TODO: Routenoptimierung mit Hilfe von https://openrouteservice.org/ statt jsprit
+
 FK-TODO: Teile des UIs (Optimierung nach Zeit oder Entfernung, Rundreise) von https://www.mapquest.com/routeplanner/ umsetzen
 FK-TODO: Adresseingabefeld von Google Maps um Scannfunktion der Adresse erweitern
 FK-TODO: Fahrt-/Reiseoptionen (z.B. "keine Autobahn") von Google Maps berücksichtigen
