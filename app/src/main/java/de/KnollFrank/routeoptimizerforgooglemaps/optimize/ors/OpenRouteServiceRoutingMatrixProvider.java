@@ -10,6 +10,7 @@ import java.util.Set;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.DistanceDuration;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.HttpClientProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RoutingMatrix;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RoutingMatrixProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
@@ -34,6 +35,7 @@ public class OpenRouteServiceRoutingMatrixProvider implements RoutingMatrixProvi
                 new Retrofit
                         .Builder()
                         .baseUrl(baseUrl)
+                        .client(HttpClientProvider.httpClient)
                         .addConverterFactory(GsonConverterFactory.create())
                         .build()
                         .create(OrsService.class);
