@@ -21,7 +21,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit;
@@ -65,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
             final Spinner spinnerTotalStops =
                     configureSpinnerTotalStops(
                             findViewById(R.id.spinnerTotalStops),
-                            Lists.createRange(11, 27));
+                            List.of(15, 20, 27));
             this
                     .<Button>findViewById(R.id.btnGenerateTemplate)
                     .setOnClickListener(onBtnGenerateTemplateClick(spinnerTotalStops, this));
