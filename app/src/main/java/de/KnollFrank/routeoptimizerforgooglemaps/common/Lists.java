@@ -85,4 +85,11 @@ public class Lists {
                 .mapToObj(i -> Pair.create(as.get(i), bs.get(i)))
                 .toList();
     }
+
+    public static List<Integer> createRange(final int startInclusive, final int endInclusive) {
+        return IntStream
+                .rangeClosed(startInclusive, endInclusive)
+                .boxed()
+                .toList();
+    }
 }
