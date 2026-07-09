@@ -28,6 +28,7 @@ public class GoogleMapsRouteExtractor {
                 .ifPresent(
                         waypointContainers -> {
                             // 3. Extrahiere die Daten für jeden Stopp aus seinem jeweiligen Sub-Baum
+                            // FK-TODO: use Lists.zip(stopDataList, waypointContainers);
                             for (int i = 0; i < waypointContainers.size(); i++) {
                                 final Node waypointNode = waypointContainers.get(i);
                                 final StopData stopData = stopDataList.get(i);
