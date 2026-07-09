@@ -7,11 +7,11 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.Node;
 
 class PlaceIdParser {
 
-    public boolean isPlaceIdNode(final Node node) {
+    public static boolean isPlaceIdNode(final Node node) {
         return node.fieldId == 1 && Datatype.STRING.equals(node.datatype);
     }
 
-    public String getPlaceId(final Node node) {
+    public static String getPlaceId(final Node node) {
         return convertHexToPlaceId(node.value);
     }
 
