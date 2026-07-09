@@ -25,7 +25,7 @@ class TokenProvider {
                 Optional.empty();
     }
 
-    public static List<String> getTokens(final String dataPart) {
+    private static List<String> getTokens(final String dataPart) {
         final String delimiter = "!";
         return Arrays.asList(
                 TokenProvider
