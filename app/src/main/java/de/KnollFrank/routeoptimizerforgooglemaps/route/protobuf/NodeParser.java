@@ -13,10 +13,10 @@ public class NodeParser {
     }
 
     private static String getFieldId(final String token) {
-        int typeIdx = 0;
-        while (typeIdx < token.length() && Character.isDigit(token.charAt(typeIdx))) {
-            typeIdx++;
+        int index = 0;
+        while (index < token.length() && Character.isDigit(token.charAt(index))) {
+            index++;
         }
-        return token.substring(0, typeIdx);
+        return token.substring(0, index);
     }
 }
