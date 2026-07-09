@@ -13,6 +13,7 @@ public class Node {
     public final int fieldId;
     public final char dataType;
     public final String value;
+    // FK-TODO: use ImmutableValueGraph instead of of children
     public final List<Node> children = new ArrayList<>();
 
     public Node(final int fieldId, final char dataType, final String value) {
