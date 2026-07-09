@@ -44,8 +44,7 @@ public class GoogleMapsRouteExtractor {
         final PlaceIdParser placeIdParser = new PlaceIdParser();
         if (placeIdParser.isPlaceIdNode(node)) {
             stopData.placeId = Optional.of(placeIdParser.getPlaceId(node));
-        } else if (node.dataType == 'd') {
-            // FK-TODO: use Datatype.DOUBLE instead of 'd'
+        } else if (node.dataType == Datatype.DOUBLE.marker()) {
             final double value = Double.parseDouble(node.value);
             // Flexibles Mapping für beide bekannten Google-Koordinatenformate (alt: 3d/4d, neu: 2d/1d)
             if (node.fieldId == 3 || node.fieldId == 2) {

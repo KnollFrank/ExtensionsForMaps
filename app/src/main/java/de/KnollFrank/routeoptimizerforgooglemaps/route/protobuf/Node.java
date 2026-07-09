@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Datatype;
+
 // FK-TODO: refactor
 public class Node {
 
     public final int fieldId;
+    // FK-TODO: use Datatype?
     public final char dataType;
     public final String value;
     // FK-TODO: use ImmutableValueGraph instead of of children
@@ -27,8 +30,7 @@ public class Node {
     }
 
     public boolean isContainer() {
-        // FK-TODO: use Datatype.CONTAINER instead of 'm'
-        return dataType == 'm';
+        return dataType == Datatype.CONTAINER.marker();
     }
 
     public int getContainerSize() {

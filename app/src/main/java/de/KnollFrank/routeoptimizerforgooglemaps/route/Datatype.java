@@ -1,14 +1,8 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
-enum Datatype {
+public record Datatype(char marker) {
 
-    DOUBLE('d'),
-    STRING('s'),
-    CONTAINER('m');
-
-    public final char marker;
-
-    Datatype(final char marker) {
-        this.marker = marker;
-    }
+    public static final Datatype DOUBLE = new Datatype('d');
+    public static final Datatype STRING = new Datatype('s');
+    public static final Datatype CONTAINER = new Datatype('m');
 }
