@@ -49,12 +49,12 @@ public class Node {
     public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         final Node node = (Node) o;
-        return Objects.equals(token, node.token);
+        return fieldId == node.fieldId && type == node.type && Objects.equals(token, node.token);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(token);
+        return Objects.hash(token, fieldId, type);
     }
 
     @NonNull

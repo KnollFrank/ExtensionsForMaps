@@ -2,6 +2,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf;
 
 public class NodeParser {
 
+    // FK-TODO: refactor
     public static Node parseNode(final String token) {
         int fieldId;
         final char type;
