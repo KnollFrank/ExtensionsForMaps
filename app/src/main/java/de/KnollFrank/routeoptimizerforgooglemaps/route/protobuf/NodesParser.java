@@ -15,7 +15,7 @@ public class NodesParser {
         final List<Node> nodes = new ArrayList<>();
         while (tokens.hasNext()) {
             final String token = tokens.next();
-            final Node node = new Node(token);
+            final Node node = NodeParser.parseNode(token);
             if (node.isContainer()) {
                 final int subCount = node.getContainerSize();
                 final List<Node> subNodes = parseNodes(tokens, subCount);
@@ -34,7 +34,7 @@ public class NodesParser {
             final String token = tokens.next();
             consumed++;
 
-            final Node node = new Node(token);
+            final Node node = NodeParser.parseNode(token);
             if (node.isContainer()) {
                 final int subCount = node.getContainerSize();
                 final List<Node> subNodes = parseNodes(tokens, subCount);

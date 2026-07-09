@@ -1,7 +1,11 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 // FK-TODO: refactor
 public class Node {
@@ -10,25 +14,16 @@ public class Node {
     // FK-TODO: fieldId und type in einer Markerklasse zusammenfassen, und hier als Optional<Marker> verwenden?
     public final int fieldId;
     // FK-TODO: use Datatype for type
+    // FK-TODO: rename to dataType
     public final char type;
     // FK-TODO: der value darf hier auch als ungeparster String (noch nicht als double usw.) angeboten werden. Siehe GoogleMapsRouteExtractor
     public final List<Node> children = new ArrayList<>();
 
-    // FK-TODO: refactor
-    // token = ![fieldId][type][value]
-    public Node(final String token) {
+    // token = ![fieldId][dataType][value]
+    public Node(final String token, final int fieldId, final char type) {
         this.token = token;
-        int typeIdx = 0;
-        while (typeIdx < token.length() && Character.isDigit(token.charAt(typeIdx))) {
-            typeIdx++;
-        }
-        if (typeIdx < token.length()) {
-            this.fieldId = Integer.parseInt(token.substring(0, typeIdx));
-            this.type = token.charAt(typeIdx);
-        } else {
-            this.fieldId = -1;
-            this.type = '?';
-        }
+        this.fieldId = fieldId;
+        this.type = type;
     }
 
     public boolean isContainer() {
@@ -48,5 +43,28 @@ public class Node {
             }
         }
         return 0;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        final Node node = (Node) o;
+        return Objects.equals(token, node.token);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(token);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Node.class.getSimpleName() + "[", "]")
+                .add("token='" + token + "'")
+                .add("fieldId=" + fieldId)
+                .add("type=" + type)
+                .add("children=" + children)
+                .toString();
     }
 }
