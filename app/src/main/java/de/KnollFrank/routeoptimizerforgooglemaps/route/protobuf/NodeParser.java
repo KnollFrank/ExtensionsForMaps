@@ -1,5 +1,7 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Datatype;
+
 public class NodeParser {
 
     // FK-TODO: refactor
@@ -8,7 +10,7 @@ public class NodeParser {
         final String fieldId = getFieldId(token);
         return new Node(
                 Integer.parseInt(fieldId),
-                token.charAt(fieldId.length()),
+                new Datatype(token.charAt(fieldId.length())),
                 token.substring(fieldId.length() + 1));
     }
 
