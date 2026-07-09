@@ -20,10 +20,10 @@ public class NodesParserTest {
         assertEquals(2, nodes.size());
         assertEquals("1sabc", nodes.get(0).token);
         assertEquals(1, nodes.get(0).fieldId);
-        assertEquals('s', nodes.get(0).type);
+        assertEquals('s', nodes.get(0).dataType);
         assertEquals("2d1.23", nodes.get(1).token);
         assertEquals(2, nodes.get(1).fieldId);
-        assertEquals('d', nodes.get(1).type);
+        assertEquals('d', nodes.get(1).dataType);
     }
 
     @Test
@@ -39,7 +39,7 @@ public class NodesParserTest {
         final Node container = nodes.get(0);
         assertEquals("1m2", container.token);
         assertEquals(1, container.fieldId);
-        assertEquals('m', container.type);
+        assertEquals('m', container.dataType);
         assertEquals(2, container.children.size());
         assertEquals("2sabc", container.children.get(0).token);
         assertEquals("3d4.56", container.children.get(1).token);

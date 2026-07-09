@@ -14,20 +14,19 @@ public class Node {
     // FK-TODO: fieldId und type in einer Markerklasse zusammenfassen, und hier als Optional<Marker> verwenden?
     public final int fieldId;
     // FK-TODO: use Datatype for type
-    // FK-TODO: rename to dataType
-    public final char type;
+    public final char dataType;
     private final String value;
     public final List<Node> children = new ArrayList<>();
 
-    public Node(final int fieldId, final char type, String value) {
-        this.token = String.valueOf(fieldId) + String.valueOf(type) + value;
+    public Node(final int fieldId, final char dataType, String value) {
+        this.token = String.valueOf(fieldId) + String.valueOf(dataType) + value;
         this.fieldId = fieldId;
-        this.type = type;
+        this.dataType = dataType;
         this.value = value;
     }
 
     public boolean isContainer() {
-        return type == 'm';
+        return dataType == 'm';
     }
 
     public int getContainerSize() {
@@ -49,12 +48,12 @@ public class Node {
     public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         final Node node = (Node) o;
-        return fieldId == node.fieldId && type == node.type && Objects.equals(value, node.value);
+        return fieldId == node.fieldId && dataType == node.dataType && Objects.equals(value, node.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fieldId, type, value);
+        return Objects.hash(fieldId, dataType, value);
     }
 
     @NonNull
@@ -63,7 +62,7 @@ public class Node {
         return new StringJoiner(", ", Node.class.getSimpleName() + "[", "]")
                 .add("token='" + token + "'")
                 .add("fieldId=" + fieldId)
-                .add("type=" + type)
+                .add("dataType=" + dataType)
                 .add("children=" + children)
                 .toString();
     }
