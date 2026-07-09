@@ -1,4 +1,4 @@
-package de.KnollFrank.routeoptimizerforgooglemaps.route;
+package de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf;
 
 public record Datatype(char marker) {
 

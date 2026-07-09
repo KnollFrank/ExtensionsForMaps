@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.route.Datatype;
-
 // FK-TODO: refactor
 public class Node {
 

@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableList;
 import java.util.Iterator;
 import java.util.List;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.Datatype;
+
 // FK-TODO: remove class
 class ContainerReader {
 

@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.Datatype;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.Node;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.NodeFinder;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.NodesParser;

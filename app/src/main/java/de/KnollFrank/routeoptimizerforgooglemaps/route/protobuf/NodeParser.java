@@ -1,7 +1,5 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.route.Datatype;
-
 public class NodeParser {
 
     // FK-TODO: refactor

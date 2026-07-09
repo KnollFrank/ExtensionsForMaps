@@ -1,5 +1,7 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.Datatype;
+
 class ParserFactory {
 
     public static Parser<Double> createLatitudeParser() {

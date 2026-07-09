@@ -6,8 +6,6 @@ import org.junit.Test;
 
 import java.util.List;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.route.Datatype;
-
 public class NodesParserTest {
 
     @Test

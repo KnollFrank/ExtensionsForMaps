@@ -2,6 +2,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 import java.util.Base64;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.Datatype;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.Node;
 
 class PlaceIdParser {
