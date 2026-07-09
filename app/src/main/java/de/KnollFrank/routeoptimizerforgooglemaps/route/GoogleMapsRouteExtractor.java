@@ -38,7 +38,7 @@ public class GoogleMapsRouteExtractor {
     }
 
     // --- FLEXIBLE DATEN-EXTRAKTION AUS DEM SUB-BAUM ---
-    // FK-TODO: refactor
+    // FK-TODO: refactor, das Parsen der Datentypen + Werte gehört in eine andere Klasse
     private static void extractDataFromSubtree(final Node node, final StopData stopData) {
         final Parser<String> placeIdParser = new PlaceIdParser();
         if (node.type == 's' && node.fieldId == 1) {

@@ -11,8 +11,11 @@ public class Node {
     public final int fieldId;
     // FK-TODO: use Datatype for type
     public final char type;
+    // FK-TODO: der value darf hier auch als ungeparster String (noch nicht als double usw.) angeboten werden. Siehe GoogleMapsRouteExtractor
     public final List<Node> children = new ArrayList<>();
 
+    // FK-TODO: refactor
+    // token = ![fieldId][type][value]
     public Node(final String token) {
         this.token = token;
         int typeIdx = 0;

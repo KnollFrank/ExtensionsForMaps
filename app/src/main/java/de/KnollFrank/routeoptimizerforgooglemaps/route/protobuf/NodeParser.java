@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+// FK-TODO: add unit test
 public class NodeParser {
 
-    // --- REKURSIVER BAUM-PARSER (Tree Builder) ---
     // FK-TODO: refactor
     public static List<Node> parseAllNodes(final List<String> tokens) {
         return parseAllNodes(tokens.iterator());

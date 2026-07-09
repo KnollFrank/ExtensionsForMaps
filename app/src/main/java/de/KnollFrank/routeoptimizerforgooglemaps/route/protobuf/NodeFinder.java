@@ -5,7 +5,6 @@ import java.util.List;
 
 public class NodeFinder {
 
-    // --- GEZIELTE WAYPOINT-SUCHE IM BAUM ---
     // FK-TODO: refactor
     public static List<Node> findWaypointContainers(final List<Node> rootNodes, final int expectedCount) {
         final List<Node> all4mContainers = new ArrayList<>();

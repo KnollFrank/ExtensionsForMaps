@@ -1,5 +1,5 @@
 NEXT:
-FK-TODO: Mehr als 10 Stopps pro Route
+FK-TODO: Mehr als 10 Stopps pro Route. Für die Generierung der Google Maps URL muß diejenige non-Standard-Form gewählt werden, die mehr als 10 Stopps in Google Maps erlaubt.
 FK-TODO: Routenoptimierung mit Hilfe von https://openrouteservice.org/ statt jsprit
 
 FK-TODO: Teile des UIs (Optimierung nach Zeit oder Entfernung, Rundreise) von https://www.mapquest.com/routeplanner/ umsetzen
