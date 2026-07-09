@@ -20,9 +20,11 @@ public class NodesParserTest {
         assertEquals(2, nodes.size());
         assertEquals("1sabc", nodes.get(0).getToken());
         assertEquals(1, nodes.get(0).fieldId);
+        // FK-TODO: use Datatype.STRING instead of 's'
         assertEquals('s', nodes.get(0).dataType);
         assertEquals("2d1.23", nodes.get(1).getToken());
         assertEquals(2, nodes.get(1).fieldId);
+        // FK-TODO: use Datatype.DOUBLE instead of 'd'
         assertEquals('d', nodes.get(1).dataType);
     }
 
@@ -39,6 +41,7 @@ public class NodesParserTest {
         final Node container = nodes.get(0);
         assertEquals("1m2", container.getToken());
         assertEquals(1, container.fieldId);
+        // FK-TODO: use Datatype.CONTAINER instead of 'm'
         assertEquals('m', container.dataType);
         assertEquals(2, container.children.size());
         assertEquals("2sabc", container.children.get(0).getToken());

@@ -41,10 +41,11 @@ public class GoogleMapsRouteExtractor {
     // --- FLEXIBLE DATEN-EXTRAKTION AUS DEM SUB-BAUM ---
     // FK-TODO: refactor, das Parsen der Datentypen + Werte gehört in eine andere Klasse
     private static void extractDataFromSubtree(final Node node, final StopData stopData) {
-        final Parser<String> placeIdParser = new PlaceIdParser();
-        if (placeIdParser.matches(node.getToken())) {
-            stopData.placeId = Optional.of(placeIdParser.parse(node.getToken()));
+        final PlaceIdParser placeIdParser = new PlaceIdParser();
+        if (placeIdParser.isPlaceIdNode(node)) {
+            stopData.placeId = Optional.of(placeIdParser.getPlaceId(node));
         } else if (node.dataType == 'd') {
+            // FK-TODO: use Datatype.DOUBLE instead of 'd'
             final double value = Double.parseDouble(node.value);
             // Flexibles Mapping für beide bekannten Google-Koordinatenformate (alt: 3d/4d, neu: 2d/1d)
             if (node.fieldId == 3 || node.fieldId == 2) {

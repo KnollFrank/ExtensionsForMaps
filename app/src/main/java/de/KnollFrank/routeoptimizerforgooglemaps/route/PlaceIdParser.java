@@ -2,19 +2,16 @@ package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 import java.util.Base64;
 
-class PlaceIdParser implements Parser<String> {
+import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.Node;
 
-    // FK-TODO: introduce Marker class instead of String
-    private static final String placeIdMarker = MarkerFactory.createMarker(1, Datatype.STRING);
+class PlaceIdParser {
 
-    @Override
-    public boolean matches(final String token) {
-        return token.startsWith(placeIdMarker);
+    public boolean isPlaceIdNode(final Node node) {
+        return node.fieldId == 1 && node.dataType == Datatype.STRING.marker;
     }
 
-    @Override
-    public String parse(final String token) {
-        return convertHexToPlaceId(token.substring(placeIdMarker.length()));
+    public String getPlaceId(final Node node) {
+        return convertHexToPlaceId(node.value);
     }
 
     /**

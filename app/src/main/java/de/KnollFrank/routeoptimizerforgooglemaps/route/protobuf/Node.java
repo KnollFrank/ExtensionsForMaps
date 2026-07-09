@@ -26,6 +26,7 @@ public class Node {
     }
 
     public boolean isContainer() {
+        // FK-TODO: use Datatype.CONTAINER instead of 'm'
         return dataType == 'm';
     }
 
