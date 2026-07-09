@@ -16,14 +16,14 @@ public class Node {
     // FK-TODO: use Datatype for type
     // FK-TODO: rename to dataType
     public final char type;
-    // FK-TODO: der value darf hier auch als ungeparster String (noch nicht als double usw.) angeboten werden. Siehe GoogleMapsRouteExtractor
+    private final String value;
     public final List<Node> children = new ArrayList<>();
 
-    // token = ![fieldId][dataType][value]
-    public Node(final String token, final int fieldId, final char type) {
+    public Node(final String token, final int fieldId, final char type, String value) {
         this.token = token;
         this.fieldId = fieldId;
         this.type = type;
+        this.value = value;
     }
 
     public boolean isContainer() {
@@ -49,12 +49,12 @@ public class Node {
     public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         final Node node = (Node) o;
-        return fieldId == node.fieldId && type == node.type && Objects.equals(token, node.token);
+        return fieldId == node.fieldId && type == node.type && Objects.equals(value, node.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(token, fieldId, type);
+        return Objects.hash(fieldId, type, value);
     }
 
     @NonNull

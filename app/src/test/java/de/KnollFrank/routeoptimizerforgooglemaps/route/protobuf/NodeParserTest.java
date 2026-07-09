@@ -17,7 +17,7 @@ public class NodeParserTest {
 
         // Then
         assertEquals(
-                new Node(token, 11, 'b'),
+                new Node(token, 11, 'b', "1"),
                 node);
     }
 }
