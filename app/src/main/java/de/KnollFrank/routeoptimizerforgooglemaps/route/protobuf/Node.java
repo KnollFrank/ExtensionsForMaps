@@ -22,11 +22,7 @@ public class Node {
     }
 
     public String getToken() {
-        return new StringBuilder()
-                .append(fieldId)
-                .append(dataType)
-                .append(value)
-                .toString();
+        return "" + fieldId + dataType + value;
     }
 
     public boolean isContainer() {
