@@ -10,9 +10,7 @@ import java.util.StringJoiner;
 // FK-TODO: refactor
 public class Node {
 
-    // FK-TODO: fieldId und type in einer Markerklasse zusammenfassen, und hier als Optional<Marker> verwenden?
     public final int fieldId;
-    // FK-TODO: use Datatype for type
     public final char dataType;
     private final String value;
     public final List<Node> children = new ArrayList<>();
@@ -24,7 +22,11 @@ public class Node {
     }
 
     public String getToken() {
-        return String.valueOf(fieldId) + String.valueOf(dataType) + value;
+        return new StringBuilder()
+                .append(fieldId)
+                .append(dataType)
+                .append(value)
+                .toString();
     }
 
     public boolean isContainer() {
