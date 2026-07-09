@@ -19,8 +19,8 @@ public class Node {
     private final String value;
     public final List<Node> children = new ArrayList<>();
 
-    public Node(final String token, final int fieldId, final char type, String value) {
-        this.token = token;
+    public Node(final int fieldId, final char type, String value) {
+        this.token = String.valueOf(fieldId) + String.valueOf(type) + value;
         this.fieldId = fieldId;
         this.type = type;
         this.value = value;

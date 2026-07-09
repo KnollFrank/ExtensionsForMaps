@@ -7,7 +7,6 @@ public class NodeParser {
     public static Node parseNode(final String token) {
         final String fieldId = getFieldId(token);
         return new Node(
-                token,
                 Integer.parseInt(fieldId),
                 token.charAt(fieldId.length()),
                 token.substring(fieldId.length() + 1));
