@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.Node;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.NodeFinder;
-import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.NodeParser;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.NodesParser;
 
 // FK-TODO: brauchen Gesamtunittest, der eine Google Maps Directions URL entgegennimmt und eine korrekt sortierte (optimierte) Google Maps Directions URL erzeugt.
 public class GoogleMapsRouteExtractor {
@@ -23,7 +23,7 @@ public class GoogleMapsRouteExtractor {
         final List<StopData> stopDataList = AddressToStopDataConverter.convert(directionsUrl.getUrlDecodedAddresses());
         directionsUrl
                 .getTokensFromDataPart()
-                .map(NodeParser::parseAllNodes)
+                .map(NodesParser::parseAllNodes)
                 .map(rootNodes -> NodeFinder.findWaypointContainers(rootNodes, stopDataList.size()))
                 .ifPresent(
                         waypointContainers -> {

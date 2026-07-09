@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-public class NodeParserTest {
+public class NodesParserTest {
 
     @Test
     public void testParseAllNodes_SimpleFlat() {
@@ -14,7 +14,7 @@ public class NodeParserTest {
         final List<String> tokens = List.of("1sabc", "2d1.23");
 
         // When
-        final List<Node> nodes = NodeParser.parseAllNodes(tokens);
+        final List<Node> nodes = NodesParser.parseAllNodes(tokens);
 
         // Then
         assertEquals(2, nodes.size());
@@ -32,7 +32,7 @@ public class NodeParserTest {
         final List<String> tokens = List.of("1m2", "2sabc", "3d4.56");
 
         // When
-        final List<Node> nodes = NodeParser.parseAllNodes(tokens);
+        final List<Node> nodes = NodesParser.parseAllNodes(tokens);
 
         // Then
         assertEquals(1, nodes.size());
@@ -50,7 +50,7 @@ public class NodeParserTest {
         final List<String> tokens = List.of("1m3", "2m2", "3sabc", "4d1.2");
 
         // When
-        final List<Node> nodes = NodeParser.parseAllNodes(tokens);
+        final List<Node> nodes = NodesParser.parseAllNodes(tokens);
 
         // Then
         assertEquals(1, nodes.size());
@@ -71,7 +71,7 @@ public class NodeParserTest {
                 List.of("4m22", "4m21", "1m5", "1m4", "1s0x4799fc4b13515dd5:0x345201aaff119b3a", "8m2", "3d48.4765345", "4d8.934900899999999");
 
         // When
-        final List<Node> nodes = NodeParser.parseAllNodes(tokens);
+        final List<Node> nodes = NodesParser.parseAllNodes(tokens);
 
         // Then
         assertEquals(1, nodes.size());

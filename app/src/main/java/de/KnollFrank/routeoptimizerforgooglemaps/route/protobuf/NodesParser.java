@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-// FK-TODO: add unit test
-public class NodeParser {
+public class NodesParser {
 
     // FK-TODO: refactor
     public static List<Node> parseAllNodes(final List<String> tokens) {
