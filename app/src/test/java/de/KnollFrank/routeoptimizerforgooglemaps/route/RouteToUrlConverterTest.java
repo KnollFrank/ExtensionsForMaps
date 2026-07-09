@@ -1,6 +1,7 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit.DEGREES;
 
 import org.junit.Test;
@@ -223,5 +224,53 @@ public class RouteToUrlConverterTest {
         assertEquals(
                 "https://www.google.com/maps/dir/?api=1&origin=Origin&origin_place_id=place1&destination=Destination&destination_place_id=place3&waypoints=W1%7C20%2C30&waypoint_place_ids=placeW1%7C",
                 result.toString());
+    }
+
+    @Test
+    public void testGetUrl_WithManyStops() {
+        // Given: Route with 12 stops (origin, destination, 10 waypoints)
+        final Stop origin =
+                new Stop(
+                        "0",
+                        "Origin",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(10.0, DEGREES),
+                                new Angle(20.0, DEGREES)),
+                        Optional.empty());
+        final Stop destination =
+                new Stop(
+                        "11",
+                        "Destination",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(30.0, DEGREES),
+                                new Angle(40.0, DEGREES)),
+                        Optional.empty());
+        final List<Stop> waypoints = new java.util.ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            waypoints.add(
+                    new Stop(
+                            String.valueOf(i),
+                            "W" + i,
+                            Optional.empty(),
+                            Geodetic.fromLatitudeLongitude(
+                                    new Angle(10.0 + i, DEGREES),
+                                    new Angle(20.0 + i, DEGREES)),
+                            Optional.empty()));
+        }
+        final Route route = new Route(origin, waypoints, destination);
+
+        // When
+        final URL url = RouteToUrlConverter.getUrl(route);
+
+        // Then: Should contain the "data=" part and have 12 * 4 = 48 tokens in innerCount
+        final String urlString = url.toString();
+        assertEquals(12, route.stops().size());
+        assertTrue(urlString.contains("/data=!3m2!1e3!4b1!4m49!4m48!"));
+        assertTrue(urlString.contains("!1d20!2d10")); // Origin
+        assertTrue(urlString.contains("!1d40!2d30")); // Destination
+        assertTrue(urlString.contains("!1d21!2d11")); // W1
+        assertTrue(urlString.contains("!1d30!2d20")); // W10
     }
 }

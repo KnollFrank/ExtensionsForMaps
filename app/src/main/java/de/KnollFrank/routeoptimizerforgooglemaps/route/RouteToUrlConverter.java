@@ -5,6 +5,7 @@ import android.net.Uri;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -16,14 +17,54 @@ public class RouteToUrlConverter {
 
     // FK-TODO: refactor
     public static URL getUrl(final Route route) {
-        final Uri.Builder builder = creaetUriBuilder();
+        if (route.stops().size() > 10) {
+            return getComplexUrl(route);
+        }
+        final Uri.Builder builder = createUriBuilder();
         appendPoint(builder, "origin", route.origin());
         appendPoint(builder, "destination", route.destination());
         appendWaypoints(builder, route.waypoints());
         return URLs.createUrl(builder.build().toString());
     }
 
-    private static Uri.Builder creaetUriBuilder() {
+    private static URL getComplexUrl(final Route route) {
+        final List<Stop> allStops = route.stops();
+        final StringBuilder pathBuilder = new StringBuilder("https://www.google.com/maps/dir");
+        final List<String> dataTokens = new ArrayList<>();
+
+        for (final Stop stop : allStops) {
+            pathBuilder.append("/").append(Uri.encode(stop.address()));
+            if (stop.placeId().isPresent()) {
+                dataTokens.add("1m5");
+                dataTokens.add("1m4");
+                dataTokens.add("1s" + stop.placeId().get());
+                dataTokens.add("8m2");
+                dataTokens.add("3d" + format(stop.geodetic().getLatitude()));
+                dataTokens.add("4d" + format(stop.geodetic().getLongitude()));
+            } else {
+                dataTokens.add("1m3");
+                dataTokens.add("2m2");
+                dataTokens.add("1d" + format(stop.geodetic().getLongitude()));
+                dataTokens.add("2d" + format(stop.geodetic().getLatitude()));
+            }
+        }
+
+        final int innerCount = dataTokens.size();
+        final int outerCount = innerCount + 1;
+
+        final StringBuilder dataBuilder = new StringBuilder();
+        dataBuilder.append("!3m2!1e3!4b1");
+        dataBuilder.append("!4m").append(outerCount);
+        dataBuilder.append("!4m").append(innerCount);
+        for (final String token : dataTokens) {
+            dataBuilder.append("!").append(token);
+        }
+
+        pathBuilder.append("/data=").append(dataBuilder).append("?entry=ttu");
+        return URLs.createUrl(pathBuilder.toString());
+    }
+
+    private static Uri.Builder createUriBuilder() {
         return new Uri
                 .Builder()
                 .scheme("https")
