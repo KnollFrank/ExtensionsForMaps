@@ -44,7 +44,7 @@ public class GoogleMapsRouteExtractorTest {
     @Test
     public void testExtractRouteFromDirectionsUrl_AllCoordinatesInPath() throws MalformedURLException {
         // Given
-        final URL url = new URL("https://www.google.com/maps/dir/48.5015274,8.9932287/48.4765345,8.9349009/48.4752669,8.9284933/@48.4884161,8.9604793,13z/data=!4m4!4m3!2m1!2b1!3e0/dir/48.5015274,8.9932287/48.4765345,8.9349009/48.4752669,8.9284933/@48.4884161,8.9604793,13z/data=!4m4!4m3!2m1!2b1!3e0");
+        final URL url = new URL("https://www.google.com/maps/dir/48.5015274,8.9932287/48.4765345,8.9349009/48.4752669,8.9284933/@48.4884161,8.9604793,13z/data=!4m4!4m3!2m1!2b1!3e0");
 
         // When
         final Route route = GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(url);

@@ -25,7 +25,9 @@ public class NodeFinder {
     }
 
     // FK-TODO: refactor
-    private static void findAllContainersByFieldId(final List<Node> nodes, final int fieldId, final List<Node> result) {
+    private static void findAllContainersByFieldId(final List<Node> nodes,
+                                                   final int fieldId,
+                                                   final List<Node> result) {
         for (final Node node : nodes) {
             if (node.fieldId == fieldId && node.isContainer()) {
                 result.add(node);
