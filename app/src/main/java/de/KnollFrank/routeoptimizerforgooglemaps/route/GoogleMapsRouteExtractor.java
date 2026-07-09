@@ -42,12 +42,10 @@ public class GoogleMapsRouteExtractor {
     // FK-TODO: refactor, das Parsen der Datentypen + Werte gehört in eine andere Klasse
     private static void extractDataFromSubtree(final Node node, final StopData stopData) {
         final Parser<String> placeIdParser = new PlaceIdParser();
-        if (node.dataType == 's' && node.fieldId == 1) {
-            if (placeIdParser.matches(node.getToken())) {
-                stopData.placeId = Optional.of(placeIdParser.parse(node.getToken()));
-            }
+        if (placeIdParser.matches(node.getToken())) {
+            stopData.placeId = Optional.of(placeIdParser.parse(node.getToken()));
         } else if (node.dataType == 'd') {
-            final double value = Double.parseDouble(node.getToken().substring(String.valueOf(node.fieldId).length() + 1));
+            final double value = Double.parseDouble(node.value);
             // Flexibles Mapping für beide bekannten Google-Koordinatenformate (alt: 3d/4d, neu: 2d/1d)
             if (node.fieldId == 3 || node.fieldId == 2) {
                 stopData.latitude = Optional.of(value);

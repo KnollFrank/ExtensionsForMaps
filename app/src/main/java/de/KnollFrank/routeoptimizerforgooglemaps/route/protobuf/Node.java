@@ -12,10 +12,10 @@ public class Node {
 
     public final int fieldId;
     public final char dataType;
-    private final String value;
+    public final String value;
     public final List<Node> children = new ArrayList<>();
 
-    public Node(final int fieldId, final char dataType, String value) {
+    public Node(final int fieldId, final char dataType, final String value) {
         this.fieldId = fieldId;
         this.dataType = dataType;
         this.value = value;
