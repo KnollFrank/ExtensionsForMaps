@@ -37,7 +37,7 @@ public class RouteToUrlConverter {
             if (stop.placeId().isPresent()) {
                 dataTokens.add("1m5");
                 dataTokens.add("1m4");
-                dataTokens.add("1s" + stop.placeId().get());
+                dataTokens.add("1s" + PlaceIdParser.convertPlaceIdToHex(stop.placeId().get()));
                 dataTokens.add("8m2");
                 dataTokens.add("3d" + format(stop.geodetic().getLatitude()));
                 dataTokens.add("4d" + format(stop.geodetic().getLongitude()));
