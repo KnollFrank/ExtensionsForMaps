@@ -1,6 +1,7 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit.DEGREES;
 
 import org.junit.Test;
@@ -8,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -265,5 +267,54 @@ public class RouteToUrlConverterTest {
 
         // Then
         assertEquals(GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(url), route);
+    }
+
+    @Test
+    public void testGetUrl_WithManyStopsAndPlaceId() {
+        // Given: Route with 12 stops (origin, destination, 10 waypoints)
+        // One waypoint has a Place ID.
+        final String placeId = "ChIJgdDN7dT6mUcRjacz_s6uCKw";
+        final Stop origin =
+                new Stop(
+                        "0",
+                        "Origin",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(48.5, DEGREES),
+                                new Angle(9.0, DEGREES)),
+                        Optional.empty());
+        final Stop destination =
+                new Stop(
+                        "11",
+                        "Destination",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(48.6, DEGREES),
+                                new Angle(9.1, DEGREES)),
+                        Optional.empty());
+        final List<Stop> waypoints = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            waypoints.add(
+                    new Stop(
+                            String.valueOf(i),
+                            "W" + i,
+                            i == 5 ? Optional.of(placeId) : Optional.empty(),
+                            Geodetic.fromLatitudeLongitude(
+                                    new Angle(48.5 + i * 0.01, DEGREES),
+                                    new Angle(9.0 + i * 0.01, DEGREES)),
+                            Optional.empty()));
+        }
+        final Route route = new Route(origin, waypoints, destination);
+
+        // When
+        final URL url = RouteToUrlConverter.getUrl(route);
+
+        // Then
+        // 1. Verifiziere, dass die Place-ID im data-Part vorkommt (als Hex kodiert)
+        final String hexPlaceId = PlaceIdParser.convertPlaceIdToHex(placeId);
+        assertTrue(url.toString().contains(hexPlaceId));
+
+        // 2. Verifiziere den Round-Trip (lossless extraction)
+        assertEquals(route, GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(url));
     }
 }
