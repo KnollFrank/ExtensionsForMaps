@@ -9,10 +9,10 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.common.Lists;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 
@@ -274,37 +274,32 @@ public class RouteToUrlConverterTest {
         // Given: Route with 12 stops (origin, destination, 10 waypoints)
         // One waypoint has a Place ID.
         final String placeId = "ChIJgdDN7dT6mUcRjacz_s6uCKw";
-        final Stop origin =
-                new Stop(
-                        "0",
-                        "Origin",
-                        Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(48.5, DEGREES),
-                                new Angle(9.0, DEGREES)),
-                        Optional.empty());
-        final Stop destination =
-                new Stop(
-                        "11",
-                        "Destination",
-                        Optional.empty(),
-                        Geodetic.fromLatitudeLongitude(
-                                new Angle(48.6, DEGREES),
-                                new Angle(9.1, DEGREES)),
-                        Optional.empty());
-        final List<Stop> waypoints = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            waypoints.add(
-                    new Stop(
-                            String.valueOf(i),
-                            "W" + i,
-                            i == 5 ? Optional.of(placeId) : Optional.empty(),
-                            Geodetic.fromLatitudeLongitude(
-                                    new Angle(48.5 + i * 0.01, DEGREES),
-                                    new Angle(9.0 + i * 0.01, DEGREES)),
-                            Optional.empty()));
-        }
-        final Route route = new Route(origin, waypoints, destination);
+        final Route route =
+                new Route(
+                        new Stop(
+                                "0",
+                                "Origin",
+                                Optional.empty(),
+                                Geodetic.fromLatitudeLongitude(
+                                        new Angle(48.5, DEGREES),
+                                        new Angle(9.0, DEGREES)),
+                                Optional.empty()),
+                        Lists
+                                .createRange(1, 10)
+                                .stream()
+                                .map(i ->
+                                             createWaypoint(
+                                                     i,
+                                                     i == 5 ? Optional.of(placeId) : Optional.empty()))
+                                .toList(),
+                        new Stop(
+                                "11",
+                                "Destination",
+                                Optional.empty(),
+                                Geodetic.fromLatitudeLongitude(
+                                        new Angle(48.6, DEGREES),
+                                        new Angle(9.1, DEGREES)),
+                                Optional.empty()));
 
         // When
         final URL url = RouteToUrlConverter.getUrl(route);
@@ -316,5 +311,16 @@ public class RouteToUrlConverterTest {
 
         // 2. Verifiziere den Round-Trip (lossless extraction)
         assertEquals(route, GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(url));
+    }
+
+    private static Stop createWaypoint(final int i, final Optional<String> placeId) {
+        return new Stop(
+                String.valueOf(i),
+                "W" + i,
+                placeId,
+                Geodetic.fromLatitudeLongitude(
+                        new Angle(48.5 + i * 0.01, DEGREES),
+                        new Angle(9.0 + i * 0.01, DEGREES)),
+                Optional.empty());
     }
 }
