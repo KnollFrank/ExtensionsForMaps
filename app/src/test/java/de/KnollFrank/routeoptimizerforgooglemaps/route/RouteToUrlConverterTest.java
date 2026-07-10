@@ -147,7 +147,7 @@ public class RouteToUrlConverterTest {
                         new Stop(
                                 "1",
                                 "Origin City",
-                                Optional.of("place1"),
+                                Optional.of(new OfficialPlaceId("ChIJ1V1RE0v8mUcROpsR_6oBUjQ")),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(10.0, DEGREES),
                                         new Angle(20.0, DEGREES)),
@@ -156,7 +156,7 @@ public class RouteToUrlConverterTest {
                                 new Stop(
                                         "2",
                                         "Waypoint Street",
-                                        Optional.of("place2"),
+                                        Optional.of(new OfficialPlaceId("ChIJsYBbyF7zmUcREc3DW6XSMuQ")),
                                         Geodetic.fromLatitudeLongitude(
                                                 new Angle(15.0, DEGREES),
                                                 new Angle(25.0, DEGREES)),
@@ -164,7 +164,7 @@ public class RouteToUrlConverterTest {
                         new Stop(
                                 "3",
                                 "Destination Landmark",
-                                Optional.of("place3"),
+                                Optional.of(new OfficialPlaceId("ChIJsYBbyF7zmUcREc3DW6XSMuQ")),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(30.0, DEGREES),
                                         new Angle(40.0, DEGREES)),
@@ -175,7 +175,7 @@ public class RouteToUrlConverterTest {
 
         // Then
         assertEquals(
-                "https://www.google.com/maps/dir/?api=1&origin=Origin%20City&origin_place_id=place1&destination=Destination%20Landmark&destination_place_id=place3&waypoints=Waypoint%20Street&waypoint_place_ids=place2",
+                "https://www.google.com/maps/dir/?api=1&origin=Origin%20City&origin_place_id=ChIJ1V1RE0v8mUcROpsR_6oBUjQ&destination=Destination%20Landmark&destination_place_id=ChIJsYBbyF7zmUcREc3DW6XSMuQ&waypoints=Waypoint%20Street&waypoint_place_ids=ChIJsYBbyF7zmUcREc3DW6XSMuQ",
                 result.toString());
     }
 
@@ -187,7 +187,7 @@ public class RouteToUrlConverterTest {
                         new Stop(
                                 "1",
                                 "Origin",
-                                Optional.of("place1"),
+                                Optional.of(new OfficialPlaceId("ChIJsYBbyF7zmUcREc3DW6XSMuQ")),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(10.0, DEGREES),
                                         new Angle(20.0, DEGREES)),
@@ -196,7 +196,7 @@ public class RouteToUrlConverterTest {
                                 new Stop(
                                         "2",
                                         "W1",
-                                        Optional.of("placeW1"),
+                                        Optional.of(new OfficialPlaceId("ChIJsYBbyF7zmUcREc3DW6XSMuQ")),
                                         Geodetic.fromLatitudeLongitude(
                                                 new Angle(15.0, DEGREES),
                                                 new Angle(25.0, DEGREES)),
@@ -212,7 +212,7 @@ public class RouteToUrlConverterTest {
                         new Stop(
                                 "4",
                                 "Destination",
-                                Optional.of("place3"),
+                                Optional.of(new OfficialPlaceId("ChIJsYBbyF7zmUcREc3DW6XSMuQ")),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(30.0, DEGREES),
                                         new Angle(40.0, DEGREES)),
@@ -223,7 +223,7 @@ public class RouteToUrlConverterTest {
 
         // Then
         assertEquals(
-                "https://www.google.com/maps/dir/?api=1&origin=Origin&origin_place_id=place1&destination=Destination&destination_place_id=place3&waypoints=W1%7C20%2C30&waypoint_place_ids=placeW1%7C",
+                "https://www.google.com/maps/dir/?api=1&origin=Origin&origin_place_id=ChIJsYBbyF7zmUcREc3DW6XSMuQ&destination=Destination&destination_place_id=ChIJsYBbyF7zmUcREc3DW6XSMuQ&waypoints=W1%7C20%2C30&waypoint_place_ids=ChIJsYBbyF7zmUcREc3DW6XSMuQ%7C",
                 result.toString());
     }
 
@@ -273,7 +273,7 @@ public class RouteToUrlConverterTest {
     public void testGetUrl_WithManyStopsAndPlaceId() {
         // Given: Route with 12 stops (origin, destination, 10 waypoints)
         // One waypoint has a Place ID.
-        final String placeId = "ChIJgdDN7dT6mUcRjacz_s6uCKw";
+        final OfficialPlaceId officialPlaceId = new OfficialPlaceId("ChIJgUbEo8cfqokR5lP9_Wh_DaM");
         final Route route =
                 new Route(
                         new Stop(
@@ -290,7 +290,7 @@ public class RouteToUrlConverterTest {
                                 .map(i ->
                                              createWaypoint(
                                                      i,
-                                                     i == 5 ? Optional.of(placeId) : Optional.empty()))
+                                                     i == 5 ? Optional.of(officialPlaceId) : Optional.empty()))
                                 .toList(),
                         new Stop(
                                 "11",
@@ -306,18 +306,17 @@ public class RouteToUrlConverterTest {
 
         // Then
         // 1. Verifiziere, dass die Place-ID im data-Part vorkommt (als Hex kodiert)
-        final String hexPlaceId = PlaceIdParser.convertPlaceIdToHex(placeId);
-        assertTrue(url.toString().contains(hexPlaceId));
+        assertTrue(url.toString().contains(officialPlaceId.toUndocumentedPlaceId().value()));
 
         // 2. Verifiziere den Round-Trip (lossless extraction)
         assertEquals(route, GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(url));
     }
 
-    private static Stop createWaypoint(final int i, final Optional<String> placeId) {
+    private static Stop createWaypoint(final int i, final Optional<OfficialPlaceId> officialPlaceId) {
         return new Stop(
                 String.valueOf(i),
                 "W" + i,
-                placeId,
+                officialPlaceId,
                 Geodetic.fromLatitudeLongitude(
                         new Angle(48.5 + i * 0.01, DEGREES),
                         new Angle(9.0 + i * 0.01, DEGREES)),

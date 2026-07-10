@@ -42,7 +42,7 @@ public class GoogleMapsRouteExtractor {
     // FK-TODO: refactor, das Parsen der Datentypen + Werte gehört in eine andere Klasse
     private static void extractDataFromSubtree(final Node node, final StopData stopData) {
         if (PlaceIdParser.isPlaceIdNode(node)) {
-            stopData.placeId = Optional.of(PlaceIdParser.getPlaceId(node));
+            stopData.officialPlaceId = Optional.of(PlaceIdParser.getOfficialPlaceId(node));
         } else if (Datatype.DOUBLE.equals(node.datatype)) {
             final double value = Double.parseDouble(node.value);
             // Flexibles Mapping für beide bekannten Google-Koordinatenformate (alt: 3d/4d, neu: 2d/1d)

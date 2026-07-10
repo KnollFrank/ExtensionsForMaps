@@ -109,7 +109,7 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
         return new Stop(
                 stop.id(),
                 stop.address(),
-                stop.placeId(),
+                stop.officialPlaceId(),
                 stop.geodetic(),
                 deliveryGroups.get(index));
     }

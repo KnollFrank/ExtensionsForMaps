@@ -34,10 +34,11 @@ public class RouteToUrlConverter {
 
         for (final Stop stop : allStops) {
             pathBuilder.append("/").append(Uri.encode(stop.address()));
-            if (stop.placeId().isPresent()) {
+            // FK-TODO: use ifPresentOrElse()
+            if (stop.officialPlaceId().isPresent()) {
                 dataTokens.add("1m5");
                 dataTokens.add("1m4");
-                dataTokens.add("1s" + PlaceIdParser.convertPlaceIdToHex(stop.placeId().get()));
+                dataTokens.add("1s" + stop.officialPlaceId().get().toUndocumentedPlaceId().value());
                 dataTokens.add("8m2");
                 dataTokens.add("3d" + format(stop.geodetic().getLatitude()));
                 dataTokens.add("4d" + format(stop.geodetic().getLongitude()));
@@ -75,7 +76,7 @@ public class RouteToUrlConverter {
 
     private static void appendPoint(final Uri.Builder builder, final String key, final Stop stop) {
         builder.appendQueryParameter(key, formatStop(stop));
-        stop.placeId().ifPresent(placeId -> builder.appendQueryParameter(key + "_place_id", placeId));
+        stop.officialPlaceId().ifPresent(officialPlaceId -> builder.appendQueryParameter(key + "_place_id", officialPlaceId.value()));
     }
 
     private static void appendWaypoints(final Uri.Builder builder, final List<Stop> waypoints) {
@@ -89,18 +90,25 @@ public class RouteToUrlConverter {
     }
 
     private static boolean hasAnyPlaceId(final List<Stop> stops) {
-        return stops.stream().anyMatch(stop -> stop.placeId().isPresent());
+        return stops.stream().anyMatch(stop -> stop.officialPlaceId().isPresent());
     }
 
     private static String formatPlaceIds(final List<Stop> stops) {
         return stops
                 .stream()
-                .map(stop -> stop.placeId().orElse(""))
+                .map(RouteToUrlConverter::formatPlaceId)
                 .collect(Collectors.joining("|"));
     }
 
+    private static String formatPlaceId(final Stop stop) {
+        return stop
+                .officialPlaceId()
+                .map(OfficialPlaceId::value)
+                .orElse("");
+    }
+
     private static String formatStop(final Stop stop) {
-        return stop.placeId().isPresent() ?
+        return stop.officialPlaceId().isPresent() ?
                 stop.address() :
                 formatCoordinates(stop);
     }
