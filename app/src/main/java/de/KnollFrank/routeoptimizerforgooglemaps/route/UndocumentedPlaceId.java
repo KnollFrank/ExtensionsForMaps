@@ -12,7 +12,7 @@ public record UndocumentedPlaceId(String value) {
         return PlaceIdConverter.toOfficialPlaceId(this);
     }
 
-    public static boolean isUndocumentedPlaceId(final String value) {
+    private static boolean isUndocumentedPlaceId(final String value) {
         return value.contains(":");
     }
 }
