@@ -104,6 +104,7 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
                 .toList();
     }
 
+    // FK-TODO: verwende Lists.zip(stops, deliveryGroups)
     private Stop getStopWithUiData(final List<Stop> stops, int index) {
         final Stop stop = stops.get(index);
         return new Stop(

@@ -3,6 +3,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -19,11 +20,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.NativeSuburbResolver;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OsrmVehicleRoutingTransportCostsProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.ors.OpenRouteServiceRoutingMatrixProvider;
@@ -114,9 +117,19 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
     public void onExtractRouteFromDirectionsUrlSuccess(final Route route) {
         runOnUiThread(() -> {
             progressBar.setVisibility(View.GONE);
-            stopsAdapter.setRoute(route);
+            stopsAdapter.setRoute(addSuburbsToAddresses(route));
             btnOptimize.setVisibility(View.VISIBLE);
         });
+    }
+
+    private Route addSuburbsToAddresses(final Route route) {
+        final SuburbsToAddressesAdder suburbsToAddressesAdder =
+                new SuburbsToAddressesAdder(
+                        new NativeSuburbResolver(
+                                new Geocoder(
+                                        this,
+                                        Locale.getDefault())));
+        return suburbsToAddressesAdder.addSuburbsToAddresses(route);
     }
 
     @Override
