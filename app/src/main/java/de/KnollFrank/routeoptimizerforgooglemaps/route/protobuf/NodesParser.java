@@ -17,9 +17,7 @@ public class NodesParser {
             final String token = tokens.next();
             final Node node = NodeParser.parseNode(token);
             if (node.isContainer()) {
-                final int subCount = node.getContainerSize();
-                final List<Node> subNodes = parseNodes(tokens, subCount);
-                node.children.addAll(subNodes);
+                parseTokensAsChildrenOfNode(node, tokens);
             }
             nodes.add(node);
         }
@@ -33,16 +31,17 @@ public class NodesParser {
         while (consumed < toConsume && tokens.hasNext()) {
             final String token = tokens.next();
             consumed++;
-
             final Node node = NodeParser.parseNode(token);
             if (node.isContainer()) {
-                final int subCount = node.getContainerSize();
-                final List<Node> subNodes = parseNodes(tokens, subCount);
-                node.children.addAll(subNodes);
-                consumed += subCount;
+                parseTokensAsChildrenOfNode(node, tokens);
+                consumed += node.getContainerSize();
             }
             nodes.add(node);
         }
         return nodes;
+    }
+
+    private static void parseTokensAsChildrenOfNode(final Node node, final Iterator<String> tokens) {
+        node.children.addAll(parseNodes(tokens, node.getContainerSize()));
     }
 }
