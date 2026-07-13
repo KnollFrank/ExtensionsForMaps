@@ -6,9 +6,8 @@ import android.content.Intent;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,9 +16,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.slider.Slider;
+
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -64,13 +64,21 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
                     }
                 });
         {
-            final Spinner spinnerTotalStops =
-                    configureSpinnerTotalStops(
-                            findViewById(R.id.spinnerTotalStops),
-                            List.of(15, 20, 27));
+            final Slider sliderTotalStops = findViewById(R.id.sliderTotalStops);
+            final TextView tvTotalStopsLabel = findViewById(R.id.tvTotalStopsLabel);
+            sliderTotalStops.addOnChangeListener(
+                    new Slider.OnChangeListener() {
+
+                        @Override
+                        public void onValueChange(@NonNull final Slider slider,
+                                                  final float value,
+                                                  final boolean fromUser) {
+                            tvTotalStopsLabel.setText("Anzahl Stopps: " + (int) value);
+                        }
+                    });
             this
                     .<Button>findViewById(R.id.btnGenerateTemplate)
-                    .setOnClickListener(onBtnGenerateTemplateClick(spinnerTotalStops, this));
+                    .setOnClickListener(onBtnGenerateTemplateClick(sliderTotalStops, this));
         }
         checkApiKeyAndInit(getIntent());
     }
@@ -190,19 +198,7 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
         }
     }
 
-    private Spinner configureSpinnerTotalStops(final Spinner spinnerTotalStops,
-                                               final List<Integer> stops) {
-        final ArrayAdapter<Integer> adapter =
-                new ArrayAdapter<>(
-                        this,
-                        android.R.layout.simple_spinner_item,
-                        stops);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerTotalStops.setAdapter(adapter);
-        return spinnerTotalStops;
-    }
-
-    private static View.OnClickListener onBtnGenerateTemplateClick(final Spinner spinnerTotalStops,
+    private static View.OnClickListener onBtnGenerateTemplateClick(final Slider sliderTotalStops,
                                                                    final Context context) {
         return new View.OnClickListener() {
 
@@ -230,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
             }
 
             private int getTotalStops() {
-                return (Integer) spinnerTotalStops.getSelectedItem();
+                return (int) sliderTotalStops.getValue();
             }
         };
     }
