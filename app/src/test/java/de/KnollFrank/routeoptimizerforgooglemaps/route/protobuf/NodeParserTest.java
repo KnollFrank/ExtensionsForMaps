@@ -10,12 +10,12 @@ public class NodeParserTest {
 
     // 11b1 3d48.4765345 1sabc 1s0x4799fc4b13515dd5:0x345201aaff119b3a
     @Test
-    public void testParseNodeWithoutChildren() {
+    public void testParseNode() {
         // Given
         final String token = "11b1";
 
         // When
-        final Node node = NodeParser.parseNodeWithoutChildren(token);
+        final Node node = NodeParser.parseNode(token);
 
         // Then
         assertEquals(

@@ -6,7 +6,7 @@ class NodeParser {
 
     // FK-TODO: refactor
     // token = [fieldId][dataType][value]
-    public static Node parseNodeWithoutChildren(final String token) {
+    public static Node parseNode(final String token) {
         final String fieldId = getFieldId(token);
         return new Node(
                 Integer.parseInt(fieldId),

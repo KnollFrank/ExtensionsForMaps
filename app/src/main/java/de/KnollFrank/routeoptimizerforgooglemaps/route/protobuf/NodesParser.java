@@ -23,7 +23,7 @@ public class NodesParser {
 
         private record NodeAndConsumedTokens(Node node, int consumedTokens) {
 
-            public NodeAndConsumedTokens add(final int consumedTokens) {
+            public NodeAndConsumedTokens addConsumedTokens(final int consumedTokens) {
                 return new NodeAndConsumedTokens(
                         node(),
                         consumedTokens() + consumedTokens);
@@ -39,14 +39,12 @@ public class NodesParser {
         }
 
         private NodeAndConsumedTokens parseNode() {
-            final String token = tokens.next();
-            final int consumedTokens = 1;
             return this
-                    .parseNodeWithChildren(NodeParser.parseNodeWithoutChildren(token))
-                    .add(consumedTokens);
+                    .addChildrenToNode(NodeParser.parseNode(tokens.next()))
+                    .addConsumedTokens(1);
         }
 
-        private NodeAndConsumedTokens parseNodeWithChildren(final Node node) {
+        private NodeAndConsumedTokens addChildrenToNode(final Node node) {
             return node.isContainer() ?
                     new NodeAndConsumedTokens(
                             new Node(
