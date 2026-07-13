@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 
+// FK-TODO: RouteToUrlConverter und GoogleMapsRouteExtractor sind zueinander invers. Dafür brauchen wir einen Unitttest.
 public class RouteToUrlConverter {
 
     // FK-TODO: refactor
@@ -28,11 +29,10 @@ public class RouteToUrlConverter {
     }
 
     private static URL getComplexUrl(final Route route) {
-        final List<Stop> allStops = route.stops();
         final StringBuilder pathBuilder = new StringBuilder("https://www.google.com/maps/dir");
         final List<String> dataTokens = new ArrayList<>();
 
-        for (final Stop stop : allStops) {
+        for (final Stop stop : route.stops()) {
             pathBuilder.append("/").append(Uri.encode(stop.address()));
             // FK-TODO: use ifPresentOrElse()
             if (stop.officialPlaceId().isPresent()) {

@@ -12,7 +12,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit;
 
 public class DirectionsUrlTemplateFactory {
 
-    // FK-TODO: refactor
+    // FK-TODO: rufe intern den RouteToUrlConverter nachdem eine neue Methode geschrieben wurde, die eine Route mit totalStops erzeugt analog zum aktuellen Code in createDirectionsUrlTemplate()
     public static URL createDirectionsUrlTemplate(final Geodetic base, int totalStops) throws MalformedURLException {
         if (totalStops < 1) {
             throw new IllegalArgumentException("totalStops: " + totalStops);
@@ -51,8 +51,6 @@ public class DirectionsUrlTemplateFactory {
 
             // Koordinaten leicht verschieben (ca. 50 Meter pro Schritt)
             final Geodetic shifted = base.add(shift.mul(i));
-
-            // Wichtig: Google verlangt im data-Block !1d für Lng und !2d für Lat
             dataBuilder.append(String.format(Locale.US, "!1m3!2m2!1d%.4f!2d%.4f", shifted.getLongitude().toDegrees(), shifted.getLatitude().toDegrees()));
         }
 
