@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 
-// FK-TODO: RouteToUrlConverter und GoogleMapsRouteExtractor sind zueinander invers. Dafür brauchen wir einen Unitttest.
 public class RouteToUrlConverter {
 
     // FK-TODO: refactor
