@@ -2,7 +2,6 @@ package de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf;
 
 import com.google.common.collect.ImmutableList;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -57,14 +56,14 @@ public class NodesParser {
         }
 
         private List<Node> parseNodes(final int toConsume) {
-            final List<Node> nodes = new ArrayList<>();
+            final ImmutableList.Builder<Node> nodesBuilder = ImmutableList.builder();
             int consumed = 0;
             while (consumed < toConsume) {
                 final NodeAndConsumedTokens nodeAndConsumedTokens = parseNode();
                 consumed += nodeAndConsumedTokens.consumedTokens();
-                nodes.add(nodeAndConsumedTokens.node());
+                nodesBuilder.add(nodeAndConsumedTokens.node());
             }
-            return nodes;
+            return nodesBuilder.build();
         }
     }
 }
