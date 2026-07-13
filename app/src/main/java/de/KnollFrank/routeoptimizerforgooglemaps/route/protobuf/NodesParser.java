@@ -21,16 +21,29 @@ public class NodesParser {
             this.tokens = tokens;
         }
 
+        private record NodeAndConsumedTokens(Node node, int consumedTokens) {
+
+            public NodeAndConsumedTokens add(final int consumedTokens) {
+                return new NodeAndConsumedTokens(
+                        node(),
+                        consumedTokens() + consumedTokens);
+            }
+        }
+
         public List<Node> parseNodes() {
             final ImmutableList.Builder<Node> nodesBuilder = ImmutableList.builder();
             while (tokens.hasNext()) {
-                final String token = tokens.next();
-                nodesBuilder.add(parseNode(token).node());
+                nodesBuilder.add(parseNode().node());
             }
             return nodesBuilder.build();
         }
 
-        private record NodeAndConsumedTokens(Node node, int consumedTokens) {
+        private NodeAndConsumedTokens parseNode() {
+            final String token = tokens.next();
+            final int consumedTokens = 1;
+            return this
+                    .parseNodeWithChildren(NodeParser.parseNodeWithoutChildren(token))
+                    .add(consumedTokens);
         }
 
         private NodeAndConsumedTokens parseNodeWithChildren(final Node node) {
@@ -45,22 +58,15 @@ public class NodesParser {
                     new NodeAndConsumedTokens(node, 0);
         }
 
-        // FK-TODO: refactor
         private List<Node> parseNodes(final int toConsume) {
             final List<Node> nodes = new ArrayList<>();
             int consumed = 0;
             while (consumed < toConsume) {
-                final String token = tokens.next();
-                consumed++;
-                final NodeAndConsumedTokens nodeAndConsumedTokens = parseNode(token);
+                final NodeAndConsumedTokens nodeAndConsumedTokens = parseNode();
                 consumed += nodeAndConsumedTokens.consumedTokens();
                 nodes.add(nodeAndConsumedTokens.node());
             }
             return nodes;
-        }
-
-        private NodeAndConsumedTokens parseNode(final String token) {
-            return parseNodeWithChildren(NodeParser.parseNodeWithoutChildren(token));
         }
     }
 }
