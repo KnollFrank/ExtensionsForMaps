@@ -58,7 +58,7 @@ public class NodesParser {
         private List<Node> parseNodes(final int toConsume) {
             final ImmutableList.Builder<Node> nodesBuilder = ImmutableList.builder();
             int consumed = 0;
-            while (consumed < toConsume) {
+            while (consumed != toConsume) {
                 final NodeAndConsumedTokens nodeAndConsumedTokens = parseNode();
                 consumed += nodeAndConsumedTokens.consumedTokens();
                 nodesBuilder.add(nodeAndConsumedTokens.node());
