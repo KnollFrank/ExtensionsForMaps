@@ -12,7 +12,7 @@ public class Node {
     public final int fieldId;
     public final Datatype datatype;
     public final String value;
-    // FK-TODO: use ImmutableValueGraph instead of of children
+    // FK-TODO: use ImmutableValueGraph instead of of children?
     public final List<Node> children;
 
     public Node(final int fieldId,
