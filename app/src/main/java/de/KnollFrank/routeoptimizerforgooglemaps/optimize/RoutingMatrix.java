@@ -1,5 +1,7 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.optimize;
 
+import androidx.annotation.NonNull;
+
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 
@@ -44,6 +46,7 @@ public class RoutingMatrix {
         return Objects.hashCode(distanceDurationByStopTable);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return new StringJoiner(", ", RoutingMatrix.class.getSimpleName() + "[", "]")
