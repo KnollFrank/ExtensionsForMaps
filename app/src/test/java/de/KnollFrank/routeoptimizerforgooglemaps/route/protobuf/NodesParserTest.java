@@ -6,15 +6,17 @@ import org.junit.Test;
 
 import java.util.List;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.route.TokenProvider;
+
 public class NodesParserTest {
 
     @Test
-    public void testParseAllNodes_SimpleFlat() {
+    public void testParseNodes_SimpleFlat() {
         // Given
         final List<String> tokens = List.of("1sabc", "2d1.23");
 
         // When
-        final List<Node> nodes = NodesParser.parseAllNodes(tokens);
+        final List<Node> nodes = NodesParser.parseNodes(tokens);
 
         // Then
         assertEquals(2, nodes.size());
@@ -27,12 +29,12 @@ public class NodesParserTest {
     }
 
     @Test
-    public void testParseAllNodes_Nested() {
+    public void testParseNodes_Nested() {
         // Given: !1m2!2sabc!3d4.56
         final List<String> tokens = List.of("1m2", "2sabc", "3d4.56");
 
         // When
-        final List<Node> nodes = NodesParser.parseAllNodes(tokens);
+        final List<Node> nodes = NodesParser.parseNodes(tokens);
 
         // Then
         assertEquals(1, nodes.size());
@@ -46,11 +48,11 @@ public class NodesParserTest {
     }
 
     @Test
-    public void testParseAllNodes_DeeplyNested() {
+    public void testParseNodes_DeeplyNested() {
         final List<String> tokens = List.of("1m3", "2m2", "3sabc", "4d1.2");
 
         // When
-        final List<Node> nodes = NodesParser.parseAllNodes(tokens);
+        final List<Node> nodes = NodesParser.parseNodes(tokens);
 
         // Then
         assertEquals(1, nodes.size());
@@ -64,14 +66,13 @@ public class NodesParserTest {
     }
 
     @Test
-    public void testParseAllNodes_RealWorldFull() {
+    public void testParseNodes_RealWorldFull() {
         // Snippet from GoogleMapsRouteExtractorTest:
-        // !4m22!4m21!1m5!1m4!1s0x4799fc4b13515dd5:0x345201aaff119b3a!8m2!3d48.4765345!4d8.934900899999999
-        final List<String> tokens =
-                List.of("4m22", "4m21", "1m5", "1m4", "1s0x4799fc4b13515dd5:0x345201aaff119b3a", "8m2", "3d48.4765345", "4d8.934900899999999");
+        final String dataPart = "!4m22!4m21!1m5!1m4!1s0x4799fc4b13515dd5:0x345201aaff119b3a!8m2!3d48.4765345!4d8.934900899999999!1m5!1m4!1s0x47b161837e1813b9:0x4263df27bd63aa0!8m2!3d53.548828199999996!4d9.987170299999999!1m5!1m4!1s0x4799f35ec85b80b1:0xe432d2a55bc3cd11!8m2!3d48.430628399999996!4d9.2546378!2m1!11b1!3e0";
+        final List<String> tokens = TokenProvider.getTokens(dataPart);
 
         // When
-        final List<Node> nodes = NodesParser.parseAllNodes(tokens);
+        final List<Node> nodes = NodesParser.parseNodes(tokens);
 
         // Then
         assertEquals(1, nodes.size());
@@ -81,7 +82,7 @@ public class NodesParserTest {
 
         final Node child4m21 = root.children.get(0);
         assertEquals("4m21", child4m21.getToken());
-        assertEquals(1, child4m21.children.size());
+        assertEquals(5, child4m21.children.size());
 
         final Node child1m5 = child4m21.children.get(0);
         assertEquals("1m5", child1m5.getToken());

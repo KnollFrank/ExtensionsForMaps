@@ -2,7 +2,6 @@ package de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf;
 
 import androidx.annotation.NonNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -14,12 +13,16 @@ public class Node {
     public final Datatype datatype;
     public final String value;
     // FK-TODO: use ImmutableValueGraph instead of of children
-    public final List<Node> children = new ArrayList<>();
+    public final List<Node> children;
 
-    public Node(final int fieldId, final Datatype datatype, final String value) {
+    public Node(final int fieldId,
+                final Datatype datatype,
+                final String value,
+                final List<Node> children) {
         this.fieldId = fieldId;
         this.datatype = datatype;
         this.value = value;
+        this.children = children;
     }
 
     public String getToken() {

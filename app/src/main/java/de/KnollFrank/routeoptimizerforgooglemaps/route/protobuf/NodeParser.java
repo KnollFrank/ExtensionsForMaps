@@ -1,15 +1,18 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf;
 
-public class NodeParser {
+import java.util.List;
+
+class NodeParser {
 
     // FK-TODO: refactor
     // token = [fieldId][dataType][value]
-    public static Node parseNode(final String token) {
+    public static Node parseNodeWithoutChildren(final String token) {
         final String fieldId = getFieldId(token);
         return new Node(
                 Integer.parseInt(fieldId),
                 new Datatype(token.charAt(fieldId.length())),
-                token.substring(fieldId.length() + 1));
+                token.substring(fieldId.length() + 1),
+                List.of());
     }
 
     private static String getFieldId(final String token) {

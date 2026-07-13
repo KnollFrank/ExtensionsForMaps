@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-class TokenProvider {
+public class TokenProvider {
 
     private static final String DATA_PART_MARKER = "data=";
 
@@ -13,6 +13,14 @@ class TokenProvider {
         return TokenProvider
                 .getDataPart(directionsUrl)
                 .map(TokenProvider::getTokens);
+    }
+
+    public static List<String> getTokens(final String dataPart) {
+        final String delimiter = "!";
+        return Arrays.asList(
+                TokenProvider
+                        .withoutDelimiterAtStart(dataPart, delimiter)
+                        .split(delimiter));
     }
 
     private static Optional<String> getDataPart(final URL directionsUrl) {
@@ -23,14 +31,6 @@ class TokenProvider {
                         .split(DATA_PART_MARKER)[1]
                         .split("\\?")[0]) :
                 Optional.empty();
-    }
-
-    private static List<String> getTokens(final String dataPart) {
-        final String delimiter = "!";
-        return Arrays.asList(
-                TokenProvider
-                        .withoutDelimiterAtStart(dataPart, delimiter)
-                        .split(delimiter));
     }
 
     private static String withoutDelimiterAtStart(final String str, final String delimiter) {

@@ -1,5 +1,7 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -7,41 +9,58 @@ import java.util.List;
 public class NodesParser {
 
     // FK-TODO: refactor
-    public static List<Node> parseAllNodes(final List<String> tokens) {
-        return parseAllNodes(tokens.iterator());
+    public static List<Node> parseNodes(final List<String> tokens) {
+        return new Worker(tokens.iterator()).parseNodes();
     }
 
-    private static List<Node> parseAllNodes(final Iterator<String> tokens) {
-        final List<Node> nodes = new ArrayList<>();
-        while (tokens.hasNext()) {
-            final String token = tokens.next();
-            final Node node = NodeParser.parseNode(token);
-            if (node.isContainer()) {
-                parseTokensAsChildrenOfNode(node, tokens);
-            }
-            nodes.add(node);
+    private static class Worker {
+
+        private final Iterator<String> tokens;
+
+        public Worker(final Iterator<String> tokens) {
+            this.tokens = tokens;
         }
-        return nodes;
-    }
 
-    // FK-TODO: refactor
-    private static List<Node> parseNodes(final Iterator<String> tokens, final int toConsume) {
-        final List<Node> nodes = new ArrayList<>();
-        int consumed = 0;
-        while (consumed < toConsume && tokens.hasNext()) {
-            final String token = tokens.next();
-            consumed++;
-            final Node node = NodeParser.parseNode(token);
-            if (node.isContainer()) {
-                parseTokensAsChildrenOfNode(node, tokens);
-                consumed += node.getContainerSize();
+        public List<Node> parseNodes() {
+            final ImmutableList.Builder<Node> nodesBuilder = ImmutableList.builder();
+            while (tokens.hasNext()) {
+                final String token = tokens.next();
+                nodesBuilder.add(parseNode(token).node());
             }
-            nodes.add(node);
+            return nodesBuilder.build();
         }
-        return nodes;
-    }
 
-    private static void parseTokensAsChildrenOfNode(final Node node, final Iterator<String> tokens) {
-        node.children.addAll(parseNodes(tokens, node.getContainerSize()));
+        private record NodeAndConsumedTokens(Node node, int consumedTokens) {
+        }
+
+        private NodeAndConsumedTokens parseNodeWithChildren(final Node node) {
+            return node.isContainer() ?
+                    new NodeAndConsumedTokens(
+                            new Node(
+                                    node.fieldId,
+                                    node.datatype,
+                                    node.value,
+                                    parseNodes(node.getContainerSize())),
+                            node.getContainerSize()) :
+                    new NodeAndConsumedTokens(node, 0);
+        }
+
+        // FK-TODO: refactor
+        private List<Node> parseNodes(final int toConsume) {
+            final List<Node> nodes = new ArrayList<>();
+            int consumed = 0;
+            while (consumed < toConsume) {
+                final String token = tokens.next();
+                consumed++;
+                final NodeAndConsumedTokens nodeAndConsumedTokens = parseNode(token);
+                consumed += nodeAndConsumedTokens.consumedTokens();
+                nodes.add(nodeAndConsumedTokens.node());
+            }
+            return nodes;
+        }
+
+        private NodeAndConsumedTokens parseNode(final String token) {
+            return parseNodeWithChildren(NodeParser.parseNodeWithoutChildren(token));
+        }
     }
 }
