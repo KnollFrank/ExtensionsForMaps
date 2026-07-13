@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.slider.Slider;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Optional;
@@ -204,20 +203,12 @@ public class MainActivity extends AppCompatActivity implements RouteOptimization
 
             @Override
             public void onClick(final View view) {
-                try {
-                    GoogleMapsNavigator.launchUrl(
-                            createDirectionsUrlTemplate(getTotalStops()),
-                            context);
-                } catch (final Exception e) {
-                    Toast
-                            .makeText(
-                                    context,
-                                    "Fehler beim Generieren des Templates: " + e.getMessage(), Toast.LENGTH_SHORT)
-                            .show();
-                }
+                GoogleMapsNavigator.launchUrl(
+                        createDirectionsUrlTemplate(getTotalStops()),
+                        context);
             }
 
-            private URL createDirectionsUrlTemplate(final int totalStops) throws MalformedURLException {
+            private URL createDirectionsUrlTemplate(final int totalStops) {
                 return DirectionsUrlTemplateFactory.createDirectionsUrlTemplate(
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.50248706742132, Unit.DEGREES),

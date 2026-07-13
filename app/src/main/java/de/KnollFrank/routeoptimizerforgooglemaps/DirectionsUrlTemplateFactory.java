@@ -2,10 +2,10 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import android.net.Uri;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit;
@@ -13,7 +13,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit;
 public class DirectionsUrlTemplateFactory {
 
     // FK-TODO: rufe intern den RouteToUrlConverter nachdem eine neue Methode geschrieben wurde, die eine Route mit totalStops erzeugt analog zum aktuellen Code in createDirectionsUrlTemplate()
-    public static URL createDirectionsUrlTemplate(final Geodetic base, int totalStops) throws MalformedURLException {
+    public static URL createDirectionsUrlTemplate(final Geodetic base, int totalStops) {
         if (totalStops < 1) {
             throw new IllegalArgumentException("totalStops: " + totalStops);
         }
@@ -60,6 +60,6 @@ public class DirectionsUrlTemplateFactory {
                 .append(dataBuilder)
                 .append("?entry=ttu");
 
-        return new URL(pathBuilder.toString());
+        return URLs.createUrl(pathBuilder.toString());
     }
 }
