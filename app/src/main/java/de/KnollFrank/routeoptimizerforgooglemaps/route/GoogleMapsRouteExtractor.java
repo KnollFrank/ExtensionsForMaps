@@ -43,17 +43,17 @@ public class GoogleMapsRouteExtractor {
     private static void extractDataFromSubtree(final Node node, final StopData stopData) {
         if (PlaceIdParser.isPlaceIdNode(node)) {
             stopData.officialPlaceId = Optional.of(PlaceIdParser.getOfficialPlaceId(node));
-        } else if (Datatype.DOUBLE.equals(node.datatype)) {
-            final double value = Double.parseDouble(node.value);
+        } else if (Datatype.DOUBLE.equals(node.datatype())) {
+            final double value = Double.parseDouble(node.value());
             // Flexibles Mapping für beide bekannten Google-Koordinatenformate (alt: 3d/4d, neu: 2d/1d)
-            if (node.fieldId == 3 || node.fieldId == 2) {
+            if (node.fieldId() == 3 || node.fieldId() == 2) {
                 stopData.latitude = Optional.of(value);
-            } else if (node.fieldId == 4 || node.fieldId == 1) {
+            } else if (node.fieldId() == 4 || node.fieldId() == 1) {
                 stopData.longitude = Optional.of(value);
             }
         }
         // Rekursiv tiefer suchen
-        for (final Node child : node.children) {
+        for (final Node child : node.children()) {
             extractDataFromSubtree(child, stopData);
         }
     }

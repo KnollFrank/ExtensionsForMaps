@@ -11,8 +11,8 @@ public class NodeFinder {
         findAllContainersByFieldId(rootNodes, 4, all4mContainers);
         for (final Node container4m : all4mContainers) {
             final List<Node> waypointChildrenOf4mContainer = new ArrayList<>();
-            for (final Node child : container4m.children) {
-                if (child.fieldId == 1 && child.isContainer()) {
+            for (final Node child : container4m.children()) {
+                if (child.fieldId() == 1 && child.isContainer()) {
                     waypointChildrenOf4mContainer.add(child);
                 }
             }
@@ -29,10 +29,10 @@ public class NodeFinder {
                                                    final int fieldId,
                                                    final List<Node> result) {
         for (final Node node : nodes) {
-            if (node.fieldId == fieldId && node.isContainer()) {
+            if (node.fieldId() == fieldId && node.isContainer()) {
                 result.add(node);
             }
-            findAllContainersByFieldId(node.children, fieldId, result);
+            findAllContainersByFieldId(node.children(), fieldId, result);
         }
     }
 }

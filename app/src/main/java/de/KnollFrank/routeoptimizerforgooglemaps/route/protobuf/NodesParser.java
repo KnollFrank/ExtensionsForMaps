@@ -47,9 +47,9 @@ public class NodesParser {
             return node.isContainer() ?
                     new NodeAndConsumedTokens(
                             new Node(
-                                    node.fieldId,
-                                    node.datatype,
-                                    node.value,
+                                    node.fieldId(),
+                                    node.datatype(),
+                                    node.value(),
                                     parseNodes(node.getContainerSize())),
                             node.getContainerSize()) :
                     new NodeAndConsumedTokens(node, 0);

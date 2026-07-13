@@ -6,24 +6,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-// FK-TODO: refactor
-public class Node {
-
-    public final int fieldId;
-    public final Datatype datatype;
-    public final String value;
-    // FK-TODO: use ImmutableValueGraph instead of of children?
-    public final List<Node> children;
-
-    public Node(final int fieldId,
-                final Datatype datatype,
-                final String value,
-                final List<Node> children) {
-        this.fieldId = fieldId;
-        this.datatype = datatype;
-        this.value = value;
-        this.children = children;
-    }
+public record Node(int fieldId,
+                   Datatype datatype,
+                   String value,
+                   // FK-TODO: use ImmutableValueGraph instead of of children?
+                   List<Node> children) {
 
     public String getToken() {
         return "" + fieldId + datatype.marker() + value;
