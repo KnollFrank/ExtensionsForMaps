@@ -42,7 +42,7 @@ public class RouteToUrlConverter {
         return URLs.createUrl(pathBuilder.toString());
     }
 
-    private static String format(final Angle angle) {
+    public static String format(final Angle angle) {
         final DecimalFormat df = new DecimalFormat("#.#######", DecimalFormatSymbols.getInstance(Locale.US));
         return df.format(angle.toDegrees());
     }

@@ -57,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             private URL createDirectionsUrlTemplate(final int totalStops) {
-                return new DirectionsUrlTemplateFactory(context).createDirectionsUrlTemplate(
-                        // FK-TODO: hier muß der aktuelle GPS-Standort des Benutzers verwendet werden.
+                return DirectionsUrlTemplateFactory.createDirectionsUrlTemplate(
+                        // FK-TODO: hier müssen echte Stopps in einem echten Dorf angegeben werden.
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.50248706742132, Unit.DEGREES),
                                 new Angle(8.992563508173783, Unit.DEGREES)),

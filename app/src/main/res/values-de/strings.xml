@@ -2,5 +2,4 @@
 <resources>
     <string name="app_name">Mehr Zwischenstopps für Maps</string>
     <string name="total_stops_label">Anzahl Stopps: %d</string>
-    <string name="waypoint_name_template">Wegpunkt %d</string>
 </resources>
