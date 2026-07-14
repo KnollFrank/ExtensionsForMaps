@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">More Stops for Maps</string>
+    <string name="total_stops_label">Number of stops: %d</string>
+    <string name="waypoint_name_template">Waypoint %d</string>
 </resources>

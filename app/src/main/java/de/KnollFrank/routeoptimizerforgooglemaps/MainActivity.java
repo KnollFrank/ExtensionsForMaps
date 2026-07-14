@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onValueChange(@NonNull final Slider slider,
                                               final float value,
                                               final boolean fromUser) {
-                        tvTotalStopsLabel.setText("Anzahl Stopps: " + (int) value);
+                        tvTotalStopsLabel.setText(getString(R.string.total_stops_label, (int) value));
                     }
                 });
         this
@@ -53,12 +53,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(final View view) {
                 GoogleMapsNavigator.launchUrl(
-                        createDirectionsUrlTemplate(getTotalStops()),
+                        createDirectionsUrlTemplate(getTotalStops(), context),
                         context);
             }
 
-            private URL createDirectionsUrlTemplate(final int totalStops) {
+            private URL createDirectionsUrlTemplate(final int totalStops, final Context context) {
                 return DirectionsUrlTemplateFactory.createDirectionsUrlTemplate(
+                        context,
                         // FK-TODO: hier muß der aktuelle GPS-Standort des Benutzers verwendet werden.
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.50248706742132, Unit.DEGREES),
