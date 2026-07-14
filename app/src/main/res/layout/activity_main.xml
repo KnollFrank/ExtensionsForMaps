@@ -158,7 +158,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="2. In Maps öffnen: Tippe auf den Button. Google Maps öffnet sich mit vorbereiteten Platzhaltern („Wegpunkt 1“, „Wegpunkt 2“ etc.)."
+                android:text="2. In Google Maps öffnen: Tippe auf den Button. Google Maps öffnet sich mit vorbereiteten Platzhaltern („Wegpunkt 1“, „Wegpunkt 2“, usw.)."
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
