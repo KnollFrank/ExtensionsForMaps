@@ -52,12 +52,10 @@ dependencies {
     // Core App Dependencies
     implementation libs.recyclerview
     implementation libs.play.services.location
-    implementation libs.okhttp
     implementation libs.gson
     implementation libs.guava
 
     testImplementation libs.junit
-    testImplementation libs.mockwebserver
     testImplementation libs.robolectric
     testImplementation libs.core
 
