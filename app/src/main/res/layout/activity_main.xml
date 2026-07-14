@@ -7,83 +7,82 @@
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/llTemplateContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="?attr/colorSurfaceVariant"
-        android:orientation="vertical"
         android:padding="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
+            android:id="@+id/tvTemplateTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Google Maps Vorlage generieren"
-            android:textAppearance="?attr/textAppearanceTitleMedium" />
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvTotalStopsLabel"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_marginTop="16dp"
+            android:text="Anzahl Stopps: 15"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTemplateTitle" />
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+        <com.google.android.material.slider.Slider
+            android:id="@+id/sliderTotalStops"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:stepSize="1.0"
+            android:value="15.0"
+            android:valueFrom="11.0"
+            android:valueTo="27.0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTotalStopsLabel"
+            app:tickColor="@android:color/transparent" />
 
-                <TextView
-                    android:id="@+id/tvTotalStopsLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Anzahl Stopps: 15"
-                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+        <TextView
+            android:id="@+id/tvMinStops"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="-8dp"
+            android:alpha="0.6"
+            android:text="11"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            app:layout_constraintStart_toStartOf="@id/sliderTotalStops"
+            app:layout_constraintTop_toBottomOf="@id/sliderTotalStops" />
 
-                <com.google.android.material.slider.Slider
-                    android:id="@+id/sliderTotalStops"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:stepSize="1.0"
-                    android:value="15.0"
-                    android:valueFrom="11.0"
-                    android:valueTo="27.0"
-                    app:tickColor="@android:color/transparent" />
+        <TextView
+            android:id="@+id/tvMaxStops"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-8dp"
+            android:layout_marginEnd="8dp"
+            android:alpha="0.6"
+            android:text="27"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            app:layout_constraintEnd_toEndOf="@id/sliderTotalStops"
+            app:layout_constraintTop_toBottomOf="@id/sliderTotalStops" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="-8dp"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="8dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:alpha="0.6"
-                        android:text="11"
-                        android:textAppearance="?attr/textAppearanceLabelSmall" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:alpha="0.6"
-                        android:text="27"
-                        android:textAppearance="?attr/textAppearanceLabelSmall" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/btnGenerateTemplate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:text="Öffnen" />
-        </LinearLayout>
-    </LinearLayout>
+        <Button
+            android:id="@+id/btnGenerateTemplate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
+            android:text="In Google Maps öffnen"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvMinStops" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
