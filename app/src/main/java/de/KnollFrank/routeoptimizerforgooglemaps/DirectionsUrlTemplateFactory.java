@@ -9,6 +9,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteFactory;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteToUrlConverter;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
@@ -28,11 +29,7 @@ public class DirectionsUrlTemplateFactory {
         if (totalStops < 2) {
             throw new IllegalArgumentException("totalStops: " + totalStops);
         }
-        final List<Stop> stops = createStops(base, shift, totalStops);
-        return new Route(
-                stops.get(0),
-                stops.subList(1, stops.size() - 1),
-                stops.get(stops.size() - 1));
+        return RouteFactory.createRoute(createStops(base, shift, totalStops));
     }
 
     private static List<Stop> createStops(final Geodetic base, final Geodetic shift, final int totalStops) {
