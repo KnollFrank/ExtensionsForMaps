@@ -53,13 +53,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(final View view) {
                 GoogleMapsNavigator.launchUrl(
-                        createDirectionsUrlTemplate(getTotalStops(), context),
+                        createDirectionsUrlTemplate(getTotalStops()),
                         context);
             }
 
-            private URL createDirectionsUrlTemplate(final int totalStops, final Context context) {
-                return DirectionsUrlTemplateFactory.createDirectionsUrlTemplate(
-                        context,
+            private URL createDirectionsUrlTemplate(final int totalStops) {
+                return new DirectionsUrlTemplateFactory(context).createDirectionsUrlTemplate(
                         // FK-TODO: hier muß der aktuelle GPS-Standort des Benutzers verwendet werden.
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.50248706742132, Unit.DEGREES),

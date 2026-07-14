@@ -16,11 +16,16 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.Stop;
 
 public class DirectionsUrlTemplateFactory {
 
+    private final Context context;
+
+    public DirectionsUrlTemplateFactory(final Context context) {
+        this.context = context;
+    }
+
     // FK-TODO: make context an instance variable
-    public static URL createDirectionsUrlTemplate(final Context context, final Geodetic base, int totalStops) {
+    public URL createDirectionsUrlTemplate(final Geodetic base, int totalStops) {
         return RouteToUrlConverter.getUrl(
                 createRoute(
-                        context,
                         base,
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(0.0005, Unit.DEGREES),
@@ -28,14 +33,14 @@ public class DirectionsUrlTemplateFactory {
                         totalStops));
     }
 
-    private static Route createRoute(final Context context, final Geodetic base, final Geodetic shift, final int totalStops) {
+    private Route createRoute(final Geodetic base, final Geodetic shift, final int totalStops) {
         if (totalStops < 2) {
             throw new IllegalArgumentException("totalStops: " + totalStops);
         }
-        return RouteFactory.createRoute(createStops(context, base, shift, totalStops));
+        return RouteFactory.createRoute(createStops(base, shift, totalStops));
     }
 
-    private static List<Stop> createStops(final Context context, final Geodetic base, final Geodetic shift, final int totalStops) {
+    private List<Stop> createStops(final Geodetic base, final Geodetic shift, final int totalStops) {
         return IntStream
                 .range(0, totalStops)
                 .mapToObj(
