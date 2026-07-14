@@ -23,38 +23,12 @@ import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String PREFS_NAME = "AppPrefs";
-    private static final String KEY_SHOW_GUIDE = "show_guide_card";
-
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         configurePlanRoute();
-        {
-            // FK-TODO: refactor
-            final SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-
-            final MaterialCardView cardGuide = findViewById(R.id.cardGuide);
-            final ImageButton btnCloseGuide = findViewById(R.id.btnCloseGuide);
-            final Button btnShowGuide = findViewById(R.id.btnShowGuide); // Neu deklariert
-
-            // Zustand auslesen (Standard: anzeigen -> true)
-            boolean showGuide = sharedPreferences.getBoolean(KEY_SHOW_GUIDE, true);
-            updateGuideVisibility(showGuide, cardGuide, btnShowGuide);
-
-            // Anleitung schließen
-            btnCloseGuide.setOnClickListener(v -> {
-                updateGuideVisibility(false, cardGuide, btnShowGuide);
-                sharedPreferences.edit().putBoolean(KEY_SHOW_GUIDE, false).apply();
-            });
-
-            // Anleitung wieder anzeigen
-            btnShowGuide.setOnClickListener(v -> {
-                updateGuideVisibility(true, cardGuide, btnShowGuide);
-                sharedPreferences.edit().putBoolean(KEY_SHOW_GUIDE, true).apply();
-            });
-        }
+        new QuickStartGuideConfigurer().configureQuickStartGuide();
     }
 
     private void configurePlanRoute() {
@@ -101,15 +75,61 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
-    // FK-TODO: refactor
-    // Kleine Hilfsmethode für den sauberen Wechsel
-    private void updateGuideVisibility(final boolean show, final View card, final View button) {
-        if (show) {
-            card.setVisibility(View.VISIBLE);
-            button.setVisibility(View.GONE);
-        } else {
-            card.setVisibility(View.GONE);
-            button.setVisibility(View.VISIBLE);
+    private class QuickStartGuideConfigurer {
+
+        private static final String PREFS_NAME = "AppPrefs";
+        private static final String KEY_SHOW_GUIDE = "show_guide_card";
+
+        private final SharedPreferences sharedPreferences;
+        private final MaterialCardView cardGuide;
+        private final Button btnShowGuide;
+
+        public QuickStartGuideConfigurer() {
+            sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            cardGuide = findViewById(R.id.cardGuide);
+            btnShowGuide = findViewById(R.id.btnShowGuide); // Neu deklariert
+        }
+
+        public void configureQuickStartGuide() {
+            updateGuideVisibility();
+            configureBtnCloseGuide();
+            configureBtnShowGuide();
+        }
+
+        private void updateGuideVisibility() {
+            final boolean showGuide = sharedPreferences.getBoolean(KEY_SHOW_GUIDE, true);
+            updateGuideVisibility(showGuide);
+        }
+
+        private void configureBtnCloseGuide() {
+            MainActivity
+                    .this
+                    .<ImageButton>findViewById(R.id.btnCloseGuide)
+                    .setOnClickListener(
+                            view -> updateGuideVisibilityAndPreferences(false));
+        }
+
+        private void configureBtnShowGuide() {
+            btnShowGuide.setOnClickListener(
+                    view -> updateGuideVisibilityAndPreferences(true));
+        }
+
+        private void updateGuideVisibilityAndPreferences(final boolean show) {
+            updateGuideVisibility(show);
+            sharedPreferences
+                    .edit()
+                    .putBoolean(KEY_SHOW_GUIDE, show)
+                    .apply();
+        }
+
+        private void updateGuideVisibility(final boolean show) {
+            if (show) {
+                cardGuide.setVisibility(View.VISIBLE);
+                btnShowGuide.setVisibility(View.GONE);
+            } else {
+                cardGuide.setVisibility(View.GONE);
+                btnShowGuide.setVisibility(View.VISIBLE);
+            }
         }
     }
 }
