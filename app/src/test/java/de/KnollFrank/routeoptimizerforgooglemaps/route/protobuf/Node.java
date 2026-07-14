@@ -9,7 +9,7 @@ import java.util.StringJoiner;
 public record Node(int fieldId,
                    Datatype datatype,
                    String value,
-                   // FK-TODO: use ImmutableValueGraph instead of of children?
+                   // FK-TODO: use ImmutableValueGraph instead of children?
                    List<Node> children) {
 
     public String getToken() {
