@@ -1,15 +1,18 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.slider.Slider;
 
 import java.net.URL;
@@ -19,6 +22,14 @@ import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String PREFS_NAME = "AppPrefs";
+    private static final String KEY_SHOW_GUIDE = "show_guide_card";
+
+    private MaterialCardView cardGuide;
+    private ImageButton btnCloseGuide;
+    private ImageButton btnHelp;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -40,6 +51,30 @@ public class MainActivity extends AppCompatActivity {
             this
                     .<Button>findViewById(R.id.btnGenerateTemplate)
                     .setOnClickListener(onBtnGenerateTemplateClick(sliderTotalStops, this));
+        }
+        {
+            // FK-TODO: refactor
+            sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+
+            cardGuide = findViewById(R.id.cardGuide);
+            btnCloseGuide = findViewById(R.id.btnCloseGuide);
+            Button btnShowGuide = findViewById(R.id.btnShowGuide); // Neu deklariert
+
+            // Zustand auslesen (Standard: anzeigen -> true)
+            boolean showGuide = sharedPreferences.getBoolean(KEY_SHOW_GUIDE, true);
+            updateGuideVisibility(showGuide, cardGuide, btnShowGuide);
+
+            // Anleitung schließen
+            btnCloseGuide.setOnClickListener(v -> {
+                updateGuideVisibility(false, cardGuide, btnShowGuide);
+                sharedPreferences.edit().putBoolean(KEY_SHOW_GUIDE, false).apply();
+            });
+
+            // Anleitung wieder anzeigen
+            btnShowGuide.setOnClickListener(v -> {
+                updateGuideVisibility(true, cardGuide, btnShowGuide);
+                sharedPreferences.edit().putBoolean(KEY_SHOW_GUIDE, true).apply();
+            });
         }
     }
 
@@ -67,5 +102,17 @@ public class MainActivity extends AppCompatActivity {
                 return (int) sliderTotalStops.getValue();
             }
         };
+    }
+
+    // FK-TODO: refactor
+    // Kleine Hilfsmethode für den sauberen Wechsel
+    private void updateGuideVisibility(boolean show, View card, View button) {
+        if (show) {
+            card.setVisibility(View.VISIBLE);
+            button.setVisibility(View.GONE);
+        } else {
+            card.setVisibility(View.GONE);
+            button.setVisibility(View.VISIBLE);
+        }
     }
 }
