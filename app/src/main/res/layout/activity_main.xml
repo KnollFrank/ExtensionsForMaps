@@ -64,16 +64,16 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:alpha="0.6"
                         android:text="11"
-                        android:textAppearance="?attr/textAppearanceLabelSmall"
-                        android:alpha="0.6" />
+                        android:textAppearance="?attr/textAppearanceLabelSmall" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:alpha="0.6"
                         android:text="27"
-                        android:textAppearance="?attr/textAppearanceLabelSmall"
-                        android:alpha="0.6" />
+                        android:textAppearance="?attr/textAppearanceLabelSmall" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -85,36 +85,4 @@
                 android:text="Öffnen" />
         </LinearLayout>
     </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewStops"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnOptimize"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/llTemplateContainer" />
-
-    <Button
-        android:id="@+id/btnOptimize"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="Route sortieren &amp; in Google Maps öffnen"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible" />
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -45,8 +45,7 @@ public class DirectionsUrlTemplateFactory {
                                         "" + (i + 1),
                                         String.format(Locale.US, "Wegpunkt %d", i + 1),
                                         Optional.empty(),
-                                        base.add(shift.mul(i)),
-                                        Optional.empty()))
+                                        base.add(shift.mul(i))))
                 .toList();
     }
 }
