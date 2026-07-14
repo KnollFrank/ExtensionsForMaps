@@ -30,23 +30,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        {
-            final Slider sliderTotalStops = findViewById(R.id.sliderTotalStops);
-            final TextView tvTotalStopsLabel = findViewById(R.id.tvTotalStopsLabel);
-            sliderTotalStops.addOnChangeListener(
-                    new Slider.OnChangeListener() {
-
-                        @Override
-                        public void onValueChange(@NonNull final Slider slider,
-                                                  final float value,
-                                                  final boolean fromUser) {
-                            tvTotalStopsLabel.setText("Anzahl Stopps: " + (int) value);
-                        }
-                    });
-            this
-                    .<Button>findViewById(R.id.btnGenerateTemplate)
-                    .setOnClickListener(onBtnGenerateTemplateClick(sliderTotalStops, this));
-        }
+        configurePlanRoute();
         {
             // FK-TODO: refactor
             final SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
@@ -71,6 +55,24 @@ public class MainActivity extends AppCompatActivity {
                 sharedPreferences.edit().putBoolean(KEY_SHOW_GUIDE, true).apply();
             });
         }
+    }
+
+    private void configurePlanRoute() {
+        final Slider sliderTotalStops = findViewById(R.id.sliderTotalStops);
+        final TextView tvTotalStopsLabel = findViewById(R.id.tvTotalStopsLabel);
+        sliderTotalStops.addOnChangeListener(
+                new Slider.OnChangeListener() {
+
+                    @Override
+                    public void onValueChange(@NonNull final Slider slider,
+                                              final float value,
+                                              final boolean fromUser) {
+                        tvTotalStopsLabel.setText("Anzahl Stopps: " + (int) value);
+                    }
+                });
+        this
+                .<Button>findViewById(R.id.btnGenerateTemplate)
+                .setOnClickListener(onBtnGenerateTemplateClick(sliderTotalStops, this));
     }
 
     private static View.OnClickListener onBtnGenerateTemplateClick(final Slider sliderTotalStops,
@@ -101,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
     // FK-TODO: refactor
     // Kleine Hilfsmethode für den sauberen Wechsel
-    private void updateGuideVisibility(boolean show, View card, View button) {
+    private void updateGuideVisibility(final boolean show, final View card, final View button) {
         if (show) {
             card.setVisibility(View.VISIBLE);
             button.setVisibility(View.GONE);
