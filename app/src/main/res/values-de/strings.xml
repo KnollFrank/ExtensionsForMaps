@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Mehr Zwischenstopps für Maps</string>
+    <string name="app_name">Mehr Stopps für Maps</string>
     <string name="total_stops_label">Anzahl Stopps: %d</string>
 </resources>
