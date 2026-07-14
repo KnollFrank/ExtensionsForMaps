@@ -22,7 +22,6 @@ public class DirectionsUrlTemplateFactory {
         this.context = context;
     }
 
-    // FK-TODO: make context an instance variable
     public URL createDirectionsUrlTemplate(final Geodetic base, int totalStops) {
         return RouteToUrlConverter.getUrl(
                 createRoute(
