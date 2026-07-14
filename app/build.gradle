@@ -52,7 +52,6 @@ dependencies {
     // Core App Dependencies
     implementation libs.recyclerview
     implementation libs.play.services.location
-    implementation libs.jsprit.core
     implementation libs.okhttp
     implementation libs.retrofit
     implementation libs.retrofit.converter.gson
