@@ -26,11 +26,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "AppPrefs";
     private static final String KEY_SHOW_GUIDE = "show_guide_card";
 
-    private MaterialCardView cardGuide;
-    private ImageButton btnCloseGuide;
-    private ImageButton btnHelp;
-    private SharedPreferences sharedPreferences;
-
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,11 +49,11 @@ public class MainActivity extends AppCompatActivity {
         }
         {
             // FK-TODO: refactor
-            sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            final SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-            cardGuide = findViewById(R.id.cardGuide);
-            btnCloseGuide = findViewById(R.id.btnCloseGuide);
-            Button btnShowGuide = findViewById(R.id.btnShowGuide); // Neu deklariert
+            final MaterialCardView cardGuide = findViewById(R.id.cardGuide);
+            final ImageButton btnCloseGuide = findViewById(R.id.btnCloseGuide);
+            final Button btnShowGuide = findViewById(R.id.btnShowGuide); // Neu deklariert
 
             // Zustand auslesen (Standard: anzeigen -> true)
             boolean showGuide = sharedPreferences.getBoolean(KEY_SHOW_GUIDE, true);
