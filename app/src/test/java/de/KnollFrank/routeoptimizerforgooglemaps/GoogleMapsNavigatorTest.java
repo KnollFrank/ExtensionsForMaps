@@ -15,7 +15,6 @@ import org.robolectric.Shadows;
 import org.robolectric.shadows.ShadowApplication;
 
 import java.util.List;
-import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
@@ -34,7 +33,6 @@ public class GoogleMapsNavigatorTest {
                         new Stop(
                                 "0",
                                 "Start",
-                                Optional.empty(),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(48.5216, Unit.DEGREES),
                                         new Angle(9.0576, Unit.DEGREES))),
@@ -42,14 +40,12 @@ public class GoogleMapsNavigatorTest {
                                 new Stop(
                                         "1",
                                         "Waypoint1",
-                                        Optional.empty(),
                                         Geodetic.fromLatitudeLongitude(
                                                 new Angle(47.3769, Unit.DEGREES),
                                                 new Angle(8.5417, Unit.DEGREES)))),
                         new Stop(
                                 "2",
                                 "Destination",
-                                Optional.empty(),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(45.4642, Unit.DEGREES),
                                         new Angle(9.1900, Unit.DEGREES))));
@@ -67,12 +63,7 @@ public class GoogleMapsNavigatorTest {
         assertEquals(Intent.ACTION_VIEW, nextStartedActivity.getAction());
         assertEquals("com.google.android.apps.maps", nextStartedActivity.getPackage());
 
-        // Prüfen, ob die URL exakt nach der offiziellen Maps Directions API gebaut wurde
-        final String expectedUrl =
-                "https://www.google.com/maps/dir/?api=1" +
-                        "&origin=48.5216%2C9.0576" +
-                        "&destination=45.4642%2C9.19" +
-                        "&waypoints=47.3769%2C8.5417";
+        final String expectedUrl = "https://www.google.com/maps/dir/Start/Waypoint1/Destination/data=!3m2!1e3!4b1!4m13!4m12!1m3!2m2!1d9.0576!2d48.5216!1m3!2m2!1d8.5417!2d47.3769!1m3!2m2!1d9.19!2d45.4642?entry=ttu";
         assertEquals(expectedUrl, nextStartedActivity.getData().toString());
     }
 }

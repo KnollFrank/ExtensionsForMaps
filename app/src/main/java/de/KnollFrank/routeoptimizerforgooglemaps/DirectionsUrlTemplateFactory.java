@@ -3,7 +3,6 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 import java.net.URL;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
@@ -44,7 +43,6 @@ public class DirectionsUrlTemplateFactory {
                                 new Stop(
                                         "" + (i + 1),
                                         String.format(Locale.US, "Wegpunkt %d", i + 1),
-                                        Optional.empty(),
                                         base.add(shift.mul(i))))
                 .toList();
     }
