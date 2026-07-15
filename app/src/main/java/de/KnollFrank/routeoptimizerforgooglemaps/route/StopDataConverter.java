@@ -21,6 +21,7 @@ class StopDataConverter {
         return new Stop(
                 stopData.id,
                 stopData.address,
+                stopData.officialPlaceId,
                 Geodetic.fromLatitudeLongitude(
                         new Angle(
                                 stopData.latitude.orElseThrow(() -> createMissingCoordinateException("latitude", stopData)),

@@ -2,6 +2,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
@@ -39,6 +40,7 @@ public class DirectionsUrlTemplateFactory {
                     return new Stop(
                             "" + (i + 1),
                             format(geodetic),
+                            Optional.empty(),
                             geodetic);
                 })
                 .toList();

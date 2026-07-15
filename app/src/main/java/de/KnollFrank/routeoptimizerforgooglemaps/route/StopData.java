@@ -9,6 +9,7 @@ class StopData {
 
     public final String id;
     public final String address;
+    public Optional<OfficialPlaceId> officialPlaceId = Optional.empty();
     public Optional<Double> latitude = Optional.empty();
     public Optional<Double> longitude = Optional.empty();
 
@@ -23,6 +24,7 @@ class StopData {
         return new StringJoiner(", ", StopData.class.getSimpleName() + "[", "]")
                 .add("id='" + id + "'")
                 .add("address='" + address + "'")
+                .add("officialPlaceId=" + officialPlaceId)
                 .add("latitude=" + latitude)
                 .add("longitude=" + longitude)
                 .toString();

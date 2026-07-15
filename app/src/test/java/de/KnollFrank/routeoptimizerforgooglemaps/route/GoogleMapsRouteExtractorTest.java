@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
@@ -56,6 +57,7 @@ public class GoogleMapsRouteExtractorTest {
                             new Angle(48.5015274, DEGREES),
                             new Angle(8.9932287, DEGREES)),
                     origin.geodetic());
+            assertTrue(origin.officialPlaceId().isEmpty());
         }
         {
             final List<Stop> waypoints = route.waypoints();
@@ -73,6 +75,7 @@ public class GoogleMapsRouteExtractorTest {
                             new Angle(48.4752669, DEGREES),
                             new Angle(8.9284933, DEGREES)),
                     destination.geodetic());
+            assertTrue(destination.officialPlaceId().isEmpty());
         }
     }
 
@@ -132,6 +135,7 @@ public class GoogleMapsRouteExtractorTest {
                 new Stop(
                         "0",
                         "Central-Apotheke",
+                        Optional.of(new OfficialPlaceId("ChIJ1V1RE0v8mUcROpsR_6oBUjQ")),
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.4765345, DEGREES),
                                 new Angle(8.934900899999999, DEGREES))),
@@ -139,12 +143,14 @@ public class GoogleMapsRouteExtractorTest {
                         new Stop(
                                 "1",
                                 "Hamburg",
+                                Optional.of(new OfficialPlaceId("ChIJuRMYfoNhsUcRoDrWe_I9JgQ")),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(53.548828199999996, DEGREES),
                                         new Angle(9.987170299999999, DEGREES)))),
                 new Stop(
                         "2",
                         "Unterhausen",
+                        Optional.of(new OfficialPlaceId("ChIJsYBbyF7zmUcREc3DW6XSMuQ")),
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.430628399999996, DEGREES),
                                 new Angle(9.2546378, DEGREES))));

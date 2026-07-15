@@ -1,7 +1,5 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.common;
 
-import static de.KnollFrank.routeoptimizerforgooglemaps.common.IndexSearchResultConverter.minusOneToEmpty;
-
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.regex.Pattern;
@@ -12,7 +10,7 @@ public class Strings {
     }
 
     public static OptionalInt indexOf(final String haystack, final String needle, final int fromIndex) {
-        return minusOneToEmpty(haystack.indexOf(needle, fromIndex));
+        return IndexSearchResultConverter.minusOneToEmpty(haystack.indexOf(needle, fromIndex));
     }
 
     public static OptionalInt indexOf(final String haystack, final String needle) {
