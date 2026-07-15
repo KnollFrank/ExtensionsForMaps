@@ -12,12 +12,12 @@ public class RouteTemplateFactoryTest {
 
     @Test
     public void test_createRouteTemplate_numberOfStops_27() {
-        test_createRouteTemplate(27);
+        test_createRouteTemplate_hasSize(27);
     }
 
     @Test
     public void test_createRouteTemplate_numberOfStops_11() {
-        test_createRouteTemplate(11);
+        test_createRouteTemplate_hasSize(11);
     }
 
     @Test
@@ -30,7 +30,7 @@ public class RouteTemplateFactoryTest {
         assertIsForbidden(28);
     }
 
-    private static void test_createRouteTemplate(final int numberOfStops) {
+    private static void test_createRouteTemplate_hasSize(final int numberOfStops) {
         // When
         final Route routeTemplate = RouteTemplateFactory.createRouteTemplate(numberOfStops);
 
