@@ -12,21 +12,25 @@ public class RouteTemplateFactoryTest {
 
     @Test
     public void test_createRouteTemplate_numberOfStops_27() {
-        // Given
-        final int numberOfStops = 27;
-
-        // When
-        final Route routeTemplate = RouteTemplateFactory.createRouteTemplate(numberOfStops);
-
-        // Then
-        assertEquals(numberOfStops, routeTemplate.stops().size());
+        test_createRouteTemplate(27);
     }
 
     @Test
     public void test_createRouteTemplate_numberOfStops_11() {
-        // Given
-        final int numberOfStops = 11;
+        test_createRouteTemplate(11);
+    }
 
+    @Test
+    public void test_createRouteTemplate_numberOfStops_lessThan2_forbidden() {
+        assertIsForbidden(1);
+    }
+
+    @Test
+    public void test_createRouteTemplate_numberOfStops_greaterThan27_forbidden() {
+        assertIsForbidden(28);
+    }
+
+    private static void test_createRouteTemplate(final int numberOfStops) {
         // When
         final Route routeTemplate = RouteTemplateFactory.createRouteTemplate(numberOfStops);
 
@@ -34,22 +38,7 @@ public class RouteTemplateFactoryTest {
         assertEquals(numberOfStops, routeTemplate.stops().size());
     }
 
-    @Test
-    public void test_createRouteTemplate_numberOfStops_lessThan2_forbidden() {
-        // Given
-        final int numberOfStops = 1;
-
-        // When & Then
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> RouteTemplateFactory.createRouteTemplate(numberOfStops));
-    }
-
-    @Test
-    public void test_createRouteTemplate_numberOfStops_greaterThan27_forbidden() {
-        // Given
-        final int numberOfStops = 28;
-
+    private static void assertIsForbidden(final int numberOfStops) {
         // When & Then
         assertThrows(
                 IllegalArgumentException.class,
