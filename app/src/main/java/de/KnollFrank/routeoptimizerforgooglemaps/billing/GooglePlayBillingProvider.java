@@ -112,6 +112,24 @@ public class GooglePlayBillingProvider implements BillingProvider, PurchasesUpda
     }
 
     @Override
+    public String getFormattedPrice() {
+        final ProductDetails productDetails = productDetailsMap.get(PRODUCT_ID_MONTHLY);
+        if (productDetails != null &&
+                productDetails.getSubscriptionOfferDetails() != null &&
+                !productDetails.getSubscriptionOfferDetails().isEmpty()) {
+            // Get the first offer's first pricing phase (base plan)
+            return productDetails
+                    .getSubscriptionOfferDetails()
+                    .get(0)
+                    .getPricingPhases()
+                    .getPricingPhaseList()
+                    .get(0)
+                    .getFormattedPrice();
+        }
+        return "";
+    }
+
+    @Override
     public void onPurchasesUpdated(@NonNull final BillingResult billingResult,
                                    @Nullable final List<Purchase> purchases) {
         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
@@ -181,6 +199,9 @@ public class GooglePlayBillingProvider implements BillingProvider, PurchasesUpda
                             final List<ProductDetails> detailsList = productDetailsResult.getProductDetailsList();
                             for (final ProductDetails details : detailsList) {
                                 productDetailsMap.put(details.getProductId(), details);
+                            }
+                            if (listener != null) {
+                                listener.onProductDetailsLoaded();
                             }
                         }
                     }

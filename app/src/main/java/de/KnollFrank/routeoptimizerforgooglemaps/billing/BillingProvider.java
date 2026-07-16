@@ -12,5 +12,7 @@ public interface BillingProvider {
 
     boolean isSubscribed();
 
+    String getFormattedPrice();
+
     void setListener(BillingListener listener);
 }

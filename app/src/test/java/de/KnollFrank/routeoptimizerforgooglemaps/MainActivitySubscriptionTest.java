@@ -3,6 +3,8 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 import static org.junit.Assert.assertEquals;
 
 import android.content.res.ColorStateList;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 import androidx.test.core.app.ActivityScenario;
@@ -40,14 +42,20 @@ public class MainActivitySubscriptionTest {
             scenario.onActivity(activity -> {
                 Slider slider = activity.findViewById(R.id.sliderTotalStops);
                 MaterialButton button = activity.findViewById(R.id.btnGenerateTemplate);
+                final TextView details = activity.findViewById(R.id.tvSubscriptionDetails);
 
                 // Set slider to 16 (Premium start)
                 slider.setValue(16.0f);
 
                 assertEquals(activity.getString(R.string.unlock_premium), button.getText().toString());
-                
+
                 ColorStateList expectedTint = ContextCompat.getColorStateList(activity, R.color.color_premium_range);
                 assertEquals(expectedTint, button.getBackgroundTintList());
+
+                // Check if price (from simulation) is present
+                assertEquals(View.VISIBLE, details.getVisibility());
+                final String expectedText = activity.getString(R.string.subscription_details_info, "0,99 €");
+                assertEquals(expectedText, details.getText().toString());
             });
         }
     }

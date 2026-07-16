@@ -64,6 +64,11 @@ public class MainActivity extends AppCompatActivity implements BillingListener {
     }
 
     @Override
+    public void onProductDetailsLoaded() {
+        runOnUiThread(this::updateGenerateTemplateButtonState);
+    }
+
+    @Override
     public void onBillingError(final String message) {
         runOnUiThread(() ->
                               Toast
@@ -102,7 +107,14 @@ public class MainActivity extends AppCompatActivity implements BillingListener {
                     ContextCompat.getColorStateList(
                             this,
                             R.color.color_premium_range));
-            tvSubscriptionDetails.setVisibility(View.VISIBLE);
+
+            final String formattedPrice = billingProvider.getFormattedPrice();
+            if (formattedPrice.isEmpty()) {
+                tvSubscriptionDetails.setVisibility(View.GONE);
+            } else {
+                tvSubscriptionDetails.setText(getString(R.string.subscription_details_info, formattedPrice));
+                tvSubscriptionDetails.setVisibility(View.VISIBLE);
+            }
         } else {
             btnGenerateTemplate.setText(R.string.open_in_google_maps);
             btnGenerateTemplate.setBackgroundTintList(defaultButtonTint);

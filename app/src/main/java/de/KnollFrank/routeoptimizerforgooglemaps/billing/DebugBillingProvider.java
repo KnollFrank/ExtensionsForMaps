@@ -15,6 +15,7 @@ public class DebugBillingProvider implements BillingProvider {
         Log.d(TAG, "Simulating billing connection established.");
         if (listener != null) {
             listener.onSubscriptionStatusChanged(isSubscribed);
+            listener.onProductDetailsLoaded();
         }
     }
 
@@ -36,6 +37,11 @@ public class DebugBillingProvider implements BillingProvider {
     @Override
     public boolean isSubscribed() {
         return isSubscribed;
+    }
+
+    @Override
+    public String getFormattedPrice() {
+        return "0,99 €";
     }
 
     @Override

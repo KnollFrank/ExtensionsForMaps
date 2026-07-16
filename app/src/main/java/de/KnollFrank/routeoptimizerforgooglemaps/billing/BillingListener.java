@@ -4,5 +4,7 @@ public interface BillingListener {
 
     void onSubscriptionStatusChanged(boolean isSubscribed);
 
+    void onProductDetailsLoaded();
+
     void onBillingError(String message);
 }
