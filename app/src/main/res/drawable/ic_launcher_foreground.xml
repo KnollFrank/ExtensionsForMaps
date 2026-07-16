@@ -1,37 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- ==================== 1. ZIFFER "1" (Präzise links positioniert) ==================== -->
+    <!-- ==================== 1. HINTERGRUND-CARD (Dunkler, edler Metallic-Slick-Look) ==================== -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:pathData="M 22,14 h 64 a 16,16 0 0 1 16,16 v 64 a 16,16 0 0 1 -16,16 h -64 a 16,16 0 0 1 -16,-16 v -64 a 16,16 0 0 1 16,-16 z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="14"
+                android:startY="14"
+                android:endX="94"
+                android:endY="94"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#252A34" /> <!-- Hellerer Schimmer oben links -->
+                <item android:offset="0.5" android:color="#1A1D24" />
+                <item android:offset="1.0" android:color="#101216" /> <!-- Sattes Schwarz unten rechts -->
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- ==================== 2. SCHLAGSCHATTEN DER ELEMENTE (Simuliert 3D-Tiefe auf dem Hintergrund) ==================== -->
+    <!-- Schatten der "1" -->
+    <path
+        android:strokeColor="#3D000000"
         android:strokeWidth="4.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M 29.0,52.0 L 34.0,47.5 L 34.0,63.5" />
+        android:pathData="M 29.8,53.5 L 34.8,49.0 L 34.8,65.0" />
 
-    <!-- ==================== 2. ZIFFER "0" (Ausbalanciert) ==================== -->
+    <!-- Schatten der "0" -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#3D000000"
         android:strokeWidth="4.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M 46.0,47.5 C 40.0,47.5 40.0,63.5 46.0,63.5 C 52.0,63.5 52.0,47.5 46.0,47.5 Z" />
+        android:pathData="M 46.8,49.0 C 40.8,49.0 40.8,65.0 46.8,65.0 C 52.8,65.0 52.8,49.0 46.8,49.0 Z" />
 
-    <!-- ==================== 3. EXPONENT-PLUS (+) (Noch näher an die 10 herangerückt) ==================== -->
+    <!-- Schatten des "+" -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#3D000000"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M 55.3,47.7 L 60.3,47.7
+                          M 57.8,45.2 L 57.8,50.2" />
+
+    <!-- Schatten des blauen Pins -->
+    <path
+        android:fillColor="#4D000000"
+        android:fillType="evenOdd"
+        android:pathData="M 75.8,44.0 A 9,9 0 0,0 66.8,53.0 C 66.8,61.0 75.8,71.0 75.8,71.0 C 75.8,71.0 84.8,61.0 84.8,53.0 A 9,9 0 0,0 75.8,44.0 Z M 75.8,49.5 a 3.5,3.5 0 1,0 0,7 a 3.5,3.5 0 1,0 0,-7" />
+
+
+    <!-- ==================== 3. VORDERGRUND-ELEMENTE MIT GEFÄLLIGEN GRADIENTS ==================== -->
+    <!-- Ziffer "1" (Weiß-Silber-Verlauf für plastischen Glanz) -->
+    <path
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 29.0,52.0 L 34.0,47.5 L 34.0,63.5">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="34.0"
+                android:startY="47.5"
+                android:endX="34.0"
+                android:endY="63.5"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFFFFF" /> <!-- Weißes Highlight oben -->
+                <item android:offset="1.0" android:color="#D0D7DE" /> <!-- Sanftes Grau unten -->
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Ziffer "0" (Weiß-Silber-Verlauf) -->
+    <path
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 46.0,47.5 C 40.0,47.5 40.0,63.5 46.0,63.5 C 52.0,63.5 52.0,47.5 46.0,47.5 Z">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="46.0"
+                android:startY="47.5"
+                android:endX="46.0"
+                android:endY="63.5"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFFFFF" />
+                <item android:offset="1.0" android:color="#D0D7DE" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Exponent-Plus (+) (Filigraner Weiß-Silber-Verlauf) -->
+    <path
         android:strokeWidth="2.5"
         android:strokeLineCap="round"
         android:pathData="M 54.5,46.5 L 59.5,46.5
-                          M 57.0,44.0 L 57.0,49.0" />
+                          M 57.0,44.0 L 57.0,49.0">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="57.0"
+                android:startY="44.0"
+                android:endX="57.0"
+                android:endY="49.0"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFFFFF" />
+                <item android:offset="1.0" android:color="#D5DCE2" />
+            </gradient>
+        </aapt:attr>
+    </path>
 
-    <!-- ==================== 4. STOP-SYMBOL (Google-Blau, jetzt mit größerem Abstand nach rechts versetzt) ==================== -->
+    <!-- STOP-SYMBOL (3D-Effekt durch geschmeidigen Blau-Lila-Gradient) -->
     <path
-        android:fillColor="#1A73E8"
         android:fillType="evenOdd"
-        android:pathData="M 75.0,42.5 A 9,9 0 0,0 66.0,51.5 C 66.0,59.5 75.0,69.5 75.0,69.5 C 75.0,69.5 84.0,59.5 84.0,51.5 A 9,9 0 0,0 75.0,42.5 Z M 75.0,48 a 3.5,3.5 0 1,0 0,7 a 3.5,3.5 0 1,0 0,-7" />
+        android:pathData="M 75.0,42.5 A 9,9 0 0,0 66.0,51.5 C 66.0,59.5 75.0,69.5 75.0,69.5 C 75.0,69.5 84.0,59.5 84.0,51.5 A 9,9 0 0,0 75.0,42.5 Z M 75.0,48 a 3.5,3.5 0 1,0 0,7 a 3.5,3.5 0 1,0 0,-7">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="66.0"
+                android:startY="42.5"
+                android:endX="84.0"
+                android:endY="69.5"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#66A3FF" /> <!-- Heller Glanzpunkt oben links -->
+                <item android:offset="0.4" android:color="#1A73E8" /> <!-- Google-Blau Kern -->
+                <item android:offset="1.0" android:color="#0B3E91" /> <!-- Tiefen-Schatten unten rechts -->
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- ZUSÄTZLICHER GLANZPUNKT (Extremer Highlight-Schimmer auf dem Pin-Kopf für echten Glanz) -->
+    <path
+        android:fillColor="#4DFFFFFF"
+        android:pathData="M 72.0,44.0 A 4,4 0 0,1 76.0,44.0 A 4,4 0 0,1 72.0,44.0 Z" />
+
 </vector>
