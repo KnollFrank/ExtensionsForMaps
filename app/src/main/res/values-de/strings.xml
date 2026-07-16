@@ -9,4 +9,5 @@
     <string name="thanks_message">Vielen Dank für Deine Unterstützung! Dein Beitrag hilft mir, die Pflege und Weiterentwicklung dieser App zu finanzieren.</string>
     <string name="close">Schließen</string>
     <string name="coffee_button">Kaffeekasse</string>
+    <string name="info_icon_desc">Informations-Icon</string>
 </resources>

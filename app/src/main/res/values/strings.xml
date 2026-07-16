@@ -8,4 +8,5 @@
     <string name="thanks_message">Thank you for your support! Your contribution helps me maintain and further develop this app.</string>
     <string name="close">Close</string>
     <string name="coffee_button">Buy me a coffee</string>
+    <string name="info_icon_desc">Information icon</string>
 </resources>
