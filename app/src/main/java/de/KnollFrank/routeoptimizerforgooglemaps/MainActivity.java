@@ -1,8 +1,13 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import android.content.res.ColorStateList;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.view.View;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,7 +37,6 @@ public class MainActivity extends AppCompatActivity implements BillingListener {
     private MaterialButton btnGenerateTemplate;
     private Slider sliderTotalStops;
     private TextView tvTotalStopsLabel;
-    private TextView tvSubscriptionDetails;
     private ColorStateList defaultButtonTint;
 
     @Override
@@ -80,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements BillingListener {
         btnGenerateTemplate = findViewById(R.id.btnGenerateTemplate);
         sliderTotalStops = findViewById(R.id.sliderTotalStops);
         tvTotalStopsLabel = findViewById(R.id.tvTotalStopsLabel);
-        tvSubscriptionDetails = findViewById(R.id.tvSubscriptionDetails);
     }
 
     private void configurePlanRoute() {
@@ -102,23 +105,42 @@ public class MainActivity extends AppCompatActivity implements BillingListener {
 
     private void updateGenerateTemplateButtonState() {
         if (needsPurchase(getSliderTotalStops())) {
-            btnGenerateTemplate.setText(R.string.unlock_premium);
+            final String formattedPrice = billingProvider.getFormattedPrice();
+            final String line1 = getString(R.string.unlock_premium);
+            final String line2 = formattedPrice.isEmpty() ?
+                    "" :
+                    "\n" + getString(R.string.unlock_premium_concise, formattedPrice);
+
+            final SpannableStringBuilder ssb = new SpannableStringBuilder(line1 + line2);
+            ssb.setSpan(
+                    new StyleSpan(Typeface.BOLD),
+                    0,
+                    line1.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            if (!line2.isEmpty()) {
+                final int start = line1.length() + 1; // +1 for the \n
+                ssb.setSpan(
+                        new RelativeSizeSpan(0.75f),
+                        start,
+                        ssb.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ssb.setSpan(
+                        new ForegroundColorSpan(
+                                ContextCompat.getColor(this, R.color.color_subscription_details)),
+                        start,
+                        ssb.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+
+            btnGenerateTemplate.setText(ssb);
             btnGenerateTemplate.setBackgroundTintList(
                     ContextCompat.getColorStateList(
                             this,
                             R.color.color_premium_range));
-
-            final String formattedPrice = billingProvider.getFormattedPrice();
-            if (formattedPrice.isEmpty()) {
-                tvSubscriptionDetails.setVisibility(View.GONE);
-            } else {
-                tvSubscriptionDetails.setText(getString(R.string.subscription_details_info, formattedPrice));
-                tvSubscriptionDetails.setVisibility(View.VISIBLE);
-            }
         } else {
             btnGenerateTemplate.setText(R.string.open_in_google_maps);
             btnGenerateTemplate.setBackgroundTintList(defaultButtonTint);
-            tvSubscriptionDetails.setVisibility(View.GONE);
         }
     }
 

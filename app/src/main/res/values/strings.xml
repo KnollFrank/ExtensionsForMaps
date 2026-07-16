@@ -8,7 +8,6 @@
     <string name="thanks_message">Thank you for your support! Your contribution helps me maintain and further develop this app.</string>
     <string name="close">Close</string>
     <string name="info_icon_desc">Information icon</string>
-    <string name="unlock_premium">Unlock Premium</string>
-    <string name="premium_stops_info">Up to 27 stops with subscription</string>
-    <string name="subscription_details_info">Subscription to unlock 16 – 27 stops: %s/month. Cancel anytime.</string>
+    <string name="unlock_premium">Unlock 16 – 27 Stops</string>
+    <string name="unlock_premium_concise">%s/month • Cancel anytime</string>
 </resources>

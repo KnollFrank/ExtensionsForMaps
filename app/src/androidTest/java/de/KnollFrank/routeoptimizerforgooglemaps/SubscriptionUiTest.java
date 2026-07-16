@@ -6,6 +6,7 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.Matchers.containsString;
 
 import android.view.View;
 
@@ -33,8 +34,8 @@ public class SubscriptionUiTest {
         // Move slider to 16
         onView(withId(R.id.sliderTotalStops)).perform(setSliderValue(16.0f));
 
-        // Check if button changed to "Unlock Premium"
-        onView(withId(R.id.btnGenerateTemplate)).check(matches(withText(R.string.unlock_premium)));
+        // Check if button changed to "Unlock..." (contains first line)
+        onView(withId(R.id.btnGenerateTemplate)).check(matches(withText(containsString("Unlock 16"))));
 
         // Click to "purchase" (Simulation mode assumed)
         onView(withId(R.id.btnGenerateTemplate)).perform(click());

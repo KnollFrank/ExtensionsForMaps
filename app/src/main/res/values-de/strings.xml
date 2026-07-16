@@ -9,7 +9,6 @@
     <string name="thanks_message">Vielen Dank für Deine Unterstützung! Dein Beitrag hilft mir, die Pflege und Weiterentwicklung dieser App zu finanzieren.</string>
     <string name="close">Schließen</string>
     <string name="info_icon_desc">Informations-Icon</string>
-    <string name="unlock_premium">Premium freischalten</string>
-    <string name="premium_stops_info">Bis zu 27 Stopps mit Abo</string>
-    <string name="subscription_details_info">Abonnement zum Freischalten von 16 bis 27 Stopps: %s/Monat. Jederzeit kündbar.</string>
+    <string name="unlock_premium">16 bis 27 Stopps freischalten</string>
+    <string name="unlock_premium_concise">%s/Monat • Jederzeit kündbar</string>
 </resources>
