@@ -61,27 +61,53 @@
                     app:layout_constraintTop_toBottomOf="@id/tvTotalStopsLabel"
                     app:tickColor="@android:color/transparent" />
 
+                <LinearLayout
+                    android:id="@+id/llRangeIndicator"
+                    android:layout_width="0dp"
+                    android:layout_height="4dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toEndOf="@id/sliderTotalStops"
+                    app:layout_constraintStart_toStartOf="@id/sliderTotalStops"
+                    app:layout_constraintTop_toBottomOf="@id/sliderTotalStops">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="4"
+                        android:background="@color/color_free_range" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="12"
+                        android:background="@color/color_premium_range" />
+                </LinearLayout>
+
                 <TextView
                     android:id="@+id/tvMinStops"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
+                    android:layout_marginTop="4dp"
                     android:alpha="0.7"
                     android:text="11"
                     android:textAppearance="?attr/textAppearanceLabelMedium"
                     app:layout_constraintStart_toStartOf="@id/sliderTotalStops"
-                    app:layout_constraintTop_toBottomOf="@id/sliderTotalStops" />
+                    app:layout_constraintTop_toBottomOf="@id/llRangeIndicator" />
 
                 <TextView
                     android:id="@+id/tvMaxStops"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
                     android:layout_marginEnd="12dp"
                     android:alpha="0.7"
                     android:text="27"
                     android:textAppearance="?attr/textAppearanceLabelMedium"
                     app:layout_constraintEnd_toEndOf="@id/sliderTotalStops"
-                    app:layout_constraintTop_toBottomOf="@id/sliderTotalStops" />
+                    app:layout_constraintTop_toBottomOf="@id/llRangeIndicator" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnGenerateTemplate"
@@ -124,20 +150,5 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCoffee"
-            style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="16dp"
-            android:text="@string/coffee_button"
-            app:icon="@android:drawable/ic_menu_send"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cardPlanning"
-            app:layout_constraintVertical_bias="1.0" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

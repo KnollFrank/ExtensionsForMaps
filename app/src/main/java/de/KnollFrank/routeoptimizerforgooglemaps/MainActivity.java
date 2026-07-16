@@ -1,48 +1,77 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.slider.Slider;
 
 import java.net.URL;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.billing.BillingHelper;
+import de.KnollFrank.routeoptimizerforgooglemaps.billing.BillingListener;
+import de.KnollFrank.routeoptimizerforgooglemaps.billing.BillingProvider;
+import de.KnollFrank.routeoptimizerforgooglemaps.billing.DebugBillingProvider;
+import de.KnollFrank.routeoptimizerforgooglemaps.billing.GooglePlayBillingProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteTemplateFactory;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteToUrlConverter;
 
-public class MainActivity extends AppCompatActivity implements BillingHelper.BillingListener {
+public class MainActivity extends AppCompatActivity implements BillingListener {
 
-    private BillingHelper billingHelper;
+    private static final boolean USE_SIMULATION = true; // Toggle for testing
+
+    private BillingProvider billingProvider;
+    private MaterialButton btnGenerateTemplate;
+    private Slider sliderTotalStops;
+    private TextView tvTotalStopsLabel;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        billingHelper = new BillingHelper(this, this);
+        initViews();
+        billingProvider =
+                USE_SIMULATION ?
+                        new DebugBillingProvider() :
+                        new GooglePlayBillingProvider(this);
+        billingProvider.setListener(this);
+        billingProvider.startConnection();
         configurePlanRoute();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (billingHelper != null) {
-            billingHelper.endConnection();
+        if (billingProvider != null) {
+            billingProvider.endConnection();
         }
     }
 
+    @Override
+    public void onSubscriptionStatusChanged(final boolean isSubscribed) {
+        runOnUiThread(this::updateGenerateTemplateButtonState);
+    }
+
+    @Override
+    public void onBillingError(final String message) {
+        runOnUiThread(() ->
+                              Toast
+                                      .makeText(this, message, Toast.LENGTH_SHORT)
+                                      .show());
+    }
+
+    private void initViews() {
+        btnGenerateTemplate = findViewById(R.id.btnGenerateTemplate);
+        sliderTotalStops = findViewById(R.id.sliderTotalStops);
+        tvTotalStopsLabel = findViewById(R.id.tvTotalStopsLabel);
+    }
+
     private void configurePlanRoute() {
-        final Slider sliderTotalStops = findViewById(R.id.sliderTotalStops);
-        final TextView tvTotalStopsLabel = findViewById(R.id.tvTotalStopsLabel);
         tvTotalStopsLabel.setText(getString(R.string.total_stops_label, (int) sliderTotalStops.getValue()));
         sliderTotalStops.addOnChangeListener(
                 new Slider.OnChangeListener() {
@@ -52,61 +81,48 @@ public class MainActivity extends AppCompatActivity implements BillingHelper.Bil
                                               final float value,
                                               final boolean fromUser) {
                         tvTotalStopsLabel.setText(getString(R.string.total_stops_label, (int) value));
+                        updateGenerateTemplateButtonState();
                     }
                 });
-        this
-                .<Button>findViewById(R.id.btnGenerateTemplate)
-                .setOnClickListener(onBtnGenerateTemplateClick(sliderTotalStops, this));
+        btnGenerateTemplate.setOnClickListener(view -> onClickGenerateTemplateButton());
+        updateGenerateTemplateButtonState();
+    }
 
-        // Setup "Buy me a coffee" button if it exists in layout
-        final View btnCoffee = findViewById(R.id.btnCoffee);
-        if (btnCoffee != null) {
-            btnCoffee.setOnClickListener(view -> billingHelper.launchBillingFlow(this, BillingHelper.COFFEE_CAPPUCCINO));
+    private void updateGenerateTemplateButtonState() {
+        if (needsPurchase(getSliderTotalStops())) {
+            btnGenerateTemplate.setText(R.string.unlock_premium);
+            btnGenerateTemplate.setBackgroundTintList(
+                    ContextCompat.getColorStateList(
+                            this,
+                            R.color.color_premium_range));
+        } else {
+            btnGenerateTemplate.setText(R.string.open_in_google_maps);
+            btnGenerateTemplate.setBackgroundTintList(null); // Reset to theme default
         }
     }
 
-    @Override
-    public void onDonationSuccessful() {
-        runOnUiThread(this::showThankYouDialog);
+    private void onClickGenerateTemplateButton() {
+        final int totalStops = getSliderTotalStops();
+        if (needsPurchase(totalStops)) {
+            billingProvider.launchSubscriptionFlow(this);
+        } else {
+            GoogleMapsNavigator.launchUrl(
+                    createDirectionsUrlTemplate(totalStops),
+                    this);
+        }
     }
 
-    @Override
-    public void onBillingError(String message) {
-        runOnUiThread(
-                () ->
-                        Toast
-                                .makeText(this, message, Toast.LENGTH_SHORT)
-                                .show());
+    private int getSliderTotalStops() {
+        return (int) sliderTotalStops.getValue();
     }
 
-    private void showThankYouDialog() {
-        new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.thanks_title)
-                .setMessage(R.string.thanks_message)
-                .setPositiveButton(R.string.close, (dialog, which) -> dialog.dismiss())
-                .show();
+    private boolean needsPurchase(final int totalStops) {
+        return totalStops > 15 && !billingProvider.isSubscribed();
     }
 
-    private static View.OnClickListener onBtnGenerateTemplateClick(final Slider sliderTotalStops,
-                                                                   final Context context) {
-        return new View.OnClickListener() {
-
-            @Override
-            public void onClick(final View view) {
-                GoogleMapsNavigator.launchUrl(
-                        createDirectionsUrlTemplate(getTotalStops()),
-                        context);
-            }
-
-            private URL createDirectionsUrlTemplate(final int totalStops) {
-                return RouteToUrlConverter.getUrl(
-                        RouteTemplateFactory.createRouteTemplate(
-                                totalStops));
-            }
-
-            private int getTotalStops() {
-                return (int) sliderTotalStops.getValue();
-            }
-        };
+    private URL createDirectionsUrlTemplate(final int totalStops) {
+        return RouteToUrlConverter.getUrl(
+                RouteTemplateFactory.createRouteTemplate(
+                        totalStops));
     }
 }
