@@ -7,6 +7,7 @@ public class DebugBillingProvider implements BillingProvider {
 
     private static final String TAG = "DebugBillingProvider";
     private boolean isSubscribed = false;
+    // FK-TODO: make Optional<BillingListener>
     private BillingListener listener;
 
     @Override

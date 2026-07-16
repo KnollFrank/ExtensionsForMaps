@@ -1,5 +1,6 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,12 +30,14 @@ public class MainActivity extends AppCompatActivity implements BillingListener {
     private MaterialButton btnGenerateTemplate;
     private Slider sliderTotalStops;
     private TextView tvTotalStopsLabel;
+    private ColorStateList defaultButtonTint;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
+        defaultButtonTint = btnGenerateTemplate.getBackgroundTintList();
         billingProvider =
                 USE_SIMULATION ?
                         new DebugBillingProvider() :
@@ -97,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements BillingListener {
                             R.color.color_premium_range));
         } else {
             btnGenerateTemplate.setText(R.string.open_in_google_maps);
-            btnGenerateTemplate.setBackgroundTintList(null); // Reset to theme default
+            btnGenerateTemplate.setBackgroundTintList(defaultButtonTint);
         }
     }
 
