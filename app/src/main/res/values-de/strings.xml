@@ -5,4 +5,8 @@
     <string name="plan_route_title">Route planen</string>
     <string name="open_in_google_maps">In Google Maps öffnen</string>
     <string name="instructions_tip">Tippe in Google Maps auf die Stopps\nund überschreibe sie mit Deinen Adressen.</string>
+    <string name="thanks_title">Vielen Dank</string>
+    <string name="thanks_message">Vielen Dank für Deine Unterstützung! Dein Beitrag hilft mir, die Pflege und Weiterentwicklung dieser App zu finanzieren.</string>
+    <string name="close">Schließen</string>
+    <string name="coffee_button">Kaffeekasse</string>
 </resources>
