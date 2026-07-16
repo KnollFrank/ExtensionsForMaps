@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">More Stops for Maps</string>
     <string name="total_stops_label">Number of stops: %d</string>
+    <string name="plan_route_title">Route Planning</string>
+    <string name="open_in_google_maps">Open in Google Maps</string>
+    <string name="instructions_tip">Tap the stops in Google Maps\nand overwrite them with your addresses.</string>
 </resources>

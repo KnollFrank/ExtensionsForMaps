@@ -1,7 +1,7 @@
 FK-TODO: Simuliere einen "Zwischenstopps hinzufügen"-Button, der über den Teilen-Button die aktuelle Route an meine App sendet, die dann der aktuellen Route einen Dummy-Stopp am Ende dazufügt und die so vergrößerte Route wieder in Google Maps öffnet.
 FK-TODO: Routenoptimierung mit Hilfe von https://openrouteservice.org/ statt jsprit
 FK-TODO: Teile des UIs (Optimierung nach Zeit oder Entfernung, Rundreise) von https://www.mapquest.com/routeplanner/ umsetzen
-FK-TODO: Adresseingabefeld von Google Maps um Scannfunktion der Adresse erweitern
+FK-TODO: Adresseingabefeld von Google Maps um Scanfunktion der Adresse erweitern
 FK-TODO: Fahrt-/Reiseoptionen (z.B. "keine Autobahn") von Google Maps berücksichtigen
          Das ist ein absolut kritischer Einwand für die Routenplanung! Wenn der Apotheken-Bote mit einem klapprigen 50ccm-Roller unterwegs ist oder absichtlich die verstopfte Stadtautobahn meiden möchte, wird deine jsprit-Optimierung komplett unbrauchbar, wenn sie ihn trotzdem über die Schnellstraße schickt.
          Die großartige Nachricht ist: Google Maps übergibt diese Routing-Optionen (Autobahnen vermeiden, Mautstraßen vermeiden, Fähren vermeiden) **vollständig innerhalb der URL**. Da du ohnehin schon unseren !data-Parser gebaut hast, musst du im Grunde nur drei neue Filtermuster hinzufügen.

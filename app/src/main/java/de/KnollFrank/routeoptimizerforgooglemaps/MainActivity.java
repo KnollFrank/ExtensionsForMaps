@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private void configurePlanRoute() {
         final Slider sliderTotalStops = findViewById(R.id.sliderTotalStops);
         final TextView tvTotalStopsLabel = findViewById(R.id.tvTotalStopsLabel);
+        tvTotalStopsLabel.setText(getString(R.string.total_stops_label, (int) sliderTotalStops.getValue()));
         sliderTotalStops.addOnChangeListener(
                 new Slider.OnChangeListener() {
 
