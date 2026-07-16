@@ -2,6 +2,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +23,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.billing.GooglePlayBillingProvid
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteTemplateFactory;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteToUrlConverter;
 
+// FK-TODO: refactor
 public class MainActivity extends AppCompatActivity implements BillingListener {
 
     private static final boolean USE_SIMULATION = true; // Toggle for testing
@@ -30,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements BillingListener {
     private MaterialButton btnGenerateTemplate;
     private Slider sliderTotalStops;
     private TextView tvTotalStopsLabel;
+    private TextView tvSubscriptionDetails;
     private ColorStateList defaultButtonTint;
 
     @Override
@@ -72,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements BillingListener {
         btnGenerateTemplate = findViewById(R.id.btnGenerateTemplate);
         sliderTotalStops = findViewById(R.id.sliderTotalStops);
         tvTotalStopsLabel = findViewById(R.id.tvTotalStopsLabel);
+        tvSubscriptionDetails = findViewById(R.id.tvSubscriptionDetails);
     }
 
     private void configurePlanRoute() {
@@ -98,9 +102,11 @@ public class MainActivity extends AppCompatActivity implements BillingListener {
                     ContextCompat.getColorStateList(
                             this,
                             R.color.color_premium_range));
+            tvSubscriptionDetails.setVisibility(View.VISIBLE);
         } else {
             btnGenerateTemplate.setText(R.string.open_in_google_maps);
             btnGenerateTemplate.setBackgroundTintList(defaultButtonTint);
+            tvSubscriptionDetails.setVisibility(View.GONE);
         }
     }
 

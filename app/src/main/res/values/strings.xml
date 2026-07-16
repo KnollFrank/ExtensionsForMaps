@@ -10,4 +10,5 @@
     <string name="info_icon_desc">Information icon</string>
     <string name="unlock_premium">Unlock Premium</string>
     <string name="premium_stops_info">Up to 27 stops with subscription</string>
+    <string name="subscription_details_info">Subscription to unlock 16 – 27 stops: €1.00/month. Cancel anytime.</string>
 </resources>
