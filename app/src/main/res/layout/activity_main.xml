@@ -117,6 +117,7 @@
                     android:padding="16dp"
                     android:text="@string/open_in_google_maps"
                     app:cornerRadius="16dp"
+                    app:iconGravity="textStart"
                     app:layout_constraintTop_toBottomOf="@id/tvMinStops" />
 
                 <LinearLayout
