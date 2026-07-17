@@ -10,4 +10,8 @@
     <string name="info_icon_desc">Information icon</string>
     <string name="unlock_premium">Unlock 16 – 27 Stops</string>
     <string name="unlock_premium_concise">%s/month • Cancel anytime</string>
+    <string name="subscription_bs_title">Unlock Premium Stops</string>
+    <string name="subscription_bs_message">Upgrade now to plan routes with up to 27 stops.</string>
+    <string name="subscribe_button">Subscribe now</string>
+    <string name="not_now">Not now</string>
 </resources>

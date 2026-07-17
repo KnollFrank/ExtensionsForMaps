@@ -11,4 +11,8 @@
     <string name="info_icon_desc">Informations-Icon</string>
     <string name="unlock_premium">16 bis 27 Stopps freischalten</string>
     <string name="unlock_premium_concise">%s/Monat • Jederzeit kündbar</string>
+    <string name="subscription_bs_title">Premium-Stopps freischalten</string>
+    <string name="subscription_bs_message">Abonniere jetzt, um Routen mit bis zu 27 Stopps zu planen.</string>
+    <string name="subscribe_button">Jetzt abonnieren</string>
+    <string name="not_now">Vielleicht später</string>
 </resources>

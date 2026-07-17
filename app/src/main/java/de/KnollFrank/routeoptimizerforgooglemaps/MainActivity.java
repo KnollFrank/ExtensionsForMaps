@@ -1,13 +1,8 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import android.content.res.ColorStateList;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.slider.Slider;
 
@@ -104,55 +100,58 @@ public class MainActivity extends AppCompatActivity implements BillingListener {
     }
 
     private void updateGenerateTemplateButtonState() {
+        btnGenerateTemplate.setText(R.string.open_in_google_maps);
         if (needsPurchase(getSliderTotalStops())) {
-            final String formattedPrice = billingProvider.getFormattedPrice();
-            final String line1 = getString(R.string.unlock_premium);
-            final String line2 = formattedPrice.isEmpty() ?
-                    "" :
-                    "\n" + getString(R.string.unlock_premium_concise, formattedPrice);
-
-            final SpannableStringBuilder ssb = new SpannableStringBuilder(line1 + line2);
-            ssb.setSpan(
-                    new StyleSpan(Typeface.BOLD),
-                    0,
-                    line1.length(),
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-            if (!line2.isEmpty()) {
-                final int start = line1.length() + 1; // +1 for the \n
-                ssb.setSpan(
-                        new RelativeSizeSpan(0.75f),
-                        start,
-                        ssb.length(),
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                ssb.setSpan(
-                        new ForegroundColorSpan(
-                                ContextCompat.getColor(this, R.color.color_subscription_details)),
-                        start,
-                        ssb.length(),
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
-
-            btnGenerateTemplate.setText(ssb);
             btnGenerateTemplate.setBackgroundTintList(
                     ContextCompat.getColorStateList(
                             this,
                             R.color.color_premium_range));
+            // FK-TODO: das Icon erscheint ganz links im Button sollte aber direkt links neben dem zentrierten Text erscheinen.
+            btnGenerateTemplate.setIcon(ContextCompat.getDrawable(this, android.R.drawable.ic_lock_lock));
         } else {
-            btnGenerateTemplate.setText(R.string.open_in_google_maps);
             btnGenerateTemplate.setBackgroundTintList(defaultButtonTint);
+            btnGenerateTemplate.setIcon(null);
         }
     }
 
     private void onClickGenerateTemplateButton() {
         final int totalStops = getSliderTotalStops();
         if (needsPurchase(totalStops)) {
-            billingProvider.launchSubscriptionFlow(this);
+            showSubscriptionBottomSheet();
         } else {
             GoogleMapsNavigator.launchUrl(
                     createDirectionsUrlTemplate(totalStops),
                     this);
         }
+    }
+
+    private void showSubscriptionBottomSheet() {
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        final View view = getLayoutInflater().inflate(R.layout.layout_subscription_bottom_sheet, findViewById(android.R.id.content), false);
+
+        final String formattedPrice = billingProvider.getFormattedPrice();
+        if (!formattedPrice.isEmpty()) {
+            view
+                    .<TextView>findViewById(R.id.tvBsPrice)
+                    .setText(
+                            getString(
+                                    R.string.unlock_premium_concise,
+                                    formattedPrice));
+        }
+
+        view
+                .findViewById(R.id.btnBsSubscribe)
+                .setOnClickListener(_view -> {
+                    billingProvider.launchSubscriptionFlow(this);
+                    bottomSheetDialog.dismiss();
+                });
+
+        view
+                .findViewById(R.id.btnBsDismiss)
+                .setOnClickListener(v -> bottomSheetDialog.dismiss());
+
+        bottomSheetDialog.setContentView(view);
+        bottomSheetDialog.show();
     }
 
     private int getSliderTotalStops() {

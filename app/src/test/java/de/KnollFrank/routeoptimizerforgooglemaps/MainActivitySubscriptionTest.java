@@ -44,10 +44,8 @@ public class MainActivitySubscriptionTest {
                 // Set slider to 16 (Premium start)
                 slider.setValue(16.0f);
 
-                final String line1 = activity.getString(R.string.unlock_premium);
-                final String line2 = activity.getString(R.string.unlock_premium_concise, "0,99 €");
-                final String expectedText = line1 + "\n" + line2;
-                assertEquals(expectedText, button.getText().toString());
+                // Text should remain stable
+                assertEquals(activity.getString(R.string.open_in_google_maps), button.getText().toString());
 
                 ColorStateList expectedTint = ContextCompat.getColorStateList(activity, R.color.color_premium_range);
                 assertEquals(expectedTint, button.getBackgroundTintList());
@@ -64,16 +62,10 @@ public class MainActivitySubscriptionTest {
 
                 // Set slider to 16
                 slider.setValue(16.0f);
-                final String line1 = activity.getString(R.string.unlock_premium);
-                final String line2 = activity.getString(R.string.unlock_premium_concise, "0,99 €");
-                final String expectedPremiumText = line1 + "\n" + line2;
-                assertEquals(expectedPremiumText, button.getText().toString());
-
-                // Perform "purchase" (click button in simulation mode)
-                button.performClick();
-
-                // Button should revert to "Open in Google Maps"
-                assertEquals(activity.getString(R.string.open_in_google_maps), button.getText().toString());
+                
+                // Color should initially be premium
+                ColorStateList premiumTint = ContextCompat.getColorStateList(activity, R.color.color_premium_range);
+                assertEquals(premiumTint, button.getBackgroundTintList());
             });
         }
     }

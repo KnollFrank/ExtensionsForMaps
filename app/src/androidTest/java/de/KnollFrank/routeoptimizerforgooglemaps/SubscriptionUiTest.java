@@ -6,7 +6,6 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.containsString;
 
 import android.view.View;
 
@@ -27,20 +26,26 @@ public class SubscriptionUiTest {
     public ActivityScenarioRule<MainActivity> activityRule = new ActivityScenarioRule<>(MainActivity.class);
 
     @Test
-    public void testSliderInteractionAndButtonUpdate() {
+    public void testSliderInteractionAndBottomSheet() {
         // Initially at 15
         onView(withId(R.id.btnGenerateTemplate)).check(matches(withText(R.string.open_in_google_maps)));
 
         // Move slider to 16
         onView(withId(R.id.sliderTotalStops)).perform(setSliderValue(16.0f));
 
-        // Check if button changed to "Unlock..." (contains first line)
-        onView(withId(R.id.btnGenerateTemplate)).check(matches(withText(containsString("Unlock 16"))));
+        // Text should still be "Open..." but button is gold (visual only, hard to test tint easily without custom matcher)
+        onView(withId(R.id.btnGenerateTemplate)).check(matches(withText(R.string.open_in_google_maps)));
 
-        // Click to "purchase" (Simulation mode assumed)
+        // Click to show Bottom Sheet
         onView(withId(R.id.btnGenerateTemplate)).perform(click());
 
-        // Button should revert
+        // Check if BS title is visible
+        onView(withText(R.string.subscription_bs_title)).check(matches(isDisplayed()));
+
+        // Click subscribe in BS
+        onView(withId(R.id.btnBsSubscribe)).perform(click());
+
+        // Button should now be back to default state (no icon)
         onView(withId(R.id.btnGenerateTemplate)).check(matches(withText(R.string.open_in_google_maps)));
     }
 

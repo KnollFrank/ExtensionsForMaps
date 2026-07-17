@@ -111,6 +111,7 @@ public class GooglePlayBillingProvider implements BillingProvider, PurchasesUpda
         return isSubscribed;
     }
 
+    // FK-TODO: im Fehlerfalle Optional.empty() zurückgeben statt eines leeren Strings
     @Override
     public String getFormattedPrice() {
         final ProductDetails productDetails = productDetailsMap.get(PRODUCT_ID_MONTHLY);
