@@ -12,7 +12,7 @@
     <string name="unlock_premium">16 bis 27 Stopps freischalten</string>
     <string name="unlock_premium_concise">%s/Monat • Jederzeit kündbar</string>
     <string name="subscription_bs_title">Auf 27 Stopps erweitern</string>
-    <string name="subscription_bs_message">Schalten Sie die Planung von bis zu 27 Stopps frei (statt der standardmäßigen 15 Stopps).</string>
+    <string name="subscription_bs_message">Erweitern Sie Ihre Routen von 15 auf bis zu 27 Stopps.</string>
     <string name="subscribe_button">Monatliches Abo starten</string>
     <string name="not_now">Vielleicht später</string>
 </resources>

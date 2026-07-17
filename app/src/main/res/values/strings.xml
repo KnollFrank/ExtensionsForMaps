@@ -12,7 +12,7 @@
     <string name="unlock_premium">Unlock 16 – 27 Stops</string>
     <string name="unlock_premium_concise">%s/month • Cancel anytime</string>
     <string name="subscription_bs_title">Expand to 27 Stops</string>
-    <string name="subscription_bs_message">Unlock the ability to plan routes with up to 27 stops (instead of the standard 15).</string>
+    <string name="subscription_bs_message">Expand your routes from 15 to up to 27 stops.</string>
     <string name="subscribe_button">Start Monthly Subscription</string>
     <string name="not_now">Not now</string>
 </resources>
