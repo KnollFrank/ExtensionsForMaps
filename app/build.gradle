@@ -55,7 +55,6 @@ dependencies {
 
     // Core App Dependencies
     implementation libs.recyclerview
-    implementation libs.play.services.location
     implementation libs.guava
 
     testImplementation libs.junit
