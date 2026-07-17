@@ -1,88 +1,37 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
-import android.content.res.ColorStateList;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.slider.Slider;
 
 import java.net.URL;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.billing.BillingListener;
-import de.KnollFrank.routeoptimizerforgooglemaps.billing.BillingProvider;
-import de.KnollFrank.routeoptimizerforgooglemaps.billing.DebugBillingProvider;
-import de.KnollFrank.routeoptimizerforgooglemaps.billing.GooglePlayBillingProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteTemplateFactory;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteToUrlConverter;
 
-// FK-TODO: refactor
-public class MainActivity extends AppCompatActivity implements BillingListener {
-
-    private static final boolean USE_SIMULATION = true; // Toggle for testing
-
-    private BillingProvider billingProvider;
-    private MaterialButton btnGenerateTemplate;
-    private Slider sliderTotalStops;
-    private TextView tvTotalStopsLabel;
-    private ColorStateList defaultButtonTint;
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initViews();
-        defaultButtonTint = btnGenerateTemplate.getBackgroundTintList();
-        billingProvider =
-                USE_SIMULATION ?
-                        new DebugBillingProvider() :
-                        new GooglePlayBillingProvider(this);
-        billingProvider.setListener(this);
-        billingProvider.startConnection();
         configurePlanRoute();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (billingProvider != null) {
-            billingProvider.endConnection();
-        }
-    }
-
-    @Override
-    public void onSubscriptionStatusChanged(final boolean isSubscribed) {
-        runOnUiThread(this::updateGenerateTemplateButtonState);
-    }
-
-    @Override
-    public void onProductDetailsLoaded() {
-        runOnUiThread(this::updateGenerateTemplateButtonState);
-    }
-
-    @Override
-    public void onBillingError(final String message) {
-        runOnUiThread(() ->
-                              Toast
-                                      .makeText(this, message, Toast.LENGTH_SHORT)
-                                      .show());
-    }
-
-    private void initViews() {
-        btnGenerateTemplate = findViewById(R.id.btnGenerateTemplate);
-        sliderTotalStops = findViewById(R.id.sliderTotalStops);
-        tvTotalStopsLabel = findViewById(R.id.tvTotalStopsLabel);
+        configureCoffeeButton();
     }
 
     private void configurePlanRoute() {
+        final Slider sliderTotalStops = findViewById(R.id.sliderTotalStops);
+        final TextView tvTotalStopsLabel = findViewById(R.id.tvTotalStopsLabel);
         tvTotalStopsLabel.setText(getString(R.string.total_stops_label, (int) sliderTotalStops.getValue()));
         sliderTotalStops.addOnChangeListener(
                 new Slider.OnChangeListener() {
@@ -92,78 +41,44 @@ public class MainActivity extends AppCompatActivity implements BillingListener {
                                               final float value,
                                               final boolean fromUser) {
                         tvTotalStopsLabel.setText(getString(R.string.total_stops_label, (int) value));
-                        updateGenerateTemplateButtonState();
                     }
                 });
-        btnGenerateTemplate.setOnClickListener(view -> onClickGenerateTemplateButton());
-        updateGenerateTemplateButtonState();
+        this
+                .<Button>findViewById(R.id.btnGenerateTemplate)
+                .setOnClickListener(onBtnGenerateTemplateClick(sliderTotalStops, this));
     }
 
-    private void updateGenerateTemplateButtonState() {
-        btnGenerateTemplate.setText(R.string.open_in_google_maps);
-        if (needsPurchase(getSliderTotalStops())) {
-            btnGenerateTemplate.setBackgroundTintList(
-                    ContextCompat.getColorStateList(
-                            this,
-                            R.color.color_premium_range));
-            btnGenerateTemplate.setIcon(ContextCompat.getDrawable(this, android.R.drawable.ic_lock_lock));
-        } else {
-            btnGenerateTemplate.setBackgroundTintList(defaultButtonTint);
-            btnGenerateTemplate.setIcon(null);
-        }
-    }
-
-    private void onClickGenerateTemplateButton() {
-        final int totalStops = getSliderTotalStops();
-        if (needsPurchase(totalStops)) {
-            showSubscriptionBottomSheet();
-        } else {
-            GoogleMapsNavigator.launchUrl(
-                    createDirectionsUrlTemplate(totalStops),
-                    this);
-        }
-    }
-
-    private void showSubscriptionBottomSheet() {
-        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
-        final View view = getLayoutInflater().inflate(R.layout.layout_subscription_bottom_sheet, findViewById(android.R.id.content), false);
-
-        final String formattedPrice = billingProvider.getFormattedPrice();
-        if (!formattedPrice.isEmpty()) {
-            view
-                    .<TextView>findViewById(R.id.tvBsPrice)
-                    .setText(
-                            getString(
-                                    R.string.unlock_premium_concise,
-                                    formattedPrice));
-        }
-
-        view
-                .findViewById(R.id.btnBsSubscribe)
-                .setOnClickListener(_view -> {
-                    billingProvider.launchSubscriptionFlow(this);
-                    bottomSheetDialog.dismiss();
+    private void configureCoffeeButton() {
+        this
+                .findViewById(R.id.btnCoffee)
+                .setOnClickListener(view -> {
+                    startActivity(
+                            new Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://paypal.me/KnollFrank")));
                 });
-
-        view
-                .findViewById(R.id.btnBsDismiss)
-                .setOnClickListener(v -> bottomSheetDialog.dismiss());
-
-        bottomSheetDialog.setContentView(view);
-        bottomSheetDialog.show();
     }
 
-    private int getSliderTotalStops() {
-        return (int) sliderTotalStops.getValue();
-    }
+    private static View.OnClickListener onBtnGenerateTemplateClick(final Slider sliderTotalStops,
+                                                                   final Context context) {
+        return new View.OnClickListener() {
 
-    private boolean needsPurchase(final int totalStops) {
-        return totalStops > 15 && !billingProvider.isSubscribed();
-    }
+            @Override
+            public void onClick(final View view) {
+                GoogleMapsNavigator.launchUrl(
+                        createDirectionsUrlTemplate(getSliderTotalStops()),
+                        context);
+            }
 
-    private URL createDirectionsUrlTemplate(final int totalStops) {
-        return RouteToUrlConverter.getUrl(
-                RouteTemplateFactory.createRouteTemplate(
-                        totalStops));
+            private URL createDirectionsUrlTemplate(final int totalStops) {
+                return RouteToUrlConverter.getUrl(
+                        RouteTemplateFactory.createRouteTemplate(
+                                totalStops));
+            }
+
+            private int getSliderTotalStops() {
+                return (int) sliderTotalStops.getValue();
+            }
+        };
     }
 }

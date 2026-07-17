@@ -5,14 +5,8 @@
     <string name="open_in_google_maps">Open in Google Maps</string>
     <string name="instructions_tip">Tap the stops in Google Maps and overwrite them with your own addresses.</string>
     <string name="thanks_title">Thank You</string>
-    <!-- FK-TODO: thanks_message und weitere sind nicht mehr in Verwendung => entfernen -->
-    <string name="thanks_message">Thank you for your support! Your contribution helps to maintain and further develop this app.</string>
     <string name="close">Close</string>
     <string name="info_icon_desc">Information icon</string>
-    <string name="unlock_premium">Unlock 16 – 27 Stops</string>
-    <string name="unlock_premium_concise">%s/month • Cancel anytime</string>
-    <string name="subscription_bs_title">Expand to 27 Stops</string>
-    <string name="subscription_bs_message">Expand your routes from 15 to up to 27 stops.</string>
-    <string name="subscribe_button">Start Monthly Subscription</string>
-    <string name="not_now">Not now</string>
+    <string name="coffee_button">Buy me a coffee</string>
+    <string name="coffee_url">https://paypal.me/KnollFrank</string>
 </resources>
