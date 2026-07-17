@@ -3,15 +3,16 @@
     <string name="total_stops_label">Number of stops: %d</string>
     <string name="plan_route_title">Route Planning</string>
     <string name="open_in_google_maps">Open in Google Maps</string>
-    <string name="instructions_tip">Tap the stops in Google Maps\nand overwrite them with your addresses.</string>
+    <string name="instructions_tip">Tap the stops in Google Maps and overwrite them with your addresses.</string>
     <string name="thanks_title">Thank You</string>
-    <string name="thanks_message">Thank you for your support! Your contribution helps me maintain and further develop this app.</string>
+    <!-- FK-TODO: thanks_message und weitere sind nicht mehr in Verwendung => entfernen -->
+    <string name="thanks_message">Thank you for your support! Your contribution helps to maintain and further develop this app.</string>
     <string name="close">Close</string>
     <string name="info_icon_desc">Information icon</string>
     <string name="unlock_premium">Unlock 16 – 27 Stops</string>
     <string name="unlock_premium_concise">%s/month • Cancel anytime</string>
-    <string name="subscription_bs_title">Unlock Premium Stops</string>
-    <string name="subscription_bs_message">Plan routes with up to 27 stops.</string>
-    <string name="subscribe_button">Subscribe now</string>
+    <string name="subscription_bs_title">Expand to 27 Stops</string>
+    <string name="subscription_bs_message">Unlock the ability to plan routes with up to 27 stops (instead of the standard 15).</string>
+    <string name="subscribe_button">Start Monthly Subscription</string>
     <string name="not_now">Not now</string>
 </resources>
