@@ -4,6 +4,7 @@
     <string name="total_stops_label">Anzahl Stopps: %d</string>
     <string name="plan_route_title">Route planen</string>
     <string name="open_in_google_maps">In Google Maps öffnen</string>
+    <!-- FK-TODO: duzen oder siezen? -->
     <string name="instructions_tip">Tippe in Google Maps auf die Stopps\nund überschreibe sie mit Deinen Adressen.</string>
     <string name="thanks_title">Vielen Dank</string>
     <string name="thanks_message">Vielen Dank für Deine Unterstützung! Dein Beitrag hilft mir, die Pflege und Weiterentwicklung dieser App zu finanzieren.</string>
@@ -12,7 +13,7 @@
     <string name="unlock_premium">16 bis 27 Stopps freischalten</string>
     <string name="unlock_premium_concise">%s/Monat • Jederzeit kündbar</string>
     <string name="subscription_bs_title">Premium-Stopps freischalten</string>
-    <string name="subscription_bs_message">Abonniere jetzt, um Routen mit bis zu 27 Stopps zu planen.</string>
+    <string name="subscription_bs_message">Plane Routen mit bis zu 27 Stopps.</string>
     <string name="subscribe_button">Jetzt abonnieren</string>
     <string name="not_now">Vielleicht später</string>
 </resources>
