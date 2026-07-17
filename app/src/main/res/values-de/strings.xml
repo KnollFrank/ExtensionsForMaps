@@ -4,7 +4,6 @@
     <string name="total_stops_label">Anzahl Stopps: %d</string>
     <string name="plan_route_title">Route planen</string>
     <string name="open_in_google_maps">In Google Maps öffnen</string>
-    <!-- FK-TODO: duzen oder siezen? -->
     <string name="instructions_tip">Tippen Sie in Google Maps auf die Stopps und überschreiben diese mit Ihren Adressen.</string>
     <string name="thanks_title">Vielen Dank</string>
     <string name="thanks_message">Vielen Dank für Ihre Unterstützung! Ihr Beitrag hilft mir, die Pflege und Weiterentwicklung dieser App zu finanzieren.</string>

@@ -106,7 +106,6 @@ public class MainActivity extends AppCompatActivity implements BillingListener {
                     ContextCompat.getColorStateList(
                             this,
                             R.color.color_premium_range));
-            // FK-TODO: das Icon erscheint ganz links im Button sollte aber direkt links neben dem zentrierten Text erscheinen.
             btnGenerateTemplate.setIcon(ContextCompat.getDrawable(this, android.R.drawable.ic_lock_lock));
         } else {
             btnGenerateTemplate.setBackgroundTintList(defaultButtonTint);

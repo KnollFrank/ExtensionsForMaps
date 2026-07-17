@@ -11,7 +11,7 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:contentDescription="@string/info_icon_desc"
-        android:src="@android:drawable/ic_dialog_info"
+        android:src="@drawable/ic_premium_star"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
