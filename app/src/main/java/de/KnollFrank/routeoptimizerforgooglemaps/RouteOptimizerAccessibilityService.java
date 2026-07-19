@@ -48,14 +48,28 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         }
         // Detect "Add stops" click
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED) {
-            final CharSequence contentDesc = event.getContentDescription();
-            if (contentDesc != null && (contentDesc.toString().contains("Add stops") || contentDesc.toString().contains("Stopp hinzufügen"))) {
+            final String eventText = getEventText(event);
+            Log.v(TAG, "Click event text: " + eventText);
+            if (eventText.contains("Add stops") || eventText.contains("Stopp hinzufügen")) {
                 if (isAtStopLimit(rootNode)) {
                     Log.d(TAG, "Stop limit reached and 'Add stops' clicked. Triggering automation.");
                     triggerShareFlow(rootNode);
                 }
             }
         }
+    }
+
+    private String getEventText(final AccessibilityEvent event) {
+        final StringBuilder sb = new StringBuilder();
+        if (event.getContentDescription() != null) {
+            sb.append(event.getContentDescription());
+        }
+        for (final CharSequence text : event.getText()) {
+            if (text != null) {
+                sb.append(text);
+            }
+        }
+        return sb.toString();
     }
 
     private boolean isAtStopLimit(final AccessibilityNodeInfo rootNode) {
