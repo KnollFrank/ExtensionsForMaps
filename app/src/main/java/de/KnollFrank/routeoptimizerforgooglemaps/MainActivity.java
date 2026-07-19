@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,6 +28,23 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         configurePlanRoute();
         configureCoffeeButton();
+        handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(@NonNull final Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(final Intent intent) {
+        if (intent != null && intent.hasExtra("EXTRA_MAPS_URL")) {
+            final String url = intent.getStringExtra("EXTRA_MAPS_URL");
+            Toast
+                    .makeText(this, "Received URL: " + url, Toast.LENGTH_LONG)
+                    .show();
+        }
     }
 
     private void configurePlanRoute() {

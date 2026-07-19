@@ -8,5 +8,7 @@
     <string name="thanks_title">Vielen Dank</string>
     <string name="close">Schließen</string>
     <string name="info_icon_desc">Informations-Icon</string>
+    <string name="accessibility_service_label">Routeoptimizer Automatisierung</string>
+    <string name="accessibility_service_description">Erkennt automatisch, wenn Google Maps das Limit von 10 Stopps erreicht hat, und hilft dabei, die Route zu erweitern.</string>
     <string name="coffee_button">Kaffeekasse</string>
 </resources>
