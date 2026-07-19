@@ -15,6 +15,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.widget.FrameLayout;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -216,7 +218,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         return Optional.empty();
     }
 
-    private AccessibilityNodeInfo findStopCountNode(AccessibilityNodeInfo rootNode) {
+    private AccessibilityNodeInfo findStopCountNode(final AccessibilityNodeInfo rootNode) {
         List<AccessibilityNodeInfo> nodes = rootNode.findAccessibilityNodeInfosByText(STOPS_EN);
         if (nodes.isEmpty()) {
             nodes = rootNode.findAccessibilityNodeInfosByText(STOPS_DE);
@@ -224,7 +226,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         return nodes.isEmpty() ? null : nodes.get(0);
     }
 
-    private AccessibilityNodeInfo findNodeByText(AccessibilityNodeInfo rootNode, String... texts) {
+    private AccessibilityNodeInfo findNodeByText(final AccessibilityNodeInfo rootNode, String... texts) {
         for (String text : texts) {
             List<AccessibilityNodeInfo> nodes = rootNode.findAccessibilityNodeInfosByText(text);
             if (!nodes.isEmpty()) return nodes.get(0);
@@ -273,7 +275,12 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         if (rootNode == null) {
             return;
         }
-        final List<AccessibilityNodeInfo> urlNodes = rootNode.findAccessibilityNodeInfosByViewId("android:id/content_preview_text");
+        final List<AccessibilityNodeInfo> urlNodes =
+                ImmutableList
+                        .<AccessibilityNodeInfo>builder()
+                        .addAll(rootNode.findAccessibilityNodeInfosByViewId("android:id/content_preview_text"))
+                        .addAll(rootNode.findAccessibilityNodeInfosByViewId("com.android.intentresolver:id/sem_chooser_sub_title_details_view"))
+                        .build();
         if (!urlNodes.isEmpty()) {
             final AccessibilityNodeInfo urlNode = urlNodes.get(0);
             final CharSequence url = urlNode.getText();
