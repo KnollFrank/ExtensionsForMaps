@@ -15,6 +15,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.widget.FrameLayout;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -49,7 +51,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     private final Rect lastOverlayBounds = new Rect();
 
     private long lastScanTime = 0;
-    private static final long SCAN_INTERVAL_MS = 150; // Throttle scans to ~6.6 FPS
+    private static final long SCAN_INTERVAL_MS = 250;
 
     @Override
     protected void onServiceConnected() {
@@ -75,8 +77,10 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     private void handleMapsEvent(final AccessibilityEvent event) {
         final long currentTime = System.currentTimeMillis();
         final boolean shouldScan = (currentTime - lastScanTime) > SCAN_INTERVAL_MS;
+
+        // Perform scan only on interval or explicit user action
         if (shouldScan || event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED) {
-            performEfficientScan();
+            updateServiceState();
             lastScanTime = currentTime;
         }
         // Trigger automation on click
@@ -94,104 +98,80 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         }
     }
 
-    private static class ScanResult {
-        Rect addStopsButtonBounds = null;
-        AccessibilityNodeInfo shareButton = null;
-        Integer stopCount = null;
-    }
-
-    private void performEfficientScan() {
-        final ScanResult result = new ScanResult();
-
-        // 1. Try active window first (fastest)
-        final AccessibilityNodeInfo activeRoot = getRootInActiveWindow();
-        if (activeRoot != null) {
-            scanHierarchyPass(activeRoot, result);
-        }
-
-        // 2. If not found and we really need it, check other windows
-        if (result.addStopsButtonBounds == null || result.stopCount == null) {
-            final List<AccessibilityWindowInfo> windows = getWindows();
-            for (final AccessibilityWindowInfo window : windows) {
-                if (activeRoot != null && window.getId() == activeRoot.getWindowId()) {
-                    continue;
-                }
-                final AccessibilityNodeInfo root = window.getRoot();
-                if (root != null) {
-                    scanHierarchyPass(root, result);
-                }
-            }
-        }
-
-        // Apply results
-        if (result.stopCount != null) {
-            lastKnownStopCount = result.stopCount;
-        }
-        updateHighlightOverlay(result.addStopsButtonBounds);
-    }
-
-    private void scanHierarchyPass(final AccessibilityNodeInfo node, final ScanResult result) {
-        if (node == null) {
+    private void updateServiceState() {
+        // Optimization: Use native system searches instead of manual Java traversal
+        // Priority: Only check the active window to avoid expensive getWindows() call on every event
+        final AccessibilityNodeInfo root = getRootInActiveWindow();
+        if (root == null) {
             return;
         }
 
-        // Check for Stop Count
-        if (result.stopCount == null) {
-            CharSequence text = node.getText();
-            if (text == null) {
-                text = node.getContentDescription();
-            }
-            if (text != null) {
-                final Matcher matcher = stopCountPattern.matcher(text.toString());
-                if (matcher.find()) {
-                    result.stopCount = Integer.parseInt(matcher.group(1));
-                }
-            }
-        }
+        // 1. Update Stop Count
+        updateStopCount(root);
 
-        // Check for Add Stops Button
-        if (result.addStopsButtonBounds == null) {
-            final CharSequence text = node.getText();
-            final CharSequence desc = node.getContentDescription();
-            if (isAddStopsText(text) || isAddStopsText(desc)) {
-                final Rect bounds = new Rect();
-                node.getBoundsInScreen(bounds);
-                result.addStopsButtonBounds = bounds;
-            }
-        }
+        // 2. Update Overlay Position
+        updateHighlightOverlay(root);
 
-        // Check for Share Button (only if we might need to click it soon)
-        if (result.shareButton == null) {
-            CharSequence nodeText = node.getText();
-            if (SHARE_ID.equals(node.getViewIdResourceName()) ||
-                    (nodeText != null && (nodeText.toString().equals("Share") || nodeText.toString().equals("Teilen")))) {
-                result.shareButton = node;
-            }
-        }
+        root.recycle();
+    }
 
-        // Recursive traversal
-        for (int i = 0; i < node.getChildCount(); i++) {
-            // Optimization: stop descending if we found everything
-            if (result.stopCount != null && result.addStopsButtonBounds != null && result.shareButton != null)
-                break;
-            scanHierarchyPass(node.getChild(i), result);
+    private void updateStopCount(AccessibilityNodeInfo root) {
+        List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(STOPS_EN);
+        if (nodes.isEmpty()) {
+            nodes = root.findAccessibilityNodeInfosByText(STOPS_DE);
+        }
+        for (final AccessibilityNodeInfo node : nodes) {
+            RouteOptimizerAccessibilityService
+                    .getTextOrElseGetContentDescription(node)
+                    .ifPresent(text -> {
+                        final Matcher matcher = stopCountPattern.matcher(text.toString());
+                        if (matcher.find()) {
+                            try {
+                                lastKnownStopCount = Integer.parseInt(matcher.group(1));
+                            } catch (NumberFormatException ignored) {
+                            }
+                        }
+                    });
+            node.recycle();
         }
     }
 
-    private void updateHighlightOverlay(Rect bounds) {
-        if (!Settings.canDrawOverlays(this) || lastKnownStopCount < STOP_LIMIT || bounds == null) {
+    private void updateHighlightOverlay(AccessibilityNodeInfo root) {
+        if (!Settings.canDrawOverlays(this) || lastKnownStopCount < STOP_LIMIT) {
             removeHighlight();
             return;
         }
 
+        final AccessibilityNodeInfo addStopsButton = findAddStopsButton(root);
+        if (addStopsButton != null) {
+            final Rect bounds = new Rect();
+            addStopsButton.getBoundsInScreen(bounds);
+
+            // Only update UI if bounds have actually changed
+            if (highlightOverlay == null || !lastOverlayBounds.equals(bounds)) {
+                showHighlight(bounds);
+            }
+            addStopsButton.recycle();
+        } else {
+            removeHighlight();
+        }
+    }
+
+    private AccessibilityNodeInfo findAddStopsButton(final AccessibilityNodeInfo root) {
+        List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(ADD_STOPS_EN);
+        if (nodes.isEmpty()) {
+            nodes = root.findAccessibilityNodeInfosByText(ADD_STOPS_DE);
+        }
+        return nodes.isEmpty() ? null : nodes.get(0);
+    }
+
+    private void showHighlight(final Rect bounds) {
+        lastOverlayBounds.set(bounds);
         if (highlightOverlay == null) {
             highlightOverlay = new FrameLayout(this);
             highlightOverlay.setBackgroundResource(R.drawable.border_highlight);
-            lastOverlayBounds.set(bounds);
             windowManager.addView(highlightOverlay, getLayoutParams(bounds));
-        } else if (!lastOverlayBounds.equals(bounds)) {
-            // Only update if moved
-            lastOverlayBounds.set(bounds);
+        } else {
             final WindowManager.LayoutParams params = (WindowManager.LayoutParams) highlightOverlay.getLayoutParams();
             updateParams(bounds, params);
             windowManager.updateViewLayout(highlightOverlay, params);
@@ -200,28 +180,38 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
 
     private void processLimitReached() {
         if (!tryClickShareButton()) {
-            Log.d(TAG, "Share button not found. Dismissing overlay.");
+            Log.d(TAG, "Share button not found. Dismissing overlay via BACK.");
             performGlobalAction(GLOBAL_ACTION_BACK);
             isWaitingToClickShareAfterBack = true;
         }
     }
 
     private boolean tryClickShareButton() {
-        // Reuse performEfficientScan logic if possible, or targeted search
-        final AccessibilityNodeInfo root = getRootInActiveWindow();
-        if (root == null) {
-            return false;
-        }
-
-        Optional<AccessibilityNodeInfo> shareButton = findShareButton(root);
+        // During automation, we allow scanning all windows as a last resort
+        Optional<AccessibilityNodeInfo> shareButton = findShareButtonInAllWindows();
         if (shareButton.isPresent()) {
             shareButton.get().performAction(AccessibilityNodeInfo.ACTION_CLICK);
             isWaitingForShareSheet = true;
             isWaitingToClickShareAfterBack = false;
-            Log.d(TAG, "Clicked Share button.");
+            Log.d(TAG, "Successfully clicked Share button.");
             return true;
         }
         return false;
+    }
+
+    private Optional<AccessibilityNodeInfo> findShareButtonInAllWindows() {
+        final List<AccessibilityWindowInfo> windows = getWindows();
+        for (final AccessibilityWindowInfo window : windows) {
+            final AccessibilityNodeInfo root = window.getRoot();
+            if (root != null) {
+                final Optional<AccessibilityNodeInfo> button = findShareButton(root);
+                if (button.isPresent()) {
+                    return button;
+                }
+                root.recycle();
+            }
+        }
+        return Optional.empty();
     }
 
     private static Optional<AccessibilityNodeInfo> findShareButton(final AccessibilityNodeInfo rootNode) {
@@ -235,12 +225,8 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         return nodes.isEmpty() ? Optional.empty() : Optional.of(nodes.get(0));
     }
 
-    private boolean isAddStopsText(CharSequence text) {
-        if (text == null) {
-            return false;
-        }
-        final String s = text.toString();
-        return s.contains(ADD_STOPS_EN) || s.contains(ADD_STOPS_DE);
+    private boolean isAddStopsText(String text) {
+        return text != null && (text.contains(ADD_STOPS_EN) || text.contains(ADD_STOPS_DE));
     }
 
     private String getEventText(final AccessibilityEvent event) {
@@ -254,6 +240,12 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         return sb.toString();
     }
 
+    private static Optional<CharSequence> getTextOrElseGetContentDescription(final AccessibilityNodeInfo node) {
+        return Optional
+                .ofNullable(node.getText())
+                .or(() -> Optional.ofNullable(node.getContentDescription()));
+    }
+
     private void handleResolverEvent() {
         if (!isWaitingForShareSheet) {
             return;
@@ -263,10 +255,12 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
             return;
         }
 
-        List<AccessibilityNodeInfo> urlNodes = rootNode.findAccessibilityNodeInfosByViewId("android:id/content_preview_text");
-        if (urlNodes.isEmpty()) {
-            urlNodes = rootNode.findAccessibilityNodeInfosByViewId("com.android.intentresolver:id/sem_chooser_sub_title_details_view");
-        }
+        final List<AccessibilityNodeInfo> urlNodes =
+                ImmutableList
+                        .<AccessibilityNodeInfo>builder()
+                        .addAll(rootNode.findAccessibilityNodeInfosByViewId("android:id/content_preview_text"))
+                        .addAll(rootNode.findAccessibilityNodeInfosByViewId("com.android.intentresolver:id/sem_chooser_sub_title_details_view"))
+                        .build();
         if (!urlNodes.isEmpty()) {
             final CharSequence url = urlNodes.get(0).getText();
             if (url != null) {
@@ -278,7 +272,11 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                 intent.putExtra("EXTRA_MAPS_URL", url.toString());
                 startActivity(intent);
             }
+            for (final AccessibilityNodeInfo n : urlNodes) {
+                n.recycle();
+            }
         }
+        rootNode.recycle();
     }
 
     private static WindowManager.LayoutParams getLayoutParams(final Rect bounds) {
@@ -305,6 +303,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         if (highlightOverlay != null) {
             windowManager.removeView(highlightOverlay);
             highlightOverlay = null;
+            lastOverlayBounds.setEmpty();
         }
     }
 
