@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+// FK-TODO: refactor
 public class RouteOptimizerAccessibilityService extends AccessibilityService {
 
     private static final String TAG = "RouteOptimizerAS";
@@ -21,6 +23,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
 
     private int lastKnownStopCount = 0;
     private boolean isWaitingForShareSheet = false;
+    private boolean isWaitingToClickShareAfterBack = false;
     private final Pattern stopCountPattern = Pattern.compile("(\\d+)\\s*(stops|Stopps)");
 
     @Override
@@ -44,47 +47,84 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     }
 
     private void handleMapsEvent(final AccessibilityEvent event) {
-        final AccessibilityNodeInfo rootNode = getRootInActiveWindow();
-        if (rootNode == null) {
-            return;
-        }
-
-        // 1. Update state: Always track stop count if "Add stops" is visible
-        updateLastKnownStopCount(rootNode);
+        // 1. Always update stop count if we can find it in any window
+        updateLastKnownStopCountFromWindows();
 
         // 2. Trigger automation on click
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED) {
             final String eventText = getEventText(event);
             if (isAddStopsText(eventText)) {
                 if (lastKnownStopCount >= STOP_LIMIT) {
-                    Log.d(TAG, "Stop limit (" + lastKnownStopCount + ") reached. Triggering automation.");
-                    triggerShareFlow(rootNode);
+                    Log.d(TAG, "Stop limit reached. Processing automation.");
+                    processLimitReached();
                 } else {
                     Log.v(TAG, "Clicked Add stops, but count is only " + lastKnownStopCount);
                 }
             }
         }
 
-        rootNode.recycle();
+        // 3. If we are waiting for the planning screen to reappear after dismissing an overlay
+        if (isWaitingToClickShareAfterBack && event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
+            tryClickShareButton();
+        }
     }
 
-    private void updateLastKnownStopCount(AccessibilityNodeInfo rootNode) {
-        // Check if "Add stops" button is visible to ensure we are in the route planning screen
-        if (findNodeByText(rootNode, "Add stops", "Stopp hinzufügen") != null) {
-            // Find the "n stops" label
-            AccessibilityNodeInfo stopCountNode = findStopCountNode(rootNode);
-            if (stopCountNode != null) {
-                String text = getTextOrElseGetContentDescription(stopCountNode).map(CharSequence::toString).orElse("");
-                Matcher matcher = stopCountPattern.matcher(text);
-                if (matcher.find()) {
-                    try {
-                        lastKnownStopCount = Integer.parseInt(matcher.group(1));
-                        Log.v(TAG, "Updated lastKnownStopCount: " + lastKnownStopCount);
-                    } catch (NumberFormatException ignored) {
-                    }
+    private void processLimitReached() {
+        // First, check if share button is already there (maybe no blocking bottom sheet appeared)
+        if (!tryClickShareButton()) {
+            // Button not found. Assume it's blocked by the "unnecessary" bottom sheet.
+            Log.d(TAG, "Share button not found. Dismissing potential overlay via BACK.");
+            performGlobalAction(GLOBAL_ACTION_BACK);
+            isWaitingToClickShareAfterBack = true;
+        }
+    }
+
+    private boolean tryClickShareButton() {
+        Optional<AccessibilityNodeInfo> shareButton = findShareButtonInAllWindows();
+        if (shareButton.isPresent()) {
+            shareButton.get().performAction(AccessibilityNodeInfo.ACTION_CLICK);
+            isWaitingForShareSheet = true;
+            isWaitingToClickShareAfterBack = false;
+            Log.d(TAG, "Successfully clicked Share button.");
+            return true;
+        }
+        return false;
+    }
+
+    private void updateLastKnownStopCountFromWindows() {
+        List<AccessibilityWindowInfo> windows = getWindows();
+        for (AccessibilityWindowInfo window : windows) {
+            AccessibilityNodeInfo root = window.getRoot();
+            if (root == null) continue;
+
+            if (findNodeByText(root, "Add stops", "Stopp hinzufügen") != null) {
+                AccessibilityNodeInfo stopCountNode = findStopCountNode(root);
+                if (stopCountNode != null) {
+                    getTextOrElseGetContentDescription(stopCountNode).ifPresent(text -> {
+                        Matcher matcher = stopCountPattern.matcher(text.toString());
+                        if (matcher.find()) {
+                            try {
+                                lastKnownStopCount = Integer.parseInt(matcher.group(1));
+                            } catch (NumberFormatException ignored) {
+                            }
+                        }
+                    });
                 }
             }
+            root.recycle();
         }
+    }
+
+    private Optional<AccessibilityNodeInfo> findShareButtonInAllWindows() {
+        List<AccessibilityWindowInfo> windows = getWindows();
+        for (AccessibilityWindowInfo window : windows) {
+            AccessibilityNodeInfo root = window.getRoot();
+            if (root == null) continue;
+            Optional<AccessibilityNodeInfo> button = findShareButton(root);
+            if (button.isPresent()) return button;
+            root.recycle();
+        }
+        return Optional.empty();
     }
 
     private AccessibilityNodeInfo findStopCountNode(AccessibilityNodeInfo rootNode) {
@@ -126,19 +166,6 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                 .or(() -> Optional.ofNullable(node.getContentDescription()));
     }
 
-    private void triggerShareFlow(final AccessibilityNodeInfo rootNode) {
-        RouteOptimizerAccessibilityService
-                .findShareButton(rootNode)
-                .ifPresentOrElse(
-                        shareButton -> {
-                            shareButton.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                            isWaitingForShareSheet = true;
-                            Log.d(TAG, "Clicked Share button.");
-                        },
-                        () -> Log.e(TAG, "Could not find Share button.")
-                                );
-    }
-
     private static Optional<AccessibilityNodeInfo> findShareButton(final AccessibilityNodeInfo rootNode) {
         return Stream.of(
                         rootNode.findAccessibilityNodeInfosByViewId("com.google.android.apps.maps:id/directions_header_share_action_button"),
@@ -171,6 +198,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                 // 2. Pass to MainActivity
                 final Intent intent = new Intent(this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                // FK-TODO: extract constant for "EXTRA_MAPS_URL" and also use in MainActivity
                 intent.putExtra("EXTRA_MAPS_URL", url.toString());
                 startActivity(intent);
             }
