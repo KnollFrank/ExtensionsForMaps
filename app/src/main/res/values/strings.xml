@@ -10,4 +10,9 @@
     <string name="accessibility_service_label">Routeoptimizer Service</string>
     <string name="accessibility_service_description">Automatically detects when Google Maps reaches the 10-stop limit and helps to expand the route.</string>
     <string name="coffee_button">Buy me a coffee</string>
+    <string name="permissions_title">Setup Automation</string>
+    <string name="permissions_message">To automate Google Maps, please enable the following permissions:</string>
+    <string name="permit_accessibility">Enable Service</string>
+    <string name="permit_overlay">Allow Overlays</string>
+    <string name="permit_done">✓ Enabled</string>
 </resources>

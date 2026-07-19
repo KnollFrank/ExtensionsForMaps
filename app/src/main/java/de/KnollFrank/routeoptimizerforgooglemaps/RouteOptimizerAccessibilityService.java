@@ -1,11 +1,19 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import android.accessibilityservice.AccessibilityService;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
+import android.widget.FrameLayout;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,15 +28,24 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     private static final String MAPS_PACKAGE = "com.google.android.apps.maps";
     private static final String RESOLVER_PACKAGE = "com.android.intentresolver";
     private static final int STOP_LIMIT = 8; // 8 intermediate stops + origin + destination = 10
+    // FK-TODO: es fehlen noch viele Sprachen
+    private static final String ADD_STOPS_EN = "Add stops";
+    private static final String ADD_STOPS_DE = "Zwischenstopps hinzufügen";
+    private static final String STOPS_EN = "stops";
+    private static final String STOPS_DE = "Haltestellen";
 
     private int lastKnownStopCount = 0;
     private boolean isWaitingForShareSheet = false;
     private boolean isWaitingToClickShareAfterBack = false;
-    private final Pattern stopCountPattern = Pattern.compile("(\\d+)\\s*(stops|Stopps)");
+    private final Pattern stopCountPattern = Pattern.compile(String.format("(\\d+)\\s*(%s|%s)", STOPS_EN, STOPS_DE));
+
+    private WindowManager windowManager;
+    private View highlightOverlay;
 
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
+        windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         Log.d(TAG, "Service connected and bound!");
     }
 
@@ -38,7 +55,6 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         if (packageName == null) {
             return;
         }
-
         if (MAPS_PACKAGE.equals(packageName.toString())) {
             handleMapsEvent(event);
         } else if (RESOLVER_PACKAGE.equals(packageName.toString())) {
@@ -47,10 +63,13 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     }
 
     private void handleMapsEvent(final AccessibilityEvent event) {
-        // 1. Always update stop count if we can find it in any window
+        // 1. Update state: Always track stop count if possible
         updateLastKnownStopCountFromWindows();
 
-        // 2. Trigger automation on click
+        // 2. Handle highlight overlay
+        updateHighlightOverlay();
+
+        // 3. Handle automation logic
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED) {
             final String eventText = getEventText(event);
             if (isAddStopsText(eventText)) {
@@ -63,16 +82,86 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
             }
         }
 
-        // 3. If we are waiting for the planning screen to reappear after dismissing an overlay
+        // 4. If we are waiting for the planning screen to reappear after dismissing an overlay
         if (isWaitingToClickShareAfterBack && event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
             tryClickShareButton();
         }
     }
 
+    private void updateHighlightOverlay() {
+        if (!Settings.canDrawOverlays(this)) {
+            removeHighlight();
+            return;
+        }
+        if (lastKnownStopCount < STOP_LIMIT) {
+            removeHighlight();
+            return;
+        }
+        final AccessibilityNodeInfo addStopsButton = findAddStopsButtonInAllWindows();
+        if (addStopsButton != null) {
+            final Rect bounds = new Rect();
+            addStopsButton.getBoundsInScreen(bounds);
+            showHighlight(bounds);
+            addStopsButton.recycle();
+        } else {
+            removeHighlight();
+        }
+    }
+
+    private void showHighlight(final Rect bounds) {
+        if (highlightOverlay == null) {
+            highlightOverlay = new FrameLayout(this);
+            highlightOverlay.setBackgroundResource(R.drawable.border_highlight);
+            windowManager.addView(highlightOverlay, getLayoutParams(bounds));
+        } else {
+            final WindowManager.LayoutParams params = (WindowManager.LayoutParams) highlightOverlay.getLayoutParams();
+            updateParams(bounds, params);
+            windowManager.updateViewLayout(highlightOverlay, params);
+        }
+    }
+
+    private static WindowManager.LayoutParams getLayoutParams(final Rect bounds) {
+        final WindowManager.LayoutParams params =
+                new WindowManager.LayoutParams(
+                        bounds.width(),
+                        bounds.height(),
+                        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                        PixelFormat.TRANSLUCENT);
+        params.gravity = Gravity.TOP | Gravity.START;
+        updateParams(bounds, params);
+        return params;
+    }
+
+    private static void updateParams(final Rect src, final WindowManager.LayoutParams dst) {
+        dst.x = src.left;
+        dst.y = src.top;
+        dst.width = src.width();
+        dst.height = src.height();
+    }
+
+    private void removeHighlight() {
+        if (highlightOverlay != null) {
+            windowManager.removeView(highlightOverlay);
+            highlightOverlay = null;
+        }
+    }
+
+    // FK-TODO: return Optional<AccessibilityNodeInfo>
+    private AccessibilityNodeInfo findAddStopsButtonInAllWindows() {
+        List<AccessibilityWindowInfo> windows = getWindows();
+        for (AccessibilityWindowInfo window : windows) {
+            AccessibilityNodeInfo root = window.getRoot();
+            if (root == null) continue;
+            AccessibilityNodeInfo button = findNodeByText(root, ADD_STOPS_EN, ADD_STOPS_DE);
+            if (button != null) return button;
+            root.recycle();
+        }
+        return null;
+    }
+
     private void processLimitReached() {
-        // First, check if share button is already there (maybe no blocking bottom sheet appeared)
         if (!tryClickShareButton()) {
-            // Button not found. Assume it's blocked by the "unnecessary" bottom sheet.
             Log.d(TAG, "Share button not found. Dismissing potential overlay via BACK.");
             performGlobalAction(GLOBAL_ACTION_BACK);
             isWaitingToClickShareAfterBack = true;
@@ -97,7 +186,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
             AccessibilityNodeInfo root = window.getRoot();
             if (root == null) continue;
 
-            if (findNodeByText(root, "Add stops", "Stopp hinzufügen") != null) {
+            if (findNodeByText(root, ADD_STOPS_EN, ADD_STOPS_DE) != null) {
                 AccessibilityNodeInfo stopCountNode = findStopCountNode(root);
                 if (stopCountNode != null) {
                     getTextOrElseGetContentDescription(stopCountNode).ifPresent(text -> {
@@ -128,9 +217,9 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     }
 
     private AccessibilityNodeInfo findStopCountNode(AccessibilityNodeInfo rootNode) {
-        List<AccessibilityNodeInfo> nodes = rootNode.findAccessibilityNodeInfosByText("stops");
+        List<AccessibilityNodeInfo> nodes = rootNode.findAccessibilityNodeInfosByText(STOPS_EN);
         if (nodes.isEmpty()) {
-            nodes = rootNode.findAccessibilityNodeInfosByText("Stopps");
+            nodes = rootNode.findAccessibilityNodeInfosByText(STOPS_DE);
         }
         return nodes.isEmpty() ? null : nodes.get(0);
     }
@@ -144,7 +233,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     }
 
     private boolean isAddStopsText(String text) {
-        return text.contains("Add stops") || text.contains("Stopp hinzufügen");
+        return text.contains(ADD_STOPS_EN) || text.contains(ADD_STOPS_DE);
     }
 
     private String getEventText(final AccessibilityEvent event) {
@@ -198,12 +287,17 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                 // 2. Pass to MainActivity
                 final Intent intent = new Intent(this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                // FK-TODO: extract constant for "EXTRA_MAPS_URL" and also use in MainActivity
                 intent.putExtra("EXTRA_MAPS_URL", url.toString());
                 startActivity(intent);
             }
         }
         rootNode.recycle();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        removeHighlight();
     }
 
     @Override

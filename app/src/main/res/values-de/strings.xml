@@ -11,4 +11,9 @@
     <string name="accessibility_service_label">Routeoptimizer Automatisierung</string>
     <string name="accessibility_service_description">Erkennt automatisch, wenn Google Maps das Limit von 10 Stopps erreicht hat, und hilft dabei, die Route zu erweitern.</string>
     <string name="coffee_button">Kaffeekasse</string>
+    <string name="permissions_title">Automatisierung einrichten</string>
+    <string name="permissions_message">Um Google Maps zu automatisieren, aktivieren Sie bitte folgende Berechtigungen:</string>
+    <string name="permit_accessibility">Service aktivieren</string>
+    <string name="permit_overlay">Overlays erlauben</string>
+    <string name="permit_done">✓ Aktiviert</string>
 </resources>
