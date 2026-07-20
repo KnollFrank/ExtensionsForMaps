@@ -1,0 +1,59 @@
+package de.KnollFrank.routeoptimizerforgooglemaps;
+
+import android.content.Context;
+import android.content.res.Resources;
+import android.util.Log;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidJUnit4.class)
+public class MapsResourceDiscoveryTest {
+
+    private static final String TAG = "MapsDiscovery";
+    private static final String MAPS_PACKAGE = "com.google.android.apps.maps";
+
+    @Test
+    public void discoverMapsResources() {
+        Log.d(TAG, "Starting wide-range resource scan for Google Maps...");
+        try {
+            final Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+            final Resources mapsRes = context.getPackageManager().getResourcesForApplication(MAPS_PACKAGE);
+
+            // Large scan range to cover strings and plurals in large APKs
+            // Package 0x7f, types 0x01-0x20
+            for (int type = 0x01; type <= 0x20; type++) {
+                final int baseId = 0x7f000000 | (type << 16);
+                for (int i = 0; i < 0xFFFF; i++) {
+                    final int id = baseId | i;
+                    try {
+                        final String name = mapsRes.getResourceEntryName(id);
+                        final String typeName = mapsRes.getResourceTypeName(id);
+                        if ("string".equals(typeName)) {
+                            checkAndLog(name, mapsRes.getString(id));
+                        } else if ("plurals".equals(typeName)) {
+                            checkAndLog(name, mapsRes.getQuantityString(id, 5));
+                        }
+                    } catch (final Resources.NotFoundException ignored) {
+                    }
+                }
+            }
+            Log.d(TAG, "Scan finished.");
+        } catch (final Exception e) {
+            Log.e(TAG, "Scan failed: " + e.getMessage());
+        }
+    }
+
+    // FK-TODO: refactor
+    private void checkAndLog(final String name, final String value) {
+        final String n = name.toLowerCase();
+        final String v = value.toLowerCase();
+        if (n.contains("stop") || n.contains("waypoint") || n.contains("add") ||
+                v.contains("stopp") || v.contains("halt") || v.contains("zwischen") || v.contains("add stop")) {
+            Log.d(TAG, String.format("Found: [%s] -> %s", name, value));
+        }
+    }
+}

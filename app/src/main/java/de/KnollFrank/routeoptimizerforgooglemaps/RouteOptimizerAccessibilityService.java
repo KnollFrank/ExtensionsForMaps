@@ -3,6 +3,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.provider.Settings;
@@ -14,6 +15,9 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.widget.FrameLayout;
+
+import androidx.annotation.PluralsRes;
+import androidx.annotation.StringRes;
 
 import com.google.common.collect.ImmutableList;
 
@@ -29,22 +33,18 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     private static final String MAPS_PACKAGE = "com.google.android.apps.maps";
     private static final String RESOLVER_PACKAGE = "com.android.intentresolver";
     private static final int STOP_LIMIT = 8; // 8 intermediate stops + origin + destination = 10
-    // FK-TODO: es fehlen noch viele Sprachen
-    private static final String ADD_STOPS_EN = "Add stops";
-    private static final String ADD_STOPS_DE = "Zwischenstopps hinzufügen";
-    private static final String STOPS_EN = "stops";
-    private static final String STOPS_DE = "Haltestellen";
+
+    private static final String KEY_ADD_STOPS = "ADD_STOPS_ENTRYPOINT_LABEL"; // e.g. "Zwischenstopps hinzufügen"
+    private static final String KEY_COUNT_STOPS = "DIRECTIONS_COUNT_STOPS"; // e.g. "%d Haltestellen"
     private static final String SHARE_ID = "com.google.android.apps.maps:id/directions_header_share_action_button";
+
+    private String localizedAddStopsText;
+    private String localizedStopsWord;
+    private Pattern localizedStopCountPattern;
 
     private int lastKnownStopCount = 0;
     private boolean isWaitingForShareSheet = false;
     private boolean isWaitingToClickShareAfterBack = false;
-    private final Pattern stopCountPattern =
-            Pattern.compile(
-                    String.format(
-                            "(\\d+)\\s*(%s|%s)",
-                            STOPS_EN,
-                            STOPS_DE));
 
     private WindowManager windowManager;
     private View highlightOverlay;
@@ -57,7 +57,8 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     protected void onServiceConnected() {
         super.onServiceConnected();
         windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        Log.d(TAG, "Service connected and bound!");
+        resolveLocalizedMapsStrings();
+        Log.d(TAG, "Service connected and bound! Localized 'Add stops': " + localizedAddStopsText);
     }
 
     @Override
@@ -71,6 +72,62 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
             handleMapsEvent(event);
         } else if (RESOLVER_PACKAGE.equals(pkg)) {
             handleResolverEvent();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        removeHighlight();
+    }
+
+    @Override
+    public void onInterrupt() {
+        Log.d(TAG, "Service interrupted.");
+    }
+
+    // FK-TODO: move method and variables localizedAddStopsText, localizedStopsWord and localizedStopCountPattern to another class
+    private void resolveLocalizedMapsStrings() {
+        try {
+            final Resources mapsRes = getPackageManager().getResourcesForApplication(MAPS_PACKAGE);
+
+            // Resolve "Add stops" label
+            // FK-TODO: use OptionalInt?
+            final @StringRes int addStopsId = mapsRes.getIdentifier(KEY_ADD_STOPS, "string", MAPS_PACKAGE);
+            if (addStopsId != 0) {
+                localizedAddStopsText = mapsRes.getString(addStopsId);
+            } else {
+                localizedAddStopsText = "Add stops"; // Fallback
+            }
+
+            // Resolve "n stops" pattern
+            // FK-TODO: use OptionalInt?
+            final @PluralsRes int countStopsId = mapsRes.getIdentifier(KEY_COUNT_STOPS, "plurals", MAPS_PACKAGE);
+            if (countStopsId != 0) {
+                // Get the string for a quantity of 5 to extract the pattern (e.g., "%d stops")
+                final String patternStr = mapsRes.getQuantityString(countStopsId, 5);
+                localizedStopsWord =
+                        patternStr
+                                .replace("%d", "")
+                                .replace("%1$d", "")
+                                .trim();
+                // Convert "%d stops" to a regex pattern like "(\d+)\s*stops"
+                final String regex =
+                        patternStr
+                                .replace("%d", "(\\d+)")
+                                .replace("%1$d", "(\\d+)");
+                localizedStopCountPattern = Pattern.compile(regex);
+            } else {
+                // FK-TODO: replace all fallbacks with Exceptions
+                localizedStopsWord = "stops";
+                localizedStopCountPattern = Pattern.compile("(\\d+)\\s*(stops|Stopps)"); // Fallback
+            }
+        } catch (final Exception e) {
+            Log.e(TAG, "Failed to resolve Maps strings: " + e.getMessage());
+            // FK-TODO: throw exception
+            localizedAddStopsText = "Add stops";
+            localizedStopsWord = "stops";
+            localizedStopCountPattern = Pattern.compile("(\\d+)\\s*(stops|Stopps)");
         }
     }
 
@@ -115,20 +172,17 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         root.recycle();
     }
 
-    private void updateStopCount(AccessibilityNodeInfo root) {
-        List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(STOPS_EN);
-        if (nodes.isEmpty()) {
-            nodes = root.findAccessibilityNodeInfosByText(STOPS_DE);
-        }
+    private void updateStopCount(final AccessibilityNodeInfo root) {
+        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(localizedStopsWord);
         for (final AccessibilityNodeInfo node : nodes) {
             RouteOptimizerAccessibilityService
                     .getTextOrElseGetContentDescription(node)
                     .ifPresent(text -> {
-                        final Matcher matcher = stopCountPattern.matcher(text.toString());
+                        final Matcher matcher = localizedStopCountPattern.matcher(text);
                         if (matcher.find()) {
                             try {
                                 lastKnownStopCount = Integer.parseInt(matcher.group(1));
-                            } catch (NumberFormatException ignored) {
+                            } catch (final NumberFormatException ignored) {
                             }
                         }
                     });
@@ -141,28 +195,26 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
             removeHighlight();
             return;
         }
-
-        final AccessibilityNodeInfo addStopsButton = findAddStopsButton(root);
-        if (addStopsButton != null) {
-            final Rect bounds = new Rect();
-            addStopsButton.getBoundsInScreen(bounds);
-
-            // Only update UI if bounds have actually changed
-            if (highlightOverlay == null || !lastOverlayBounds.equals(bounds)) {
-                showHighlight(bounds);
-            }
-            addStopsButton.recycle();
-        } else {
-            removeHighlight();
-        }
+        this
+                .findAddStopsButton(root)
+                .ifPresentOrElse(
+                        addStopsButton -> {
+                            final Rect bounds = new Rect();
+                            addStopsButton.getBoundsInScreen(bounds);
+                            // Only update UI if bounds have actually changed
+                            if (highlightOverlay == null || !lastOverlayBounds.equals(bounds)) {
+                                showHighlight(bounds);
+                            }
+                            addStopsButton.recycle();
+                        },
+                        this::removeHighlight);
     }
 
-    private AccessibilityNodeInfo findAddStopsButton(final AccessibilityNodeInfo root) {
-        List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(ADD_STOPS_EN);
-        if (nodes.isEmpty()) {
-            nodes = root.findAccessibilityNodeInfosByText(ADD_STOPS_DE);
-        }
-        return nodes.isEmpty() ? null : nodes.get(0);
+    private Optional<AccessibilityNodeInfo> findAddStopsButton(final AccessibilityNodeInfo root) {
+        return root
+                .findAccessibilityNodeInfosByText(localizedAddStopsText)
+                .stream()
+                .findFirst();
     }
 
     private void showHighlight(final Rect bounds) {
@@ -199,6 +251,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         return false;
     }
 
+    // FK-TODO: refactor
     private Optional<AccessibilityNodeInfo> findShareButtonInAllWindows() {
         final List<AccessibilityWindowInfo> windows = getWindows();
         for (final AccessibilityWindowInfo window : windows) {
@@ -217,6 +270,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     private static Optional<AccessibilityNodeInfo> findShareButton(final AccessibilityNodeInfo rootNode) {
         List<AccessibilityNodeInfo> nodes = rootNode.findAccessibilityNodeInfosByViewId(SHARE_ID);
         if (nodes.isEmpty()) {
+            // FK-TODO: use string resource
             nodes = rootNode.findAccessibilityNodeInfosByText("Share");
         }
         if (nodes.isEmpty()) {
@@ -226,7 +280,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     }
 
     private boolean isAddStopsText(String text) {
-        return text != null && (text.contains(ADD_STOPS_EN) || text.contains(ADD_STOPS_DE));
+        return text != null && text.contains(localizedAddStopsText);
     }
 
     private String getEventText(final AccessibilityEvent event) {
@@ -240,10 +294,11 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         return sb.toString();
     }
 
-    private static Optional<CharSequence> getTextOrElseGetContentDescription(final AccessibilityNodeInfo node) {
+    private static Optional<String> getTextOrElseGetContentDescription(final AccessibilityNodeInfo node) {
         return Optional
                 .ofNullable(node.getText())
-                .or(() -> Optional.ofNullable(node.getContentDescription()));
+                .or(() -> Optional.ofNullable(node.getContentDescription()))
+                .map(CharSequence::toString);
     }
 
     private void handleResolverEvent() {
@@ -305,16 +360,5 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
             highlightOverlay = null;
             lastOverlayBounds.setEmpty();
         }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        removeHighlight();
-    }
-
-    @Override
-    public void onInterrupt() {
-        Log.d(TAG, "Service interrupted.");
     }
 }
