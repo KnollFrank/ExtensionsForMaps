@@ -10,6 +10,8 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.stream.Stream;
+
 @RunWith(AndroidJUnit4.class)
 public class MapsResourceDiscoveryTest {
 
@@ -47,13 +49,32 @@ public class MapsResourceDiscoveryTest {
         }
     }
 
-    // FK-TODO: refactor
     private void checkAndLog(final String name, final String value) {
-        final String n = name.toLowerCase();
-        final String v = value.toLowerCase();
-        if (n.contains("stop") || n.contains("waypoint") || n.contains("add") ||
-                v.contains("stopp") || v.contains("halt") || v.contains("zwischen") || v.contains("add stop")) {
+        if (isCandidateName(name) || isCandidateValue(value)) {
             Log.d(TAG, String.format("Found: [%s] -> %s", name, value));
         }
+    }
+
+    private static boolean isCandidateName(final String name) {
+        return Stream
+                .of(
+                        "stop",
+                        "waypoint",
+                        "add")
+                .map(String::toLowerCase)
+                .anyMatch(name.toLowerCase()::contains);
+    }
+
+    private static boolean isCandidateValue(final String value) {
+        return Stream
+                .of(
+                        "stopp",
+                        "halt",
+                        "zwischen",
+                        "add stop",
+                        "share",
+                        "teilen")
+                .map(String::toLowerCase)
+                .anyMatch(value.toLowerCase()::contains);
     }
 }
