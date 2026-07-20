@@ -3,6 +3,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -16,13 +17,14 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.widget.FrameLayout;
 
-import androidx.annotation.PluralsRes;
-import androidx.annotation.StringRes;
-
 import com.google.common.collect.ImmutableList;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,9 +40,9 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     private static final String KEY_COUNT_STOPS = "DIRECTIONS_COUNT_STOPS"; // e.g. "%d Haltestellen"
     private static final String SHARE_ID = "com.google.android.apps.maps:id/directions_header_share_action_button";
 
-    private String localizedAddStopsText;
-    private String localizedStopsWord;
-    private Pattern localizedStopCountPattern;
+    private final Set<String> localizedAddStopsTexts = new HashSet<>();
+    private final Set<String> localizedStopsWords = new HashSet<>();
+    private final List<Pattern> localizedStopCountPatterns = new ArrayList<>();
 
     private int lastKnownStopCount = 0;
     private boolean isWaitingForShareSheet = false;
@@ -58,7 +60,13 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         super.onServiceConnected();
         windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         resolveLocalizedMapsStrings();
-        Log.d(TAG, "Service connected and bound! Localized 'Add stops': " + localizedAddStopsText);
+    }
+
+    @Override
+    public void onConfigurationChanged(final Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.d(TAG, "Configuration changed, re-resolving localized strings.");
+        resolveLocalizedMapsStrings();
     }
 
     @Override
@@ -86,48 +94,71 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         Log.d(TAG, "Service interrupted.");
     }
 
-    // FK-TODO: move method and variables localizedAddStopsText, localizedStopsWord and localizedStopCountPattern to another class
+    // FK-TODO: move method and variables localizedAddStopsTexts, localizedStopsWords and localizedStopCountPatterns to another class
+    // FK-TODO: refactor
     private void resolveLocalizedMapsStrings() {
+        localizedAddStopsTexts.clear();
+        localizedStopsWords.clear();
+        localizedStopCountPatterns.clear();
+
         try {
-            final Resources mapsRes = getPackageManager().getResourcesForApplication(MAPS_PACKAGE);
+            final Context mapsContext = createPackageContext(MAPS_PACKAGE, 0);
 
-            // Resolve "Add stops" label
-            // FK-TODO: use OptionalInt?
-            final @StringRes int addStopsId = mapsRes.getIdentifier(KEY_ADD_STOPS, "string", MAPS_PACKAGE);
-            if (addStopsId != 0) {
-                localizedAddStopsText = mapsRes.getString(addStopsId);
-            } else {
-                localizedAddStopsText = "Add stops"; // Fallback
+            // Get ALL locales supported by the Google Maps APK
+            final String[] supportedLocales = mapsContext.getAssets().getLocales();
+            Log.d(TAG, "Scanning " + supportedLocales.length + " locales from Maps APK...");
+
+            for (final String localeTag : supportedLocales) {
+                if (localeTag == null || localeTag.isEmpty()) continue;
+
+                // Convert locale tag (e.g., "de-DE", "en-US", or just "de") to Locale object
+                final Locale locale = Locale.forLanguageTag(localeTag.replace('_', '-'));
+
+                final Configuration config = new Configuration(mapsContext.getResources().getConfiguration());
+                config.setLocale(locale);
+                final Context localizedContext = mapsContext.createConfigurationContext(config);
+                final Resources mapsRes = localizedContext.getResources();
+
+                // 1. Resolve "Add stops" label
+                final int addStopsId = mapsRes.getIdentifier(KEY_ADD_STOPS, "string", MAPS_PACKAGE);
+                if (addStopsId != 0) {
+                    final String text = mapsRes.getString(addStopsId);
+                    if (localizedAddStopsTexts.add(text)) {
+                        Log.v(TAG, "Discovered [" + locale + "] AddStops: " + text);
+                    }
+                }
+
+                // 2. Resolve "n stops" pattern
+                final int countStopsId = mapsRes.getIdentifier(KEY_COUNT_STOPS, "plurals", MAPS_PACKAGE);
+                if (countStopsId != 0) {
+                    final String patternStr = mapsRes.getQuantityString(countStopsId, 5);
+                    final String word = patternStr.replace("%d", "").replace("%1$d", "").trim();
+                    if (localizedStopsWords.add(word)) {
+                        final String regex = patternStr.replace("%d", "(\\d+)").replace("%1$d", "(\\d+)");
+                        localizedStopCountPatterns.add(Pattern.compile(regex));
+                        Log.v(TAG, "Discovered [" + locale + "] StopsWord: " + word);
+                    }
+                }
             }
 
-            // Resolve "n stops" pattern
-            // FK-TODO: use OptionalInt?
-            final @PluralsRes int countStopsId = mapsRes.getIdentifier(KEY_COUNT_STOPS, "plurals", MAPS_PACKAGE);
-            if (countStopsId != 0) {
-                // Get the string for a quantity of 5 to extract the pattern (e.g., "%d stops")
-                final String patternStr = mapsRes.getQuantityString(countStopsId, 5);
-                localizedStopsWord =
-                        patternStr
-                                .replace("%d", "")
-                                .replace("%1$d", "")
-                                .trim();
-                // Convert "%d stops" to a regex pattern like "(\d+)\s*stops"
-                final String regex =
-                        patternStr
-                                .replace("%d", "(\\d+)")
-                                .replace("%1$d", "(\\d+)");
-                localizedStopCountPattern = Pattern.compile(regex);
-            } else {
-                // FK-TODO: replace all fallbacks with Exceptions
-                localizedStopsWord = "stops";
-                localizedStopCountPattern = Pattern.compile("(\\d+)\\s*(stops|Stopps)"); // Fallback
+            // Fallbacks if discovery was too restrictive
+            if (localizedAddStopsTexts.isEmpty()) {
+                localizedAddStopsTexts.add("Add stops");
+                localizedAddStopsTexts.add("Zwischenstopps hinzufügen");
             }
+            if (localizedStopsWords.isEmpty()) {
+                localizedStopsWords.add("stops");
+                localizedStopsWords.add("Haltestellen");
+                localizedStopCountPatterns.add(Pattern.compile("(\\d+)\\s*(stops|Stopps|Haltestellen)"));
+            }
+
+            Log.d(TAG, "Final Discovery Results: " + localizedAddStopsTexts.size() + " 'Add' texts, " +
+                    localizedStopsWords.size() + " 'Stops' words found.");
         } catch (final Exception e) {
             Log.e(TAG, "Failed to resolve Maps strings: " + e.getMessage());
-            // FK-TODO: throw exception
-            localizedAddStopsText = "Add stops";
-            localizedStopsWord = "stops";
-            localizedStopCountPattern = Pattern.compile("(\\d+)\\s*(stops|Stopps)");
+            localizedAddStopsTexts.add("Add stops");
+            localizedStopsWords.add("stops");
+            localizedStopCountPatterns.add(Pattern.compile("(\\d+)\\s*(stops|Stopps)"));
         }
     }
 
@@ -173,24 +204,30 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     }
 
     private void updateStopCount(final AccessibilityNodeInfo root) {
-        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(localizedStopsWord);
-        for (final AccessibilityNodeInfo node : nodes) {
-            RouteOptimizerAccessibilityService
-                    .getTextOrElseGetContentDescription(node)
-                    .ifPresent(text -> {
-                        final Matcher matcher = localizedStopCountPattern.matcher(text);
-                        if (matcher.find()) {
-                            try {
-                                lastKnownStopCount = Integer.parseInt(matcher.group(1));
-                            } catch (final NumberFormatException ignored) {
+        for (final String stopsWord : localizedStopsWords) {
+            final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(stopsWord);
+            for (final AccessibilityNodeInfo node : nodes) {
+                RouteOptimizerAccessibilityService
+                        .getTextOrElseGetContentDescription(node)
+                        .ifPresent(text -> {
+                            // FK-TODO: refactor
+                            for (final Pattern pattern : localizedStopCountPatterns) {
+                                final Matcher matcher = pattern.matcher(text);
+                                if (matcher.find()) {
+                                    try {
+                                        lastKnownStopCount = Integer.parseInt(matcher.group(1));
+                                        return; // Found it
+                                    } catch (final NumberFormatException ignored) {
+                                    }
+                                }
                             }
-                        }
-                    });
-            node.recycle();
+                        });
+                node.recycle();
+            }
         }
     }
 
-    private void updateHighlightOverlay(AccessibilityNodeInfo root) {
+    private void updateHighlightOverlay(final AccessibilityNodeInfo root) {
         if (!Settings.canDrawOverlays(this) || lastKnownStopCount < STOP_LIMIT) {
             removeHighlight();
             return;
@@ -210,11 +247,15 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                         this::removeHighlight);
     }
 
+    // FK-TODO: refactor
     private Optional<AccessibilityNodeInfo> findAddStopsButton(final AccessibilityNodeInfo root) {
-        return root
-                .findAccessibilityNodeInfosByText(localizedAddStopsText)
-                .stream()
-                .findFirst();
+        for (final String addStopsText : localizedAddStopsTexts) {
+            final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(addStopsText);
+            if (!nodes.isEmpty()) {
+                return Optional.of(nodes.get(0));
+            }
+        }
+        return Optional.empty();
     }
 
     private void showHighlight(final Rect bounds) {
@@ -240,7 +281,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
 
     private boolean tryClickShareButton() {
         // During automation, we allow scanning all windows as a last resort
-        Optional<AccessibilityNodeInfo> shareButton = findShareButtonInAllWindows();
+        final Optional<AccessibilityNodeInfo> shareButton = findShareButtonInAllWindows();
         if (shareButton.isPresent()) {
             shareButton.get().performAction(AccessibilityNodeInfo.ACTION_CLICK);
             isWaitingForShareSheet = true;
@@ -279,13 +320,25 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         return nodes.isEmpty() ? Optional.empty() : Optional.of(nodes.get(0));
     }
 
-    private boolean isAddStopsText(String text) {
-        return text != null && text.contains(localizedAddStopsText);
+    private boolean isAddStopsText(final String text) {
+        if (text == null) {
+            return false;
+        }
+        // FK-TODO: refactor
+        for (final String addStopsText : localizedAddStopsTexts) {
+            if (text.contains(addStopsText)) {
+                return true;
+            }
+        }
+        return false;
     }
 
+    // FK-TODO: refactor
     private String getEventText(final AccessibilityEvent event) {
         final StringBuilder sb = new StringBuilder();
-        if (event.getContentDescription() != null) sb.append(event.getContentDescription());
+        if (event.getContentDescription() != null) {
+            sb.append(event.getContentDescription());
+        }
         for (final CharSequence text : event.getText()) {
             if (text != null) {
                 sb.append(text);
@@ -301,6 +354,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                 .map(CharSequence::toString);
     }
 
+    // FK-TODO: refactor
     private void handleResolverEvent() {
         if (!isWaitingForShareSheet) {
             return;
