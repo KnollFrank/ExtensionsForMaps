@@ -2,7 +2,6 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
@@ -27,6 +26,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 
 // FK-TODO: refactor
 public class RouteOptimizerAccessibilityService extends AccessibilityService {
@@ -376,10 +377,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                 Log.d(TAG, "Extracted URL: " + url);
                 isWaitingForShareSheet = false;
                 performGlobalAction(GLOBAL_ACTION_BACK);
-                final Intent intent = new Intent(this, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("EXTRA_MAPS_URL", url.toString());
-                startActivity(intent);
+                ExtraMapsUrlSenderAndReceiver.sendExtraMapsUrl(URLs.createUrl(url.toString()), this);
             }
             for (final AccessibilityNodeInfo n : urlNodes) {
                 n.recycle();

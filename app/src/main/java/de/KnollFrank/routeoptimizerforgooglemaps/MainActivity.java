@@ -21,6 +21,7 @@ import com.google.android.material.slider.Slider;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteTemplateFactory;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteToUrlConverter;
@@ -34,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         configurePlanRoute();
         configureCoffeeButton();
         configurePermissionButtons();
-        handleIntent(getIntent());
+        handleIntent(Optional.ofNullable(getIntent()));
     }
 
     @Override
@@ -47,16 +48,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onNewIntent(@NonNull final Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        handleIntent(intent);
+        handleIntent(Optional.of(intent));
     }
 
-    private void handleIntent(final Intent intent) {
-        if (intent != null && intent.hasExtra("EXTRA_MAPS_URL")) {
-            final String url = intent.getStringExtra("EXTRA_MAPS_URL");
-            Toast
-                    .makeText(this, "Received URL: " + url, Toast.LENGTH_LONG)
-                    .show();
-        }
+    private void handleIntent(final Optional<Intent> intent) {
+        ExtraMapsUrlSenderAndReceiver
+                .receiveExtraMapsUrl(intent)
+                .ifPresent(
+                        extraMapsUrl ->
+                                Toast
+                                        .makeText(this, "Received URL: " + extraMapsUrl, Toast.LENGTH_LONG)
+                                        .show());
     }
 
     private void configurePlanRoute() {
