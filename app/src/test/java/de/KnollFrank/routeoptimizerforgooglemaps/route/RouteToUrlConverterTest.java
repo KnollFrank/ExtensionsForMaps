@@ -52,30 +52,7 @@ public class RouteToUrlConverterTest {
     @Test
     public void testGetUrl_WithWaypoints() {
         // Given
-        final Route route =
-                new Route(
-                        new Stop(
-                                "1",
-                                "Origin",
-                                Optional.empty(),
-                                Geodetic.fromLatitudeLongitude(
-                                        new Angle(10.0, DEGREES),
-                                        new Angle(20.0, DEGREES))),
-                        List.of(
-                                new Stop(
-                                        "2",
-                                        "Waypoint",
-                                        Optional.empty(),
-                                        Geodetic.fromLatitudeLongitude(
-                                                new Angle(15.0, DEGREES),
-                                                new Angle(25.0, DEGREES)))),
-                        new Stop(
-                                "3",
-                                "Destination",
-                                Optional.empty(),
-                                Geodetic.fromLatitudeLongitude(
-                                        new Angle(30.0, DEGREES),
-                                        new Angle(40.0, DEGREES))));
+        final Route route = RouteTestFactory.createRouteWithTwoWaypoints();
 
         // When
         final URL result = RouteToUrlConverter.getUrl(route);

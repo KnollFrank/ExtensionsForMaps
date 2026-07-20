@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 
+// FK-TODO: in Google Maps dürfen dieselben zwei Stops (mit derselben Adresse) niemals direkt aufeinanderfolgen. Soll das hier im Konstruktor sichergestellt werden?
 public record Route(Stop origin, List<Stop> waypoints, Stop destination) {
 
     public List<Stop> stops() {
