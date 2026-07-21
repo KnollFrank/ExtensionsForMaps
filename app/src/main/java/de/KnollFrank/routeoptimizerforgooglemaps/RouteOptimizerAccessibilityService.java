@@ -252,7 +252,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     }
 
     private void updateSortButtonPosition() {
-        if (!enableEnhancedAddStopButton() || lastStopCountBounds.isEmpty()) {
+        if (lastStopCountBounds.isEmpty()) {
             removeSortButton();
             return;
         }
