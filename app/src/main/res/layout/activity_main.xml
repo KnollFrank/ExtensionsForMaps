@@ -164,27 +164,29 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnPermitAccessibility"
                     style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:layout_marginEnd="8dp"
                     android:text="@string/permit_accessibility"
-                    app:layout_constraintEnd_toStartOf="@+id/btnPermitOverlay"
-                    app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvPermissionsMessage" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnPermitOverlay"
                     style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="8dp"
                     android:text="@string/permit_overlay"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintStart_toEndOf="@id/btnPermitAccessibility"
-                    app:layout_constraintTop_toBottomOf="@id/tvPermissionsMessage" />
+                    app:layout_constraintTop_toBottomOf="@id/btnPermitAccessibility" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPermitNotifications"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/permit_notifications"
+                    app:layout_constraintTop_toBottomOf="@id/btnPermitOverlay" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>

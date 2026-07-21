@@ -14,6 +14,7 @@
     <string name="permissions_message">To automate Google Maps, please enable the following permissions:</string>
     <string name="permit_accessibility">Enable Service</string>
     <string name="permit_overlay">Allow Overlays</string>
+    <string name="permit_notifications">Enable Notifications</string>
     <string name="permit_done">✓ Enabled</string>
     <string name="error_processing_route">An error occurred while processing the route.</string>
 </resources>

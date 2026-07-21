@@ -3,6 +3,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -16,11 +17,14 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.Routes;
 
 class DummyStopAdder {
 
+    private static final String TAG = "DummyStopAdder";
+
     public static void addDummyStopToDirectionsUrlThenOpenInGoogleMaps(final URL directionsUrl, final Context context) {
         CompletableFuture
                 .supplyAsync(() -> addDummyStop(directionsUrl))
                 .whenComplete((final URL directionsUrlWithDummyStop, final Throwable throwable) -> {
                     if (throwable != null) {
+                        Log.e(TAG, "Error adding dummy stop to directions URL", throwable);
                         displayErrorProcessingRoute(context);
                         return;
                     }
