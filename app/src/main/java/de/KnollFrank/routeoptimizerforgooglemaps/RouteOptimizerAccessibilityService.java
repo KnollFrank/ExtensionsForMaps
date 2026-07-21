@@ -377,7 +377,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                 Log.d(TAG, "Extracted URL: " + url);
                 isWaitingForShareSheet = false;
                 performGlobalAction(GLOBAL_ACTION_BACK);
-                ExtraMapsUrlSenderAndReceiver.sendExtraMapsUrl(URLs.createUrl(url.toString()), this);
+                DummyStopAdder.addDummyStopToDirectionsUrlThenOpenInGoogleMaps(URLs.createUrl(url.toString()), this);
             }
             for (final AccessibilityNodeInfo n : urlNodes) {
                 n.recycle();
