@@ -4,10 +4,13 @@ import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.GradientDrawable;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -15,6 +18,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
@@ -53,6 +57,9 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     private View highlightOverlay;
     private final Rect lastOverlayBounds = new Rect();
 
+    private View sortButtonOverlay;
+    private final Rect lastStopCountBounds = new Rect();
+
     private long lastScanTime = 0;
     private static final long SCAN_INTERVAL_MS = 250;
 
@@ -88,6 +95,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     public void onDestroy() {
         super.onDestroy();
         removeHighlight();
+        removeSortButton();
     }
 
     @Override
@@ -207,10 +215,14 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         // 2. Update Overlay Position
         updateHighlightOverlay(root);
 
+        // 3. Update Sort Button Position
+        updateSortButtonPosition();
+
         root.recycle();
     }
 
     private void updateStopCount(final AccessibilityNodeInfo root) {
+        lastStopCountBounds.setEmpty();
         for (final String stopsWord : localizedStopsWords) {
             final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(stopsWord);
             for (final AccessibilityNodeInfo node : nodes) {
@@ -223,6 +235,8 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                                 if (matcher.find()) {
                                     try {
                                         lastKnownStopCount = Integer.parseInt(matcher.group(1));
+                                        node.getBoundsInScreen(lastStopCountBounds);
+                                        Log.d(TAG, String.format("Found stop count: '%s' at bounds: %s", text, lastStopCountBounds));
                                         return; // Found it
                                     } catch (final NumberFormatException ignored) {
                                     }
@@ -230,7 +244,73 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                             }
                         });
                 node.recycle();
+                if (!lastStopCountBounds.isEmpty()) {
+                    return;
+                }
             }
+        }
+    }
+
+    private void updateSortButtonPosition() {
+        if (!enableEnhancedAddStopButton() || lastStopCountBounds.isEmpty()) {
+            removeSortButton();
+            return;
+        }
+
+        if (sortButtonOverlay == null) {
+            sortButtonOverlay = createSortButton();
+            windowManager.addView(sortButtonOverlay, getSortButtonLayoutParams(lastStopCountBounds));
+        } else {
+            final WindowManager.LayoutParams params = (WindowManager.LayoutParams) sortButtonOverlay.getLayoutParams();
+            updateSortButtonParams(lastStopCountBounds, params);
+            windowManager.updateViewLayout(sortButtonOverlay, params);
+        }
+    }
+
+    private View createSortButton() {
+        final TextView button = new TextView(this);
+        button.setText("↕️ Sortieren");
+        button.setTextColor(Color.parseColor("#8AB4F8"));
+        button.setGravity(Gravity.CENTER);
+        button.setPadding(dpToPx(12), dpToPx(6), dpToPx(12), dpToPx(6));
+
+        final GradientDrawable shape = new GradientDrawable();
+        shape.setShape(GradientDrawable.RECTANGLE);
+        shape.setCornerRadius(dpToPx(17));
+        shape.setColor(Color.parseColor("#3C4043"));
+        button.setBackground(shape);
+
+        button.setOnClickListener(v -> Log.d(TAG, "Sort button clicked for " + lastKnownStopCount + " stops"));
+
+        return button;
+    }
+
+    private WindowManager.LayoutParams getSortButtonLayoutParams(final Rect targetRect) {
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                dpToPx(34),
+                WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                PixelFormat.TRANSLUCENT);
+        params.gravity = Gravity.TOP | Gravity.START;
+        updateSortButtonParams(targetRect, params);
+        return params;
+    }
+
+    private void updateSortButtonParams(final Rect targetRect, final WindowManager.LayoutParams params) {
+        params.x = targetRect.right + dpToPx(8);
+        params.y = targetRect.centerY() - (dpToPx(34) / 2);
+    }
+
+    private int dpToPx(final int dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
+    }
+
+    private void removeSortButton() {
+        if (sortButtonOverlay != null) {
+            windowManager.removeView(sortButtonOverlay);
+            sortButtonOverlay = null;
+            lastStopCountBounds.setEmpty();
         }
     }
 
