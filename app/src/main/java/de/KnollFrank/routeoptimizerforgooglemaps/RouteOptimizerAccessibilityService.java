@@ -23,6 +23,7 @@ import android.widget.FrameLayout;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -45,12 +46,18 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     private static final String KEY_COUNT_STOPS = "DIRECTIONS_COUNT_STOPS"; // e.g. "%d Haltestellen"
     private static final String SHARE_ID = "com.google.android.apps.maps:id/directions_header_share_action_button";
 
+    private enum PendingAction {
+        NONE,
+        ADD_DUMMY_STOP,
+        SORT
+    }
+
     private final Set<String> localizedAddStopsTexts = new HashSet<>();
     private final Set<String> localizedStopsWords = new HashSet<>();
     private final List<Pattern> localizedStopCountPatterns = new ArrayList<>();
 
     private int lastKnownStopCount = 0;
-    private boolean isWaitingForShareSheet = false;
+    private PendingAction pendingAction = PendingAction.NONE;
     private boolean isWaitingToClickShareAfterBack = false;
 
     private WindowManager windowManager;
@@ -186,7 +193,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
             if (isAddStopsText(eventText)) {
                 if (enableEnhancedAddStopButton()) {
                     Log.d(TAG, "Stop limit reached. Processing automation.");
-                    processLimitReached();
+                    requestRouteUrl(PendingAction.ADD_DUMMY_STOP);
                 }
             }
         }
@@ -284,7 +291,10 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         shape.setStroke(dpToPx(2), Color.parseColor("#D4AF37"));
         button.setBackground(shape);
 
-        button.setOnClickListener(v -> Log.d(TAG, "Sort button clicked for " + lastKnownStopCount + " stops"));
+        button.setOnClickListener(v -> {
+            Log.d(TAG, "Sort button clicked for " + lastKnownStopCount + " stops");
+            requestRouteUrl(PendingAction.SORT);
+        });
 
         return button;
     }
@@ -362,7 +372,8 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         }
     }
 
-    private void processLimitReached() {
+    private void requestRouteUrl(final PendingAction action) {
+        this.pendingAction = action;
         if (!tryClickShareButton()) {
             Log.d(TAG, "Share button not found. Dismissing overlay via BACK.");
             performGlobalAction(GLOBAL_ACTION_BACK);
@@ -375,7 +386,6 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         final Optional<AccessibilityNodeInfo> shareButton = findShareButtonInAllWindows();
         if (shareButton.isPresent()) {
             shareButton.get().performAction(AccessibilityNodeInfo.ACTION_CLICK);
-            isWaitingForShareSheet = true;
             isWaitingToClickShareAfterBack = false;
             Log.d(TAG, "Successfully clicked Share button.");
             return true;
@@ -447,7 +457,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
 
     // FK-TODO: refactor
     private void handleResolverEvent() {
-        if (!isWaitingForShareSheet) {
+        if (pendingAction == PendingAction.NONE) {
             return;
         }
         final AccessibilityNodeInfo rootNode = getRootInActiveWindow();
@@ -464,9 +474,15 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
             final CharSequence url = urlNodes.get(0).getText();
             if (url != null) {
                 Log.d(TAG, "Extracted URL: " + url);
-                isWaitingForShareSheet = false;
+                final URL routeUrl = URLs.createUrl(url.toString());
+                if (pendingAction == PendingAction.ADD_DUMMY_STOP) {
+                    DummyStopAdder.addDummyStopToDirectionsUrlThenOpenInGoogleMaps(routeUrl, this);
+                } else if (pendingAction == PendingAction.SORT) {
+                    Log.d(TAG, "Extracted URL for SORT: " + routeUrl);
+                    // Hier kann später die Sortier-Logik aufgerufen werden
+                }
+                pendingAction = PendingAction.NONE;
                 performGlobalAction(GLOBAL_ACTION_BACK);
-                DummyStopAdder.addDummyStopToDirectionsUrlThenOpenInGoogleMaps(URLs.createUrl(url.toString()), this);
             }
             for (final AccessibilityNodeInfo n : urlNodes) {
                 n.recycle();
