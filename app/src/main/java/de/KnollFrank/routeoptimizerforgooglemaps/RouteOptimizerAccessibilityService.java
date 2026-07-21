@@ -364,7 +364,6 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         if (rootNode == null) {
             return;
         }
-
         final List<AccessibilityNodeInfo> urlNodes =
                 ImmutableList
                         .<AccessibilityNodeInfo>builder()

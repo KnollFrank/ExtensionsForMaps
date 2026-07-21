@@ -16,4 +16,5 @@
     <string name="permit_accessibility">Service aktivieren</string>
     <string name="permit_overlay">Overlays erlauben</string>
     <string name="permit_done">✓ Aktiviert</string>
+    <string name="error_processing_route">Beim Verarbeiten der Route ist ein Fehler aufgetreten.</string>
 </resources>
