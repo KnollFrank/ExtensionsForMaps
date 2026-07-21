@@ -17,8 +17,8 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
+import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
@@ -268,16 +268,20 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     }
 
     private View createSortButton() {
-        final TextView button = new TextView(this);
+        final Button button = new Button(this);
         button.setText("↕️ Sortieren");
         button.setTextColor(Color.parseColor("#8AB4F8"));
+        button.setAllCaps(false);
         button.setGravity(Gravity.CENTER);
         button.setPadding(dpToPx(12), dpToPx(6), dpToPx(12), dpToPx(6));
+        button.setMinimumHeight(0);
+        button.setMinimumWidth(0);
 
         final GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.RECTANGLE);
         shape.setCornerRadius(dpToPx(17));
         shape.setColor(Color.parseColor("#3C4043"));
+        shape.setStroke(dpToPx(2), Color.parseColor("#D4AF37"));
         button.setBackground(shape);
 
         button.setOnClickListener(v -> Log.d(TAG, "Sort button clicked for " + lastKnownStopCount + " stops"));
