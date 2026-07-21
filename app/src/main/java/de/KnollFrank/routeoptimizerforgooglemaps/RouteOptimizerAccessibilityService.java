@@ -36,6 +36,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     private static final String MAPS_PACKAGE = "com.google.android.apps.maps";
     private static final String RESOLVER_PACKAGE = "com.android.intentresolver";
     private static final int STOP_LIMIT = 8; // 8 intermediate stops + origin + destination = 10
+    private static final int MAX_WAYPOINTS = 25;
 
     private static final String KEY_ADD_STOPS = "ADD_STOPS_ENTRYPOINT_LABEL"; // e.g. "Zwischenstopps hinzufügen"
     private static final String KEY_COUNT_STOPS = "DIRECTIONS_COUNT_STOPS"; // e.g. "%d Haltestellen"
@@ -176,7 +177,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED) {
             final String eventText = getEventText(event);
             if (isAddStopsText(eventText)) {
-                if (lastKnownStopCount >= STOP_LIMIT) {
+                if (enableEnhancedAddStopButton()) {
                     Log.d(TAG, "Stop limit reached. Processing automation.");
                     processLimitReached();
                 }
@@ -185,6 +186,10 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         if (isWaitingToClickShareAfterBack && event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
             tryClickShareButton();
         }
+    }
+
+    private boolean enableEnhancedAddStopButton() {
+        return lastKnownStopCount >= STOP_LIMIT && lastKnownStopCount < MAX_WAYPOINTS;
     }
 
     private void updateServiceState() {
@@ -229,7 +234,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     }
 
     private void updateHighlightOverlay(final AccessibilityNodeInfo root) {
-        if (!Settings.canDrawOverlays(this) || lastKnownStopCount < STOP_LIMIT) {
+        if (!Settings.canDrawOverlays(this) || !enableEnhancedAddStopButton()) {
             removeHighlight();
             return;
         }
