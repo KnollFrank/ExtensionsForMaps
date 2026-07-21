@@ -33,10 +33,13 @@ class DummyStopAdder {
     }
 
     private static URL addDummyStop(final URL directionsUrl) {
+        final URL expandedUrl = expandShortDirectionsUrl(directionsUrl);
+        if (DirectionsUrlPredicate.isShortDirectionsUrl(expandedUrl)) {
+            throw new RuntimeException("Could not expand short URL: " + expandedUrl);
+        }
         return RouteToUrlConverter.getUrl(
                 Routes.addDummyStop(
-                        GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(
-                                expandShortDirectionsUrl(directionsUrl))));
+                        GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(expandedUrl)));
     }
 
     private static URL expandShortDirectionsUrl(final URL directionsUrl) {

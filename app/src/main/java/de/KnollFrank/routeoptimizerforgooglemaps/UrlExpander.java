@@ -1,5 +1,7 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
@@ -10,22 +12,32 @@ import okhttp3.Response;
 
 public class UrlExpander {
 
+    private static final String TAG = "UrlExpander";
+
     private static final OkHttpClient client =
             new OkHttpClient
                     .Builder()
                     .followRedirects(true)
                     .followSslRedirects(true)
-                    .connectTimeout(5, TimeUnit.SECONDS)
-                    .readTimeout(5, TimeUnit.SECONDS)
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(10, TimeUnit.SECONDS)
                     .build();
 
     public static URL expandUrl(final URL shortenedUrl) throws IOException {
+        Log.d(TAG, "Expanding URL: " + shortenedUrl);
         try (final Response response = client.newCall(createRequest(shortenedUrl)).execute()) {
-            return response.request().url().url();
+            final URL expandedUrl = response.request().url().url();
+            Log.d(TAG, String.format("Expanded URL: %s (Status: %d)", expandedUrl, response.code()));
+            return expandedUrl;
         }
     }
 
     private static Request createRequest(final URL url) {
-        return new Request.Builder().url(url).head().build();
+        return new Request
+                .Builder()
+                .url(url)
+                .header("User-Agent", "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36")
+                .get()
+                .build();
     }
 }

@@ -5,6 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import java.io.IOException;
 import java.net.URL;
@@ -12,6 +14,7 @@ import java.net.URL;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
+@RunWith(RobolectricTestRunner.class)
 public class UrlExpanderTest {
 
     private MockWebServer mockWebServer;
@@ -77,5 +80,22 @@ public class UrlExpanderTest {
 
         // Then
         assertEquals(targetUrl, expandedUrl);
+    }
+
+    @Test
+    public void testExpandUrl_usesGetMethodAndUserAgent() throws IOException, InterruptedException {
+        // Given
+        mockWebServer.enqueue(new MockResponse().setResponseCode(200));
+        final URL originalUrl = mockWebServer.url("/test").url();
+
+        // When
+        UrlExpander.expandUrl(originalUrl);
+
+        // Then
+        final okhttp3.mockwebserver.RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals(
+                "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36",
+                request.getHeader("User-Agent"));
     }
 }
