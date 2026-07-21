@@ -16,10 +16,6 @@ public class Routes {
     private static List<Stop> addDummyStop(final List<Stop> stops) {
         return Lists.concat(
                 stops,
-                getSecondToLastElement(stops));
-    }
-
-    private static <T> T getSecondToLastElement(final List<T> ts) {
-        return ts.get(ts.size() - 2);
+                Lists.getLastElement(stops).orElseThrow());
     }
 }
