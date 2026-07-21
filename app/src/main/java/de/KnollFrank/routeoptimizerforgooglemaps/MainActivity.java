@@ -193,5 +193,4 @@ public class MainActivity extends AppCompatActivity {
                         GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(
                                 expandShortDirectionsUrl(directionsUrl))));
     }
-
 }
