@@ -55,9 +55,11 @@ dependencies {
 
     // Core App Dependencies
     implementation libs.recyclerview
+    implementation libs.okhttp
     implementation libs.guava
 
     testImplementation libs.junit
+    testImplementation libs.mockwebserver
     testImplementation libs.robolectric
     testImplementation libs.core
 

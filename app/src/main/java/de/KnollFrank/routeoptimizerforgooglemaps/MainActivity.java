@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,12 +18,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.slider.Slider;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.route.DirectionsUrlPredicate;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.GoogleMapsRouteExtractor;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteTemplateFactory;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteToUrlConverter;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Routes;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,9 +60,10 @@ public class MainActivity extends AppCompatActivity {
                 .receiveExtraMapsUrl(intent)
                 .ifPresent(
                         extraMapsUrl ->
-                                Toast
-                                        .makeText(this, "Received URL: " + extraMapsUrl, Toast.LENGTH_LONG)
-                                        .show());
+                                // FK-TODO: handle in RouteOptimizerAccessibilityService
+                                CompletableFuture
+                                        .supplyAsync(() -> addDummyStop(extraMapsUrl))
+                                        .thenAccept(url -> runOnUiThread(() -> GoogleMapsNavigator.launchUrl(url, this))));
     }
 
     private void configurePlanRoute() {
@@ -171,4 +176,22 @@ public class MainActivity extends AppCompatActivity {
             }
         };
     }
+
+    private static URL expandShortDirectionsUrl(final URL directionsUrl) {
+        try {
+            return DirectionsUrlPredicate.isShortDirectionsUrl(directionsUrl) ?
+                    UrlExpander.expandUrl(directionsUrl) :
+                    directionsUrl;
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static URL addDummyStop(final URL directionsUrl) {
+        return RouteToUrlConverter.getUrl(
+                Routes.addDummyStop(
+                        GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(
+                                expandShortDirectionsUrl(directionsUrl))));
+    }
+
 }
