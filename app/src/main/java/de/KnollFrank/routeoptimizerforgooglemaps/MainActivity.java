@@ -132,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
     private void updatePermitOverlayButtonState() {
         final MaterialButton btnOverlay = findViewById(R.id.btnPermitOverlay);
         final boolean canDrawOverlays = Settings.canDrawOverlays(this);
+        // FK-TODO: zeige statt dem Text R.string.permit_done bessert so was an wie "✓ Overlays Allowed". Dito btnPermitAccessibility
         btnOverlay.setText(canDrawOverlays ? R.string.permit_done : R.string.permit_overlay);
         btnOverlay.setEnabled(!canDrawOverlays);
     }
