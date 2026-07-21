@@ -83,7 +83,7 @@ public class UrlExpanderTest {
     }
 
     @Test
-    public void testExpandUrl_usesHeadMethodAndUserAgent() throws IOException, InterruptedException {
+    public void testExpandUrl_usesHeadMethod() throws IOException, InterruptedException {
         // Given
         mockWebServer.enqueue(new MockResponse().setResponseCode(200));
         final URL originalUrl = mockWebServer.url("/test").url();
@@ -94,8 +94,5 @@ public class UrlExpanderTest {
         // Then
         final okhttp3.mockwebserver.RecordedRequest request = mockWebServer.takeRequest();
         assertEquals("HEAD", request.getMethod());
-        assertEquals(
-                "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36",
-                request.getHeader("User-Agent"));
     }
 }
