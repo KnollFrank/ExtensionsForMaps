@@ -17,6 +17,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.widget.FrameLayout;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Range;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,8 +36,6 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     private static final String TAG = "RouteOptimizerAS";
     private static final String MAPS_PACKAGE = "com.google.android.apps.maps";
     private static final String RESOLVER_PACKAGE = "com.android.intentresolver";
-    private static final int STOP_LIMIT = 8; // 8 intermediate stops + origin + destination = 10
-    private static final int MAX_WAYPOINTS = 25;
 
     private static final String KEY_ADD_STOPS = "ADD_STOPS_ENTRYPOINT_LABEL"; // e.g. "Zwischenstopps hinzufügen"
     private static final String KEY_COUNT_STOPS = "DIRECTIONS_COUNT_STOPS"; // e.g. "%d Haltestellen"
@@ -189,7 +188,9 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     }
 
     private boolean enableEnhancedAddStopButton() {
-        return lastKnownStopCount >= STOP_LIMIT && lastKnownStopCount < MAX_WAYPOINTS;
+        return Range
+                .closedOpen(8, 25)
+                .contains(lastKnownStopCount);
     }
 
     private void updateServiceState() {
