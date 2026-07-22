@@ -39,14 +39,14 @@ public class AddStopFeatureTest {
     }
 
     @Test
-    public void testOnMapsEvent_ClickAddStops_TriggersUrlRequest() {
+    public void testOnGoogleMapsEvent_ClickAddStops_TriggersUrlRequest() {
         // Given
         feature.onStopCountUpdated(15, new Rect()); // Above limit
         final AccessibilityEvent event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_CLICKED);
         event.getText().add("Add stops");
 
         // When
-        feature.onMapsEvent(event, null);
+        feature.onGoogleMapsEvent(event, null);
 
         // Then
         verify(urlRequester).requestUrl(any());

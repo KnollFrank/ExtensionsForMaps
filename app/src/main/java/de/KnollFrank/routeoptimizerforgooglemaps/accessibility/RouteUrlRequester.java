@@ -40,7 +40,7 @@ public class RouteUrlRequester {
         }
     }
 
-    public void handleMapsEvent(final AccessibilityEvent event) {
+    public void handleGoogleMapsEvent(final AccessibilityEvent event) {
         if (isWaitingToClickShareAfterBack && event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
             tryClickShareButton();
         }

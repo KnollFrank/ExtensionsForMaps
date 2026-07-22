@@ -19,7 +19,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.feature.SortFeature;
 public class RouteOptimizerAccessibilityService extends AccessibilityService {
 
     private static final String TAG = "RouteOptimizerAS";
-    private static final String MAPS_PACKAGE = "com.google.android.apps.maps";
+    private static final String GOOGLE_MAPS_PACKAGE = "com.google.android.apps.maps";
     private static final String RESOLVER_PACKAGE = "com.android.intentresolver";
 
     private final List<AccessibilityFeature> features = new ArrayList<>();
@@ -55,15 +55,14 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
             return;
         }
 
-        final String pkg = packageName.toString();
-        switch (pkg) {
-            case MAPS_PACKAGE -> handleMapsEvent(event);
+        switch (packageName.toString()) {
+            case GOOGLE_MAPS_PACKAGE -> handleGoogleMapsEvent(event);
             case RESOLVER_PACKAGE -> urlRequester.handleResolverEvent();
         }
     }
 
-    private void handleMapsEvent(final AccessibilityEvent event) {
-        urlRequester.handleMapsEvent(event);
+    private void handleGoogleMapsEvent(final AccessibilityEvent event) {
+        urlRequester.handleGoogleMapsEvent(event);
 
         final AccessibilityNodeInfo root = getRootInActiveWindow();
         if (root == null) {
@@ -73,7 +72,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         stopCountDetector.detect(root);
 
         for (final AccessibilityFeature feature : features) {
-            feature.onMapsEvent(event, root);
+            feature.onGoogleMapsEvent(event, root);
         }
 
         root.recycle();

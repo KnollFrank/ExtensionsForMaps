@@ -26,8 +26,6 @@ import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.StopCountDetector
 public class AddStopFeature implements AccessibilityFeature, StopCountDetector.StopCountListener {
 
     private static final String TAG = "AddStopFeature";
-    private static final int MIN_WAYPOINTS = 8;
-    private static final int MAX_WAYPOINTS = 25;
 
     private final AccessibilityService service;
     private final WindowManager windowManager;
@@ -46,7 +44,11 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     }
 
     @Override
-    public void onMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
+    public void onServiceConnected() {
+    }
+
+    @Override
+    public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED) {
             final String eventText = getEventText(event);
             if (isAddStopsText(eventText)) {
@@ -75,7 +77,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     }
 
     private boolean enableEnhancedAddStopButton() {
-        return Range.closedOpen(MIN_WAYPOINTS, MAX_WAYPOINTS).contains(lastKnownStopCount);
+        return Range.closedOpen(8, 25).contains(lastKnownStopCount);
     }
 
     private void updateHighlightOverlay(final AccessibilityNodeInfo root) {

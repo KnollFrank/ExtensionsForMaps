@@ -5,12 +5,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 public interface AccessibilityFeature {
 
-    default void onMapsEvent(AccessibilityEvent event, AccessibilityNodeInfo root) {
-    }
+    void onServiceConnected();
 
-    default void onServiceConnected() {
-    }
+    void onGoogleMapsEvent(AccessibilityEvent event, AccessibilityNodeInfo root);
 
-    default void onDestroy() {
-    }
+    void onDestroy();
 }
