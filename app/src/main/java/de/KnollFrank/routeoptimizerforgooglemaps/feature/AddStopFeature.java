@@ -17,6 +17,7 @@ import com.google.common.collect.Range;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.DummyStopAdder;
 import de.KnollFrank.routeoptimizerforgooglemaps.R;
@@ -97,11 +98,20 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
         this
                 .findAddStopsButton(root)
                 .ifPresentOrElse(
-                        addStopsButton -> {
-                            final Rect bounds = new Rect();
-                            addStopsButton.getBoundsInScreen(bounds);
-                            if (highlightOverlay == null || !lastOverlayBounds.equals(bounds)) {
-                                showHighlight(bounds);
+                        new Consumer<>() {
+
+                            @Override
+                            public void accept(final AccessibilityNodeInfo addStopsButton) {
+                                final Rect bounds = getBounds(addStopsButton);
+                                if (highlightOverlay == null || !lastOverlayBounds.equals(bounds)) {
+                                    showHighlight(bounds);
+                                }
+                            }
+
+                            private static Rect getBounds(final AccessibilityNodeInfo accessibilityNodeInfo) {
+                                final Rect bounds = new Rect();
+                                accessibilityNodeInfo.getBoundsInScreen(bounds);
+                                return bounds;
                             }
                         },
                         this::removeHighlight);
