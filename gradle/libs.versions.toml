@@ -12,6 +12,7 @@ constraintlayout = "2.2.1"
 okhttp = "5.4.0"
 recyclerview = "1.4.0"
 robolectric = "4.16.1"
+mockito = "5.23.0"
 rules = "1.7.0"
 uiautomator = "2.3.0"
 
@@ -27,6 +28,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }

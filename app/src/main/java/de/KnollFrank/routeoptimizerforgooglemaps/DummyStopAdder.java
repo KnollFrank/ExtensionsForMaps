@@ -15,7 +15,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.GoogleMapsRouteExtractor;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteToUrlConverter;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Routes;
 
-class DummyStopAdder {
+public class DummyStopAdder {
 
     private static final String TAG = "DummyStopAdder";
 
