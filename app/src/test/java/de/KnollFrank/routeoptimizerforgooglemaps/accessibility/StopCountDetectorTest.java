@@ -27,11 +27,12 @@ public class StopCountDetectorTest {
 
     @Before
     public void setUp() {
-        final MapsContext mapsContext = new MapsContext(
-                Set.of("Add stops"),
-                Set.of("stops"),
-                List.of(Pattern.compile("(\\d+) stops"))
-        );
+        final MapsContext mapsContext =
+                new MapsContext(
+                        Set.of("Add stops"),
+                        Set.of("stops"),
+                        List.of(Pattern.compile("(\\d+) stops"))
+                );
         detector = new StopCountDetector(mapsContext);
         listener = mock(StopCountDetector.StopCountListener.class);
         detector.addListener(listener);

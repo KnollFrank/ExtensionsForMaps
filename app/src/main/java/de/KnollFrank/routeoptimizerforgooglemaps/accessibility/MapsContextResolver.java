@@ -67,7 +67,6 @@ public class MapsContextResolver {
             localizedStopsWords.add("Haltestellen");
             localizedStopCountPatterns.add(Pattern.compile("(\\d+)\\s*(stops|Stopps|Haltestellen)"));
         }
-
         return new MapsContext(localizedAddStopsTexts, localizedStopsWords, localizedStopCountPatterns);
     }
 }

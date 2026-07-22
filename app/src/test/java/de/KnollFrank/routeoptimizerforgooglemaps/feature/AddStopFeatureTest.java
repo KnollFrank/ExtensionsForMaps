@@ -30,11 +30,12 @@ public class AddStopFeatureTest {
     public void setUp() {
         final AccessibilityService service = mock(AccessibilityService.class);
         urlRequester = mock(RouteUrlRequester.class);
-        final MapsContext mapsContext = new MapsContext(
-                Set.of("Add stops"),
-                Set.of("stops"),
-                List.of(Pattern.compile("(\\d+) stops"))
-        );
+        final MapsContext mapsContext =
+                new MapsContext(
+                        Set.of("Add stops"),
+                        Set.of("stops"),
+                        List.of(Pattern.compile("(\\d+) stops"))
+                );
         feature = new AddStopFeature(service, mapsContext, urlRequester);
     }
 
