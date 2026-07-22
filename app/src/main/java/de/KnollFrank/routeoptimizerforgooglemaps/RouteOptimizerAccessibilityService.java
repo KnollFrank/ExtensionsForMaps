@@ -74,8 +74,6 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         for (final AccessibilityFeature feature : features) {
             feature.onGoogleMapsEvent(event, root);
         }
-
-        root.recycle();
     }
 
     @Override

@@ -52,14 +52,12 @@ public class StopCountDetector {
                                 count = Integer.parseInt(matcher.group(1));
                                 node.getBoundsInScreen(bounds);
                                 Log.d(TAG, String.format("Found stop count: '%s' at bounds: %s", text, bounds));
-                                node.recycle();
                                 break search;
                             } catch (final NumberFormatException ignored) {
                             }
                         }
                     }
                 }
-                node.recycle();
             }
         }
 

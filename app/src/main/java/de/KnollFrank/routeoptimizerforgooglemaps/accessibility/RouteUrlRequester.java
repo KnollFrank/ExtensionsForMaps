@@ -74,11 +74,7 @@ public class RouteUrlRequester {
                 currentCallback = null;
                 service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
             }
-            for (final AccessibilityNodeInfo n : urlNodes) {
-                n.recycle();
-            }
         }
-        rootNode.recycle();
     }
 
     private boolean tryClickShareButton() {
@@ -101,7 +97,6 @@ public class RouteUrlRequester {
                 if (button.isPresent()) {
                     return button;
                 }
-                root.recycle();
             }
         }
         return Optional.empty();

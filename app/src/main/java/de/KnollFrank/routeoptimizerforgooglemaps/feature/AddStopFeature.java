@@ -91,7 +91,6 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
         if (root == null) return;
         if (!Settings.canDrawOverlays(service) || !enableEnhancedAddStopButton()) {
             removeHighlight();
-            root.recycle();
             return;
         }
         this
@@ -103,10 +102,8 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
                             if (highlightOverlay == null || !lastOverlayBounds.equals(bounds)) {
                                 showHighlight(bounds);
                             }
-                            addStopsButton.recycle();
                         },
                         this::removeHighlight);
-        root.recycle();
     }
 
     private Optional<AccessibilityNodeInfo> findAddStopsButton(final AccessibilityNodeInfo root) {
