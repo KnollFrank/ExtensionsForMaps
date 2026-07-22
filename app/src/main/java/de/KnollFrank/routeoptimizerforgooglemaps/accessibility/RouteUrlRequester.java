@@ -22,7 +22,7 @@ public class RouteUrlRequester {
     @FunctionalInterface
     public interface RouteUrlCallback {
 
-        void onUrlExtracted(URL url);
+        void onRouteUrlExtracted(URL routeUrl);
     }
 
     private final AccessibilityService service;
@@ -33,7 +33,7 @@ public class RouteUrlRequester {
         this.service = service;
     }
 
-    public void requestUrl(final RouteUrlCallback callback) {
+    public void requestRouteUrl(final RouteUrlCallback callback) {
         this.currentCallback = callback;
         if (!tryClickShareButton()) {
             Log.d(TAG, "Share button not found. Dismissing overlay via BACK.");
@@ -70,7 +70,7 @@ public class RouteUrlRequester {
             if (urlText != null) {
                 Log.d(TAG, "Extracted URL: " + urlText);
                 final URL routeUrl = URLs.createUrl(urlText.toString());
-                currentCallback.onUrlExtracted(routeUrl);
+                currentCallback.onRouteUrlExtracted(routeUrl);
                 currentCallback = null;
                 service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
             }

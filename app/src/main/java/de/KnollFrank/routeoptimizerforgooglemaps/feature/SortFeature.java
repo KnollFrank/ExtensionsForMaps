@@ -24,16 +24,16 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
 
     private final AccessibilityService service;
     private final WindowManager windowManager;
-    private final RouteUrlRequester urlRequester;
+    private final RouteUrlRequester routeUrlRequester;
 
     private View sortButtonOverlay;
     private final Rect lastStopCountBounds = new Rect();
     private int lastKnownStopCount = 0;
 
-    public SortFeature(final AccessibilityService service, final RouteUrlRequester urlRequester) {
+    public SortFeature(final AccessibilityService service, final RouteUrlRequester routeUrlRequester) {
         this.service = service;
         this.windowManager = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
-        this.urlRequester = urlRequester;
+        this.routeUrlRequester = routeUrlRequester;
     }
 
     @Override
@@ -97,7 +97,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
 
         button.setOnClickListener(v -> {
             Log.d(TAG, "Sort button clicked for " + lastKnownStopCount + " stops");
-            urlRequester.requestUrl(url -> Log.d(TAG, "Extracted URL for SORT: " + url));
+            routeUrlRequester.requestRouteUrl(routeUrl -> Log.d(TAG, "Extracted route URL for SORT: " + routeUrl));
         });
 
         return button;

@@ -32,7 +32,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     private final AccessibilityService service;
     private final WindowManager windowManager;
     private final MapsContext mapsContext;
-    private final RouteUrlRequester urlRequester;
+    private final RouteUrlRequester routeUrlRequester;
 
     // FK-TODO: make Optional<View>
     private View highlightOverlay;
@@ -41,11 +41,11 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
     public AddStopFeature(final AccessibilityService service,
                           final MapsContext mapsContext,
-                          final RouteUrlRequester urlRequester) {
+                          final RouteUrlRequester routeUrlRequester) {
         this.service = service;
         this.windowManager = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
         this.mapsContext = mapsContext;
-        this.urlRequester = urlRequester;
+        this.routeUrlRequester = routeUrlRequester;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
         if (isAddStopsButtonClick(event) && enableEnhancedAddStopButton()) {
             Log.d(TAG, "Stop limit reached. Requesting URL for dummy stop.");
-            urlRequester.requestUrl(url -> DummyStopAdder.addDummyStopToDirectionsUrlThenOpenInGoogleMaps(url, service));
+            routeUrlRequester.requestRouteUrl(routeUrl -> DummyStopAdder.addDummyStopToDirectionsUrlThenOpenInGoogleMaps(routeUrl, service));
         }
     }
 

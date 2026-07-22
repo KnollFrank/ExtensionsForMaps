@@ -22,19 +22,19 @@ import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.RouteUrlRequester
 public class AddStopFeatureTest {
 
     private AddStopFeature feature;
-    private RouteUrlRequester urlRequester;
+    private RouteUrlRequester routeUrlRequester;
 
     @Before
     public void setUp() {
         final AccessibilityService service = mock(AccessibilityService.class);
-        urlRequester = mock(RouteUrlRequester.class);
+        routeUrlRequester = mock(RouteUrlRequester.class);
         final MapsContext mapsContext =
                 new MapsContext(
                         "Add stops",
                         "stops",
                         Pattern.compile("(\\d+) stops")
                 );
-        feature = new AddStopFeature(service, mapsContext, urlRequester);
+        feature = new AddStopFeature(service, mapsContext, routeUrlRequester);
     }
 
     @Test
@@ -48,6 +48,6 @@ public class AddStopFeatureTest {
         feature.onGoogleMapsEvent(event, null);
 
         // Then
-        verify(urlRequester).requestUrl(any());
+        verify(routeUrlRequester).requestRouteUrl(any());
     }
 }
