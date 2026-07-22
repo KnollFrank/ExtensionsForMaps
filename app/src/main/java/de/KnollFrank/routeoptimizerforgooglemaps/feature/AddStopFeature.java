@@ -33,6 +33,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     private final MapsContext mapsContext;
     private final RouteUrlRequester urlRequester;
 
+    // FK-TODO: make Optional<View>
     private View highlightOverlay;
     private final Rect lastOverlayBounds = new Rect();
     private int lastKnownStopCount = 0;
@@ -138,12 +139,13 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     }
 
     private WindowManager.LayoutParams getLayoutParams(final Rect bounds) {
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                bounds.width(),
-                bounds.height(),
-                WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                PixelFormat.TRANSLUCENT);
+        final WindowManager.LayoutParams params =
+                new WindowManager.LayoutParams(
+                        bounds.width(),
+                        bounds.height(),
+                        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                        PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.TOP | Gravity.START;
         updateParams(bounds, params);
         return params;
