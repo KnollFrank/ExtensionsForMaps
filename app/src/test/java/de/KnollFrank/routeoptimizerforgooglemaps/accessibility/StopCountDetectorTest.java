@@ -16,7 +16,6 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 @RunWith(RobolectricTestRunner.class)
@@ -29,9 +28,9 @@ public class StopCountDetectorTest {
     public void setUp() {
         final MapsContext mapsContext =
                 new MapsContext(
-                        Set.of("Add stops"),
-                        Set.of("stops"),
-                        List.of(Pattern.compile("(\\d+) stops"))
+                        "Add stops",
+                        "stops",
+                        Pattern.compile("(\\d+) stops")
                 );
         detector = new StopCountDetector(mapsContext);
         listener = mock(StopCountDetector.StopCountListener.class);

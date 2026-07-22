@@ -13,8 +13,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.MapsContext;
@@ -32,9 +30,9 @@ public class AddStopFeatureTest {
         urlRequester = mock(RouteUrlRequester.class);
         final MapsContext mapsContext =
                 new MapsContext(
-                        Set.of("Add stops"),
-                        Set.of("stops"),
-                        List.of(Pattern.compile("(\\d+) stops"))
+                        "Add stops",
+                        "stops",
+                        Pattern.compile("(\\d+) stops")
                 );
         feature = new AddStopFeature(service, mapsContext, urlRequester);
     }

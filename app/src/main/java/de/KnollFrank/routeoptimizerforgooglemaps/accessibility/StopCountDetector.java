@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class StopCountDetector {
 
@@ -38,24 +37,19 @@ public class StopCountDetector {
         final Rect bounds = new Rect();
         int count = -1;
 
-        search:
-        for (final String stopsWord : mapsContext.localizedStopsWords()) {
-            final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(stopsWord);
-            for (final AccessibilityNodeInfo node : nodes) {
-                final Optional<String> textOpt = getTextOrElseGetContentDescription(node);
-                if (textOpt.isPresent()) {
-                    final String text = textOpt.get();
-                    for (final Pattern pattern : mapsContext.localizedStopCountPatterns()) {
-                        final Matcher matcher = pattern.matcher(text);
-                        if (matcher.find()) {
-                            try {
-                                count = Integer.parseInt(matcher.group(1));
-                                node.getBoundsInScreen(bounds);
-                                Log.d(TAG, String.format("Found stop count: '%s' at bounds: %s", text, bounds));
-                                break search;
-                            } catch (final NumberFormatException ignored) {
-                            }
-                        }
+        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(mapsContext.stopsWord());
+        for (final AccessibilityNodeInfo node : nodes) {
+            final Optional<String> textOpt = getTextOrElseGetContentDescription(node);
+            if (textOpt.isPresent()) {
+                final String text = textOpt.get();
+                final Matcher matcher = mapsContext.stopCountPattern().matcher(text);
+                if (matcher.find()) {
+                    try {
+                        count = Integer.parseInt(matcher.group(1));
+                        node.getBoundsInScreen(bounds);
+                        Log.d(TAG, String.format("Found stop count: '%s' at bounds: %s", text, bounds));
+                        break;
+                    } catch (final NumberFormatException ignored) {
                     }
                 }
             }

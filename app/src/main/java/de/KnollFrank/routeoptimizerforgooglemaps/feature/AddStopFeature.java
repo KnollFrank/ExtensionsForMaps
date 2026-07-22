@@ -118,11 +118,9 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     }
 
     private Optional<AccessibilityNodeInfo> findAddStopsButton(final AccessibilityNodeInfo root) {
-        for (final String addStopsText : mapsContext.localizedAddStopsTexts()) {
-            final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(addStopsText);
-            if (!nodes.isEmpty()) {
-                return Optional.of(nodes.get(0));
-            }
+        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(mapsContext.addStopsText());
+        if (!nodes.isEmpty()) {
+            return Optional.of(nodes.get(0));
         }
         return Optional.empty();
     }
@@ -135,7 +133,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
             windowManager.addView(highlightOverlay, getLayoutParams(bounds));
         } else {
             final WindowManager.LayoutParams params = (WindowManager.LayoutParams) highlightOverlay.getLayoutParams();
-            updateParams(bounds, params);
+            updateLayoutParams(params, bounds);
             windowManager.updateViewLayout(highlightOverlay, params);
         }
     }
@@ -157,11 +155,11 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                         PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.TOP | Gravity.START;
-        updateParams(bounds, params);
+        updateLayoutParams(params, bounds);
         return params;
     }
 
-    private void updateParams(final Rect src, final WindowManager.LayoutParams dst) {
+    private void updateLayoutParams(final WindowManager.LayoutParams dst, final Rect src) {
         dst.x = src.left;
         dst.y = src.top;
         dst.width = src.width();
@@ -184,9 +182,6 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     // FK-TODO: refactor
     private boolean isAddStopsText(final String text) {
         if (text == null) return false;
-        for (final String addStopsText : mapsContext.localizedAddStopsTexts()) {
-            if (text.contains(addStopsText)) return true;
-        }
-        return false;
+        return text.contains(mapsContext.addStopsText());
     }
 }

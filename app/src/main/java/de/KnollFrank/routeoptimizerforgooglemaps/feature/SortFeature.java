@@ -73,7 +73,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
             windowManager.addView(sortButtonOverlay, getSortButtonLayoutParams(lastStopCountBounds));
         } else {
             final WindowManager.LayoutParams params = (WindowManager.LayoutParams) sortButtonOverlay.getLayoutParams();
-            updateSortButtonParams(lastStopCountBounds, params);
+            updateLayoutParams(params, lastStopCountBounds);
             windowManager.updateViewLayout(sortButtonOverlay, params);
         }
     }
@@ -104,20 +104,21 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     }
 
     private WindowManager.LayoutParams getSortButtonLayoutParams(final Rect targetRect) {
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                dpToPx(34),
-                WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                PixelFormat.TRANSLUCENT);
+        final WindowManager.LayoutParams params =
+                new WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        dpToPx(34),
+                        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                        PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.TOP | Gravity.START;
-        updateSortButtonParams(targetRect, params);
+        updateLayoutParams(params, targetRect);
         return params;
     }
 
-    private void updateSortButtonParams(final Rect targetRect, final WindowManager.LayoutParams params) {
-        params.x = targetRect.right + dpToPx(8);
-        params.y = targetRect.centerY() - (dpToPx(34) / 2);
+    private void updateLayoutParams(final WindowManager.LayoutParams dst, final Rect src) {
+        dst.x = src.right + dpToPx(8);
+        dst.y = src.centerY() - (dpToPx(34) / 2);
     }
 
     private int dpToPx(final int dp) {
