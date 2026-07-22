@@ -67,7 +67,6 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
             removeSortButton();
             return;
         }
-
         if (sortButtonOverlay == null) {
             sortButtonOverlay = createSortButton();
             windowManager.addView(sortButtonOverlay, getSortButtonLayoutParams(lastStopCountBounds));
@@ -95,10 +94,11 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
         shape.setStroke(dpToPx(2), Color.parseColor("#D4AF37"));
         button.setBackground(shape);
 
-        button.setOnClickListener(v -> {
-            Log.d(TAG, "Sort button clicked for " + lastKnownStopCount + " stops");
-            routeUrlRequester.requestRouteUrl(routeUrl -> Log.d(TAG, "Extracted route URL for SORT: " + routeUrl));
-        });
+        button.setOnClickListener(
+                view -> {
+                    Log.d(TAG, "Sort button clicked for " + lastKnownStopCount + " stops");
+                    routeUrlRequester.requestRouteUrl(routeUrl -> Log.d(TAG, "Extracted route URL for SORT: " + routeUrl));
+                });
 
         return button;
     }
