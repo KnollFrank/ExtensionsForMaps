@@ -19,7 +19,8 @@ public class DummyStopAdder {
 
     private static final String TAG = "DummyStopAdder";
 
-    public static void addDummyStopToDirectionsUrlThenOpenInGoogleMaps(final URL directionsUrl, final Context context) {
+    public static void addDummyStopToDirectionsUrlThenOpenInGoogleMaps(final URL directionsUrl,
+                                                                       final Context context) {
         CompletableFuture
                 .supplyAsync(() -> addDummyStop(directionsUrl))
                 .whenComplete((final URL directionsUrlWithDummyStop, final Throwable throwable) -> {

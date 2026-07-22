@@ -19,7 +19,9 @@ public class RouteUrlRequester {
     private static final String TAG = "RouteUrlRequester";
     private static final String SHARE_ID = "com.google.android.apps.maps:id/directions_header_share_action_button";
 
+    @FunctionalInterface
     public interface RouteUrlCallback {
+
         void onUrlExtracted(URL url);
     }
 

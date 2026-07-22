@@ -15,6 +15,7 @@ import android.widget.FrameLayout;
 
 import com.google.common.collect.Range;
 
+import java.util.List;
 import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.DummyStopAdder;
@@ -36,7 +37,9 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     private final Rect lastOverlayBounds = new Rect();
     private int lastKnownStopCount = 0;
 
-    public AddStopFeature(final AccessibilityService service, final MapsContext mapsContext, final RouteUrlRequester urlRequester) {
+    public AddStopFeature(final AccessibilityService service,
+                          final MapsContext mapsContext,
+                          final RouteUrlRequester urlRequester) {
         this.service = service;
         this.windowManager = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
         this.mapsContext = mapsContext;
@@ -49,20 +52,15 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
     @Override
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED) {
-            final String eventText = getEventText(event);
-            if (isAddStopsText(eventText)) {
-                if (enableEnhancedAddStopButton()) {
-                    Log.d(TAG, "Stop limit reached. Requesting URL for dummy stop.");
-                    urlRequester.requestUrl(url -> DummyStopAdder.addDummyStopToDirectionsUrlThenOpenInGoogleMaps(url, service));
-                }
-            }
+        if (isAddStopsButtonClick(event) && enableEnhancedAddStopButton()) {
+            Log.d(TAG, "Stop limit reached. Requesting URL for dummy stop.");
+            urlRequester.requestUrl(url -> DummyStopAdder.addDummyStopToDirectionsUrlThenOpenInGoogleMaps(url, service));
         }
     }
 
     @Override
     public void onStopCountUpdated(final int count, final Rect bounds) {
-        this.lastKnownStopCount = count;
+        lastKnownStopCount = count;
         updateHighlightOverlay(service.getRootInActiveWindow());
     }
 
@@ -80,6 +78,15 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
         return Range.closedOpen(8, 25).contains(lastKnownStopCount);
     }
 
+    private boolean isAddStopsButtonClick(final AccessibilityEvent event) {
+        return event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED && isAddStopsButton(event);
+    }
+
+    private boolean isAddStopsButton(final AccessibilityEvent event) {
+        return isAddStopsText(getEventText(event));
+    }
+
+    // FK-TODO: use "Optional<AccessibilityNodeInfo> root"
     private void updateHighlightOverlay(final AccessibilityNodeInfo root) {
         if (root == null) return;
         if (!Settings.canDrawOverlays(service) || !enableEnhancedAddStopButton()) {
@@ -87,23 +94,24 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
             root.recycle();
             return;
         }
-
-        findAddStopsButton(root).ifPresentOrElse(
-                addStopsButton -> {
-                    final Rect bounds = new Rect();
-                    addStopsButton.getBoundsInScreen(bounds);
-                    if (highlightOverlay == null || !lastOverlayBounds.equals(bounds)) {
-                        showHighlight(bounds);
-                    }
-                    addStopsButton.recycle();
-                },
-                this::removeHighlight);
+        this
+                .findAddStopsButton(root)
+                .ifPresentOrElse(
+                        addStopsButton -> {
+                            final Rect bounds = new Rect();
+                            addStopsButton.getBoundsInScreen(bounds);
+                            if (highlightOverlay == null || !lastOverlayBounds.equals(bounds)) {
+                                showHighlight(bounds);
+                            }
+                            addStopsButton.recycle();
+                        },
+                        this::removeHighlight);
         root.recycle();
     }
 
     private Optional<AccessibilityNodeInfo> findAddStopsButton(final AccessibilityNodeInfo root) {
         for (final String addStopsText : mapsContext.localizedAddStopsTexts()) {
-            final java.util.List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(addStopsText);
+            final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(addStopsText);
             if (!nodes.isEmpty()) {
                 return Optional.of(nodes.get(0));
             }
@@ -164,6 +172,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
         return sb.toString();
     }
 
+    // FK-TODO: refactor
     private boolean isAddStopsText(final String text) {
         if (text == null) return false;
         for (final String addStopsText : mapsContext.localizedAddStopsTexts()) {
