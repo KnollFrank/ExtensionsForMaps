@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.DummyStopAdder;
 import de.KnollFrank.routeoptimizerforgooglemaps.R;
-import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.MapsContext;
+import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.GoogleMapsContext;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.RouteUrlRequester;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.StopCountDetector;
 
@@ -31,7 +31,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
     private final AccessibilityService service;
     private final WindowManager windowManager;
-    private final MapsContext mapsContext;
+    private final GoogleMapsContext googleMapsContext;
     private final RouteUrlRequester routeUrlRequester;
 
     // FK-TODO: make Optional<View>
@@ -40,11 +40,11 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     private int lastKnownStopCount = 0;
 
     public AddStopFeature(final AccessibilityService service,
-                          final MapsContext mapsContext,
+                          final GoogleMapsContext googleMapsContext,
                           final RouteUrlRequester routeUrlRequester) {
         this.service = service;
         this.windowManager = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
-        this.mapsContext = mapsContext;
+        this.googleMapsContext = googleMapsContext;
         this.routeUrlRequester = routeUrlRequester;
     }
 
@@ -118,7 +118,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     }
 
     private Optional<AccessibilityNodeInfo> findAddStopsButton(final AccessibilityNodeInfo root) {
-        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(mapsContext.addStopsText());
+        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.addStopsText());
         if (!nodes.isEmpty()) {
             return Optional.of(nodes.get(0));
         }
@@ -182,6 +182,6 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     // FK-TODO: refactor
     private boolean isAddStopsText(final String text) {
         if (text == null) return false;
-        return text.contains(mapsContext.addStopsText());
+        return text.contains(googleMapsContext.addStopsText());
     }
 }

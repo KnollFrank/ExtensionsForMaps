@@ -8,8 +8,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.MapsContext;
-import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.MapsContextResolver;
+import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.GoogleMapsContext;
+import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.GoogleMapsContextResolver;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.RouteUrlRequester;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.StopCountDetector;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.AccessibilityFeature;
@@ -29,12 +29,12 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
-        final MapsContext mapsContext = MapsContextResolver.resolve(this);
+        final GoogleMapsContext googleMapsContext = GoogleMapsContextResolver.resolve(this);
 
         urlRequester = new RouteUrlRequester(this);
-        stopCountDetector = new StopCountDetector(mapsContext);
+        stopCountDetector = new StopCountDetector(googleMapsContext);
 
-        final AddStopFeature addStopFeature = new AddStopFeature(this, mapsContext, urlRequester);
+        final AddStopFeature addStopFeature = new AddStopFeature(this, googleMapsContext, urlRequester);
         final SortFeature sortFeature = new SortFeature(this, urlRequester);
 
         stopCountDetector.addListener(addStopFeature);

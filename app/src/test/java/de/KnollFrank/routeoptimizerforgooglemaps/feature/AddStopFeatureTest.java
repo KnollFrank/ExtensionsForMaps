@@ -15,7 +15,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.util.regex.Pattern;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.MapsContext;
+import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.GoogleMapsContext;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.RouteUrlRequester;
 
 @RunWith(RobolectricTestRunner.class)
@@ -28,13 +28,12 @@ public class AddStopFeatureTest {
     public void setUp() {
         final AccessibilityService service = mock(AccessibilityService.class);
         routeUrlRequester = mock(RouteUrlRequester.class);
-        final MapsContext mapsContext =
-                new MapsContext(
+        final GoogleMapsContext googleMapsContext =
+                new GoogleMapsContext(
                         "Add stops",
                         "stops",
-                        Pattern.compile("(\\d+) stops")
-                );
-        feature = new AddStopFeature(service, mapsContext, routeUrlRequester);
+                        Pattern.compile("(\\d+) stops"));
+        feature = new AddStopFeature(service, googleMapsContext, routeUrlRequester);
     }
 
     @Test

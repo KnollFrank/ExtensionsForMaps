@@ -20,11 +20,11 @@ public class StopCountDetector {
         void onStopCountLost();
     }
 
-    private final MapsContext mapsContext;
+    private final GoogleMapsContext googleMapsContext;
     private final List<StopCountListener> listeners = new ArrayList<>();
 
-    public StopCountDetector(final MapsContext mapsContext) {
-        this.mapsContext = mapsContext;
+    public StopCountDetector(final GoogleMapsContext googleMapsContext) {
+        this.googleMapsContext = googleMapsContext;
     }
 
     public void addListener(final StopCountListener listener) {
@@ -37,12 +37,12 @@ public class StopCountDetector {
         final Rect bounds = new Rect();
         int count = -1;
 
-        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(mapsContext.stopsWord());
+        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord());
         for (final AccessibilityNodeInfo node : nodes) {
             final Optional<String> textOpt = getTextOrElseGetContentDescription(node);
             if (textOpt.isPresent()) {
                 final String text = textOpt.get();
-                final Matcher matcher = mapsContext.stopCountPattern().matcher(text);
+                final Matcher matcher = googleMapsContext.stopCountPattern().matcher(text);
                 if (matcher.find()) {
                     try {
                         count = Integer.parseInt(matcher.group(1));
