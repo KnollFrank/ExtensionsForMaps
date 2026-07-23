@@ -8,6 +8,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -18,10 +19,8 @@ import com.google.common.collect.Range;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.DummyStopAdder;
 import de.KnollFrank.routeoptimizerforgooglemaps.R;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.GoogleMapsContext;
-import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.RouteUrlRequester;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.StopCountDetector;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.AccessibilityServices;
 
@@ -32,7 +31,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     private final AccessibilityService service;
     private final WindowManager windowManager;
     private final GoogleMapsContext googleMapsContext;
-    private final RouteUrlRequester routeUrlRequester;
+    private final OnClickListener onAddStopsClickListener;
 
     private Optional<View> highlightOverlay = Optional.empty();
     private final Rect lastOverlayBounds = new Rect();
@@ -40,11 +39,11 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
     public AddStopFeature(final AccessibilityService service,
                           final GoogleMapsContext googleMapsContext,
-                          final RouteUrlRequester routeUrlRequester) {
+                          final OnClickListener onAddStopsClickListener) {
         this.service = service;
         this.windowManager = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
         this.googleMapsContext = googleMapsContext;
-        this.routeUrlRequester = routeUrlRequester;
+        this.onAddStopsClickListener = onAddStopsClickListener;
     }
 
     @Override
@@ -54,8 +53,8 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     @Override
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
         if (isAddStopsButtonClick(event) && enableEnhancedAddStopButton()) {
-            Log.d(TAG, "Stop limit reached. Requesting URL for dummy stop.");
-            routeUrlRequester.requestRouteUrl(routeUrl -> DummyStopAdder.addDummyStopToDirectionsUrlThenOpenInGoogleMaps(routeUrl, service));
+            Log.d(TAG, "Stop limit reached. Triggering onAddStopsClickListener.");
+            onAddStopsClickListener.onClick(null);
         }
     }
 

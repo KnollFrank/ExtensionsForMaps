@@ -31,7 +31,11 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         super.onServiceConnected();
         urlRequester = new RouteUrlRequester(this);
         final GoogleMapsContext googleMapsContext = GoogleMapsContextResolver.resolve(this);
-        final AddStopFeature addStopFeature = new AddStopFeature(this, googleMapsContext, urlRequester);
+        final AddStopFeature addStopFeature =
+                new AddStopFeature(
+                        this,
+                        googleMapsContext,
+                        view -> addDummyStopToDirectionsUrlThenOpenInGoogleMaps());
         final SortFeature sortFeature = new SortFeature(this, urlRequester);
         stopCountDetector =
                 new StopCountDetector(
@@ -80,5 +84,13 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
 
     private void handleResolverEvent(final AccessibilityEvent event) {
         urlRequester.handleResolverEvent();
+    }
+
+    private void addDummyStopToDirectionsUrlThenOpenInGoogleMaps() {
+        urlRequester.requestRouteUrl(
+                routeUrl ->
+                        DummyStopAdder.addDummyStopToDirectionsUrlThenOpenInGoogleMaps(
+                                routeUrl,
+                                this));
     }
 }
