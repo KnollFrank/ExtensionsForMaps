@@ -47,6 +47,7 @@ public class AddStopFeatureTest {
         feature.onGoogleMapsEvent(event, null);
 
         // Then
+        // FK-TODO: prüfe stattdessen, ob DummyStopAdder.addDummyStopToDirectionsUrlThenOpenInGoogleMaps() aufgerufen wird mit den korrekten Parametern
         verify(routeUrlRequester).requestRouteUrl(any());
     }
 }

@@ -25,6 +25,7 @@ public class SortFeatureTest {
 
     @Test
     public void testFeatureInitialization() {
+        // FK-TODO: prüfe, ob ein Klick auf den Sortbutton den OnClickListener auslöst.
         // Just verify constructor works
     }
 }

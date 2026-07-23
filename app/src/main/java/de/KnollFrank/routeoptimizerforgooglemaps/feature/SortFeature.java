@@ -18,6 +18,7 @@ import android.widget.Button;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.RouteUrlRequester;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.StopCountDetector;
 
+// FK-TODO: refactor
 public class SortFeature implements AccessibilityFeature, StopCountDetector.StopCountListener {
 
     private static final String TAG = SortFeature.class.getSimpleName();
@@ -26,6 +27,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     private final WindowManager windowManager;
     private final RouteUrlRequester routeUrlRequester;
 
+    // FK-TODO: make Optional<View>
     private View sortButtonOverlay;
     private final Rect lastStopCountBounds = new Rect();
     private int lastKnownStopCount = 0;
