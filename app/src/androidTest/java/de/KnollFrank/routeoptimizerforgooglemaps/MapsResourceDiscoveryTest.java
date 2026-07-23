@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 @RunWith(AndroidJUnit4.class)
 public class MapsResourceDiscoveryTest {
 
-    private static final String TAG = "MapsDiscovery";
+    private static final String TAG = MapsResourceDiscoveryTest.class.getSimpleName();
     private static final String MAPS_PACKAGE = "com.google.android.apps.maps";
 
     @Test

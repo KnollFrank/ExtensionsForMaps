@@ -27,7 +27,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.StopCountDetector
 
 public class AddStopFeature implements AccessibilityFeature, StopCountDetector.StopCountListener {
 
-    private static final String TAG = "AddStopFeature";
+    private static final String TAG = AddStopFeature.class.getSimpleName();
 
     private final AccessibilityService service;
     private final WindowManager windowManager;

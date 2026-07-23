@@ -17,7 +17,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.Routes;
 
 public class DummyStopAdder {
 
-    private static final String TAG = "DummyStopAdder";
+    private static final String TAG = DummyStopAdder.class.getSimpleName();
 
     public static void addDummyStopToDirectionsUrlThenOpenInGoogleMaps(final URL directionsUrl,
                                                                        final Context context) {

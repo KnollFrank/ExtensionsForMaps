@@ -40,7 +40,7 @@ public class GoogleMapsIntegrationTest {
     private static final int TIMEOUT = 15000;
     private static final String MAPS_PACKAGE = "com.google.android.apps.maps";
     private static final String APP_PACKAGE = "de.KnollFrank.routeoptimizerforgooglemaps";
-    private static final String TAG = "GoogleMapsTest";
+    private static final String TAG = GoogleMapsIntegrationTest.class.getSimpleName();
 
     @Before
     public void setUp() {

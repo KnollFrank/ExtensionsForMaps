@@ -18,7 +18,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.feature.SortFeature;
 
 public class RouteOptimizerAccessibilityService extends AccessibilityService {
 
-    private static final String TAG = "RouteOptimizerAS";
+    private static final String TAG = RouteOptimizerAccessibilityService.class.getSimpleName();
     private static final String GOOGLE_MAPS_PACKAGE = "com.google.android.apps.maps";
     private static final String RESOLVER_PACKAGE = "com.android.intentresolver";
 

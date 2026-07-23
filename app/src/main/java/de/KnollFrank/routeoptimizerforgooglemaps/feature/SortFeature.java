@@ -20,7 +20,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.StopCountDetector
 
 public class SortFeature implements AccessibilityFeature, StopCountDetector.StopCountListener {
 
-    private static final String TAG = "SortFeature";
+    private static final String TAG = SortFeature.class.getSimpleName();
 
     private final AccessibilityService service;
     private final WindowManager windowManager;

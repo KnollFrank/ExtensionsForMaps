@@ -13,7 +13,7 @@ import okhttp3.Response;
 
 public class UrlExpander {
 
-    private static final String TAG = "UrlExpander";
+    private static final String TAG = UrlExpander.class.getSimpleName();
 
     private static final OkHttpClient client =
             new OkHttpClient

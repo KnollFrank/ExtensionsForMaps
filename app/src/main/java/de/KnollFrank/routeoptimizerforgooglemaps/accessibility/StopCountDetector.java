@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 
 public class StopCountDetector {
 
-    private static final String TAG = "StopCountDetector";
+    private static final String TAG = StopCountDetector.class.getSimpleName();
 
     public interface StopCountListener {
 
