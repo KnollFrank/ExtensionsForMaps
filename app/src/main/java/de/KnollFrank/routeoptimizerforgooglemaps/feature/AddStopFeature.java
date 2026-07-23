@@ -34,8 +34,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     private final GoogleMapsContext googleMapsContext;
     private final RouteUrlRequester routeUrlRequester;
 
-    // FK-TODO: make Optional<View>
-    private View highlightOverlay;
+    private Optional<View> highlightOverlay = Optional.empty();
     private final Rect lastOverlayBounds = new Rect();
     private int lastKnownStopCount = 0;
 
@@ -103,7 +102,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
                             @Override
                             public void accept(final AccessibilityNodeInfo addStopsButton) {
                                 final Rect bounds = getBounds(addStopsButton);
-                                if (highlightOverlay == null || !lastOverlayBounds.equals(bounds)) {
+                                if (highlightOverlay.isEmpty() || !lastOverlayBounds.equals(bounds)) {
                                     showHighlight(bounds);
                                 }
                             }
@@ -126,23 +125,32 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
     private void showHighlight(final Rect bounds) {
         lastOverlayBounds.set(bounds);
-        if (highlightOverlay == null) {
-            highlightOverlay = new FrameLayout(service);
-            highlightOverlay.setBackgroundResource(R.drawable.border_highlight);
-            windowManager.addView(highlightOverlay, getLayoutParams(bounds));
-        } else {
-            final WindowManager.LayoutParams params = (WindowManager.LayoutParams) highlightOverlay.getLayoutParams();
-            updateLayoutParams(params, bounds);
-            windowManager.updateViewLayout(highlightOverlay, params);
-        }
+        highlightOverlay.ifPresentOrElse(
+                highlightOverlay -> {
+                    final WindowManager.LayoutParams params = (WindowManager.LayoutParams) highlightOverlay.getLayoutParams();
+                    updateLayoutParams(params, bounds);
+                    windowManager.updateViewLayout(highlightOverlay, params);
+                },
+                () -> {
+                    final View highlightOverlay = createHighlightOverlay();
+                    windowManager.addView(highlightOverlay, getLayoutParams(bounds));
+                    this.highlightOverlay = Optional.of(highlightOverlay);
+                });
+    }
+
+    private View createHighlightOverlay() {
+        final View highlightOverlay = new FrameLayout(service);
+        highlightOverlay.setBackgroundResource(R.drawable.border_highlight);
+        return highlightOverlay;
     }
 
     private void removeHighlight() {
-        if (highlightOverlay != null) {
-            windowManager.removeView(highlightOverlay);
-            highlightOverlay = null;
-            lastOverlayBounds.setEmpty();
-        }
+        highlightOverlay.ifPresent(
+                highlightOverlay -> {
+                    windowManager.removeView(highlightOverlay);
+                    this.highlightOverlay = Optional.empty();
+                    lastOverlayBounds.setEmpty();
+                });
     }
 
     private WindowManager.LayoutParams getLayoutParams(final Rect bounds) {
