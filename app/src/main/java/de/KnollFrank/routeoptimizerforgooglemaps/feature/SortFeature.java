@@ -15,6 +15,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 
+import androidx.annotation.VisibleForTesting;
+
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.RouteUrlRequester;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.StopCountDetector;
 
@@ -26,16 +28,20 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     private final AccessibilityService service;
     private final WindowManager windowManager;
     private final RouteUrlRequester routeUrlRequester;
+    private final RouteUrlRequester.RouteUrlCallback onRouteUrlExtracted;
 
     // FK-TODO: make Optional<View>
     private View sortButtonOverlay;
     private final Rect lastStopCountBounds = new Rect();
     private int lastKnownStopCount = 0;
 
-    public SortFeature(final AccessibilityService service, final RouteUrlRequester routeUrlRequester) {
+    public SortFeature(final AccessibilityService service,
+                       final RouteUrlRequester routeUrlRequester,
+                       final RouteUrlRequester.RouteUrlCallback onRouteUrlExtracted) {
         this.service = service;
         this.windowManager = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
         this.routeUrlRequester = routeUrlRequester;
+        this.onRouteUrlExtracted = onRouteUrlExtracted;
     }
 
     @Override
@@ -88,21 +94,21 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
         button.setPadding(dpToPx(12), dpToPx(6), dpToPx(12), dpToPx(6));
         button.setMinimumHeight(0);
         button.setMinimumWidth(0);
+        button.setBackground(getShape());
+        button.setOnClickListener(view -> {
+            Log.d(TAG, "Sort button clicked for " + lastKnownStopCount + " stops");
+            routeUrlRequester.requestRouteUrl(onRouteUrlExtracted);
+        });
+        return button;
+    }
 
+    private GradientDrawable getShape() {
         final GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.RECTANGLE);
         shape.setCornerRadius(dpToPx(17));
         shape.setColor(Color.parseColor("#3C4043"));
         shape.setStroke(dpToPx(2), Color.parseColor("#D4AF37"));
-        button.setBackground(shape);
-
-        button.setOnClickListener(
-                view -> {
-                    Log.d(TAG, "Sort button clicked for " + lastKnownStopCount + " stops");
-                    routeUrlRequester.requestRouteUrl(routeUrl -> Log.d(TAG, "Extracted route URL for SORT: " + routeUrl));
-                });
-
-        return button;
+        return shape;
     }
 
     private WindowManager.LayoutParams getSortButtonLayoutParams(final Rect targetRect) {
@@ -132,5 +138,10 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
             windowManager.removeView(sortButtonOverlay);
             sortButtonOverlay = null;
         }
+    }
+
+    @VisibleForTesting
+    View getSortButtonOverlay() {
+        return sortButtonOverlay;
     }
 }

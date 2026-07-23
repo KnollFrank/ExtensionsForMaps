@@ -40,7 +40,11 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                                 DummyStopAdder.addDummyStopToDirectionsUrlThenOpenInGoogleMaps(
                                         routeUrl,
                                         this));
-        final SortFeature sortFeature = new SortFeature(this, urlRequester);
+        final SortFeature sortFeature =
+                new SortFeature(
+                        this,
+                        urlRequester,
+                        routeUrl -> Log.d(TAG, "Extracted route URL for SORT: " + routeUrl));
         stopCountDetector =
                 new StopCountDetector(
                         googleMapsContext,
