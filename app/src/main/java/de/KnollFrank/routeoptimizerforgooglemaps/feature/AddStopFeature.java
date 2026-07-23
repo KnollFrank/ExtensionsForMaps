@@ -62,8 +62,8 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     }
 
     @Override
-    public void onStopCountUpdated(final int count, final Rect bounds) {
-        lastKnownStopCount = count;
+    public void onStopCountUpdated(final int stopCount, final Rect stopCountBounds) {
+        lastKnownStopCount = stopCount;
         AccessibilityServices
                 .getRootInActiveWindow(service)
                 .ifPresent(this::updateHighlightOverlay);

@@ -37,9 +37,9 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     }
 
     @Override
-    public void onStopCountUpdated(final int count, final Rect bounds) {
-        this.lastKnownStopCount = count;
-        this.lastStopCountBounds.set(bounds);
+    public void onStopCountUpdated(final int stopCount, final Rect stopCountBounds) {
+        this.lastKnownStopCount = stopCount;
+        this.lastStopCountBounds.set(stopCountBounds);
         updateSortButtonPosition();
     }
 

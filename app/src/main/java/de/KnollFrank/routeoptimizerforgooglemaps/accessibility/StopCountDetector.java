@@ -8,13 +8,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 
+// FK-TODO: refactor
 public class StopCountDetector {
 
     private static final String TAG = StopCountDetector.class.getSimpleName();
 
     public interface StopCountListener {
 
-        void onStopCountUpdated(int count, Rect bounds);
+        void onStopCountUpdated(int stopCount, Rect stopCountBounds);
 
         void onStopCountLost();
     }
@@ -29,8 +30,8 @@ public class StopCountDetector {
     }
 
     public void detect(final AccessibilityNodeInfo root) {
-        final Rect bounds = new Rect();
-        int count = -1;
+        final Rect stopCountBounds = new Rect();
+        int stopCount = -1;
 
         final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord());
         for (final AccessibilityNodeInfo node : nodes) {
@@ -40,9 +41,9 @@ public class StopCountDetector {
                 final Matcher matcher = googleMapsContext.stopCountPattern().matcher(text);
                 if (matcher.find()) {
                     try {
-                        count = Integer.parseInt(matcher.group(1));
-                        node.getBoundsInScreen(bounds);
-                        Log.d(TAG, String.format("Found stop count: '%s' at bounds: %s", text, bounds));
+                        stopCount = Integer.parseInt(matcher.group(1));
+                        node.getBoundsInScreen(stopCountBounds);
+                        Log.d(TAG, String.format("Found stop count: '%s' at bounds: %s", text, stopCountBounds));
                         break;
                     } catch (final NumberFormatException ignored) {
                     }
@@ -50,9 +51,9 @@ public class StopCountDetector {
             }
         }
 
-        if (count != -1) {
+        if (stopCount != -1) {
             for (final StopCountListener listener : listeners) {
-                listener.onStopCountUpdated(count, bounds);
+                listener.onStopCountUpdated(stopCount, stopCountBounds);
             }
         } else {
             for (final StopCountListener listener : listeners) {
