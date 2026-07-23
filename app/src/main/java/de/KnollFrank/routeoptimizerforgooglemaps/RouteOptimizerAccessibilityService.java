@@ -58,9 +58,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        for (final AccessibilityFeature feature : features) {
-            feature.onDestroy();
-        }
+        features.forEach(AccessibilityFeature::onDestroy);
     }
 
     @Override
@@ -75,9 +73,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                 .ifPresent(
                         root -> {
                             stopCountDetector.detect(root);
-                            for (final AccessibilityFeature feature : features) {
-                                feature.onGoogleMapsEvent(event, root);
-                            }
+                            features.forEach(feature -> feature.onGoogleMapsEvent(event, root));
                         });
     }
 
