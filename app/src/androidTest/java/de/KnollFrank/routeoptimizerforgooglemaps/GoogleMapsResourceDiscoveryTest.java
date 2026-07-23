@@ -13,9 +13,9 @@ import org.junit.runner.RunWith;
 import java.util.stream.Stream;
 
 @RunWith(AndroidJUnit4.class)
-public class MapsResourceDiscoveryTest {
+public class GoogleMapsResourceDiscoveryTest {
 
-    private static final String TAG = MapsResourceDiscoveryTest.class.getSimpleName();
+    private static final String TAG = GoogleMapsResourceDiscoveryTest.class.getSimpleName();
     private static final String MAPS_PACKAGE = "com.google.android.apps.maps";
 
     @Test
