@@ -11,6 +11,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.GoogleMapsContext
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.GoogleMapsContextResolver;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.RouteUrlRequester;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.StopCountDetector;
+import de.KnollFrank.routeoptimizerforgooglemaps.common.AccessibilityServices;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.AccessibilityFeature;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.AddStopFeature;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.SortFeature;
@@ -68,8 +69,8 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
 
     private void handleGoogleMapsEvent(final AccessibilityEvent event) {
         urlRequester.handleGoogleMapsEvent(event);
-        Optional
-                .ofNullable(getRootInActiveWindow())
+        AccessibilityServices
+                .getRootInActiveWindow(this)
                 .ifPresent(
                         root -> {
                             stopCountDetector.detect(root);

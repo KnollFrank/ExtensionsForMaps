@@ -3,6 +3,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps.common;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class Optionals {
@@ -16,5 +17,9 @@ public class Optionals {
 
     public static Optional<Integer> asOptional(final OptionalInt optionalInt) {
         return optionalInt.stream().boxed().findFirst();
+    }
+
+    public static <A, B> void ifPresentBoth(final Optional<A> optA, final Optional<B> optB, BiConsumer<A, B> consumer) {
+        optA.ifPresent(a -> optB.ifPresent(b -> consumer.accept(a, b)));
     }
 }

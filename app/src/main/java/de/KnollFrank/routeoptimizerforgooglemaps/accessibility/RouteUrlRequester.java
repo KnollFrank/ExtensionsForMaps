@@ -12,8 +12,11 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.common.AccessibilityServices;
+import de.KnollFrank.routeoptimizerforgooglemaps.common.Optionals;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.URLs;
 
+// FK-TODO: refactor
 public class RouteUrlRequester {
 
     private static final String TAG = RouteUrlRequester.class.getSimpleName();
@@ -26,16 +29,15 @@ public class RouteUrlRequester {
     }
 
     private final AccessibilityService service;
-    // FK-TODO: use Optional<RouteUrlCallback>
-    private RouteUrlCallback currentCallback;
+    private Optional<RouteUrlCallback> routeUrlCallback = Optional.empty();
     private boolean isWaitingToClickShareAfterBack = false;
 
     public RouteUrlRequester(final AccessibilityService service) {
         this.service = service;
     }
 
-    public void requestRouteUrl(final RouteUrlCallback callback) {
-        this.currentCallback = callback;
+    public void requestRouteUrl(final RouteUrlCallback routeUrlCallback) {
+        this.routeUrlCallback = Optional.of(routeUrlCallback);
         if (!tryClickShareButton()) {
             Log.d(TAG, "Share button not found. Dismissing overlay via BACK.");
             service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
@@ -50,29 +52,27 @@ public class RouteUrlRequester {
     }
 
     public void handleResolverEvent() {
-        if (currentCallback == null) {
-            return;
-        }
+        Optionals.ifPresentBoth(
+                routeUrlCallback,
+                AccessibilityServices.getRootInActiveWindow(service),
+                this::handleResolverEvent);
+    }
 
-        final AccessibilityNodeInfo rootNode = service.getRootInActiveWindow();
-        if (rootNode == null) {
-            return;
-        }
-
+    private void handleResolverEvent(final RouteUrlCallback routeUrlCallback,
+                                     final AccessibilityNodeInfo rootNode) {
         final List<AccessibilityNodeInfo> urlNodes =
                 ImmutableList
                         .<AccessibilityNodeInfo>builder()
                         .addAll(rootNode.findAccessibilityNodeInfosByViewId("android:id/content_preview_text"))
                         .addAll(rootNode.findAccessibilityNodeInfosByViewId("com.android.intentresolver:id/sem_chooser_sub_title_details_view"))
                         .build();
-
         if (!urlNodes.isEmpty()) {
             final CharSequence urlText = urlNodes.get(0).getText();
             if (urlText != null) {
                 Log.d(TAG, "Extracted URL: " + urlText);
                 final URL routeUrl = URLs.createUrl(urlText.toString());
-                currentCallback.onRouteUrlExtracted(routeUrl);
-                currentCallback = null;
+                routeUrlCallback.onRouteUrlExtracted(routeUrl);
+                this.routeUrlCallback = Optional.empty();
                 service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
             }
         }

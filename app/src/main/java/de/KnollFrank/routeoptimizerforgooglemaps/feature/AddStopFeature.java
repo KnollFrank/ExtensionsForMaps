@@ -24,6 +24,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.R;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.GoogleMapsContext;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.RouteUrlRequester;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.StopCountDetector;
+import de.KnollFrank.routeoptimizerforgooglemaps.common.AccessibilityServices;
 
 public class AddStopFeature implements AccessibilityFeature, StopCountDetector.StopCountListener {
 
@@ -63,7 +64,9 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     @Override
     public void onStopCountUpdated(final int count, final Rect bounds) {
         lastKnownStopCount = count;
-        updateHighlightOverlay(service.getRootInActiveWindow());
+        AccessibilityServices
+                .getRootInActiveWindow(service)
+                .ifPresent(this::updateHighlightOverlay);
     }
 
     @Override
@@ -88,9 +91,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
         return isAddStopsText(getEventText(event));
     }
 
-    // FK-TODO: use "Optional<AccessibilityNodeInfo> root"
     private void updateHighlightOverlay(final AccessibilityNodeInfo root) {
-        if (root == null) return;
         if (!Settings.canDrawOverlays(service) || !enableEnhancedAddStopButton()) {
             removeHighlight();
             return;
