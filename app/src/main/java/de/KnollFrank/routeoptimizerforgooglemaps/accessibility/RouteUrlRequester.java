@@ -26,6 +26,7 @@ public class RouteUrlRequester {
     }
 
     private final AccessibilityService service;
+    // FK-TODO: use Optional<RouteUrlCallback>
     private RouteUrlCallback currentCallback;
     private boolean isWaitingToClickShareAfterBack = false;
 

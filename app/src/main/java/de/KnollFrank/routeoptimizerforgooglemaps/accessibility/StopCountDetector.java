@@ -4,7 +4,6 @@ import android.graphics.Rect;
 import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -21,19 +20,15 @@ public class StopCountDetector {
     }
 
     private final GoogleMapsContext googleMapsContext;
-    private final List<StopCountListener> listeners = new ArrayList<>();
+    private final List<StopCountListener> listeners;
 
-    public StopCountDetector(final GoogleMapsContext googleMapsContext) {
+    public StopCountDetector(final GoogleMapsContext googleMapsContext,
+                             final List<StopCountListener> listeners) {
         this.googleMapsContext = googleMapsContext;
-    }
-
-    public void addListener(final StopCountListener listener) {
-        listeners.add(listener);
+        this.listeners = listeners;
     }
 
     public void detect(final AccessibilityNodeInfo root) {
-        if (root == null) return;
-
         final Rect bounds = new Rect();
         int count = -1;
 
