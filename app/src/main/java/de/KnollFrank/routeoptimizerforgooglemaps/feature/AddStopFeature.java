@@ -15,7 +15,6 @@ import android.widget.FrameLayout;
 
 import com.google.common.collect.Range;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -119,11 +118,10 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     }
 
     private Optional<AccessibilityNodeInfo> findAddStopsButton(final AccessibilityNodeInfo root) {
-        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.addStopsText());
-        if (!nodes.isEmpty()) {
-            return Optional.of(nodes.get(0));
-        }
-        return Optional.empty();
+        return root
+                .findAccessibilityNodeInfosByText(googleMapsContext.addStopsText())
+                .stream()
+                .findFirst();
     }
 
     private void showHighlight(final Rect bounds) {
