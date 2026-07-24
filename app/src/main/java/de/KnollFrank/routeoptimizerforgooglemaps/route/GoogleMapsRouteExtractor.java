@@ -10,6 +10,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.NodeFinder;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.protobuf.NodesParser;
 
 // FK-TODO: brauchen Gesamtunittest, der eine Google Maps Directions URL entgegennimmt und eine korrekt sortierte (optimierte) Google Maps Directions URL erzeugt.
+// FK-TODO: GoogleMapsRouteExtractor und RouteToUrlConverter sind invers zueinander. Führe wie in SettingsSearch ein Converter-Interface ein
 public class GoogleMapsRouteExtractor {
 
     public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) {

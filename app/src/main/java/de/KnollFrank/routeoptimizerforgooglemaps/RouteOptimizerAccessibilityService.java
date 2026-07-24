@@ -15,6 +15,8 @@ import de.KnollFrank.routeoptimizerforgooglemaps.common.AccessibilityServices;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.AccessibilityFeature;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.AddStopFeature;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.SortFeature;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.HaversineVehicleRoutingTransportCostsProvider;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
 
 public class RouteOptimizerAccessibilityService extends AccessibilityService {
 
@@ -44,7 +46,14 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                 new SortFeature(
                         this,
                         urlRequester,
-                        routeUrl -> Log.d(TAG, "Extracted route URL for SORT: " + routeUrl));
+                        routeUrl -> {
+                            Log.d(TAG, "Extracted route URL for SORT: " + routeUrl);
+                            final RouteOptimizationWorkflow routeOptimizationWorkflow =
+                                    new RouteOptimizationWorkflow(
+                                            new RouteOptimizer(new HaversineVehicleRoutingTransportCostsProvider()),
+                                            RouteOptimizerAccessibilityService.this);
+                            routeOptimizationWorkflow.optimizeThenShowRoute(routeUrl);
+                        });
         stopCountDetector =
                 new StopCountDetector(
                         googleMapsContext,

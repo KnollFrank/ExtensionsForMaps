@@ -138,7 +138,8 @@ public class GoogleMapsRouteExtractorTest {
                         Optional.of(new OfficialPlaceId("ChIJ1V1RE0v8mUcROpsR_6oBUjQ")),
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.4765345, DEGREES),
-                                new Angle(8.934900899999999, DEGREES))),
+                                new Angle(8.934900899999999, DEGREES)),
+                        Optional.empty()),
                 List.of(
                         new Stop(
                                 "1",
@@ -146,13 +147,15 @@ public class GoogleMapsRouteExtractorTest {
                                 Optional.of(new OfficialPlaceId("ChIJuRMYfoNhsUcRoDrWe_I9JgQ")),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(53.548828199999996, DEGREES),
-                                        new Angle(9.987170299999999, DEGREES)))),
+                                        new Angle(9.987170299999999, DEGREES)),
+                                Optional.empty())),
                 new Stop(
                         "2",
                         "Unterhausen",
                         Optional.of(new OfficialPlaceId("ChIJsYBbyF7zmUcREc3DW6XSMuQ")),
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(48.430628399999996, DEGREES),
-                                new Angle(9.2546378, DEGREES))));
+                                new Angle(9.2546378, DEGREES)),
+                        Optional.empty()));
     }
 }

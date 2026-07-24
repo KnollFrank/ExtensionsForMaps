@@ -7,5 +7,6 @@ import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
 public record Stop(String id,
                    String address,
                    Optional<OfficialPlaceId> officialPlaceId,
-                   Geodetic geodetic) {
+                   Geodetic geodetic,
+                   Optional<DeliveryGroup> deliveryGroup) {
 }

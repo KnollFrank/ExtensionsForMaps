@@ -4,6 +4,7 @@ import static de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Unit.DEGREES;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Angle;
 import de.KnollFrank.routeoptimizerforgooglemaps.coordinate.Geodetic;
@@ -28,7 +29,8 @@ class StopDataConverter {
                                 DEGREES),
                         new Angle(
                                 stopData.longitude.orElseThrow(() -> createMissingCoordinateException("longitude", stopData)),
-                                DEGREES)));
+                                DEGREES)),
+                Optional.empty());
     }
 
     private static IllegalArgumentException createMissingCoordinateException(

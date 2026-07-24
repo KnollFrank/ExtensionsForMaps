@@ -30,7 +30,8 @@ public class RouteToUrlConverterTest {
                                 Optional.empty(),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(48.50161543647, DEGREES),
-                                        new Angle(8.993018526571907, DEGREES))),
+                                        new Angle(8.993018526571907, DEGREES)),
+                                Optional.empty()),
                         List.of(),
                         new Stop(
                                 "2",
@@ -38,7 +39,8 @@ public class RouteToUrlConverterTest {
                                 Optional.empty(),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(48.476548982116846, DEGREES),
-                                        new Angle(8.934905787678979, DEGREES))));
+                                        new Angle(8.934905787678979, DEGREES)),
+                                Optional.empty()));
 
         // When
         final URL result = RouteToUrlConverter.getUrl(route);
@@ -74,7 +76,8 @@ public class RouteToUrlConverterTest {
                                 Optional.empty(),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(10.0, DEGREES),
-                                        new Angle(20.0, DEGREES))),
+                                        new Angle(20.0, DEGREES)),
+                                Optional.empty()),
                         List.of(
                                 new Stop(
                                         "2",
@@ -82,21 +85,24 @@ public class RouteToUrlConverterTest {
                                         Optional.empty(),
                                         Geodetic.fromLatitudeLongitude(
                                                 new Angle(15.0, DEGREES),
-                                                new Angle(25.0, DEGREES))),
+                                                new Angle(25.0, DEGREES)),
+                                        Optional.empty()),
                                 new Stop(
                                         "3",
                                         "W2",
                                         Optional.empty(),
                                         Geodetic.fromLatitudeLongitude(
                                                 new Angle(20.0, DEGREES),
-                                                new Angle(30.0, DEGREES)))),
+                                                new Angle(30.0, DEGREES)),
+                                        Optional.empty())),
                         new Stop(
                                 "4",
                                 "Destination",
                                 Optional.empty(),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(30.0, DEGREES),
-                                        new Angle(40.0, DEGREES))));
+                                        new Angle(40.0, DEGREES)),
+                                Optional.empty()));
 
         // When
         final URL result = RouteToUrlConverter.getUrl(route);
@@ -118,7 +124,8 @@ public class RouteToUrlConverterTest {
                                 Optional.of(new OfficialPlaceId("ChIJ1V1RE0v8mUcROpsR_6oBUjQ")),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(10.0, DEGREES),
-                                        new Angle(20.0, DEGREES))),
+                                        new Angle(20.0, DEGREES)),
+                                Optional.empty()),
                         List.of(
                                 new Stop(
                                         "2",
@@ -126,14 +133,16 @@ public class RouteToUrlConverterTest {
                                         Optional.of(new OfficialPlaceId("ChIJsYBbyF7zmUcREc3DW6XSMuQ")),
                                         Geodetic.fromLatitudeLongitude(
                                                 new Angle(15.0, DEGREES),
-                                                new Angle(25.0, DEGREES)))),
+                                                new Angle(25.0, DEGREES)),
+                                        Optional.empty())),
                         new Stop(
                                 "3",
                                 "Destination Landmark",
                                 Optional.of(new OfficialPlaceId("ChIJsYBbyF7zmUcREc3DW6XSMuQ")),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(30.0, DEGREES),
-                                        new Angle(40.0, DEGREES))));
+                                        new Angle(40.0, DEGREES)),
+                                Optional.empty()));
 
         // When
         final URL result = RouteToUrlConverter.getUrl(route);
@@ -155,7 +164,8 @@ public class RouteToUrlConverterTest {
                                 Optional.of(new OfficialPlaceId("ChIJsYBbyF7zmUcREc3DW6XSMuQ")),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(10.0, DEGREES),
-                                        new Angle(20.0, DEGREES))),
+                                        new Angle(20.0, DEGREES)),
+                                Optional.empty()),
                         List.of(
                                 new Stop(
                                         "2",
@@ -163,21 +173,24 @@ public class RouteToUrlConverterTest {
                                         Optional.of(new OfficialPlaceId("ChIJsYBbyF7zmUcREc3DW6XSMuQ")),
                                         Geodetic.fromLatitudeLongitude(
                                                 new Angle(15.0, DEGREES),
-                                                new Angle(25.0, DEGREES))),
+                                                new Angle(25.0, DEGREES)),
+                                        Optional.empty()),
                                 new Stop(
                                         "3",
                                         "W2",
                                         Optional.empty(),
                                         Geodetic.fromLatitudeLongitude(
                                                 new Angle(20.0, DEGREES),
-                                                new Angle(30.0, DEGREES)))),
+                                                new Angle(30.0, DEGREES)),
+                                        Optional.empty())),
                         new Stop(
                                 "4",
                                 "Destination",
                                 Optional.of(new OfficialPlaceId("ChIJsYBbyF7zmUcREc3DW6XSMuQ")),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(30.0, DEGREES),
-                                        new Angle(40.0, DEGREES))));
+                                        new Angle(40.0, DEGREES)),
+                                Optional.empty()));
 
         // When
         final URL result = RouteToUrlConverter.getUrl(route);
@@ -198,7 +211,8 @@ public class RouteToUrlConverterTest {
                         Optional.empty(),
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(10.0, DEGREES),
-                                new Angle(20.0, DEGREES)));
+                                new Angle(20.0, DEGREES)),
+                        Optional.empty());
         final Stop destination =
                 new Stop(
                         "11",
@@ -206,7 +220,8 @@ public class RouteToUrlConverterTest {
                         Optional.empty(),
                         Geodetic.fromLatitudeLongitude(
                                 new Angle(30.0, DEGREES),
-                                new Angle(40.0, DEGREES)));
+                                new Angle(40.0, DEGREES)),
+                        Optional.empty());
         final List<Stop> waypoints = new java.util.ArrayList<>();
         for (int i = 1; i <= 10; i++) {
             waypoints.add(
@@ -216,7 +231,8 @@ public class RouteToUrlConverterTest {
                             Optional.empty(),
                             Geodetic.fromLatitudeLongitude(
                                     new Angle(10.0 + i, DEGREES),
-                                    new Angle(20.0 + i, DEGREES))));
+                                    new Angle(20.0 + i, DEGREES)),
+                            Optional.empty()));
         }
         final Route route = new Route(origin, waypoints, destination);
 
@@ -240,7 +256,8 @@ public class RouteToUrlConverterTest {
                                 Optional.empty(),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(48.5, DEGREES),
-                                        new Angle(9.0, DEGREES))),
+                                        new Angle(9.0, DEGREES)),
+                                Optional.empty()),
                         Lists
                                 .createRange(1, 10)
                                 .stream()
@@ -255,7 +272,8 @@ public class RouteToUrlConverterTest {
                                 Optional.empty(),
                                 Geodetic.fromLatitudeLongitude(
                                         new Angle(48.6, DEGREES),
-                                        new Angle(9.1, DEGREES))));
+                                        new Angle(9.1, DEGREES)),
+                                Optional.empty()));
 
         // When
         final URL url = RouteToUrlConverter.getUrl(route);
@@ -275,6 +293,7 @@ public class RouteToUrlConverterTest {
                 officialPlaceId,
                 Geodetic.fromLatitudeLongitude(
                         new Angle(48.5 + i * 0.01, DEGREES),
-                        new Angle(9.0 + i * 0.01, DEGREES)));
+                        new Angle(9.0 + i * 0.01, DEGREES)),
+                Optional.empty());
     }
 }
