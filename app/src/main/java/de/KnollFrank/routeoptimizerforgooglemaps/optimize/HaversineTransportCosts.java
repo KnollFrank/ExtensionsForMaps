@@ -9,6 +9,7 @@ import com.graphhopper.jsprit.core.problem.vehicle.Vehicle;
 // STRATEGIE 1: Haversine Implementierung (Luftlinie)
 // =========================================================================================
 // FK-TODO: braucht man für relativ kurze Strecken (z.B. innerhalb Deutschlands) eine so präzise Formel, die die Erdkrümmung berücksichtigt, oder geht das auch einfacher planar?
+// FK-TODO: use com.graphhopper.jsprit.core.util.VehicleRoutingTransportCostsMatrix instead
 class HaversineTransportCosts implements VehicleRoutingTransportCosts {
 
     @Override

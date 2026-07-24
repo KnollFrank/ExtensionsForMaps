@@ -8,6 +8,7 @@ import com.graphhopper.jsprit.core.problem.vehicle.Vehicle;
 // =========================================================================================
 // STRATEGIE 2: OSRM Implementierung (Straßennetz-Matrix)
 // =========================================================================================
+// FK-TODO: use com.graphhopper.jsprit.core.util.VehicleRoutingTransportCostsMatrix instead
 class OsrmTransportCosts implements VehicleRoutingTransportCosts {
 
     private final RoutingMatrix routingMatrix;
