@@ -17,23 +17,22 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowLooper;
 
 @RunWith(RobolectricTestRunner.class)
-// FK-TODO: macht das Sinn?
-public class SpinnerOverlayTest {
+public class ProgressOverlayTest {
 
-    private SpinnerOverlay spinnerOverlay;
+    private ProgressOverlay progressOverlay;
     private WindowManager windowManager;
 
     @Before
     public void setUp() {
         final Context context = ApplicationProvider.getApplicationContext();
         windowManager = mock(WindowManager.class);
-        spinnerOverlay = new SpinnerOverlay(context, windowManager);
+        progressOverlay = new ProgressOverlay(context, windowManager);
     }
 
     @Test
     public void testShow() {
         // When
-        spinnerOverlay.show();
+        progressOverlay.show();
         ShadowLooper.idleMainLooper();
 
         // Then
@@ -43,11 +42,11 @@ public class SpinnerOverlayTest {
     @Test
     public void testHide() {
         // Given
-        spinnerOverlay.show();
+        progressOverlay.show();
         ShadowLooper.idleMainLooper();
 
         // When
-        spinnerOverlay.hide();
+        progressOverlay.hide();
         ShadowLooper.idleMainLooper();
 
         // Then

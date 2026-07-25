@@ -13,29 +13,31 @@ import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 public class RouteOptimizationWorkflow {
 
     private final RouteOptimizationOrchestrator routeOptimizationOrchestrator;
-    private final SpinnerOverlay spinnerOverlay;
+    private final ProgressOverlay progressOverlay;
 
     public RouteOptimizationWorkflow(final RouteOptimizer routeOptimizer, final Context context) {
-        this.spinnerOverlay = new SpinnerOverlay(context);
+        this.progressOverlay = new ProgressOverlay(context);
         this.routeOptimizationOrchestrator =
                 new RouteOptimizationOrchestrator(
-                        createCallback(context, spinnerOverlay),
+                        createCallback(context, progressOverlay),
                         routeOptimizer);
     }
 
     RouteOptimizationWorkflow(final RouteOptimizationOrchestrator routeOptimizationOrchestrator,
-                              final SpinnerOverlay spinnerOverlay) {
+                              final ProgressOverlay progressOverlay) {
         this.routeOptimizationOrchestrator = routeOptimizationOrchestrator;
-        this.spinnerOverlay = spinnerOverlay;
+        this.progressOverlay = progressOverlay;
     }
 
     private RouteOptimizationOrchestrator.Callback createCallback(final Context context,
-                                                                  final SpinnerOverlay spinnerOverlay) {
+                                                                  final ProgressOverlay progressOverlay) {
         return new RouteOptimizationOrchestrator.Callback() {
 
             @Override
             public void onExtractRouteFromDirectionsUrlStarted() {
-                spinnerOverlay.show();
+                progressOverlay.show();
+                // FK-TODO: i18n
+                progressOverlay.updateStatus("Lese Route...");
             }
 
             @Override
@@ -45,17 +47,19 @@ public class RouteOptimizationWorkflow {
 
             @Override
             public void onOptimizationStarted() {
+                // FK-TODO: i18n
+                progressOverlay.updateStatus("Optimiere Route...");
             }
 
             @Override
             public void onOptimizationSuccess(final Route optimizedRoute) {
-                spinnerOverlay.hide();
+                progressOverlay.hide();
                 GoogleMapsNavigator.launchRouteOverview(optimizedRoute, context);
             }
 
             @Override
             public void onError(final String message) {
-                spinnerOverlay.hide();
+                progressOverlay.hide();
                 runOnUiThread(
                         () -> Toast
                                 .makeText(context, message, Toast.LENGTH_LONG)

@@ -18,8 +18,8 @@ public class RouteOptimizationWorkflowTest {
     public void testOptimizeThenShowRoute_callsOrchestrator() throws MalformedURLException {
         // Given
         final RouteOptimizationOrchestrator orchestrator = mock(RouteOptimizationOrchestrator.class);
-        final SpinnerOverlay spinnerOverlay = mock(SpinnerOverlay.class);
-        final RouteOptimizationWorkflow workflow = new RouteOptimizationWorkflow(orchestrator, spinnerOverlay);
+        final ProgressOverlay progressOverlay = mock(ProgressOverlay.class);
+        final RouteOptimizationWorkflow workflow = new RouteOptimizationWorkflow(orchestrator, progressOverlay);
         final URL url = new URL("https://example.com");
 
         // When
