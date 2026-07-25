@@ -74,6 +74,11 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
         removeHighlight();
     }
 
+    public void reset() {
+        lastKnownStopCount = 0;
+        removeHighlight();
+    }
+
     @Override
     public void onDestroy() {
         removeHighlight();

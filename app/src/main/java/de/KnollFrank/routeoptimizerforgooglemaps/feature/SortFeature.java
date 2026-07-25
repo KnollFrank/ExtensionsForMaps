@@ -53,6 +53,14 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
 
     @Override
     public void onStopCountLost() {
+        Log.d(TAG, "Stop count label not found. Hiding sort button, but keeping count: " + lastKnownStopCount);
+        this.lastStopCountBounds.setEmpty();
+        removeSortButton();
+    }
+
+    public void reset() {
+        Log.d(TAG, "Full reset of SortFeature.");
+        lastKnownStopCount = 0;
         this.lastStopCountBounds.setEmpty();
         removeSortButton();
     }

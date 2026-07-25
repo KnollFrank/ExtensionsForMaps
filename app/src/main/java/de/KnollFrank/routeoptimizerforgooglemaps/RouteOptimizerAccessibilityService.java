@@ -77,6 +77,17 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                         });
     }
 
+    // FK-TODO: refactor using streams
+    private void resetFeatures() {
+        for (final AccessibilityFeature feature : features) {
+            if (feature instanceof final AddStopFeature addStopFeature) {
+                addStopFeature.reset();
+            } else if (feature instanceof final SortFeature sortFeature) {
+                sortFeature.reset();
+            }
+        }
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -89,6 +100,9 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     }
 
     private void handleGoogleMapsEvent(final AccessibilityEvent event) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            resetFeatures();
+        }
         urlRequester.handleGoogleMapsEvent(event);
         AccessibilityServices
                 .getRootInActiveWindow(this)
