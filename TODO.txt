@@ -1,4 +1,3 @@
-FK-TODO: Simuliere einen "Zwischenstopps hinzufügen"-Button, der über den Teilen-Button die aktuelle Route an meine App sendet, die dann der aktuellen Route einen Dummy-Stopp am Ende dazufügt und die so vergrößerte Route wieder in Google Maps öffnet.
 FK-TODO: Routenoptimierung mit Hilfe von https://openrouteservice.org/ statt jsprit
 FK-TODO: Teile des UIs (Optimierung nach Zeit oder Entfernung, Rundreise) von https://www.mapquest.com/routeplanner/ umsetzen
 FK-TODO: Adresseingabefeld von Google Maps um Scanfunktion der Adresse erweitern
