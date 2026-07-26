@@ -99,6 +99,7 @@ public class RouteOptimizationWorkflow {
                 final AlertDialog dialog =
                         new MaterialAlertDialogBuilder(context)
                                 .setTitle("Route Preview")
+                                .setCancelable(false)
                                 .setView(dialogView)
                                 .setPositiveButton(
                                         "OK",
