@@ -1,17 +1,21 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
-import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.location.Geocoder;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.net.URL;
 import java.util.Locale;
@@ -79,33 +83,49 @@ public class RouteOptimizationWorkflow {
             }
 
             private void showRoutePreviewDialog(final Route enrichedRoute, final Context context) {
-                final View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_route_preview, null);
+                _showRoutePreviewDialog(enrichedRoute, new ContextThemeWrapper(context, R.style.Theme_RouteoptimizerForGoogleMaps_Dialog));
+            }
+
+            private void _showRoutePreviewDialog(final Route enrichedRoute, final ContextThemeWrapper context) {
+                final View dialogView =
+                        LayoutInflater
+                                .from(context)
+                                .inflate(R.layout.dialog_route_preview, null);
                 final StopsAdapter stopsAdapter = new StopsAdapter();
+                stopsAdapter.setRoute(enrichedRoute);
                 final RecyclerView recyclerViewStops = dialogView.findViewById(R.id.recyclerViewStops);
                 recyclerViewStops.setLayoutManager(new LinearLayoutManager(context));
                 recyclerViewStops.setAdapter(stopsAdapter);
-
-                stopsAdapter.setRoute(enrichedRoute);
-
                 final AlertDialog dialog =
-                        new AlertDialog
-                                .Builder(context)
+                        new MaterialAlertDialogBuilder(context)
                                 .setTitle("Route Preview")
                                 .setView(dialogView)
                                 .setPositiveButton(
                                         "OK",
-                                        (d, which) -> {
-                                            stopsAdapter.getRoute().ifPresent(configuredRoute -> {
-                                                progressOverlay.show();
-                                                progressOverlay.updateStatus("Optimiere Route...");
-                                                routeOptimizationOrchestrator.optimizeRoute(configuredRoute);
-                                            });
+                                        new DialogInterface.OnClickListener() {
+
+                                            @Override
+                                            public void onClick(final DialogInterface dialog, final int which) {
+                                                stopsAdapter
+                                                        .getRoute()
+                                                        .ifPresent(
+                                                                configuredRoute -> {
+                                                                    progressOverlay.show();
+                                                                    progressOverlay.updateStatus("Optimiere Route...");
+                                                                    routeOptimizationOrchestrator.optimizeRoute(configuredRoute);
+                                                                });
+                                            }
                                         })
                                 .setNegativeButton(
                                         "Abbrechen",
-                                        (d, which) -> d.dismiss())
-                                .create();
+                                        new DialogInterface.OnClickListener() {
 
+                                            @Override
+                                            public void onClick(final DialogInterface dialog, final int which) {
+                                                dialog.dismiss();
+                                            }
+                                        })
+                                .create();
                 if (dialog.getWindow() != null) {
                     dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY);
                 }

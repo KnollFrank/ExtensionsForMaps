@@ -6,4 +6,6 @@
     </style>
 
     <style name="Theme.RouteoptimizerForGoogleMaps" parent="Base.Theme.RouteoptimizerForGoogleMaps" />
+
+    <style name="Theme.RouteoptimizerForGoogleMaps.Dialog" parent="Theme.Material3.DayNight.Dialog" />
 </resources>
