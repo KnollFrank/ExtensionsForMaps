@@ -82,17 +82,17 @@ public class RouteOptimizationWorkflow {
                                 .show());
             }
 
-            private void showRoutePreviewDialog(final Route enrichedRoute, final Context context) {
-                _showRoutePreviewDialog(enrichedRoute, new ContextThemeWrapper(context, R.style.Theme_RouteoptimizerForGoogleMaps_Dialog));
+            private void showRoutePreviewDialog(final Route route, final Context context) {
+                showRoutePreviewDialog(route, new ContextThemeWrapper(context, R.style.Theme_RouteoptimizerForGoogleMaps_Dialog));
             }
 
-            private void _showRoutePreviewDialog(final Route enrichedRoute, final ContextThemeWrapper context) {
+            private void showRoutePreviewDialog(final Route route, final ContextThemeWrapper context) {
                 final View dialogView =
                         LayoutInflater
                                 .from(context)
                                 .inflate(R.layout.dialog_route_preview, null);
                 final StopsAdapter stopsAdapter = new StopsAdapter();
-                stopsAdapter.setRoute(enrichedRoute);
+                stopsAdapter.setRoute(route);
                 final RecyclerView recyclerViewStops = dialogView.findViewById(R.id.recyclerViewStops);
                 recyclerViewStops.setLayoutManager(new LinearLayoutManager(context));
                 recyclerViewStops.setAdapter(stopsAdapter);
