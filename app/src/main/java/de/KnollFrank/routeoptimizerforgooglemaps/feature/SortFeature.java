@@ -93,6 +93,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
         }
     }
 
+    // FK-TODO: warum nicht Button statt View als Rückgabewert und ebenfalls sortButtonOverlay vom Button statt View?
     private View createSortButton() {
         final Button button = new Button(service);
         button.setText("↕️ Sortieren");

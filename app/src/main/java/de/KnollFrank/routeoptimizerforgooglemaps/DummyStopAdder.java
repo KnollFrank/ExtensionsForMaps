@@ -19,17 +19,18 @@ public class DummyStopAdder {
 
     private static final String TAG = DummyStopAdder.class.getSimpleName();
 
-    public static void addDummyStopToDirectionsUrlThenOpenInGoogleMaps(final URL directionsUrl,
-                                                                       final Context context) {
-        CompletableFuture
+    public static CompletableFuture<Void> addDummyStopToDirectionsUrlThenOpenInGoogleMaps(final URL directionsUrl,
+                                                                                          final Context context) {
+        return CompletableFuture
                 .supplyAsync(() -> addDummyStop(directionsUrl))
-                .whenComplete((final URL directionsUrlWithDummyStop, final Throwable throwable) -> {
+                .handle((final URL directionsUrlWithDummyStop, final Throwable throwable) -> {
                     if (throwable != null) {
                         Log.e(TAG, "Error adding dummy stop to directions URL", throwable);
                         displayErrorProcessingRoute(context);
-                        return;
+                    } else {
+                        GoogleMapsNavigator.launchUrl(directionsUrlWithDummyStop, context);
                     }
-                    GoogleMapsNavigator.launchUrl(directionsUrlWithDummyStop, context);
+                    return null;
                 });
     }
 

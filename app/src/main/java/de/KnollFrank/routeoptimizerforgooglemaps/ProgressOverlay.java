@@ -49,6 +49,10 @@ public class ProgressOverlay {
         mainHandler.post(() -> {
             if (statusTextView != null) {
                 statusTextView.setText(message);
+                statusTextView.setVisibility(
+                        message != null && !message.isEmpty() ?
+                                View.VISIBLE :
+                                View.GONE);
             }
         });
     }
@@ -78,6 +82,7 @@ public class ProgressOverlay {
         statusTextView.setTextColor(Color.WHITE);
         statusTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
         statusTextView.setGravity(Gravity.CENTER);
+        statusTextView.setVisibility(View.GONE);
         final LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);

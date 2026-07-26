@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,10 +39,19 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                         this,
                         googleMapsContext,
                         urlRequester,
-                        routeUrl ->
-                                DummyStopAdder.addDummyStopToDirectionsUrlThenOpenInGoogleMaps(
-                                        routeUrl,
-                                        this));
+                        new RouteUrlRequester.RouteUrlCallback() {
+
+                            @Override
+                            public void onRouteUrlExtracted(final URL routeUrl) {
+                                final ProgressOverlay progressOverlay = new ProgressOverlay(RouteOptimizerAccessibilityService.this);
+                                progressOverlay.show();
+                                DummyStopAdder
+                                        .addDummyStopToDirectionsUrlThenOpenInGoogleMaps(
+                                                routeUrl,
+                                                RouteOptimizerAccessibilityService.this)
+                                        .thenRun(progressOverlay::hide);
+                            }
+                        });
         final SortFeature sortFeature =
                 new SortFeature(
                         this,
