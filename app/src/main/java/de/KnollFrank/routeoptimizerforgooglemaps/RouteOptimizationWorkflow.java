@@ -1,8 +1,10 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import java.net.URL;
@@ -42,7 +44,37 @@ public class RouteOptimizationWorkflow {
 
             @Override
             public void onExtractRouteFromDirectionsUrlSuccess(final Route route) {
-                routeOptimizationOrchestrator.optimizeRoute(route);
+                progressOverlay.hide();
+                runOnUiThread(() -> showRoutePreviewDialog(route, context));
+            }
+
+            private void showRoutePreviewDialog(final Route route, final Context context) {
+                final AlertDialog dialog =
+                        new AlertDialog
+                                .Builder(context)
+                                .setTitle("Route Preview")
+                                .setMessage(route.toString())
+                                .setPositiveButton(
+                                        "OK",
+                                        (d, which) -> {
+                                            progressOverlay.show();
+                                            progressOverlay.updateStatus("Optimiere Route...");
+                                            routeOptimizationOrchestrator.optimizeRoute(route);
+                                        })
+                                .setNegativeButton(
+                                        "Abbrechen",
+                                        (d, which) -> d.dismiss())
+                                .create();
+
+                if (dialog.getWindow() != null) {
+                    dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY);
+                }
+                dialog.show();
+                if (dialog.getWindow() != null) {
+                    dialog.getWindow().setLayout(
+                            WindowManager.LayoutParams.MATCH_PARENT,
+                            WindowManager.LayoutParams.MATCH_PARENT);
+                }
             }
 
             @Override
