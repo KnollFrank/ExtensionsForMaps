@@ -17,4 +17,12 @@
     <string name="permit_notifications">Enable Notifications</string>
     <string name="permit_done">✓ Enabled</string>
     <string name="error_processing_route">An error occurred while processing the route.</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_general">General</string>
+    <string name="settings_show_preview">Show route preview</string>
+    <string name="settings_section_optimization_method">Optimization Method</string>
+    <string name="settings_method_haversine">Haversine (Straight Line)</string>
+    <string name="settings_method_ors">OpenRouteService (Road Network)</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
 </resources>

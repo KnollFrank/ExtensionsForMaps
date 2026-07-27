@@ -18,4 +18,12 @@
     <string name="permit_notifications">Hinweise erlauben</string>
     <string name="permit_done">✓ Aktiviert</string>
     <string name="error_processing_route">Beim Verarbeiten der Route ist ein Fehler aufgetreten.</string>
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_section_general">Allgemein</string>
+    <string name="settings_show_preview">Routen-Vorschau anzeigen</string>
+    <string name="settings_section_optimization_method">Optimierungsmethode</string>
+    <string name="settings_method_haversine">Haversine (Luftlinie)</string>
+    <string name="settings_method_ors">OpenRouteService (Straßennetz)</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Abbrechen</string>
 </resources>

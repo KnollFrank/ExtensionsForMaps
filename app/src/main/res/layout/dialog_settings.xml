@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- Section: General -->
+    <TextView
+        android:id="@+id/tvGeneralLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:text="@string/settings_section_general"
+        android:textSize="16sp" />
+
+    <CheckBox
+        android:id="@+id/checkBoxShowPreview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/settings_show_preview" />
+
+    <!-- Section: Optimization Method -->
+    <TextView
+        android:id="@+id/tvMethodLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="16dp"
+        android:paddingBottom="8dp"
+        android:text="@string/settings_section_optimization_method"
+        android:textSize="16sp" />
+
+    <RadioGroup
+        android:id="@+id/radioGroupOptimizationMethod"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/rbHaversine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_method_haversine" />
+
+        <RadioButton
+            android:id="@+id/rbOrs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_method_ors" />
+    </RadioGroup>
+</LinearLayout>

@@ -11,6 +11,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -19,8 +20,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.TextView;
 
 import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AlertDialog;
@@ -152,56 +151,29 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
 
     private void showSettingsDialog() {
         final Context themedContext = new ContextThemeWrapper(service, R.style.Theme_RouteoptimizerForGoogleMaps_Dialog);
+        final View dialogView =
+                LayoutInflater
+                        .from(themedContext)
+                        .inflate(R.layout.dialog_settings, null);
 
-        final LinearLayout layout = new LinearLayout(themedContext);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        final int padding = dpToPx(24);
-        layout.setPadding(padding, padding, padding, padding);
-
-        // --- Section: General ---
-        final TextView generalLabel = new TextView(themedContext);
-        generalLabel.setText("Allgemein");
-        generalLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        generalLabel.setPadding(0, 0, 0, dpToPx(8));
-        layout.addView(generalLabel);
-
-        final CheckBox checkBox = new CheckBox(themedContext);
-        checkBox.setText("Routen-Vorschau anzeigen");
+        final CheckBox checkBox = dialogView.findViewById(R.id.checkBoxShowPreview);
         checkBox.setChecked(SortConfig.shouldShowRoutePreview(service));
-        layout.addView(checkBox);
 
-        // --- Section: Optimization Method ---
-        final TextView methodLabel = new TextView(themedContext);
-        methodLabel.setText("Optimierungsmethode");
-        methodLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        methodLabel.setPadding(0, dpToPx(16), 0, dpToPx(8));
-        layout.addView(methodLabel);
-
-        final RadioGroup radioGroup = new RadioGroup(themedContext);
-        final RadioButton rbHaversine = new RadioButton(themedContext);
-        rbHaversine.setText("Haversine (Luftlinie)");
-        rbHaversine.setId(View.generateViewId());
-
-        final RadioButton rbOrs = new RadioButton(themedContext);
-        rbOrs.setText("OpenRouteService (Straßennetz)");
-        rbOrs.setId(View.generateViewId());
-
-        radioGroup.addView(rbHaversine);
-        radioGroup.addView(rbOrs);
+        final RadioButton rbHaversine = dialogView.findViewById(R.id.rbHaversine);
+        final RadioButton rbOrs = dialogView.findViewById(R.id.rbOrs);
 
         if (SortConfig.getOptimizationMethod(service) == SortConfig.OptimizationMethod.HAVERSINE) {
             rbHaversine.setChecked(true);
         } else {
             rbOrs.setChecked(true);
         }
-        layout.addView(radioGroup);
 
         final AlertDialog dialog =
                 new MaterialAlertDialogBuilder(themedContext)
-                        .setTitle("Einstellungen")
-                        .setView(layout)
+                        .setTitle(R.string.settings_title)
+                        .setView(dialogView)
                         .setPositiveButton(
-                                "OK",
+                                R.string.ok,
                                 new DialogInterface.OnClickListener() {
 
                                     @Override
@@ -215,7 +187,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
                                     }
                                 })
                         .setNegativeButton(
-                                "Abbrechen",
+                                R.string.cancel,
                                 new DialogInterface.OnClickListener() {
 
                                     @Override
