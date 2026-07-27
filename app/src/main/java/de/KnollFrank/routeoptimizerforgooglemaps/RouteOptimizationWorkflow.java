@@ -57,9 +57,9 @@ public class RouteOptimizationWorkflow {
             @Override
             public void onExtractRouteFromDirectionsUrlSuccess(final Route route) {
                 final Route enrichedRoute = addSuburbsToAddresses(route, context);
-                progressOverlay.hide();
                 runOnUiThread(() -> {
                     if (SortConfig.shouldShowRoutePreview(context)) {
+                        progressOverlay.hide();
                         showRoutePreviewDialog(enrichedRoute, context);
                     } else {
                         routeOptimizationOrchestrator.optimizeRoute(enrichedRoute);
@@ -69,6 +69,7 @@ public class RouteOptimizationWorkflow {
 
             @Override
             public void onOptimizationStarted() {
+                progressOverlay.show();
                 // FK-TODO: i18n
                 progressOverlay.updateStatus("Optimiere Route...");
             }
@@ -115,12 +116,7 @@ public class RouteOptimizationWorkflow {
                                             public void onClick(final DialogInterface dialog, final int which) {
                                                 stopsAdapter
                                                         .getRoute()
-                                                        .ifPresent(
-                                                                configuredRoute -> {
-                                                                    progressOverlay.show();
-                                                                    progressOverlay.updateStatus("Optimiere Route...");
-                                                                    routeOptimizationOrchestrator.optimizeRoute(configuredRoute);
-                                                                });
+                                                        .ifPresent(routeOptimizationOrchestrator::optimizeRoute);
                                             }
                                         })
                                 .setNegativeButton(
