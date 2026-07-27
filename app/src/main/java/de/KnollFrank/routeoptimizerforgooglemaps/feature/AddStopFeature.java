@@ -4,7 +4,6 @@ import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -97,7 +96,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     }
 
     private void updateHighlightOverlay(final AccessibilityNodeInfo root) {
-        if (!Settings.canDrawOverlays(service) || !enableEnhancedAddStopButton()) {
+        if (!enableEnhancedAddStopButton()) {
             removeHighlight();
             return;
         }

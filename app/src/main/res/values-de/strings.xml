@@ -12,13 +12,9 @@
     <string name="accessibility_service_description">Erkennt automatisch, wenn Google Maps das Limit von 10 Stopps erreicht hat, und hilft dabei, die Route zu erweitern.</string>
     <string name="coffee_button">Kaffeekasse</string>
     <string name="permissions_title">Automatisierung einrichten</string>
-    <string name="permissions_message">Um Google Maps zu automatisieren, aktivieren Sie bitte folgende Berechtigungen:</string>
+    <string name="permissions_message">Um Google Maps zu automatisieren, aktivieren Sie bitte die folgende Berechtigung:</string>
     <string name="permit_accessibility">Service aktivieren</string>
-    <string name="permit_overlay">Overlays erlauben</string>
-    <string name="permit_notifications">Hinweise erlauben</string>
     <string name="permit_accessibility_done">Service aktiviert ✓</string>
-    <string name="permit_overlay_done">Overlays erlaubt ✓</string>
-    <string name="permit_notifications_done">Hinweise aktiviert ✓</string>
     <string name="permit_done">✓ Aktiviert</string>
     <string name="error_processing_route">Beim Verarbeiten der Route ist ein Fehler aufgetreten.</string>
     <string name="settings_title">Einstellungen</string>
