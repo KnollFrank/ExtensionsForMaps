@@ -33,6 +33,7 @@ public class OsrmVehicleRoutingTransportCostsProvider implements VehicleRoutingT
                     matrixBuilder.addTransportDistance(from.id(), to.id(), distanceDuration.distance());
                     matrixBuilder.addTransportTime(from.id(), to.id(), distanceDuration.duration());
                 } else {
+                    // FK-TODO: throw Exception
                     matrixBuilder.addTransportDistance(
                             from.id(),
                             to.id(),
