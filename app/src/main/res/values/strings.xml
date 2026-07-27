@@ -15,6 +15,9 @@
     <string name="permit_accessibility">Enable Service</string>
     <string name="permit_overlay">Allow Overlays</string>
     <string name="permit_notifications">Enable Notifications</string>
+    <string name="permit_accessibility_done">Service enabled ✓</string>
+    <string name="permit_overlay_done">Overlays allowed ✓</string>
+    <string name="permit_notifications_done">Notifications enabled ✓</string>
     <string name="permit_done">✓ Enabled</string>
     <string name="error_processing_route">An error occurred while processing the route.</string>
     <string name="settings_title">Settings</string>

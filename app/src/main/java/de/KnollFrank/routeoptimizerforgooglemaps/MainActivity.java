@@ -151,23 +151,19 @@ public class MainActivity extends AppCompatActivity {
     private void updatePermitAccessibilityButtonState() {
         final boolean accessibilityServiceEnabled = isAccessibilityServiceEnabled();
         final MaterialButton btnAccessibility = findViewById(R.id.btnPermitAccessibility);
-        btnAccessibility.setText(accessibilityServiceEnabled ? R.string.permit_done : R.string.permit_accessibility);
-        btnAccessibility.setEnabled(!accessibilityServiceEnabled);
+        btnAccessibility.setText(accessibilityServiceEnabled ? R.string.permit_accessibility_done : R.string.permit_accessibility);
     }
 
     private void updatePermitOverlayButtonState() {
         final MaterialButton btnOverlay = findViewById(R.id.btnPermitOverlay);
         final boolean canDrawOverlays = Settings.canDrawOverlays(this);
-        // FK-TODO: zeige statt dem Text R.string.permit_done bessert so was an wie "✓ Overlays Allowed". Dito btnPermitAccessibility
-        btnOverlay.setText(canDrawOverlays ? R.string.permit_done : R.string.permit_overlay);
-        btnOverlay.setEnabled(!canDrawOverlays);
+        btnOverlay.setText(canDrawOverlays ? R.string.permit_overlay_done : R.string.permit_overlay);
     }
 
     private void updatePermitNotificationsButtonState() {
         final boolean notificationsEnabled = NotificationManagerCompat.from(this).areNotificationsEnabled();
         final MaterialButton btnNotifications = findViewById(R.id.btnPermitNotifications);
-        btnNotifications.setText(notificationsEnabled ? R.string.permit_done : R.string.permit_notifications);
-        btnNotifications.setEnabled(!notificationsEnabled);
+        btnNotifications.setText(notificationsEnabled ? R.string.permit_notifications_done : R.string.permit_notifications);
     }
 
     // FK-TODO: refactor and move to another class
