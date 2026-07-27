@@ -2,6 +2,7 @@ package de.KnollFrank.routeoptimizerforgooglemaps.feature;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -14,9 +15,16 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
 
 import androidx.annotation.VisibleForTesting;
+import androidx.appcompat.app.AlertDialog;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import de.KnollFrank.routeoptimizerforgooglemaps.R;
+import de.KnollFrank.routeoptimizerforgooglemaps.SortConfig;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.RouteUrlRequester;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.StopCountDetector;
 
@@ -84,7 +92,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
             return;
         }
         if (sortButtonOverlay == null) {
-            sortButtonOverlay = createSortButton();
+            sortButtonOverlay = createOverlayLayout();
             windowManager.addView(sortButtonOverlay, getSortButtonLayoutParams(lastStopCountBounds));
         } else {
             final WindowManager.LayoutParams params = (WindowManager.LayoutParams) sortButtonOverlay.getLayoutParams();
@@ -93,7 +101,15 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
         }
     }
 
-    // FK-TODO: warum nicht Button statt View als Rückgabewert und ebenfalls sortButtonOverlay vom Button statt View?
+    private View createOverlayLayout() {
+        final LinearLayout layout = new LinearLayout(service);
+        layout.setOrientation(LinearLayout.HORIZONTAL);
+        layout.setGravity(Gravity.CENTER_VERTICAL);
+        layout.addView(createSortButton());
+        layout.addView(createSettingsButton());
+        return layout;
+    }
+
     private View createSortButton() {
         final Button button = new Button(service);
         button.setText("↕️ Sortieren");
@@ -109,6 +125,65 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
             routeUrlRequester.requestRouteUrl(onRouteUrlExtracted);
         });
         return button;
+    }
+
+    private View createSettingsButton() {
+        final Button button = new Button(service);
+        button.setText("⚙️");
+        button.setTextColor(Color.WHITE);
+        button.setGravity(Gravity.CENTER);
+        button.setPadding(dpToPx(8), dpToPx(6), dpToPx(8), dpToPx(6));
+        button.setMinimumHeight(0);
+        button.setMinimumWidth(0);
+        button.setBackground(getShape());
+        final LinearLayout.LayoutParams params =
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.leftMargin = dpToPx(4);
+        button.setLayoutParams(params);
+        button.setOnClickListener(view -> showSettingsDialog());
+        return button;
+    }
+
+    private void showSettingsDialog() {
+        final CheckBox checkBox = new CheckBox(service);
+        checkBox.setText("Routen-Vorschau anzeigen");
+        checkBox.setChecked(SortConfig.shouldShowRoutePreview(service));
+        checkBox.setTextColor(Color.BLACK); // FK-TODO: improve styling
+
+        final int padding = dpToPx(20);
+        final LinearLayout layout = new LinearLayout(service);
+        layout.setPadding(padding, padding, padding, padding);
+        layout.addView(checkBox);
+
+        final AlertDialog dialog =
+                new MaterialAlertDialogBuilder(service, R.style.Theme_RouteoptimizerForGoogleMaps_Dialog)
+                        .setTitle("Einstellungen")
+                        .setView(layout)
+                        .setPositiveButton(
+                                "OK",
+                                new DialogInterface.OnClickListener() {
+
+                                    @Override
+                                    public void onClick(final DialogInterface dialog, final int which) {
+                                        SortConfig.setShouldShowRoutePreview(service, checkBox.isChecked());
+                                    }
+                                })
+                        .setNegativeButton(
+                                "Abbrechen",
+                                new DialogInterface.OnClickListener() {
+
+                                    @Override
+                                    public void onClick(final DialogInterface dialog, final int which) {
+                                        dialog.dismiss();
+                                    }
+                                })
+                        .create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY);
+        }
+        dialog.show();
     }
 
     private GradientDrawable getShape() {

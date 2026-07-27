@@ -58,7 +58,13 @@ public class RouteOptimizationWorkflow {
             public void onExtractRouteFromDirectionsUrlSuccess(final Route route) {
                 final Route enrichedRoute = addSuburbsToAddresses(route, context);
                 progressOverlay.hide();
-                runOnUiThread(() -> showRoutePreviewDialog(enrichedRoute, context));
+                runOnUiThread(() -> {
+                    if (SortConfig.shouldShowRoutePreview(context)) {
+                        showRoutePreviewDialog(enrichedRoute, context);
+                    } else {
+                        routeOptimizationOrchestrator.optimizeRoute(enrichedRoute);
+                    }
+                });
             }
 
             @Override
