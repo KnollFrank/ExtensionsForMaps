@@ -17,7 +17,10 @@ import de.KnollFrank.routeoptimizerforgooglemaps.feature.AccessibilityFeature;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.AddStopFeature;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.SortFeature;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.HaversineVehicleRoutingTransportCostsProvider;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OsrmVehicleRoutingTransportCostsProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.VehicleRoutingTransportCostsProvider;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.ors.OpenRouteServiceRoutingMatrixProvider;
 
 public class RouteOptimizerAccessibilityService extends AccessibilityService {
 
@@ -60,7 +63,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                             Log.d(TAG, "Extracted route URL for SORT: " + routeUrl);
                             final RouteOptimizationWorkflow routeOptimizationWorkflow =
                                     new RouteOptimizationWorkflow(
-                                            new RouteOptimizer(new HaversineVehicleRoutingTransportCostsProvider()),
+                                            new RouteOptimizer(getVehicleRoutingTransportCostsProvider()),
                                             RouteOptimizerAccessibilityService.this);
                             routeOptimizationWorkflow.optimizeThenShowRoute(routeUrl);
                         });
@@ -125,5 +128,15 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
 
     private void handleResolverEvent(final AccessibilityEvent event) {
         urlRequester.handleResolverEvent();
+    }
+
+    private VehicleRoutingTransportCostsProvider getVehicleRoutingTransportCostsProvider() {
+        if (SortConfig.getOptimizationMethod(this) == SortConfig.OptimizationMethod.HAVERSINE) {
+            return new HaversineVehicleRoutingTransportCostsProvider();
+        } else {
+            return new OsrmVehicleRoutingTransportCostsProvider(
+                    new OpenRouteServiceRoutingMatrixProvider(
+                            "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjA0NWE4OGQ0NGUzNTQzOGI5YTNjYTNhMzE3ZTIwOTY3IiwiaCI6Im11cm11cjY0In0="));
+        }
     }
 }

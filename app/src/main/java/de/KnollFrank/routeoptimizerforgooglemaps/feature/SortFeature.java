@@ -18,6 +18,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AlertDialog;
@@ -149,14 +152,49 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
 
     private void showSettingsDialog() {
         final Context themedContext = new ContextThemeWrapper(service, R.style.Theme_RouteoptimizerForGoogleMaps_Dialog);
+
+        final LinearLayout layout = new LinearLayout(themedContext);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        final int padding = dpToPx(24);
+        layout.setPadding(padding, padding, padding, padding);
+
+        // --- Section: General ---
+        final TextView generalLabel = new TextView(themedContext);
+        generalLabel.setText("Allgemein");
+        generalLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        generalLabel.setPadding(0, 0, 0, dpToPx(8));
+        layout.addView(generalLabel);
+
         final CheckBox checkBox = new CheckBox(themedContext);
         checkBox.setText("Routen-Vorschau anzeigen");
         checkBox.setChecked(SortConfig.shouldShowRoutePreview(service));
-
-        final int padding = dpToPx(24);
-        final LinearLayout layout = new LinearLayout(themedContext);
-        layout.setPadding(padding, padding, padding, padding);
         layout.addView(checkBox);
+
+        // --- Section: Optimization Method ---
+        final TextView methodLabel = new TextView(themedContext);
+        methodLabel.setText("Optimierungsmethode");
+        methodLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        methodLabel.setPadding(0, dpToPx(16), 0, dpToPx(8));
+        layout.addView(methodLabel);
+
+        final RadioGroup radioGroup = new RadioGroup(themedContext);
+        final RadioButton rbHaversine = new RadioButton(themedContext);
+        rbHaversine.setText("Haversine (Luftlinie)");
+        rbHaversine.setId(View.generateViewId());
+
+        final RadioButton rbOrs = new RadioButton(themedContext);
+        rbOrs.setText("OpenRouteService (Straßennetz)");
+        rbOrs.setId(View.generateViewId());
+
+        radioGroup.addView(rbHaversine);
+        radioGroup.addView(rbOrs);
+
+        if (SortConfig.getOptimizationMethod(service) == SortConfig.OptimizationMethod.HAVERSINE) {
+            rbHaversine.setChecked(true);
+        } else {
+            rbOrs.setChecked(true);
+        }
+        layout.addView(radioGroup);
 
         final AlertDialog dialog =
                 new MaterialAlertDialogBuilder(themedContext)
@@ -169,6 +207,11 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
                                     @Override
                                     public void onClick(final DialogInterface dialog, final int which) {
                                         SortConfig.setShouldShowRoutePreview(service, checkBox.isChecked());
+                                        SortConfig.setOptimizationMethod(
+                                                service,
+                                                rbHaversine.isChecked() ?
+                                                        SortConfig.OptimizationMethod.HAVERSINE :
+                                                        SortConfig.OptimizationMethod.OPEN_ROUTE_SERVICE);
                                     }
                                 })
                         .setNegativeButton(
