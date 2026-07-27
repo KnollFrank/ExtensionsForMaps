@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -147,18 +148,18 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     }
 
     private void showSettingsDialog() {
-        final CheckBox checkBox = new CheckBox(service);
+        final Context themedContext = new ContextThemeWrapper(service, R.style.Theme_RouteoptimizerForGoogleMaps_Dialog);
+        final CheckBox checkBox = new CheckBox(themedContext);
         checkBox.setText("Routen-Vorschau anzeigen");
         checkBox.setChecked(SortConfig.shouldShowRoutePreview(service));
-        checkBox.setTextColor(Color.BLACK); // FK-TODO: improve styling
 
-        final int padding = dpToPx(20);
-        final LinearLayout layout = new LinearLayout(service);
+        final int padding = dpToPx(24);
+        final LinearLayout layout = new LinearLayout(themedContext);
         layout.setPadding(padding, padding, padding, padding);
         layout.addView(checkBox);
 
         final AlertDialog dialog =
-                new MaterialAlertDialogBuilder(service, R.style.Theme_RouteoptimizerForGoogleMaps_Dialog)
+                new MaterialAlertDialogBuilder(themedContext)
                         .setTitle("Einstellungen")
                         .setView(layout)
                         .setPositiveButton(
