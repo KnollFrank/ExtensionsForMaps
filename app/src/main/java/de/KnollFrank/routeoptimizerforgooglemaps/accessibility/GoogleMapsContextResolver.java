@@ -53,7 +53,7 @@ public class GoogleMapsContextResolver {
         return countStopsPatternStr
                 .replace("%d", "")
                 .replace("%1$d", "")
-                .trim();
+                .replaceAll("\\s+", "");
     }
 
     private static Pattern getStopCountPattern(final String countStopsPatternStr) {

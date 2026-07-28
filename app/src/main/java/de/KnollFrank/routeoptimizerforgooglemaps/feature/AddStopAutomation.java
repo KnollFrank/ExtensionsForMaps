@@ -13,7 +13,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.common.AccessibilityServices;
 public class AddStopAutomation {
 
     private static final String TAG = AddStopAutomation.class.getSimpleName();
-    private static final long COOLDOWN_MS = 800;
+    private static final long COOLDOWN_MS = 1000;
 
     private enum State {
         IDLE,
@@ -35,7 +35,7 @@ public class AddStopAutomation {
     public void start() {
         Log.d(TAG, "Automation started: WAITING_FOR_STOP_COUNT_CLICK");
         state = State.WAITING_FOR_STOP_COUNT_CLICK;
-        lastActionTime = 0; // Reset to allow immediate first action
+        lastActionTime = 0;
     }
 
     public void onStopCountUpdated(final Rect stopCountBounds) {
@@ -61,7 +61,6 @@ public class AddStopAutomation {
     }
 
     private void handleWaitingForStopCountClick(final AccessibilityNodeInfo root) {
-        // Backup if onStopCountUpdated wasn't triggered
         final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord());
         if (!nodes.isEmpty()) {
             final AccessibilityNodeInfo node = nodes.get(0);
@@ -77,6 +76,7 @@ public class AddStopAutomation {
     private void handleWaitingForLastStopClick(final AccessibilityNodeInfo root) {
         final List<AccessibilityNodeInfo> recyclerViews = root.findAccessibilityNodeInfosByViewId("com.google.android.apps.maps:id/edit_waypoints_list");
         if (recyclerViews.isEmpty()) {
+            Log.d(TAG, "Step 2: Waypoint list not found yet. Waiting...");
             return;
         }
 
@@ -110,16 +110,21 @@ public class AddStopAutomation {
 
     private void handleWaitingForClearClick(final AccessibilityNodeInfo root) {
         final List<AccessibilityNodeInfo> clearButtons = root.findAccessibilityNodeInfosByViewId("com.google.android.apps.maps:id/search_omnibox_text_clear");
-        if (!clearButtons.isEmpty()) {
-            final AccessibilityNodeInfo clearButton = clearButtons.get(0);
-            Log.d(TAG, "Step 3: Found clear button in search bar. Clicking...");
-            if (AccessibilityServices.click(service, clearButton)) {
-                state = State.IDLE;
-                markAction();
-                Log.d(TAG, "Add Stop automation completed successfully!");
-            }
-            clearButton.recycle();
+
+        if (clearButtons.isEmpty()) {
+            // Success: If the clear button is missing, it means the field has been cleared!
+            Log.d(TAG, "Step 3: Clear button is gone. Automation completed successfully!");
+            state = State.IDLE;
+            return;
         }
+
+        // If the button is still there, try to click it (again)
+        final AccessibilityNodeInfo clearButton = clearButtons.get(0);
+        Log.d(TAG, "Step 3: Found clear button. Attempting to click...");
+        if (AccessibilityServices.click(service, clearButton)) {
+            markAction(); // Wait another cooldown period before verifying or retrying
+        }
+        clearButton.recycle();
     }
 
     private boolean isCooldownOver() {
