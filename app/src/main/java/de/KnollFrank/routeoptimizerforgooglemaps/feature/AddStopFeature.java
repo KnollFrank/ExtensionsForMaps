@@ -32,6 +32,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     private final GoogleMapsContext googleMapsContext;
     private final RouteUrlRequester routeUrlRequester;
     private final RouteUrlRequester.RouteUrlCallback onRouteUrlExtracted;
+    private final AddStopAutomation automation;
 
     private Optional<View> highlightOverlay = Optional.empty();
     private final Rect lastOverlayBounds = new Rect();
@@ -46,6 +47,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
         this.googleMapsContext = googleMapsContext;
         this.routeUrlRequester = routeUrlRequester;
         this.onRouteUrlExtracted = onRouteUrlExtracted;
+        this.automation = new AddStopAutomation(service, googleMapsContext);
     }
 
     @Override
@@ -54,6 +56,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
     @Override
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
+        automation.onGoogleMapsEvent(root);
         if (isAddStopsButtonClick(event) && enableEnhancedAddStopButton()) {
             Log.d(TAG, "Stop limit reached. Requesting route URL.");
             routeUrlRequester.requestRouteUrl(onRouteUrlExtracted);
@@ -63,6 +66,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     @Override
     public void onStopCountUpdated(final int stopCount, final Rect stopCountBounds) {
         lastKnownStopCount = stopCount;
+        automation.onStopCountUpdated(stopCountBounds);
         AccessibilityServices
                 .getRootInActiveWindow(service)
                 .ifPresent(this::updateHighlightOverlay);
@@ -81,6 +85,11 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     @Override
     public void onDestroy() {
         removeHighlight();
+        automation.reset();
+    }
+
+    public void startAutomation() {
+        automation.start();
     }
 
     private boolean enableEnhancedAddStopButton() {

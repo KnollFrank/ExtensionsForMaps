@@ -39,7 +39,9 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         super.onServiceConnected();
         urlRequester = new RouteUrlRequester(this);
         final GoogleMapsContext googleMapsContext = GoogleMapsContextResolver.resolve(this);
-        final AddStopFeature addStopFeature =
+
+        final AddStopFeature[] addStopFeatureWrapper = new AddStopFeature[1];
+        addStopFeatureWrapper[0] =
                 new AddStopFeature(
                         this,
                         googleMapsContext,
@@ -54,9 +56,14 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                                         .addDummyStopToDirectionsUrlThenOpenInGoogleMaps(
                                                 routeUrl,
                                                 RouteOptimizerAccessibilityService.this)
-                                        .thenRun(progressOverlay::hide);
+                                        .thenRun(() -> {
+                                            progressOverlay.hide();
+                                            addStopFeatureWrapper[0].startAutomation();
+                                        });
                             }
                         });
+        final AddStopFeature addStopFeature = addStopFeatureWrapper[0];
+
         final SortFeature sortFeature =
                 new SortFeature(
                         this,
