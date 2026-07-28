@@ -32,6 +32,7 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
+
         <service
             android:name=".RouteOptimizerAccessibilityService"
             android:description="@string/accessibility_service_description"

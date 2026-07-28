@@ -2,32 +2,22 @@ package de.KnollFrank.routeoptimizerforgooglemaps.feature;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 
 import androidx.annotation.VisibleForTesting;
-import androidx.appcompat.app.AlertDialog;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-
-import de.KnollFrank.routeoptimizerforgooglemaps.R;
-import de.KnollFrank.routeoptimizerforgooglemaps.SortConfig;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.RouteUrlRequester;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.StopCountDetector;
 
@@ -145,61 +135,8 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
                         LinearLayout.LayoutParams.WRAP_CONTENT);
         params.leftMargin = dpToPx(4);
         button.setLayoutParams(params);
-        button.setOnClickListener(view -> showSettingsDialog());
+        button.setOnClickListener(view -> new SettingsDialog(service).show());
         return button;
-    }
-
-    private void showSettingsDialog() {
-        final Context themedContext = new ContextThemeWrapper(service, R.style.Theme_RouteoptimizerForGoogleMaps_Dialog);
-        final View dialogView =
-                LayoutInflater
-                        .from(themedContext)
-                        .inflate(R.layout.dialog_settings, null);
-
-        final CheckBox checkBox = dialogView.findViewById(R.id.checkBoxShowPreview);
-        checkBox.setChecked(SortConfig.shouldShowRoutePreview(service));
-
-        final RadioButton rbHaversine = dialogView.findViewById(R.id.rbHaversine);
-        final RadioButton rbOrs = dialogView.findViewById(R.id.rbOrs);
-
-        if (SortConfig.getOptimizationMethod(service) == SortConfig.OptimizationMethod.HAVERSINE) {
-            rbHaversine.setChecked(true);
-        } else {
-            rbOrs.setChecked(true);
-        }
-
-        final AlertDialog dialog =
-                new MaterialAlertDialogBuilder(themedContext)
-                        .setTitle(R.string.settings_title)
-                        .setView(dialogView)
-                        .setPositiveButton(
-                                R.string.ok,
-                                new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(final DialogInterface dialog, final int which) {
-                                        SortConfig.setShouldShowRoutePreview(service, checkBox.isChecked());
-                                        SortConfig.setOptimizationMethod(
-                                                service,
-                                                rbHaversine.isChecked() ?
-                                                        SortConfig.OptimizationMethod.HAVERSINE :
-                                                        SortConfig.OptimizationMethod.OPEN_ROUTE_SERVICE);
-                                    }
-                                })
-                        .setNegativeButton(
-                                R.string.cancel,
-                                new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(final DialogInterface dialog, final int which) {
-                                        dialog.dismiss();
-                                    }
-                                })
-                        .create();
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY);
-        }
-        dialog.show();
     }
 
     private GradientDrawable getShape() {

@@ -12,7 +12,8 @@
         android:layout_height="wrap_content"
         android:paddingBottom="8dp"
         android:text="@string/settings_section_general"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
     <CheckBox
         android:id="@+id/checkBoxShowPreview"
@@ -25,26 +26,76 @@
         android:id="@+id/tvMethodLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="16dp"
+        android:paddingTop="24dp"
         android:paddingBottom="8dp"
         android:text="@string/settings_section_optimization_method"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
-    <RadioGroup
-        android:id="@+id/radioGroupOptimizationMethod"
+    <!-- Option: Straight Line -->
+    <LinearLayout
+        android:id="@+id/layoutHaversine"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="vertical"
+        android:padding="8dp">
 
         <RadioButton
             android:id="@+id/rbHaversine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clickable="false"
             android:text="@string/settings_method_haversine" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:alpha="0.7"
+            android:text="@string/settings_method_haversine_desc"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- Option: Road Network -->
+    <LinearLayout
+        android:id="@+id/layoutOrs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="vertical"
+        android:padding="8dp">
 
         <RadioButton
             android:id="@+id/rbOrs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clickable="false"
             android:text="@string/settings_method_ors" />
-    </RadioGroup>
+
+        <TextView
+            android:id="@+id/tvOrsDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:alpha="0.7"
+            android:text="@string/settings_method_ors_desc"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnConfigureOrs"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="8dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:padding="8dp"
+        android:text="⚙️"
+        android:textSize="16sp" />
+
 </LinearLayout>

@@ -20,8 +20,20 @@
     <string name="settings_section_general">General</string>
     <string name="settings_show_preview">Show route preview</string>
     <string name="settings_section_optimization_method">Optimization Method</string>
-    <string name="settings_method_haversine">Haversine (Straight Line)</string>
-    <string name="settings_method_ors">OpenRouteService (Road Network)</string>
+    <string name="settings_method_haversine">Straight Line</string>
+    <string name="settings_method_haversine_desc">Fast calculation based on direct distance.</string>
+    <string name="settings_method_ors">Road Network</string>
+    <string name="settings_method_ors_desc">Maximum precision considering real roads and paths.</string>
+    <string name="settings_configure_ors">Configure</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+
+    <!-- API Key Activity -->
+    <string name="api_key_title">OpenRouteService API Key</string>
+    <string name="api_key_description">To optimize the route using the road network, an API key from OpenRouteService is required. You can request one here:</string>
+    <string name="api_key_hint">Enter API Key</string>
+    <string name="api_key_save">Verify &amp; Save</string>
+    <string name="api_key_error_empty">Please enter an API key</string>
+    <string name="api_key_error_invalid">Invalid API key or network error: %s</string>
+    <string name="api_key_success">API Key saved successfully!</string>
 </resources>

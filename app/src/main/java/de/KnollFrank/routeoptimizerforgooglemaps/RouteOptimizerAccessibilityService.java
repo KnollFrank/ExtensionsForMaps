@@ -136,7 +136,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
         } else {
             return new OsrmVehicleRoutingTransportCostsProvider(
                     new OpenRouteServiceRoutingMatrixProvider(
-                            "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjA0NWE4OGQ0NGUzNTQzOGI5YTNjYTNhMzE3ZTIwOTY3IiwiaCI6Im11cm11cjY0In0="));
+                            ApiKeyRepository.getApiKey(this).orElseThrow()));
         }
     }
 }
