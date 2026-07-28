@@ -68,12 +68,32 @@
         android:orientation="vertical"
         android:padding="8dp">
 
-        <RadioButton
-            android:id="@+id/rbOrs"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:clickable="false"
-            android:text="@string/settings_method_ors" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rbOrs"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:clickable="false"
+                android:text="@string/settings_method_ors" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnConfigureOrs"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="4dp"
+                android:text="⚙️"
+                android:textSize="16sp" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvOrsDesc"
@@ -84,18 +104,5 @@
             android:text="@string/settings_method_ors_desc"
             android:textSize="12sp" />
     </LinearLayout>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnConfigureOrs"
-        style="?attr/materialButtonOutlinedStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginTop="8dp"
-        android:minWidth="0dp"
-        android:minHeight="0dp"
-        android:padding="8dp"
-        android:text="⚙️"
-        android:textSize="16sp" />
 
 </LinearLayout>
