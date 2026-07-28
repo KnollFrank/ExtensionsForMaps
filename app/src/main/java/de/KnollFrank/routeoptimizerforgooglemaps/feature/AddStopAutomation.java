@@ -13,6 +13,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.common.AccessibilityServices;
 public class AddStopAutomation {
 
     private static final String TAG = AddStopAutomation.class.getSimpleName();
+    private static final long COOLDOWN_MS = 800;
 
     private enum State {
         IDLE,
@@ -24,6 +25,7 @@ public class AddStopAutomation {
     private final AccessibilityService service;
     private final GoogleMapsContext googleMapsContext;
     private State state = State.IDLE;
+    private long lastActionTime = 0;
 
     public AddStopAutomation(final AccessibilityService service, final GoogleMapsContext googleMapsContext) {
         this.service = service;
@@ -33,18 +35,24 @@ public class AddStopAutomation {
     public void start() {
         Log.d(TAG, "Automation started: WAITING_FOR_STOP_COUNT_CLICK");
         state = State.WAITING_FOR_STOP_COUNT_CLICK;
+        lastActionTime = 0; // Reset to allow immediate first action
     }
 
     public void onStopCountUpdated(final Rect stopCountBounds) {
-        if (state == State.WAITING_FOR_STOP_COUNT_CLICK) {
+        if (state == State.WAITING_FOR_STOP_COUNT_CLICK && isCooldownOver()) {
             Log.d(TAG, "Step 1: Clicking stop count label via onStopCountUpdated at " + stopCountBounds);
             if (AccessibilityServices.click(service, stopCountBounds)) {
                 state = State.WAITING_FOR_LAST_STOP_CLICK;
+                markAction();
             }
         }
     }
 
     public void onGoogleMapsEvent(final AccessibilityNodeInfo root) {
+        if (state == State.IDLE || !isCooldownOver()) {
+            return;
+        }
+
         switch (state) {
             case WAITING_FOR_STOP_COUNT_CLICK -> handleWaitingForStopCountClick(root);
             case WAITING_FOR_LAST_STOP_CLICK -> handleWaitingForLastStopClick(root);
@@ -60,6 +68,7 @@ public class AddStopAutomation {
             Log.d(TAG, "Step 1 (Backup): Found '" + googleMapsContext.stopsWord() + "' label. Clicking...");
             if (AccessibilityServices.click(service, node)) {
                 state = State.WAITING_FOR_LAST_STOP_CLICK;
+                markAction();
             }
             node.recycle();
         }
@@ -73,8 +82,6 @@ public class AddStopAutomation {
 
         final AccessibilityNodeInfo recyclerView = recyclerViews.get(0);
         final int childCount = recyclerView.getChildCount();
-        Log.d(TAG, "Step 2: Found waypoint list. Child count: " + childCount);
-
         if (childCount > 0) {
             final AccessibilityNodeInfo lastChild = recyclerView.getChild(childCount - 1);
             if (lastChild != null) {
@@ -87,10 +94,13 @@ public class AddStopAutomation {
                     Log.d(TAG, "Step 2: Last waypoint is visible. Clicking...");
                     if (AccessibilityServices.click(service, lastChild)) {
                         state = State.WAITING_FOR_CLEAR_CLICK;
+                        markAction();
                     }
                 } else {
                     Log.d(TAG, "Step 2: Last waypoint is off-screen. Scrolling...");
-                    recyclerView.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                    if (recyclerView.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) {
+                        markAction();
+                    }
                 }
                 lastChild.recycle();
             }
@@ -101,18 +111,30 @@ public class AddStopAutomation {
     private void handleWaitingForClearClick(final AccessibilityNodeInfo root) {
         final List<AccessibilityNodeInfo> clearButtons = root.findAccessibilityNodeInfosByViewId("com.google.android.apps.maps:id/search_omnibox_text_clear");
         if (!clearButtons.isEmpty()) {
+            final AccessibilityNodeInfo clearButton = clearButtons.get(0);
             Log.d(TAG, "Step 3: Found clear button in search bar. Clicking...");
-            if (AccessibilityServices.click(service, clearButtons.get(0))) {
+            if (AccessibilityServices.click(service, clearButton)) {
                 state = State.IDLE;
+                markAction();
                 Log.d(TAG, "Add Stop automation completed successfully!");
             }
+            clearButton.recycle();
         }
+    }
+
+    private boolean isCooldownOver() {
+        return System.currentTimeMillis() - lastActionTime >= COOLDOWN_MS;
+    }
+
+    private void markAction() {
+        lastActionTime = System.currentTimeMillis();
     }
 
     public void reset() {
         if (state != State.IDLE) {
             Log.d(TAG, "Automation reset from state: " + state);
             state = State.IDLE;
+            lastActionTime = 0;
         }
     }
 }
