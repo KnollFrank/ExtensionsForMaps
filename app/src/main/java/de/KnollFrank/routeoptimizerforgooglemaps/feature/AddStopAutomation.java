@@ -26,6 +26,7 @@ public class AddStopAutomation {
     private final GoogleMapsContext googleMapsContext;
     private State state = State.IDLE;
     private long lastActionTime = 0;
+    private String textToClear = null;
 
     public AddStopAutomation(final AccessibilityService service, final GoogleMapsContext googleMapsContext) {
         this.service = service;
@@ -36,6 +37,7 @@ public class AddStopAutomation {
         Log.d(TAG, "Automation started: WAITING_FOR_STOP_COUNT_CLICK");
         state = State.WAITING_FOR_STOP_COUNT_CLICK;
         lastActionTime = 0;
+        textToClear = null;
     }
 
     public void onStopCountUpdated(final Rect stopCountBounds) {
@@ -76,7 +78,17 @@ public class AddStopAutomation {
     private void handleWaitingForLastStopClick(final AccessibilityNodeInfo root) {
         final List<AccessibilityNodeInfo> recyclerViews = root.findAccessibilityNodeInfosByViewId("com.google.android.apps.maps:id/edit_waypoints_list");
         if (recyclerViews.isEmpty()) {
-            Log.d(TAG, "Step 2: Waypoint list not found yet. Waiting...");
+            Log.d(TAG, "Step 2: Waypoint list not found yet.");
+            // Retry expansion click if the first one was ignored
+            final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord());
+            if (!nodes.isEmpty()) {
+                final AccessibilityNodeInfo node = nodes.get(0);
+                Log.d(TAG, "Step 2: Re-clicking expansion label '" + googleMapsContext.stopsWord() + "'...");
+                if (AccessibilityServices.click(service, node)) {
+                    markAction();
+                }
+                node.recycle();
+            }
             return;
         }
 
@@ -110,19 +122,37 @@ public class AddStopAutomation {
 
     private void handleWaitingForClearClick(final AccessibilityNodeInfo root) {
         final List<AccessibilityNodeInfo> clearButtons = root.findAccessibilityNodeInfosByViewId("com.google.android.apps.maps:id/search_omnibox_text_clear");
+        final List<AccessibilityNodeInfo> editTexts = root.findAccessibilityNodeInfosByViewId("com.google.android.apps.maps:id/search_omnibox_edit_text");
 
         if (clearButtons.isEmpty()) {
-            // Success: If the clear button is missing, it means the field has been cleared!
             Log.d(TAG, "Step 3: Clear button is gone. Automation completed successfully!");
             state = State.IDLE;
             return;
         }
 
-        // If the button is still there, try to click it (again)
+        if (!editTexts.isEmpty()) {
+            final AccessibilityNodeInfo editText = editTexts.get(0);
+            final String currentText = editText.getText() != null ? editText.getText().toString() : "";
+
+            if (textToClear == null) {
+                textToClear = currentText;
+                Log.d(TAG, "Step 3: Dummy stop text identified: '" + textToClear + "'");
+            }
+
+            if (!currentText.equals(textToClear)) {
+                Log.d(TAG, "Step 3: Text has changed or was cleared. Stopping automation to allow user input.");
+                state = State.IDLE;
+                editText.recycle();
+                return;
+            }
+            editText.recycle();
+        }
+
+        // Still matches the dummy text and X is visible -> click it
         final AccessibilityNodeInfo clearButton = clearButtons.get(0);
         Log.d(TAG, "Step 3: Found clear button. Attempting to click...");
         if (AccessibilityServices.click(service, clearButton)) {
-            markAction(); // Wait another cooldown period before verifying or retrying
+            markAction();
         }
         clearButton.recycle();
     }
@@ -140,6 +170,7 @@ public class AddStopAutomation {
             Log.d(TAG, "Automation reset from state: " + state);
             state = State.IDLE;
             lastActionTime = 0;
+            textToClear = null;
         }
     }
 }

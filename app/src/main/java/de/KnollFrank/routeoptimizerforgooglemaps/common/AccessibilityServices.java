@@ -27,6 +27,10 @@ public class AccessibilityServices {
     }
 
     public static boolean click(final AccessibilityService service, final Rect bounds) {
+        if (bounds.isEmpty()) {
+            Log.w(TAG, "Attempted to click on an empty Rect. Ignoring.");
+            return false;
+        }
         final int x = bounds.centerX();
         final int y = bounds.centerY();
 
