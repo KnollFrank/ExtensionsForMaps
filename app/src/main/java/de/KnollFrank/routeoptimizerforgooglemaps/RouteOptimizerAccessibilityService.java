@@ -14,6 +14,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.RouteUrlRequester
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.StopCountDetector;
 import de.KnollFrank.routeoptimizerforgooglemaps.common.AccessibilityServices;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.AccessibilityFeature;
+import de.KnollFrank.routeoptimizerforgooglemaps.feature.ActiveServiceHighlightFeature;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.AddStopFeature;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.SortFeature;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.HaversineVehicleRoutingTransportCostsProvider;
@@ -31,6 +32,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     private List<AccessibilityFeature> features = List.of();
     private StopCountDetector stopCountDetector;
     private RouteUrlRequester urlRequester;
+    private ActiveServiceHighlightFeature activeServiceHighlightFeature;
 
     @Override
     protected void onServiceConnected() {
@@ -67,11 +69,12 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                                             RouteOptimizerAccessibilityService.this);
                             routeOptimizationWorkflow.optimizeThenShowRoute(routeUrl);
                         });
+        activeServiceHighlightFeature = new ActiveServiceHighlightFeature(this);
         stopCountDetector =
                 new StopCountDetector(
                         googleMapsContext,
                         List.of(addStopFeature, sortFeature));
-        features = List.of(addStopFeature, sortFeature);
+        features = List.of(addStopFeature, sortFeature, activeServiceHighlightFeature);
         for (final AccessibilityFeature feature : features) {
             feature.onServiceConnected();
         }
@@ -92,6 +95,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
 
     // FK-TODO: refactor using streams
     private void resetFeatures() {
+        activeServiceHighlightFeature.hide();
         for (final AccessibilityFeature feature : features) {
             if (feature instanceof final AddStopFeature addStopFeature) {
                 addStopFeature.reset();

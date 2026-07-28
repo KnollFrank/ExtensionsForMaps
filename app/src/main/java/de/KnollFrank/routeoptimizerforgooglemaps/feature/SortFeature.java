@@ -125,9 +125,11 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
         button.setText("⚙️");
         button.setTextColor(Color.WHITE);
         button.setGravity(Gravity.CENTER);
-        button.setPadding(dpToPx(8), dpToPx(6), dpToPx(8), dpToPx(6));
+        button.setPadding(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4));
         button.setMinimumHeight(0);
         button.setMinimumWidth(0);
+        button.setMinWidth(0);
+        button.setMinHeight(0);
         button.setBackground(getShape());
         final LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
