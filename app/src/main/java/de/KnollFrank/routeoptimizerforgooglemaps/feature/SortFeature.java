@@ -139,7 +139,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
         button.setBackground(getShape());
         final LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        dpToPx(34),
                         LinearLayout.LayoutParams.MATCH_PARENT);
         params.leftMargin = dpToPx(4);
         button.setLayoutParams(params);
