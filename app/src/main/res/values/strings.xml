@@ -16,6 +16,7 @@
     <string name="permit_accessibility_done">Service enabled ✓</string>
     <string name="permit_done">✓ Enabled</string>
     <string name="error_processing_route">An error occurred while processing the route.</string>
+    <string name="sort_button_label">↕️ Sort</string>
     <string name="settings_title">Settings</string>
     <string name="settings_section_general">General</string>
     <string name="settings_show_preview">Show route preview</string>

@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.VisibleForTesting;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.R;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.RouteUrlRequester;
 import de.KnollFrank.routeoptimizerforgooglemaps.accessibility.StopCountDetector;
 
@@ -105,7 +106,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
 
     private View createSortButton() {
         final Button button = new Button(service);
-        button.setText("↕️ Sortieren");
+        button.setText(service.getString(R.string.sort_button_label));
         button.setTextColor(Color.parseColor("#8AB4F8"));
         button.setAllCaps(false);
         button.setGravity(Gravity.CENTER);
@@ -113,6 +114,11 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
         button.setMinimumHeight(0);
         button.setMinimumWidth(0);
         button.setBackground(getShape());
+        final LinearLayout.LayoutParams params =
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT);
+        button.setLayoutParams(params);
         button.setOnClickListener(view -> {
             Log.d(TAG, "Sort button clicked for " + lastKnownStopCount + " stops");
             routeUrlRequester.requestRouteUrl(onRouteUrlExtracted);
@@ -134,7 +140,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
         final LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                        LinearLayout.LayoutParams.MATCH_PARENT);
         params.leftMargin = dpToPx(4);
         button.setLayoutParams(params);
         button.setOnClickListener(view -> new SettingsDialog(service).show());
