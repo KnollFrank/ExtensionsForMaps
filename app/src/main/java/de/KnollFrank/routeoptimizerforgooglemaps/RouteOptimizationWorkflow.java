@@ -33,6 +33,7 @@ public class RouteOptimizationWorkflow {
         this.progressOverlay = new ProgressOverlay(context);
         this.routeOptimizationOrchestrator =
                 new RouteOptimizationOrchestrator(
+                        context,
                         createCallback(context, progressOverlay),
                         routeOptimizer);
     }
@@ -50,8 +51,7 @@ public class RouteOptimizationWorkflow {
             @Override
             public void onExtractRouteFromDirectionsUrlStarted() {
                 progressOverlay.show();
-                // FK-TODO: i18n
-                progressOverlay.updateStatus("Lese Route...");
+                progressOverlay.updateStatus(context.getString(R.string.status_reading_route));
             }
 
             @Override
@@ -70,8 +70,7 @@ public class RouteOptimizationWorkflow {
             @Override
             public void onOptimizationStarted() {
                 progressOverlay.show();
-                // FK-TODO: i18n
-                progressOverlay.updateStatus("Optimiere Route...");
+                progressOverlay.updateStatus(context.getString(R.string.status_optimizing_route));
             }
 
             @Override
@@ -105,11 +104,11 @@ public class RouteOptimizationWorkflow {
                 recyclerViewStops.setAdapter(stopsAdapter);
                 final AlertDialog dialog =
                         new MaterialAlertDialogBuilder(context)
-                                .setTitle("Route Preview")
+                                .setTitle(R.string.route_preview_title)
                                 .setCancelable(false)
                                 .setView(dialogView)
                                 .setPositiveButton(
-                                        "OK",
+                                        R.string.ok,
                                         new DialogInterface.OnClickListener() {
 
                                             @Override
@@ -120,7 +119,7 @@ public class RouteOptimizationWorkflow {
                                             }
                                         })
                                 .setNegativeButton(
-                                        "Abbrechen",
+                                        R.string.cancel,
                                         new DialogInterface.OnClickListener() {
 
                                             @Override

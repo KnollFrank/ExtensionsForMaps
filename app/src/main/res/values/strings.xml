@@ -26,8 +26,24 @@
     <string name="settings_method_ors">Road Network</string>
     <string name="settings_method_ors_desc">Maximum precision considering real roads and paths.</string>
     <string name="settings_configure_ors">Configure</string>
+    <string name="settings_configure_button_text">⚙️</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+
+    <!-- Progress & Status -->
+    <string name="status_reading_route">Reading route…</string>
+    <string name="status_optimizing_route">Optimizing route…</string>
+    <string name="route_preview_title">Route Preview</string>
+
+    <!-- Errors -->
+    <string name="error_network">Network error: %s</string>
+    <string name="error_general">Error: %s</string>
+    <string name="error_optimization">Optimization error: %s</string>
+    <string name="error_unassigned_jobs">Unassigned stops: %s</string>
+
+    <!-- Delivery Groups -->
+    <string name="delivery_group_none">No stage selected</string>
+    <string name="delivery_group_name_format">Stage %d</string>
 
     <!-- API Key Activity -->
     <string name="api_key_title">OpenRouteService API Key</string>

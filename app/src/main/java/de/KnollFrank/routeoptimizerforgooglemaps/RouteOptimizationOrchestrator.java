@@ -1,5 +1,7 @@
 package de.KnollFrank.routeoptimizerforgooglemaps;
 
+import android.content.Context;
+
 import java.io.IOException;
 import java.net.URL;
 
@@ -23,10 +25,12 @@ public class RouteOptimizationOrchestrator {
         void onError(String message);
     }
 
+    private final Context context;
     private final Callback callback;
     private final RouteOptimizer routeOptimizer;
 
-    public RouteOptimizationOrchestrator(final Callback callback, final RouteOptimizer routeOptimizer) {
+    public RouteOptimizationOrchestrator(final Context context, final Callback callback, final RouteOptimizer routeOptimizer) {
+        this.context = context;
         this.callback = callback;
         this.routeOptimizer = routeOptimizer;
     }
@@ -41,9 +45,9 @@ public class RouteOptimizationOrchestrator {
                                 expandShortDirectionsUrl(
                                         directionsUrl)));
             } catch (final IOException e) {
-                callback.onError("Network error: " + e.getMessage());
+                callback.onError(context.getString(R.string.error_network, e.getMessage()));
             } catch (final Exception e) {
-                callback.onError("Error: " + e.getMessage());
+                callback.onError(context.getString(R.string.error_general, e.getMessage()));
             }
         }).start();
     }
@@ -55,7 +59,12 @@ public class RouteOptimizationOrchestrator {
             try {
                 callback.onOptimizationSuccess(routeOptimizer.optimize(route));
             } catch (final Exception e) {
-                callback.onError("Optimization error: " + e.getMessage());
+                final String msg = e.getMessage();
+                if (msg != null && msg.startsWith("UNASSIGNED_JOBS:")) {
+                    callback.onError(context.getString(R.string.error_unassigned_jobs, msg.substring(16)));
+                } else {
+                    callback.onError(context.getString(R.string.error_optimization, e.getMessage()));
+                }
             }
         }).start();
     }

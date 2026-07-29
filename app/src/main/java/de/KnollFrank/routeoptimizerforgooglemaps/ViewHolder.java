@@ -98,8 +98,8 @@ class ViewHolder extends RecyclerView.ViewHolder {
                     private String getText(final int position) {
                         return this
                                 .getItem(position)
-                                .map(DeliveryGroup::name)
-                                .orElse("keine Etappe ausgewählt");
+                                .map(group -> context.getString(R.string.delivery_group_name_format, group.sequenceOrder()))
+                                .orElse(context.getString(R.string.delivery_group_none));
                     }
                 };
         spinnerDeliveryGroupAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

@@ -1,7 +1,6 @@
 package de.KnollFrank.routeoptimizerforgooglemaps.route;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.IntStream;
 
 public class DeliveryGroups {
@@ -23,7 +22,7 @@ public class DeliveryGroups {
     private static DeliveryGroup createDeliveryGroup(final int sequenceOrder) {
         return new DeliveryGroup(
                 "" + sequenceOrder,
-                String.format(Locale.ROOT, "%d. Etappe", sequenceOrder),
+                null,
                 sequenceOrder);
     }
 }

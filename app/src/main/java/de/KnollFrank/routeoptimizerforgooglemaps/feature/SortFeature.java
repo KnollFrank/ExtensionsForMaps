@@ -128,7 +128,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
 
     private View createSettingsButton() {
         final Button button = new Button(service);
-        button.setText("⚙️");
+        button.setText(service.getString(R.string.settings_configure_button_text));
         button.setTextColor(Color.WHITE);
         button.setGravity(Gravity.CENTER);
         button.setPadding(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4));
