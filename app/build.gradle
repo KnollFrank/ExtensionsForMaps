@@ -22,6 +22,11 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField "boolean", "FEATURE_ROUTE_PREVIEW_VISIBLE", "true"
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {

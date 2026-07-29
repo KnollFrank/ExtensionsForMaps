@@ -24,6 +24,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.io.IOException;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.ApiKeyRepository;
+import de.KnollFrank.routeoptimizerforgooglemaps.BuildConfig;
 import de.KnollFrank.routeoptimizerforgooglemaps.R;
 import de.KnollFrank.routeoptimizerforgooglemaps.SortConfig;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.ors.OpenRouteServiceRoutingMatrixProvider;
@@ -42,6 +43,11 @@ public class SettingsDialog {
 
         final CheckBox checkBox = dialogView.findViewById(R.id.checkBoxShowPreview);
         checkBox.setChecked(SortConfig.shouldShowRoutePreview(service));
+
+        final View tvGeneralLabel = dialogView.findViewById(R.id.tvGeneralLabel);
+        final int visibility = BuildConfig.FEATURE_ROUTE_PREVIEW_VISIBLE ? View.VISIBLE : View.GONE;
+        checkBox.setVisibility(visibility);
+        tvGeneralLabel.setVisibility(visibility);
 
         final View layoutHaversine = dialogView.findViewById(R.id.layoutHaversine);
         final RadioButton rbHaversine = dialogView.findViewById(R.id.rbHaversine);

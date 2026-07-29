@@ -15,6 +15,9 @@ public class SortConfig {
     private static final String KEY_OPTIMIZATION_METHOD = "optimization_method";
 
     public static boolean shouldShowRoutePreview(final Context context) {
+        if (!BuildConfig.FEATURE_ROUTE_PREVIEW_VISIBLE) {
+            return false;
+        }
         return getPrefs(context).getBoolean(KEY_SHOW_ROUTE_PREVIEW, true);
     }
 
