@@ -45,6 +45,10 @@ public class RouteUrlRequester {
         }
     }
 
+    public boolean isWaitingForUrl() {
+        return routeUrlCallback.isPresent();
+    }
+
     public void handleGoogleMapsEvent(final AccessibilityEvent event) {
         if (isWaitingToClickShareAfterBack && event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
             tryClickShareButton();

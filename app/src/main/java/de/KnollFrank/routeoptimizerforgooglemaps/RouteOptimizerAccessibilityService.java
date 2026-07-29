@@ -28,6 +28,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     private static final String TAG = RouteOptimizerAccessibilityService.class.getSimpleName();
     private static final String GOOGLE_MAPS_PACKAGE = "com.google.android.apps.maps";
     private static final String RESOLVER_PACKAGE = "com.android.intentresolver";
+    private static final String SYSTEM_PACKAGE = "android";
 
     private List<AccessibilityFeature> features = List.of();
     private StopCountDetector stopCountDetector;
@@ -96,6 +97,11 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                             switch (packageName.toString()) {
                                 case GOOGLE_MAPS_PACKAGE -> handleGoogleMapsEvent(event);
                                 case RESOLVER_PACKAGE -> handleResolverEvent(event);
+                                case SYSTEM_PACKAGE -> {
+                                    if (urlRequester.isWaitingForUrl()) {
+                                        handleResolverEvent(event);
+                                    }
+                                }
                             }
                         });
     }
