@@ -29,7 +29,9 @@ public class RouteOptimizationOrchestrator {
     private final Callback callback;
     private final RouteOptimizer routeOptimizer;
 
-    public RouteOptimizationOrchestrator(final Context context, final Callback callback, final RouteOptimizer routeOptimizer) {
+    public RouteOptimizationOrchestrator(final Context context,
+                                         final Callback callback,
+                                         final RouteOptimizer routeOptimizer) {
         this.context = context;
         this.callback = callback;
         this.routeOptimizer = routeOptimizer;

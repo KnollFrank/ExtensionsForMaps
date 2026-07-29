@@ -38,11 +38,7 @@ public class RouteOptimizerTest {
                                 new Angle(48.5015, Unit.DEGREES),
                                 new Angle(8.9932, Unit.DEGREES)),
                         Optional.empty());
-        final DeliveryGroup kernstadt =
-                new DeliveryGroup(
-                        "ks",
-                        "Kernstadt",
-                        1);
+        final DeliveryGroup kernstadt = new DeliveryGroup("ks", 1);
         // Hechingen is further away (~16km)
         final Stop hechingen_stadt =
                 new Stop(
@@ -96,16 +92,8 @@ public class RouteOptimizerTest {
                                 new Angle(48.5015, Unit.DEGREES),
                                 new Angle(8.9932, Unit.DEGREES)),
                         Optional.empty());
-        final DeliveryGroup kernstadt =
-                new DeliveryGroup(
-                        "ks",
-                        "Kernstadt",
-                        1);
-        final DeliveryGroup dorf =
-                new DeliveryGroup(
-                        "df",
-                        "Dörfer",
-                        2);
+        final DeliveryGroup kernstadt = new DeliveryGroup("ks", 1);
+        final DeliveryGroup dorf = new DeliveryGroup("df", 2);
         // Hechingen is further away (~16km)
         final Stop hechingen_stadt =
                 new Stop(
@@ -175,7 +163,6 @@ public class RouteOptimizerTest {
                                 Optional.of(
                                         new DeliveryGroup(
                                                 "id" + i,
-                                                "Group " + i,
                                                 i))));
             }
         }
@@ -268,16 +255,8 @@ public class RouteOptimizerTest {
         final RouteOptimizer routeOptimizer =
                 new RouteOptimizer(
                         new HaversineVehicleRoutingTransportCostsProvider());
-        final DeliveryGroup first =
-                new DeliveryGroup(
-                        "TOWN",
-                        "Town",
-                        1);
-        final DeliveryGroup second =
-                new DeliveryGroup(
-                        "VILLAGE",
-                        "Village",
-                        2);
+        final DeliveryGroup first = new DeliveryGroup("TOWN", 1);
+        final DeliveryGroup second = new DeliveryGroup("VILLAGE", 2);
         final Stop berlin =
                 new Stop(
                         "0",

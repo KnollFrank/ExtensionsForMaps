@@ -20,9 +20,6 @@ public class DeliveryGroups {
     }
 
     private static DeliveryGroup createDeliveryGroup(final int sequenceOrder) {
-        return new DeliveryGroup(
-                "" + sequenceOrder,
-                null,
-                sequenceOrder);
+        return new DeliveryGroup("" + sequenceOrder, sequenceOrder);
     }
 }

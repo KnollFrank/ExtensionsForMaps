@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static de.KnollFrank.routeoptimizerforgooglemaps.route.Stops.getAddresses;
 
+import androidx.test.core.app.ApplicationProvider;
+
 import com.google.common.collect.ImmutableTable;
 
 import org.junit.Test;
@@ -53,6 +55,7 @@ public class RouteOptimizationOrchestratorTest {
         final CountDownLatch optimizationLatch = new CountDownLatch(1);
         final RouteOptimizationOrchestrator orchestrator =
                 new RouteOptimizationOrchestrator(
+                        ApplicationProvider.getApplicationContext(),
                         createCallback(extractedRoute, extractionLatch, optimizedRoute, optimizationLatch),
                         new RouteOptimizer(new OsrmVehicleRoutingTransportCostsProvider(routingMatrixProvider)));
         orchestrator.extractRouteFromDirectionsUrl(directionsUrl);
