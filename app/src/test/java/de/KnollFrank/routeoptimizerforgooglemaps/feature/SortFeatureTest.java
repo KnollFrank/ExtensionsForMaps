@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import android.accessibilityservice.AccessibilityService;
 import android.graphics.Rect;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +36,8 @@ public class SortFeatureTest {
     public void testSortButtonClick_requestsRouteUrl() {
         // Given
         feature.onStopCountUpdated(15, new Rect(0, 0, 100, 50));
-        final Button sortButton = (Button) feature.getSortButtonOverlay();
+        final LinearLayout container = (LinearLayout) feature.getSortButtonOverlay();
+        final Button sortButton = (Button) container.getChildAt(0);
 
         // When
         sortButton.performClick();
