@@ -141,7 +141,6 @@ public class ScanAddressActivity extends AppCompatActivity {
                                     isAnalyzing = false;
                                     etResult.setText(currentDetection.address());
                                     cardResult.setVisibility(View.VISIBLE);
-                                    addressOverlay.updateBounds(null, 0, 0);
                                 } else if (isAnalyzing) {
                                     addressOverlay.updateBounds(null, 0, 0);
                                 }

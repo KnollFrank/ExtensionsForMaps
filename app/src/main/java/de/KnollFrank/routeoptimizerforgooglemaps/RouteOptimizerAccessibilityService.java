@@ -96,7 +96,8 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                 .ofNullable(event.getPackageName())
                 .ifPresent(
                         packageName -> {
-                            switch (packageName.toString()) {
+                            final String pkg = packageName.toString();
+                            switch (pkg) {
                                 case GOOGLE_MAPS_PACKAGE -> handleGoogleMapsEvent(event);
                                 case RESOLVER_PACKAGE -> handleResolverEvent(event);
                                 case SYSTEM_PACKAGE -> {

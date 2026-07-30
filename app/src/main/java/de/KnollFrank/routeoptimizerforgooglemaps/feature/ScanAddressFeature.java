@@ -76,17 +76,41 @@ public class ScanAddressFeature implements AccessibilityFeature {
         final Rect bounds = new Rect();
         inputNode.getBoundsInScreen(bounds);
 
-        if (scanButtonOverlay == null || !lastInputBounds.equals(bounds)) {
+        if (scanButtonOverlay == null) {
             showScanButton(bounds);
+        } else if (!lastInputBounds.equals(bounds)) {
+            updateScanButtonPosition(bounds);
         }
         inputNode.recycle();
     }
 
     private void showScanButton(final Rect inputBounds) {
         lastInputBounds.set(inputBounds);
-        removeScanButton();
-
         final FrameLayout layout = new FrameLayout(service);
+        final Button scanButton = createButton();
+        layout.addView(scanButton, new FrameLayout.LayoutParams(dpToPx(40), dpToPx(40)));
+
+        try {
+            windowManager.addView(layout, getLayoutParams(inputBounds));
+            scanButtonOverlay = layout;
+        } catch (WindowManager.BadTokenException e) {
+            Log.e(TAG, "Failed to add scan button overlay", e);
+        }
+    }
+
+    private void updateScanButtonPosition(final Rect inputBounds) {
+        lastInputBounds.set(inputBounds);
+        if (scanButtonOverlay != null) {
+            try {
+                windowManager.updateViewLayout(scanButtonOverlay, getLayoutParams(inputBounds));
+            } catch (IllegalArgumentException e) {
+                // View might have been removed already
+                scanButtonOverlay = null;
+            }
+        }
+    }
+
+    private Button createButton() {
         final Button scanButton = new Button(service);
         scanButton.setText("📷");
         scanButton.setPadding(0, 0, 0, 0);
@@ -95,14 +119,14 @@ public class ScanAddressFeature implements AccessibilityFeature {
                 Log.d(TAG, "Address received from scanner: " + address);
                 pendingAddress = address;
             });
-
             final Intent intent = new Intent(service, ScanAddressActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             service.startActivity(intent);
         });
+        return scanButton;
+    }
 
-        layout.addView(scanButton, new FrameLayout.LayoutParams(dpToPx(40), dpToPx(40)));
-
+    private WindowManager.LayoutParams getLayoutParams(final Rect inputBounds) {
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 dpToPx(40),
                 dpToPx(40),
@@ -110,16 +134,17 @@ public class ScanAddressFeature implements AccessibilityFeature {
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.TOP | Gravity.START;
-        params.x = inputBounds.right - dpToPx(44); // Closer to the microphone
+        params.x = inputBounds.right - dpToPx(44);
         params.y = inputBounds.centerY() - dpToPx(20);
-
-        windowManager.addView(layout, params);
-        scanButtonOverlay = layout;
+        return params;
     }
 
     private void removeScanButton() {
         if (scanButtonOverlay != null) {
-            windowManager.removeView(scanButtonOverlay);
+            try {
+                windowManager.removeView(scanButtonOverlay);
+            } catch (IllegalArgumentException ignored) {
+            }
             scanButtonOverlay = null;
         }
     }

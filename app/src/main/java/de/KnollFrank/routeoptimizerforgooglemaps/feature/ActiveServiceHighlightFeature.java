@@ -24,13 +24,13 @@ public class ActiveServiceHighlightFeature implements AccessibilityFeature {
 
     @Override
     public void onServiceConnected() {
-        show();
     }
 
     @Override
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
-        // Always ensure it's visible when Google Maps events are being processed
-        show();
+        if (highlightView == null) {
+            show();
+        }
     }
 
     @Override
