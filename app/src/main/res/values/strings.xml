@@ -53,4 +53,13 @@
     <string name="api_key_error_empty">Please enter an API key</string>
     <string name="api_key_error_invalid">Invalid API key or network error: %s</string>
     <string name="api_key_success">API Key saved successfully!</string>
+
+    <!-- Scan Address -->
+    <string name="scan_button_text">📷</string>
+    <string name="scan_instructions">Align address within the frame</string>
+    <string name="scan_capture">Capture</string>
+    <string name="scan_detected_title">Detected Address:</string>
+    <string name="scan_retry">Retry</string>
+    <string name="scan_done">Use this address</string>
+    <string name="scan_error_permission">Camera permission required</string>
 </resources>

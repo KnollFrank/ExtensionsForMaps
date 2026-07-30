@@ -16,6 +16,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.common.AccessibilityServices;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.AccessibilityFeature;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.ActiveServiceHighlightFeature;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.AddStopFeature;
+import de.KnollFrank.routeoptimizerforgooglemaps.feature.ScanAddressFeature;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.SortFeature;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.HaversineVehicleRoutingTransportCostsProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OsrmVehicleRoutingTransportCostsProvider;
@@ -78,11 +79,12 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                             routeOptimizationWorkflow.optimizeThenShowRoute(routeUrl);
                         });
         activeServiceHighlightFeature = new ActiveServiceHighlightFeature(this);
+        final ScanAddressFeature scanAddressFeature = new ScanAddressFeature(this);
         stopCountDetector =
                 new StopCountDetector(
                         googleMapsContext,
                         List.of(addStopFeature, sortFeature));
-        features = List.of(addStopFeature, sortFeature, activeServiceHighlightFeature);
+        features = List.of(addStopFeature, sortFeature, activeServiceHighlightFeature, scanAddressFeature);
         for (final AccessibilityFeature feature : features) {
             feature.onServiceConnected();
         }
