@@ -60,7 +60,8 @@
     <string name="scan_instructions">Adresse im Rahmen ausrichten</string>
     <string name="scan_capture">Scannen</string>
     <string name="scan_detected_title">Erkannte Adresse:</string>
-    <string name="scan_retry">Wiederholen</string>
-    <string name="scan_done">Diese Adresse nutzen</string>
+    <string name="scan_wrong_address">Falsche Adresse</string>
+    <string name="scan_add_address">Adresse hinzufügen</string>
     <string name="scan_error_permission">Kameraberechtigung erforderlich</string>
+    <string name="scan_error_no_detection">Noch keine Adresse erkannt</string>
 </resources>

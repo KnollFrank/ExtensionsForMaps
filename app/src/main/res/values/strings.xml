@@ -59,7 +59,8 @@
     <string name="scan_instructions">Align address within the frame</string>
     <string name="scan_capture">Capture</string>
     <string name="scan_detected_title">Detected Address:</string>
-    <string name="scan_retry">Retry</string>
-    <string name="scan_done">Use this address</string>
+    <string name="scan_wrong_address">Wrong address</string>
+    <string name="scan_add_address">Add address</string>
     <string name="scan_error_permission">Camera permission required</string>
+    <string name="scan_error_no_detection">No address detected yet</string>
 </resources>

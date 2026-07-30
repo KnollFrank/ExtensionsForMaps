@@ -6,13 +6,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraSelector;
-import androidx.camera.core.ImageCapture;
-import androidx.camera.core.ImageCaptureException;
+import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
@@ -26,6 +24,7 @@ import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,10 +47,13 @@ public class ScanAddressActivity extends AppCompatActivity {
     }
 
     private PreviewView previewView;
-    private ImageCapture imageCapture;
+    private AddressOverlayView addressOverlay;
     private ExecutorService cameraExecutor;
     private View cardResult;
     private EditText etResult;
+    private View progressRefining;
+    private ScannedAddressRefiner.RefinedResult currentDetection;
+    private boolean isAnalyzing = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,13 +61,15 @@ public class ScanAddressActivity extends AppCompatActivity {
         setContentView(R.layout.activity_scan_address);
 
         previewView = findViewById(R.id.previewView);
+        addressOverlay = findViewById(R.id.addressOverlay);
         cardResult = findViewById(R.id.cardResult);
         etResult = findViewById(R.id.etResult);
+        progressRefining = findViewById(R.id.progressRefining);
 
-        findViewById(R.id.btnCapture).setOnClickListener(v -> captureImage());
         findViewById(R.id.btnRetry).setOnClickListener(v -> {
             cardResult.setVisibility(View.GONE);
-            findViewById(R.id.btnCapture).setVisibility(View.VISIBLE);
+            currentDetection = null;
+            isAnalyzing = true;
         });
         findViewById(R.id.btnDone).setOnClickListener(v -> {
             if (callback != null) {
@@ -87,19 +91,6 @@ public class ScanAddressActivity extends AppCompatActivity {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == CAMERA_PERMISSION_CODE) {
-            if (allPermissionsGranted()) {
-                startCamera();
-            } else {
-                Toast.makeText(this, R.string.scan_error_permission, Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        }
-    }
-
     private void startCamera() {
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
 
@@ -110,12 +101,16 @@ public class ScanAddressActivity extends AppCompatActivity {
                 Preview preview = new Preview.Builder().build();
                 preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
-                imageCapture = new ImageCapture.Builder().build();
+                ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .build();
+
+                imageAnalysis.setAnalyzer(cameraExecutor, this::processImage);
 
                 CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
 
                 cameraProvider.unbindAll();
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture);
+                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis);
 
             } catch (ExecutionException | InterruptedException e) {
                 Log.e(TAG, "Use case binding failed", e);
@@ -123,42 +118,39 @@ public class ScanAddressActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
-    private void captureImage() {
-        if (imageCapture == null) return;
-
-        imageCapture.takePicture(cameraExecutor, new ImageCapture.OnImageCapturedCallback() {
-            @Override
-            public void onCaptureSuccess(@NonNull ImageProxy image) {
-                recognizeText(image);
-            }
-
-            @Override
-            public void onError(@NonNull ImageCaptureException exception) {
-                Log.e(TAG, "Photo capture failed", exception);
-            }
-        });
-    }
-
-    private void recognizeText(ImageProxy imageProxy) {
+    private void processImage(@NonNull ImageProxy imageProxy) {
         @SuppressWarnings("UnsafeOptInUsageError")
         android.media.Image mediaImage = imageProxy.getImage();
-        if (mediaImage != null) {
-            InputImage image = InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
+        if (mediaImage != null && isAnalyzing) {
+            int rotationDegrees = imageProxy.getImageInfo().getRotationDegrees();
+            int width = imageProxy.getWidth();
+            int height = imageProxy.getHeight();
+            InputImage image = InputImage.fromMediaImage(mediaImage, rotationDegrees);
             TextRecognizer recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
 
             recognizer.process(image)
                     .addOnSuccessListener(visionText -> {
-                        String resultText = visionText.getText();
-                        runOnUiThread(() -> {
-                            etResult.setText(resultText);
-                            cardResult.setVisibility(View.VISIBLE);
-                            findViewById(R.id.btnCapture).setVisibility(View.GONE);
+                        cameraExecutor.execute(() -> {
+                            Optional<ScannedAddressRefiner.RefinedResult> result = ScannedAddressRefiner.refine(this, visionText);
+                            runOnUiThread(() -> {
+                                if (result.isPresent() && isAnalyzing) {
+                                    currentDetection = result.get();
+                                    addressOverlay.updateBounds(currentDetection.bounds(), width, height);
+                                    
+                                    // Auto-detect and show results
+                                    isAnalyzing = false;
+                                    etResult.setText(currentDetection.address());
+                                    cardResult.setVisibility(View.VISIBLE);
+                                    addressOverlay.updateBounds(null, 0, 0);
+                                } else if (isAnalyzing) {
+                                    addressOverlay.updateBounds(null, 0, 0);
+                                }
+                            });
                         });
                     })
-                    .addOnFailureListener(e -> {
-                        Log.e(TAG, "Text recognition failed", e);
-                    })
                     .addOnCompleteListener(task -> imageProxy.close());
+        } else {
+            imageProxy.close();
         }
     }
 
