@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -104,7 +105,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
             try {
                 windowManager.updateViewLayout(scanButtonOverlay, getLayoutParams(inputBounds));
             } catch (IllegalArgumentException e) {
-                // View might have been removed already
                 scanButtonOverlay = null;
             }
         }
@@ -115,13 +115,36 @@ public class ScanAddressFeature implements AccessibilityFeature {
         scanButton.setText("📷");
         scanButton.setPadding(0, 0, 0, 0);
         scanButton.setOnClickListener(v -> {
-            ScanAddressActivity.setCallback(address -> {
-                Log.d(TAG, "Address received from scanner: " + address);
-                pendingAddress = address;
-            });
-            final Intent intent = new Intent(service, ScanAddressActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            service.startActivity(intent);
+            Log.d(TAG, "Launching Google Lens...");
+
+            // Alternative 1: Public intent for Google App's Lens functionality
+            Intent googleAppLensIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("googlelens://v1/camera"));
+            googleAppLensIntent.setPackage("com.google.android.googlequicksearchbox");
+            googleAppLensIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            if (googleAppLensIntent.resolveActivity(service.getPackageManager()) != null) {
+                service.startActivity(googleAppLensIntent);
+            } else {
+                // Alternative 2: Standalone Google Lens app
+                Intent standaloneLensIntent = service.getPackageManager().getLaunchIntentForPackage("com.google.ar.lens");
+                if (standaloneLensIntent != null) {
+                    standaloneLensIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    service.startActivity(standaloneLensIntent);
+                } else {
+                    Log.d(TAG, "Google Lens not found. Opening Play Store...");
+                    Intent playStoreIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.ar.lens"));
+                    playStoreIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    
+                    if (playStoreIntent.resolveActivity(service.getPackageManager()) != null) {
+                        service.startActivity(playStoreIntent);
+                    } else {
+                        // Fallback to browser if Play Store app is missing
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.google.ar.lens"));
+                        browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        service.startActivity(browserIntent);
+                    }
+                }
+            }
         });
         return scanButton;
     }
@@ -151,5 +174,10 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     private int dpToPx(int dp) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, service.getResources().getDisplayMetrics());
+    }
+
+    // This method will be used later when the user describes the extraction process
+    public void setScannedAddress(String address) {
+        this.pendingAddress = address;
     }
 }

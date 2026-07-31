@@ -30,11 +30,13 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     private static final String GOOGLE_MAPS_PACKAGE = "com.google.android.apps.maps";
     private static final String RESOLVER_PACKAGE = "com.android.intentresolver";
     private static final String SYSTEM_PACKAGE = "android";
+    private static final String GOOGLE_APP_PACKAGE = "com.google.android.googlequicksearchbox";
 
     private List<AccessibilityFeature> features = List.of();
     private StopCountDetector stopCountDetector;
     private RouteUrlRequester urlRequester;
     private ActiveServiceHighlightFeature activeServiceHighlightFeature;
+    private ScanAddressFeature scanAddressFeature;
 
     @Override
     protected void onServiceConnected() {
@@ -79,7 +81,7 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                             routeOptimizationWorkflow.optimizeThenShowRoute(routeUrl);
                         });
         activeServiceHighlightFeature = new ActiveServiceHighlightFeature(this);
-        final ScanAddressFeature scanAddressFeature = new ScanAddressFeature(this);
+        scanAddressFeature = new ScanAddressFeature(this);
         stopCountDetector =
                 new StopCountDetector(
                         googleMapsContext,
@@ -105,8 +107,14 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
                                         handleResolverEvent(event);
                                     }
                                 }
+                                case GOOGLE_APP_PACKAGE -> handleGoogleAppEvent(event);
                             }
                         });
+    }
+
+    private void handleGoogleAppEvent(final AccessibilityEvent event) {
+        // Placeholder for future Lens extraction logic
+        Log.d(TAG, "Received event from Google App (Lens): " + event.getEventType());
     }
 
     // FK-TODO: refactor using streams
