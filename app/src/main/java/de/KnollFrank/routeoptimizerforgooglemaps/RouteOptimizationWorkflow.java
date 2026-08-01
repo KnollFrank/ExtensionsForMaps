@@ -129,7 +129,14 @@ public class RouteOptimizationWorkflow {
                                         })
                                 .create();
                 if (dialog.getWindow() != null) {
-                    dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY);
+                    Context baseContext = context;
+                    while (baseContext instanceof android.view.ContextThemeWrapper) {
+                        baseContext = ((android.view.ContextThemeWrapper) baseContext).getBaseContext();
+                    }
+                    int windowType = (baseContext instanceof android.accessibilityservice.AccessibilityService)
+                            ? WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
+                            : WindowManager.LayoutParams.TYPE_APPLICATION;
+                    dialog.getWindow().setType(windowType);
                 }
                 dialog.show();
                 if (dialog.getWindow() != null) {

@@ -93,11 +93,19 @@ public class ProgressOverlay {
     }
 
     private WindowManager.LayoutParams getLayoutParams() {
+        Context baseContext = context;
+        while (baseContext instanceof android.view.ContextThemeWrapper) {
+            baseContext = ((android.view.ContextThemeWrapper) baseContext).getBaseContext();
+        }
+        int windowType = (baseContext instanceof android.accessibilityservice.AccessibilityService)
+                ? WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
+                : WindowManager.LayoutParams.TYPE_APPLICATION;
+
         final WindowManager.LayoutParams params =
                 new WindowManager.LayoutParams(
                         WindowManager.LayoutParams.WRAP_CONTENT,
                         WindowManager.LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                        windowType,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                         PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.CENTER;

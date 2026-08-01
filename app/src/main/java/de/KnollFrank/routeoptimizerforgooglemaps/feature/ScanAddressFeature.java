@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 
 public class ScanAddressFeature implements AccessibilityFeature {
 
-    private static final String TAG = "ScanAddressFeature";
+    private static final String TAG = ScanAddressFeature.class.getSimpleName();
     private static final String GOOGLE_PKG = "com.google.android.googlequicksearchbox";
     private static final String MAPS_PKG = "com.google.android.apps.maps";
     private static final String SEARCH_EDIT_TEXT_ID = "com.google.android.apps.maps:id/search_omnibox_edit_text";
