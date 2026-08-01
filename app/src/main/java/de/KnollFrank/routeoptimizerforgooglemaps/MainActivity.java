@@ -78,6 +78,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void configurePermissionButtons() {
+        if (!BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
+            findViewById(R.id.cardPermissions).setVisibility(View.GONE);
+            return;
+        }
         this
                 .findViewById(R.id.btnPermitAccessibility)
                 .setOnClickListener(
@@ -91,7 +95,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updatePermissionButtonStates() {
-        updatePermitAccessibilityButtonState();
+        if (BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
+            updatePermitAccessibilityButtonState();
+        }
     }
 
     private void updatePermitAccessibilityButtonState() {

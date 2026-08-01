@@ -33,54 +33,5 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".feature.AddStopActivity"
-            android:exported="true"
-            android:icon="@drawable/ic_feature_add_stop"
-            android:label="Route: Stopp hinzufügen"
-            android:taskAffinity=".addstop"
-            android:theme="@style/Theme.RouteoptimizerForGoogleMaps">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".feature.SortActivity"
-            android:exported="true"
-            android:icon="@drawable/ic_feature_sort"
-            android:label="Route: Optimieren"
-            android:taskAffinity=".sort"
-            android:theme="@style/Theme.RouteoptimizerForGoogleMaps">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".feature.ScanAddressActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:taskAffinity=".scanner"
-            android:excludeFromRecents="true"
-            android:theme="@style/Theme.RouteoptimizerForGoogleMaps" />
-
-        <service
-            android:name=".RouteOptimizerAccessibilityService"
-            android:description="@string/accessibility_service_description"
-            android:exported="false"
-            android:label="@string/accessibility_service_label"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility_service_config" />
-        </service>
     </application>
 </manifest>

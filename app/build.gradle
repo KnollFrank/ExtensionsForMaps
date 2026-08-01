@@ -25,6 +25,22 @@ android {
         buildConfigField "boolean", "FEATURE_ROUTE_PREVIEW_VISIBLE", "true"
     }
 
+    flavorDimensions = ["mode"]
+    productFlavors {
+        remoteControl {
+            dimension "mode"
+            applicationIdSuffix ".remote"
+            versionNameSuffix "-remote"
+            buildConfigField "boolean", "SHOW_ACCESSIBILITY_SETTINGS", "true"
+        }
+        standalone {
+            dimension "mode"
+            applicationIdSuffix ".standalone"
+            versionNameSuffix "-standalone"
+            buildConfigField "boolean", "SHOW_ACCESSIBILITY_SETTINGS", "false"
+        }
+    }
+
     buildFeatures {
         buildConfig = true
     }
