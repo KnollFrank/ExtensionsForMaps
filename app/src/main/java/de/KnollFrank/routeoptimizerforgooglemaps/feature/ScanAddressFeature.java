@@ -37,7 +37,8 @@ public class ScanAddressFeature implements AccessibilityFeature {
     
     private static final String TOKEN_START = "START_ADDR";
     private static final String TOKEN_END = "END_ADDR";
-    private static final String AI_PROMPT = "Extrahiere die Adresse ohne Namen exakt so: " + TOKEN_START + " [Adresse] " + TOKEN_END;
+    // Prompt so gewählt, dass die Tokens nicht als Paar in der Instruktion auftauchen
+    private static final String AI_PROMPT = "Analysiere das Bild und extrahiere nur die Adresse (ohne Namen). Antwort-Format: " + TOKEN_START + " [gefundene Adresse hier einsetzen] " + TOKEN_END;
 
     private enum State {
         IDLE,
@@ -51,6 +52,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private View scanButtonOverlay;
     private final Rect lastInputBounds = new Rect();
     private String pendingAddress = null;
+    private String lastLoggedFullText = "";
     private State state = State.IDLE;
     private long lastActionTime = 0;
 
@@ -65,9 +67,9 @@ public class ScanAddressFeature implements AccessibilityFeature {
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             if (MAPS_PKG.equals(String.valueOf(event.getPackageName()))) {
-                if (pendingAddress != null) {
-                    Log.d(TAG, "Maps wieder im Vordergrund. Adresse bereit zum Einfügen.");
+                if (state != State.IDLE && pendingAddress == null) {
                     state = State.IDLE;
+                    Log.d(TAG, "Maps aktiv. Scan-System bereit.");
                 }
             }
         }
@@ -79,26 +81,23 @@ public class ScanAddressFeature implements AccessibilityFeature {
     public void onGoogleAppEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
         if (root == null || !GOOGLE_PKG.equals(String.valueOf(root.getPackageName()))) return;
 
-        // 1. Wenn wir eine Adresse haben: Sofortiger Rückzug aus Lens erzwingen!
+        // Wenn wir schon eine Adresse haben, warten wir auf die Rückkehr zu Maps
         if (pendingAddress != null) {
-            if (System.currentTimeMillis() - lastActionTime > 1500) {
-                Log.d(TAG, "Adresse vorhanden. Erzwinge Rückkehr zu Maps...");
-                returnToMaps();
-            }
+            if (System.currentTimeMillis() - lastActionTime > 2000) returnToMaps();
             return;
         }
 
-        // 2. Extraktion versuchen (hat immer Vorrang vor neuem Prompt)
+        // 1. Priorität: Ergebnis-Extraktion
         if (tryExtractAIResponse()) return;
 
-        // 3. Prompt-Eingabe (nur wenn noch keine Adresse gefunden wurde)
+        // 2. Prompt-Logik
         AccessibilityNodeInfo inputField = findKiInput(root);
         if (inputField != null) {
             String currentText = String.valueOf(inputField.getText());
-            if (currentText.contains("Extrahiere")) {
+            if (currentText.contains("Extrahiere") || currentText.contains("Analysiere")) {
                 if (state != State.AWAITING_RESPONSE) {
                     state = State.AWAITING_RESPONSE;
-                    Log.d(TAG, "Prompt bereit. Bitte manuell abschicken.");
+                    Log.d(TAG, "Prompt bereit. Bitte manuell Suchen klicken.");
                 }
                 return;
             }
@@ -110,7 +109,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
             return;
         }
 
-        // 4. Einstiegspunkt
+        // 3. Einstiegspunkt
         if (state == State.IDLE || (state == State.OPENING_PANEL && System.currentTimeMillis() - lastActionTime > 5000)) {
             AccessibilityNodeInfo entry = findEntryPoint(root);
             if (entry != null) {
@@ -129,20 +128,25 @@ public class ScanAddressFeature implements AccessibilityFeature {
         collectAllVisibleText(root, sb);
         String fullText = sb.toString();
 
+        // Nur loggen wenn neu und relevant
+        if (!fullText.equals(lastLoggedFullText) && fullText.contains(TOKEN_START)) {
+            lastLoggedFullText = fullText;
+        }
+
         Pattern pattern = Pattern.compile(TOKEN_START + "\\s*(.*?)\\s*" + TOKEN_END, Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(fullText);
         
-        String rawAddr = null;
+        String foundCandidate = null;
         while (matcher.find()) {
             String candidate = matcher.group(1).trim();
-            if (candidate.length() > 5 && !candidate.contains("[Adresse]")) {
-                rawAddr = candidate;
+            // VALIDIERUNG: Ein echtes Ergebnis darf keine Prompt-Bestandteile enthalten und muss eine Adresse sein
+            if (isValidAddress(candidate)) {
+                foundCandidate = candidate;
             }
         }
 
-        if (rawAddr != null) {
-            // Bereinigung: Umbrüche und Mehrfach-Leerzeichen entfernen
-            pendingAddress = rawAddr.replaceAll("[\\r\\n]+", " ").replaceAll("\\s{2,}", " ").trim();
+        if (foundCandidate != null) {
+            pendingAddress = foundCandidate.replaceAll("[\\r\\n]+", " ").replaceAll("\\s{2,}", " ").trim();
             Log.i(TAG, "ADRESSE GEFUNDEN: " + pendingAddress);
             returnToMaps();
             return true;
@@ -150,12 +154,22 @@ public class ScanAddressFeature implements AccessibilityFeature {
         return false;
     }
 
+    private boolean isValidAddress(String text) {
+        if (text.length() < 5) return false;
+        String lower = text.toLowerCase();
+        // Darf keine Platzhalter-Wörter aus dem Prompt enthalten
+        if (lower.contains("gefundene adresse")) return false;
+        if (lower.contains("[adresse]")) return false;
+        if (lower.contains("extrahiere")) return false;
+        if (lower.contains("format:")) return false;
+        // Eine Adresse sollte idealerweise eine Zahl enthalten (Hausnummer oder PLZ)
+        return text.matches(".*\\d+.*");
+    }
+
     private void returnToMaps() {
         state = State.IDLE;
         lastActionTime = System.currentTimeMillis();
-        // Aktion 1: Back drücken
         service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
-        // Aktion 2: Maps aktiv nach vorne holen (als Fallback)
         try {
             Intent intent = service.getPackageManager().getLaunchIntentForPackage(MAPS_PKG);
             if (intent != null) {
@@ -258,7 +272,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
             Bundle args = new Bundle();
             args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, pendingAddress);
             if (et.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)) {
-                Log.d(TAG, "ERFOLG: Adresse in Maps eingefügt.");
+                Log.d(TAG, "Adresse in Maps eingefügt.");
                 pendingAddress = null;
             }
         }
@@ -293,7 +307,8 @@ public class ScanAddressFeature implements AccessibilityFeature {
         btn.setText("📷");
         btn.setPadding(0, 0, 0, 0);
         btn.setOnClickListener(v -> {
-            state = State.IDLE; lastActionTime = 0;
+            state = State.IDLE; lastActionTime = 0; lastLoggedFullText = "";
+            pendingAddress = null; // WICHTIG: Speicher leeren!
             try {
                 Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("googlelens://v1/camera"));
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
