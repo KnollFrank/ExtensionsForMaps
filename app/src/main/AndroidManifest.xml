@@ -36,7 +36,9 @@
         <activity
             android:name=".feature.AddStopActivity"
             android:exported="true"
+            android:icon="@drawable/ic_feature_add_stop"
             android:label="Route: Stopp hinzufügen"
+            android:taskAffinity=".addstop"
             android:theme="@style/Theme.RouteoptimizerForGoogleMaps">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -48,7 +50,9 @@
         <activity
             android:name=".feature.SortActivity"
             android:exported="true"
+            android:icon="@drawable/ic_feature_sort"
             android:label="Route: Optimieren"
+            android:taskAffinity=".sort"
             android:theme="@style/Theme.RouteoptimizerForGoogleMaps">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
