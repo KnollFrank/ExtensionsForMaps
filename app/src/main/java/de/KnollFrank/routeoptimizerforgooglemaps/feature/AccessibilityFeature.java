@@ -9,5 +9,8 @@ public interface AccessibilityFeature {
 
     void onGoogleMapsEvent(AccessibilityEvent event, AccessibilityNodeInfo root);
 
+    default void onGoogleAppEvent(AccessibilityEvent event, AccessibilityNodeInfo root) {
+    }
+
     void onDestroy();
 }

@@ -113,8 +113,9 @@ public class RouteOptimizerAccessibilityService extends AccessibilityService {
     }
 
     private void handleGoogleAppEvent(final AccessibilityEvent event) {
-        // Placeholder for future Lens extraction logic
-        Log.d(TAG, "Received event from Google App (Lens): " + event.getEventType());
+        AccessibilityServices
+                .getRootInActiveWindow(this)
+                .ifPresent(root -> features.forEach(feature -> feature.onGoogleAppEvent(event, root)));
     }
 
     // FK-TODO: refactor using streams
