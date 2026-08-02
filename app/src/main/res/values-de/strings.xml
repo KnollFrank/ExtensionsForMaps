@@ -78,4 +78,18 @@
     <string name="scan_add_address">Adresse hinzufügen</string>
     <string name="scan_error_permission">Kameraberechtigung erforderlich</string>
     <string name="scan_error_no_detection">Noch keine Adresse erkannt</string>
+
+    <!-- License -->
+    <string name="license_title">Lizenzstatus</string>
+    <string name="license_status_free">Kostenlose Version (Limit: 15 Stopps)</string>
+    <string name="license_status_pro">Pro-Version (Unbegrenzte Stopps)</string>
+    <string name="license_enter_key">Lizenzschlüssel eingeben</string>
+    <string name="license_activate">Aktivieren</string>
+    <string name="license_key_hint">Schlüssel hier eingeben</string>
+    <string name="license_error_invalid">Ungültiger Lizenzschlüssel.</string>
+    <string name="license_success">Pro-Features aktiviert! Vielen Dank für deine Unterstützung.</string>
+
+    <string name="upgrade_pro_title">Upgrade auf Pro</string>
+    <string name="upgrade_pro_message">Du hast das kostenlose Limit von 15 Stopps erreicht. Hole dir die Pro-Version, um mehr Stopps hinzuzufügen und größere Routen zu sortieren.\n\nVorteile:\n- Unbegrenzte Stopps\n- Professionelle Routenoptimierung</string>
+    <string name="upgrade_pro_button">Pro-Features freischalten</string>
 </resources>

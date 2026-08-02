@@ -21,6 +21,9 @@ import com.google.android.material.slider.Slider;
 import java.net.URL;
 import java.util.List;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.feature.UpgradeDialog;
+import de.KnollFrank.routeoptimizerforgooglemaps.license.LicenseManager;
+import de.KnollFrank.routeoptimizerforgooglemaps.license.LicenseManagerProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteTemplateFactory;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteToUrlConverter;
 
@@ -33,12 +36,14 @@ public class MainActivity extends AppCompatActivity {
         configurePlanRoute();
         configureCoffeeButton();
         configurePermissionButtons();
+        configureLicenseUI();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         updatePermissionButtonStates();
+        updateLicenseUI();
     }
 
     @Override
@@ -104,6 +109,27 @@ public class MainActivity extends AppCompatActivity {
         final boolean accessibilityServiceEnabled = isAccessibilityServiceEnabled();
         final MaterialButton btnAccessibility = findViewById(R.id.btnPermitAccessibility);
         btnAccessibility.setText(accessibilityServiceEnabled ? R.string.permit_accessibility_done : R.string.permit_accessibility);
+    }
+
+    private void configureLicenseUI() {
+        if (BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
+            findViewById(R.id.cardLicense).setVisibility(View.GONE);
+            return;
+        }
+        findViewById(R.id.btnActivateLicense).setOnClickListener(v -> UpgradeDialog.showActivationDialog(this, this::updateLicenseUI));
+    }
+
+    private void updateLicenseUI() {
+        if (BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) return;
+
+        LicenseManager licenseManager = LicenseManagerProvider.getInstance(this);
+        boolean isPro = licenseManager.isPro();
+
+        TextView tvStatus = findViewById(R.id.tvLicenseStatus);
+        tvStatus.setText(isPro ? R.string.license_status_pro : R.string.license_status_free);
+
+        Button btnActivate = findViewById(R.id.btnActivateLicense);
+        btnActivate.setVisibility(isPro ? View.GONE : View.VISIBLE);
     }
 
     // FK-TODO: refactor and move to another class

@@ -20,6 +20,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.net.URL;
 import java.util.Locale;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.feature.UpgradeDialog;
+import de.KnollFrank.routeoptimizerforgooglemaps.license.LicenseManagerProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.NativeSuburbResolver;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
@@ -58,6 +60,14 @@ public class RouteOptimizationWorkflow {
             public void onExtractRouteFromDirectionsUrlSuccess(final Route route) {
                 final Route enrichedRoute = addSuburbsToAddresses(route, context);
                 runOnUiThread(() -> {
+                    if (!BuildConfig.SHOW_ACCESSIBILITY_SETTINGS &&
+                            LicenseManagerProvider.getInstance(context).isProFeatureRequired(enrichedRoute.stops().size()) &&
+                            !LicenseManagerProvider.getInstance(context).isPro()) {
+                        progressOverlay.hide();
+                        UpgradeDialog.show(context, () -> onExtractRouteFromDirectionsUrlSuccess(route));
+                        return;
+                    }
+
                     if (SortConfig.shouldShowRoutePreview(context)) {
                         progressOverlay.hide();
                         showRoutePreviewDialog(enrichedRoute, context);

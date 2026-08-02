@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import de.KnollFrank.routeoptimizerforgooglemaps.GoogleMapsNavigator;
 import de.KnollFrank.routeoptimizerforgooglemaps.R;
 import de.KnollFrank.routeoptimizerforgooglemaps.UrlExpander;
+import de.KnollFrank.routeoptimizerforgooglemaps.license.LicenseManagerProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.GoogleMapsRouteExtractor;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteToUrlConverter;
@@ -84,11 +85,17 @@ public class AddStopActivity extends AppCompatActivity {
         int stopCount = route.stops().size();
         if (stopCount >= 27) {
             showLimitReachedDialog();
+        } else if (stopCount >= 15 && !LicenseManagerProvider.getInstance(this).isPro()) {
+            showUpgradeDialog(route);
         } else if (stopCount < 10) {
             showSuggestMapsDialog(route);
         } else {
             addStopAndFinish(route);
         }
+    }
+
+    private void showUpgradeDialog(Route route) {
+        UpgradeDialog.show(this, () -> handleRoute(route));
     }
 
     private void showLimitReachedDialog() {
