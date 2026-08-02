@@ -8,4 +8,13 @@
     <style name="Theme.RouteoptimizerForGoogleMaps" parent="Base.Theme.RouteoptimizerForGoogleMaps" />
 
     <style name="Theme.RouteoptimizerForGoogleMaps.Dialog" parent="Theme.Material3.DayNight.Dialog" />
+
+    <style name="Theme.RouteoptimizerForGoogleMaps.Transparent" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 </resources>
