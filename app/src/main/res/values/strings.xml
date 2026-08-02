@@ -38,7 +38,7 @@
 
     <!-- Progress & Status -->
     <string name="status_reading_route">Reading route…</string>
-    <string name="status_optimizing_route">Optimizing route…</string>
+    <string name="status_optimizing_route">Sorting route…</string>
     <string name="route_preview_title">Route Preview</string>
 
     <!-- Errors -->

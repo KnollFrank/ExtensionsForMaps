@@ -19,7 +19,7 @@
             android:name=".feature.SortActivity"
             android:exported="true"
             android:icon="@drawable/ic_feature_sort"
-            android:label="Route: Optimieren"
+            android:label="Route: Sortieren"
             android:taskAffinity=".sort"
             android:theme="@style/Theme.RouteoptimizerForGoogleMaps">
             <intent-filter>

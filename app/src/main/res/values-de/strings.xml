@@ -39,7 +39,7 @@
 
     <!-- Progress & Status -->
     <string name="status_reading_route">Lese Route…</string>
-    <string name="status_optimizing_route">Optimiere Route…</string>
+    <string name="status_optimizing_route">Sortiere Route…</string>
     <string name="route_preview_title">Routenvorschau</string>
 
     <!-- Errors -->
