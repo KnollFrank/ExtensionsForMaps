@@ -9,7 +9,7 @@ public class LocalLicenseManager implements LicenseManager {
     private static final String TAG = "LocalLicenseManager";
     private static final String PREFS_NAME = "license_prefs";
     private static final String KEY_IS_PRO = "is_pro";
-    private static final String FIXED_LICENSE_KEY = "PRO-VERSION-KEY";
+    private static final String FIXED_LICENSE_KEY = "PRO";
 
     private final SharedPreferences prefs;
 

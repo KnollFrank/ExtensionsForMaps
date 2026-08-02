@@ -23,6 +23,7 @@ import java.util.Locale;
 import de.KnollFrank.routeoptimizerforgooglemaps.feature.UpgradeDialog;
 import de.KnollFrank.routeoptimizerforgooglemaps.license.LicenseManagerProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.NativeSuburbResolver;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OptimizationType;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.RouteOptimizer;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
 
@@ -30,6 +31,7 @@ public class RouteOptimizationWorkflow {
 
     private final RouteOptimizationOrchestrator routeOptimizationOrchestrator;
     private final ProgressOverlay progressOverlay;
+    private boolean showOptimizationTypeDialog = false;
 
     public RouteOptimizationWorkflow(final RouteOptimizer routeOptimizer, final Context context) {
         this.progressOverlay = new ProgressOverlay(context);
@@ -38,6 +40,10 @@ public class RouteOptimizationWorkflow {
                         context,
                         createCallback(context, progressOverlay),
                         routeOptimizer);
+    }
+
+    public void setShowOptimizationTypeDialog(boolean show) {
+        this.showOptimizationTypeDialog = show;
     }
 
     RouteOptimizationWorkflow(final RouteOptimizationOrchestrator routeOptimizationOrchestrator,
@@ -68,13 +74,51 @@ public class RouteOptimizationWorkflow {
                         return;
                     }
 
-                    if (SortConfig.shouldShowRoutePreview(context)) {
-                        progressOverlay.hide();
-                        showRoutePreviewDialog(enrichedRoute, context);
+                    if (showOptimizationTypeDialog) {
+                        showOptimizationTypeDialog(enrichedRoute, context);
                     } else {
-                        routeOptimizationOrchestrator.optimizeRoute(enrichedRoute);
+                        proceedWithRoute(enrichedRoute, context);
                     }
                 });
+            }
+
+            private void showOptimizationTypeDialog(final Route route, final Context context) {
+                String[] options = {
+                        context.getString(R.string.settings_type_fixed_destination),
+                        context.getString(R.string.settings_type_any_destination)
+                };
+                final OptimizationType[] selectedType = {SortConfig.getOptimizationType(context)};
+                int checkedItem = (selectedType[0] == OptimizationType.FIXED_DESTINATION) ? 0 : 1;
+
+                new MaterialAlertDialogBuilder(context)
+                        .setTitle(R.string.sort_dialog_title)
+                        .setSingleChoiceItems(options, checkedItem, (dialog, which) -> {
+                            selectedType[0] = (which == 0) ? OptimizationType.FIXED_DESTINATION : OptimizationType.ANY_DESTINATION;
+                        })
+                        .setPositiveButton(R.string.ok, (dialog, which) -> {
+                            SortConfig.setOptimizationType(context, selectedType[0]);
+                            proceedWithRoute(route, context);
+                        })
+                        .setNegativeButton(R.string.cancel, (dialog, which) -> {
+                            if (context instanceof android.app.Activity) {
+                                ((android.app.Activity) context).finish();
+                            }
+                        })
+                        .setOnCancelListener(dialog -> {
+                            if (context instanceof android.app.Activity) {
+                                ((android.app.Activity) context).finish();
+                            }
+                        })
+                        .show();
+            }
+
+            private void proceedWithRoute(final Route route, final Context context) {
+                if (SortConfig.shouldShowRoutePreview(context)) {
+                    progressOverlay.hide();
+                    showRoutePreviewDialog(route, context);
+                } else {
+                    routeOptimizationOrchestrator.optimizeRoute(route);
+                }
             }
 
             @Override
