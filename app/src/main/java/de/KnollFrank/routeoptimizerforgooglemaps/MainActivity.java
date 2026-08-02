@@ -72,14 +72,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void configureCoffeeButton() {
-        this
-                .findViewById(R.id.btnCoffee)
-                .setOnClickListener(
-                        view ->
-                                startActivity(
-                                        new Intent(
-                                                Intent.ACTION_VIEW,
-                                                Uri.parse("https://paypal.me/KnollFrank"))));
+        final View btnCoffee = findViewById(R.id.btnCoffee);
+        if (!BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
+            btnCoffee.setVisibility(View.GONE);
+            return;
+        }
+        btnCoffee.setOnClickListener(
+                view ->
+                        startActivity(
+                                new Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("https://paypal.me/KnollFrank"))));
     }
 
     private void configurePermissionButtons() {
