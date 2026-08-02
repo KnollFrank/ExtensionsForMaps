@@ -91,4 +91,9 @@
     <string name="upgrade_pro_title">Upgrade to Pro</string>
     <string name="upgrade_pro_message">You have reached the free limit of 15 stops. Upgrade to Pro to add more stops and sort larger routes.\n\nBenefits:\n- Unlimited stops\n- Professional route optimization</string>
     <string name="upgrade_pro_button">Unlock Pro Features</string>
+
+    <!-- Add Stop Instruction -->
+    <string name="add_stop_instruction_title">Stop Added</string>
+    <string name="add_stop_instruction_message">The last stop of your route has been duplicated. In Google Maps, tap on this duplicate stop to replace it with your new address.</string>
+    <string name="dont_show_again">Don\'t show again</string>
 </resources>

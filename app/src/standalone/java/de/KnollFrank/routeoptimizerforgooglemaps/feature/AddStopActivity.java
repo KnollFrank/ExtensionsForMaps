@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 
 import de.KnollFrank.routeoptimizerforgooglemaps.GoogleMapsNavigator;
 import de.KnollFrank.routeoptimizerforgooglemaps.R;
+import de.KnollFrank.routeoptimizerforgooglemaps.SortConfig;
 import de.KnollFrank.routeoptimizerforgooglemaps.UrlExpander;
 import de.KnollFrank.routeoptimizerforgooglemaps.license.LicenseManagerProvider;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.GoogleMapsRouteExtractor;
@@ -118,11 +119,16 @@ public class AddStopActivity extends AppCompatActivity {
     }
 
     private void addStopAndFinish(Route route) {
-        Toast.makeText(this, "Stopp wird hinzugefügt...", Toast.LENGTH_SHORT).show();
-        CompletableFuture.runAsync(() -> {
-                    URL expandedUrl = RouteToUrlConverter.getUrl(Routes.addDummyStop(route));
-                    GoogleMapsNavigator.launchUrl(expandedUrl, getApplicationContext());
-                }).thenRun(() -> runOnUiThread(this::finish))
+        Toast.makeText(this, "Stopp wird vorbereitet...", Toast.LENGTH_SHORT).show();
+        CompletableFuture.supplyAsync(() -> RouteToUrlConverter.getUrl(Routes.addDummyStop(route)))
+                .thenAccept(expandedUrl -> runOnUiThread(() -> {
+                    if (SortConfig.shouldShowAddStopInstruction(this)) {
+                        showInstructionDialog(expandedUrl);
+                    } else {
+                        GoogleMapsNavigator.launchUrl(expandedUrl, getApplicationContext());
+                        finish();
+                    }
+                }))
                 .exceptionally(throwable -> {
                     Log.e(TAG, "Error adding stop", throwable);
                     runOnUiThread(() -> {
@@ -131,6 +137,24 @@ public class AddStopActivity extends AppCompatActivity {
                     });
                     return null;
                 });
+    }
+
+    private void showInstructionDialog(URL url) {
+        android.view.View view = android.view.LayoutInflater.from(this).inflate(R.layout.dialog_add_stop_instruction, null);
+        android.widget.CheckBox cbDontShowAgain = view.findViewById(R.id.cbDontShowAgain);
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.add_stop_instruction_title)
+                .setView(view)
+                .setPositiveButton(R.string.ok, (dialog, which) -> {
+                    if (cbDontShowAgain.isChecked()) {
+                        SortConfig.setShouldShowAddStopInstruction(this, false);
+                    }
+                    GoogleMapsNavigator.launchUrl(url, getApplicationContext());
+                    finish();
+                })
+                .setCancelable(false)
+                .show();
     }
 
     @Nullable

@@ -16,6 +16,7 @@ public class SortConfig {
     private static final String KEY_SHOW_ROUTE_PREVIEW = "show_route_preview";
     private static final String KEY_OPTIMIZATION_METHOD = "optimization_method";
     private static final String KEY_OPTIMIZATION_TYPE = "optimization_type";
+    private static final String KEY_SHOW_ADD_STOP_INSTRUCTION = "show_add_stop_instruction";
 
     public static boolean shouldShowRoutePreview(final Context context) {
         if (!BuildConfig.FEATURE_ROUTE_PREVIEW_VISIBLE) {
@@ -63,6 +64,18 @@ public class SortConfig {
                 .getPrefs(context)
                 .edit()
                 .putString(KEY_OPTIMIZATION_TYPE, type.name())
+                .apply();
+    }
+
+    public static boolean shouldShowAddStopInstruction(final Context context) {
+        return getPrefs(context).getBoolean(KEY_SHOW_ADD_STOP_INSTRUCTION, true);
+    }
+
+    public static void setShouldShowAddStopInstruction(final Context context, final boolean show) {
+        SortConfig
+                .getPrefs(context)
+                .edit()
+                .putBoolean(KEY_SHOW_ADD_STOP_INSTRUCTION, show)
                 .apply();
     }
 
