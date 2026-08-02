@@ -250,6 +250,108 @@ public class RouteOptimizerTest {
     }
 
     @Test
+    public void testOptimize_anyDestination() throws Exception {
+        // Given
+        final RouteOptimizer routeOptimizer =
+                new RouteOptimizer(
+                        new HaversineVehicleRoutingTransportCostsProvider());
+        // Start: Berlin
+        // Waypoint: Potsdam (Close)
+        // Destination: Munich (Far)
+        final Stop berlin =
+                new Stop(
+                        "0",
+                        "Berlin",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(52.5200, Unit.DEGREES),
+                                new Angle(13.4050, Unit.DEGREES)),
+                        Optional.empty());
+        final Stop potsdam =
+                new Stop(
+                        "1",
+                        "Potsdam",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(52.3906, Unit.DEGREES),
+                                new Angle(13.0645, Unit.DEGREES)),
+                        Optional.empty());
+        final Stop munich =
+                new Stop(
+                        "2",
+                        "Munich",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(48.1351, Unit.DEGREES),
+                                new Angle(11.5820, Unit.DEGREES)),
+                        Optional.empty());
+        final Route route = new Route(berlin, List.of(potsdam), munich);
+
+        // When: ANY_DESTINATION
+        final Route optimizedAny = routeOptimizer.optimize(route, OptimizationType.ANY_DESTINATION);
+
+        // Then: Should end at Munich (it's the furthest from Berlin)
+        // Order: Berlin -> Potsdam -> Munich
+        assertEquals(munich, optimizedAny.destination());
+        assertEquals(potsdam, optimizedAny.waypoints().get(0));
+
+        // When: Swap Munich and Potsdam in input, but still ANY_DESTINATION
+        final Route routeSwapped = new Route(berlin, List.of(munich), potsdam);
+        final Route optimizedAnySwapped = routeOptimizer.optimize(routeSwapped, OptimizationType.ANY_DESTINATION);
+
+        // Then: Should still end at Munich (the furthest)
+        // Order: Berlin -> Potsdam -> Munich
+        assertEquals(munich, optimizedAnySwapped.destination());
+        assertEquals(potsdam, optimizedAnySwapped.waypoints().get(0));
+    }
+
+    @Test
+    public void testOptimize_fixedDestination() throws Exception {
+        // Given
+        final RouteOptimizer routeOptimizer =
+                new RouteOptimizer(
+                        new HaversineVehicleRoutingTransportCostsProvider());
+        // Start: Berlin
+        // Waypoint: Munich (Far)
+        // Destination: Potsdam (Close)
+        final Stop berlin =
+                new Stop(
+                        "0",
+                        "Berlin",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(52.5200, Unit.DEGREES),
+                                new Angle(13.4050, Unit.DEGREES)),
+                        Optional.empty());
+        final Stop potsdam =
+                new Stop(
+                        "1",
+                        "Potsdam",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(52.3906, Unit.DEGREES),
+                                new Angle(13.0645, Unit.DEGREES)),
+                        Optional.empty());
+        final Stop munich =
+                new Stop(
+                        "2",
+                        "Munich",
+                        Optional.empty(),
+                        Geodetic.fromLatitudeLongitude(
+                                new Angle(48.1351, Unit.DEGREES),
+                                new Angle(11.5820, Unit.DEGREES)),
+                        Optional.empty());
+        final Route route = new Route(berlin, List.of(munich), potsdam);
+
+        // When: FIXED_DESTINATION (Default)
+        final Route optimizedFixed = routeOptimizer.optimize(route, OptimizationType.FIXED_DESTINATION);
+
+        // Then: Destination MUST remain Potsdam
+        assertEquals(potsdam, optimizedFixed.destination());
+        assertEquals(munich, optimizedFixed.waypoints().get(0));
+    }
+
+    @Test
     public void testOptimize_respectsGroupSequence() throws Exception {
         // Given
         final RouteOptimizer routeOptimizer =

@@ -59,7 +59,10 @@ public class RouteOptimizationOrchestrator {
         callback.onOptimizationStarted();
         new Thread(() -> {
             try {
-                callback.onOptimizationSuccess(routeOptimizer.optimize(route));
+                callback.onOptimizationSuccess(
+                        routeOptimizer.optimize(
+                                route,
+                                SortConfig.getOptimizationType(context)));
             } catch (final Exception e) {
                 final String msg = e.getMessage();
                 if (msg != null && msg.startsWith("UNASSIGNED_JOBS:")) {

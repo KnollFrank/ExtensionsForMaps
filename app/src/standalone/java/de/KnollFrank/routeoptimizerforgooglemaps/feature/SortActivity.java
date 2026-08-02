@@ -8,12 +8,17 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.KnollFrank.routeoptimizerforgooglemaps.R;
 import de.KnollFrank.routeoptimizerforgooglemaps.RouteOptimizationWorkflow;
+import de.KnollFrank.routeoptimizerforgooglemaps.SortConfig;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OptimizationType;
 import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteOptimizerFactory;
 
 public class SortActivity extends AppCompatActivity {
@@ -40,13 +45,7 @@ public class SortActivity extends AppCompatActivity {
             if (sharedText != null) {
                 URL url = extractUrl(sharedText);
                 if (url != null) {
-                    Toast.makeText(this, "Route wird optimiert...", Toast.LENGTH_SHORT).show();
-                    // Pass 'this' instead of applicationContext so the UI elements can use the activity's window token.
-                    new RouteOptimizationWorkflow(RouteOptimizerFactory.createRouteOptimizer(this), this)
-                            .optimizeThenShowRoute(url);
-                    
-                    // We don't finish() immediately anymore because the workflow is asynchronous and needs
-                    // this activity to be alive to show the ProgressOverlay and potential dialogs.
+                    showOptimizationTypeDialog(url);
                 } else {
                     Toast.makeText(this, "Keine Google Maps Route gefunden.", Toast.LENGTH_LONG).show();
                     finish();
@@ -57,6 +56,35 @@ public class SortActivity extends AppCompatActivity {
         } else {
             finish();
         }
+    }
+
+    private void showOptimizationTypeDialog(URL url) {
+        String[] options = {
+                getString(R.string.settings_type_fixed_destination),
+                getString(R.string.settings_type_any_destination)
+        };
+        final OptimizationType[] selectedType = {SortConfig.getOptimizationType(this)};
+        int checkedItem = (selectedType[0] == OptimizationType.FIXED_DESTINATION) ? 0 : 1;
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.sort_dialog_title)
+                .setSingleChoiceItems(options, checkedItem, (dialog, which) -> {
+                    selectedType[0] = (which == 0) ? OptimizationType.FIXED_DESTINATION : OptimizationType.ANY_DESTINATION;
+                })
+                .setPositiveButton(R.string.ok, (dialog, which) -> {
+                    SortConfig.setOptimizationType(this, selectedType[0]);
+                    startOptimization(url);
+                })
+                .setNegativeButton(R.string.cancel, (dialog, which) -> finish())
+                .setOnCancelListener(dialog -> finish())
+                .show();
+    }
+
+    private void startOptimization(URL url) {
+        Toast.makeText(this, "Route wird optimiert...", Toast.LENGTH_SHORT).show();
+        // Pass 'this' instead of applicationContext so the UI elements can use the activity's window token.
+        new RouteOptimizationWorkflow(RouteOptimizerFactory.createRouteOptimizer(this), this)
+                .optimizeThenShowRoute(url);
     }
 
     @Nullable

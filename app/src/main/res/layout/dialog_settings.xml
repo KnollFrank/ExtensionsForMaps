@@ -105,4 +105,66 @@
             android:textSize="12sp" />
     </LinearLayout>
 
+    <!-- Section: Optimization Type -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="24dp"
+        android:paddingBottom="8dp"
+        android:text="@string/settings_section_optimization_type"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <!-- Option: Fixed Destination -->
+    <LinearLayout
+        android:id="@+id/layoutFixedDest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <RadioButton
+            android:id="@+id/rbFixedDest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:text="@string/settings_type_fixed_destination" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:alpha="0.7"
+            android:text="@string/settings_type_fixed_destination_desc"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- Option: Any Destination -->
+    <LinearLayout
+        android:id="@+id/layoutAnyDest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <RadioButton
+            android:id="@+id/rbAnyDest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:text="@string/settings_type_any_destination" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:alpha="0.7"
+            android:text="@string/settings_type_any_destination_desc"
+            android:textSize="12sp" />
+    </LinearLayout>
+
 </LinearLayout>

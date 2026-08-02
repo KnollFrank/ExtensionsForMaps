@@ -27,6 +27,7 @@ import de.KnollFrank.routeoptimizerforgooglemaps.ApiKeyRepository;
 import de.KnollFrank.routeoptimizerforgooglemaps.BuildConfig;
 import de.KnollFrank.routeoptimizerforgooglemaps.R;
 import de.KnollFrank.routeoptimizerforgooglemaps.SortConfig;
+import de.KnollFrank.routeoptimizerforgooglemaps.optimize.OptimizationType;
 import de.KnollFrank.routeoptimizerforgooglemaps.optimize.ors.OpenRouteServiceRoutingMatrixProvider;
 
 public class SettingsDialog {
@@ -56,6 +57,11 @@ public class SettingsDialog {
         final TextView tvOrsDesc = dialogView.findViewById(R.id.tvOrsDesc);
         final View btnConfigureOrs = dialogView.findViewById(R.id.btnConfigureOrs);
 
+        final View layoutFixedDest = dialogView.findViewById(R.id.layoutFixedDest);
+        final RadioButton rbFixedDest = dialogView.findViewById(R.id.rbFixedDest);
+        final View layoutAnyDest = dialogView.findViewById(R.id.layoutAnyDest);
+        final RadioButton rbAnyDest = dialogView.findViewById(R.id.rbAnyDest);
+
         // Manual RadioButton management to allow clicking the whole container/description
         final View.OnClickListener haversineClick = v -> {
             rbHaversine.setChecked(true);
@@ -70,6 +76,18 @@ public class SettingsDialog {
 
         layoutHaversine.setOnClickListener(haversineClick);
         layoutOrs.setOnClickListener(orsClick);
+
+        final View.OnClickListener fixedDestClick = v -> {
+            rbFixedDest.setChecked(true);
+            rbAnyDest.setChecked(false);
+        };
+        final View.OnClickListener anyDestClick = v -> {
+            rbAnyDest.setChecked(true);
+            rbFixedDest.setChecked(false);
+        };
+
+        layoutFixedDest.setOnClickListener(fixedDestClick);
+        layoutAnyDest.setOnClickListener(anyDestClick);
 
         final Runnable updateOrsState = () -> {
             final boolean hasApiKey = ApiKeyRepository.getApiKey(service).isPresent();
@@ -100,6 +118,11 @@ public class SettingsDialog {
                             rbOrs.isChecked() ?
                                     SortConfig.OptimizationMethod.OPEN_ROUTE_SERVICE :
                                     SortConfig.OptimizationMethod.HAVERSINE);
+                    SortConfig.setOptimizationType(
+                            service,
+                            rbAnyDest.isChecked() ?
+                                    OptimizationType.ANY_DESTINATION :
+                                    OptimizationType.FIXED_DESTINATION);
                 })
                 .setNegativeButton(R.string.cancel, (d, w) -> d.dismiss())
                 .setOnDismissListener(d -> prefs.unregisterOnSharedPreferenceChangeListener(prefsListener))
@@ -116,6 +139,14 @@ public class SettingsDialog {
         } else {
             rbHaversine.setChecked(true);
             rbOrs.setChecked(false);
+        }
+
+        if (SortConfig.getOptimizationType(service) == OptimizationType.FIXED_DESTINATION) {
+            rbFixedDest.setChecked(true);
+            rbAnyDest.setChecked(false);
+        } else {
+            rbAnyDest.setChecked(true);
+            rbFixedDest.setChecked(false);
         }
 
         if (settingsDialog.getWindow() != null) {

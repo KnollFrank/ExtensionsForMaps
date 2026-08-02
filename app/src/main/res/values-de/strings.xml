@@ -37,6 +37,14 @@
     <string name="add_stop_suggest_maps_message">Diese Route hat weniger als 10 Stopps. Sie können weitere Stopps auch direkt in Google Maps über die Schaltfläche \"Stopp hinzufügen\" ergänzen.\n\nMöchten Sie trotzdem, dass diese App den Stopp hinzufügt?</string>
     <string name="add_stop_yes">Ja, hinzufügen</string>
 
+    <string name="settings_section_optimization_type">Optimierungstyp</string>
+    <string name="settings_type_fixed_destination">Letztes Ziel sperren</string>
+    <string name="settings_type_fixed_destination_desc">Start und Ziel bleiben unverändert.</string>
+    <string name="settings_type_any_destination">Irgendwo enden</string>
+    <string name="settings_type_any_destination_desc">Das Ziel ist flexibel für eine kürzere Route.</string>
+
+    <string name="sort_dialog_title">Optimierungstyp wählen</string>
+
     <!-- Progress & Status -->
     <string name="status_reading_route">Lese Route…</string>
     <string name="status_optimizing_route">Sortiere Route…</string>

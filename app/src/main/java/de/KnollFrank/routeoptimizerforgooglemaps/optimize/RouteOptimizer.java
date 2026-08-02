@@ -36,20 +36,34 @@ public class RouteOptimizer {
     }
 
     public Route optimize(final Route route) throws Exception {
-        return new Route(
-                route.origin(),
-                getOptimizedWaypoints(route).orElse(route.waypoints()),
-                route.destination());
+        return optimize(route, OptimizationType.FIXED_DESTINATION);
     }
 
-    private Optional<List<Stop>> getOptimizedWaypoints(final Route route) throws Exception {
-        final Map<String, Stop> stopById = getStopById(route.waypoints());
-        return RouteOptimizer
-                .getBestSolution(
-                        this
-                                .createVehicleRoutingAlgorithm(route, stopById)
-                                .searchSolutions())
-                .map(bestSolution -> getStops(bestSolution, stopById));
+    public Route optimize(final Route route, final OptimizationType optimizationType) throws Exception {
+        final List<Stop> allStops = new ArrayList<>(route.waypoints());
+        if (optimizationType == OptimizationType.ANY_DESTINATION) {
+            allStops.add(route.destination());
+        }
+
+        final Map<String, Stop> stopById = getStopById(allStops);
+        final VehicleRoutingProblemSolution bestSolution =
+                RouteOptimizer
+                        .getBestSolution(
+                                this
+                                        .createVehicleRoutingAlgorithm(route, stopById, optimizationType)
+                                        .searchSolutions())
+                        .orElseThrow(() -> new IllegalStateException("No solution found"));
+
+        final List<Stop> optimizedStops = getStops(bestSolution, stopById);
+
+        if (optimizationType == OptimizationType.ANY_DESTINATION) {
+            final Stop newDestination = optimizedStops.get(optimizedStops.size() - 1);
+            final List<Stop> newWaypoints = new ArrayList<>(optimizedStops);
+            newWaypoints.remove(newWaypoints.size() - 1);
+            return new Route(route.origin(), newWaypoints, newDestination);
+        } else {
+            return new Route(route.origin(), optimizedStops, route.destination());
+        }
     }
 
     private static Map<String, Stop> getStopById(final List<Stop> stops) {
@@ -63,8 +77,9 @@ public class RouteOptimizer {
 
     private VehicleRoutingAlgorithm createVehicleRoutingAlgorithm(
             final Route route,
-            final Map<String, Stop> stopById) throws Exception {
-        final VehicleRoutingProblem vehicleRoutingProblem = createVehicleRoutingProblem(route, stopById);
+            final Map<String, Stop> stopById,
+            final OptimizationType optimizationType) throws Exception {
+        final VehicleRoutingProblem vehicleRoutingProblem = createVehicleRoutingProblem(route, stopById, optimizationType);
         final StateManager stateManager = new StateManager(vehicleRoutingProblem);
         return Jsprit
                 .Builder
@@ -81,31 +96,40 @@ public class RouteOptimizer {
 
     private VehicleRoutingProblem createVehicleRoutingProblem(
             final Route route,
-            final Map<String, Stop> stopById) throws Exception {
+            final Map<String, Stop> stopById,
+            final OptimizationType optimizationType) throws Exception {
         final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
         // ANFORDERUNG 1: Eiserne Zustellungs-Garantie wird am Ende durch unassignedJobs Check erzwungen.
         return vrpBuilder
-                .addVehicle(createVehicle(route))
+                .addVehicle(createVehicle(route, optimizationType))
                 .setRoutingCost(vehicleRoutingTransportCostsProvider.getVehicleRoutingTransportCosts(route))
                 .addAllJobs(createServices(stopById))
                 .setFleetSize(VehicleRoutingProblem.FleetSize.FINITE)
                 .build();
     }
 
-    private static VehicleImpl createVehicle(final Route route) {
-        return VehicleImpl
-                .Builder
-                .newInstance("vehicle")
-                .setType(
-                        VehicleTypeImpl
-                                .Builder
-                                .newInstance("car")
-                                .setCostPerDistance(1.0)
-                                .build())
-                .setStartLocation(createLocation(route.origin()))
-                .setEndLocation(createLocation(route.destination()))
-                .setReturnToDepot(true)
-                .build();
+    private static VehicleImpl createVehicle(final Route route, final OptimizationType optimizationType) {
+        final VehicleImpl.Builder vehicleBuilder =
+                VehicleImpl
+                        .Builder
+                        .newInstance("vehicle")
+                        .setType(
+                                VehicleTypeImpl
+                                        .Builder
+                                        .newInstance("car")
+                                        .setCostPerDistance(1.0)
+                                        .build())
+                        .setStartLocation(createLocation(route.origin()));
+
+        if (optimizationType == OptimizationType.FIXED_DESTINATION) {
+            vehicleBuilder
+                    .setEndLocation(createLocation(route.destination()))
+                    .setReturnToDepot(true);
+        } else {
+            vehicleBuilder.setReturnToDepot(false);
+        }
+
+        return vehicleBuilder.build();
     }
 
     private static List<Service> createServices(final Map<String, Stop> stopById) {

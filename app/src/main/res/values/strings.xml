@@ -36,6 +36,14 @@
     <string name="add_stop_suggest_maps_message">This route has fewer than 10 stops. You can also add more stops directly in Google Maps using the \"Add stop\" button.\n\nDo you still want this app to add the stop?</string>
     <string name="add_stop_yes">Yes, add it</string>
 
+    <string name="settings_section_optimization_type">Optimization Type</string>
+    <string name="settings_type_fixed_destination">Lock last destination</string>
+    <string name="settings_type_fixed_destination_desc">The origin and destination remain unchanged.</string>
+    <string name="settings_type_any_destination">End anywhere</string>
+    <string name="settings_type_any_destination_desc">The destination is flexible for a shorter route.</string>
+
+    <string name="sort_dialog_title">Select Optimization Type</string>
+
     <!-- Progress & Status -->
     <string name="status_reading_route">Reading route…</string>
     <string name="status_optimizing_route">Sorting route…</string>
