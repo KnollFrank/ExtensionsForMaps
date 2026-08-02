@@ -22,7 +22,6 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField "boolean", "FEATURE_ROUTE_PREVIEW_VISIBLE", "true"
     }
 
     flavorDimensions = ["mode"]
@@ -32,12 +31,14 @@ android {
             applicationIdSuffix ".remote"
             versionNameSuffix "-remote"
             buildConfigField "boolean", "SHOW_ACCESSIBILITY_SETTINGS", "true"
+            buildConfigField "boolean", "FEATURE_ROUTE_PREVIEW_VISIBLE", "true"
         }
         standalone {
             dimension "mode"
             applicationIdSuffix ".standalone"
             versionNameSuffix "-standalone"
             buildConfigField "boolean", "SHOW_ACCESSIBILITY_SETTINGS", "false"
+            buildConfigField "boolean", "FEATURE_ROUTE_PREVIEW_VISIBLE", "false"
         }
     }
 
