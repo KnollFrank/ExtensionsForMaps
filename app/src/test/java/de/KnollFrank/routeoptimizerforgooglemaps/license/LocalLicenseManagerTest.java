@@ -3,8 +3,6 @@ package de.KnollFrank.routeoptimizerforgooglemaps.license;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.content.Context;
-
 import androidx.test.core.app.ApplicationProvider;
 
 import org.junit.Before;
@@ -16,12 +14,10 @@ import org.robolectric.RobolectricTestRunner;
 public class LocalLicenseManagerTest {
 
     private LocalLicenseManager licenseManager;
-    private Context context;
 
     @Before
     public void setUp() {
-        context = ApplicationProvider.getApplicationContext();
-        licenseManager = new LocalLicenseManager(context);
+        licenseManager = new LocalLicenseManager(ApplicationProvider.getApplicationContext());
     }
 
     @Test
@@ -43,17 +39,8 @@ public class LocalLicenseManagerTest {
 
     @Test
     public void testActivation_withCorrectKey_succeeds() {
-        // We can't easily get the testKey because it's private, 
-        // but we can check if the one from preferences works if we could access it.
-        // For testing purposes, we can trust the log or reflect if needed, 
-        // but let's test the mechanism by checking if it persists.
-        
-        // Actually, let's just test that after activation it returns true.
-        // We can use a trick: since it's Robolectric, we can check the prefs directly.
-        String key = context.getSharedPreferences("license_prefs", Context.MODE_PRIVATE).getString("test_key", "");
-        assertFalse(key.isEmpty());
-        
-        assertTrue(licenseManager.activate(key));
+        // The fixed key is "PRO-VERSION-KEY"
+        assertTrue(licenseManager.activate("PRO-VERSION-KEY"));
         assertTrue(licenseManager.isPro());
     }
 }
