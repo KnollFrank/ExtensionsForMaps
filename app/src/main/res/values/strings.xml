@@ -30,6 +30,12 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
 
+    <string name="add_stop_limit_reached_title">Limit reached</string>
+    <string name="add_stop_limit_reached_message">Google Maps supports a maximum of 27 stops. Further expansion is unfortunately not possible.</string>
+    <string name="add_stop_suggest_maps_title">Possible in Google Maps</string>
+    <string name="add_stop_suggest_maps_message">This route has fewer than 10 stops. You can also add more stops directly in Google Maps using the \"Add stop\" button.\n\nDo you still want this app to add the stop?</string>
+    <string name="add_stop_yes">Yes, add it</string>
+
     <!-- Progress & Status -->
     <string name="status_reading_route">Reading route…</string>
     <string name="status_optimizing_route">Optimizing route…</string>

@@ -8,12 +8,21 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.KnollFrank.routeoptimizerforgooglemaps.DummyStopAdder;
+import de.KnollFrank.routeoptimizerforgooglemaps.GoogleMapsNavigator;
+import de.KnollFrank.routeoptimizerforgooglemaps.R;
+import de.KnollFrank.routeoptimizerforgooglemaps.UrlExpander;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.GoogleMapsRouteExtractor;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Route;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.RouteToUrlConverter;
+import de.KnollFrank.routeoptimizerforgooglemaps.route.Routes;
 
 public class AddStopActivity extends AppCompatActivity {
 
@@ -39,14 +48,7 @@ public class AddStopActivity extends AppCompatActivity {
             if (sharedText != null) {
                 URL url = extractUrl(sharedText);
                 if (url != null) {
-                    Toast.makeText(this, "Stopp wird hinzugefügt...", Toast.LENGTH_SHORT).show();
-                    DummyStopAdder.addDummyStopToDirectionsUrlThenOpenInGoogleMaps(url, getApplicationContext())
-                            .thenRun(this::finish)
-                            .exceptionally(throwable -> {
-                                Log.e(TAG, "Error adding stop", throwable);
-                                finish();
-                                return null;
-                            });
+                    processUrl(url);
                 } else {
                     Toast.makeText(this, "Keine Google Maps Route gefunden.", Toast.LENGTH_LONG).show();
                     finish();
@@ -57,6 +59,71 @@ public class AddStopActivity extends AppCompatActivity {
         } else {
             finish();
         }
+    }
+
+    private void processUrl(URL url) {
+        Toast.makeText(this, "Route wird geladen...", Toast.LENGTH_SHORT).show();
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                URL expandedUrl = UrlExpander.expandUrl(url);
+                return GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(expandedUrl);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).thenAccept(route -> runOnUiThread(() -> handleRoute(route))).exceptionally(throwable -> {
+            Log.e(TAG, "Error processing route", throwable);
+            runOnUiThread(() -> {
+                Toast.makeText(this, R.string.error_processing_route, Toast.LENGTH_LONG).show();
+                finish();
+            });
+            return null;
+        });
+    }
+
+    private void handleRoute(Route route) {
+        int stopCount = route.stops().size();
+        if (stopCount >= 27) {
+            showLimitReachedDialog();
+        } else if (stopCount < 10) {
+            showSuggestMapsDialog(route);
+        } else {
+            addStopAndFinish(route);
+        }
+    }
+
+    private void showLimitReachedDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.add_stop_limit_reached_title)
+                .setMessage(R.string.add_stop_limit_reached_message)
+                .setPositiveButton(R.string.ok, (dialog, which) -> finish())
+                .setOnCancelListener(dialog -> finish())
+                .show();
+    }
+
+    private void showSuggestMapsDialog(Route route) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.add_stop_suggest_maps_title)
+                .setMessage(R.string.add_stop_suggest_maps_message)
+                .setPositiveButton(R.string.add_stop_yes, (dialog, which) -> addStopAndFinish(route))
+                .setNegativeButton(R.string.cancel, (dialog, which) -> finish())
+                .setOnCancelListener(dialog -> finish())
+                .show();
+    }
+
+    private void addStopAndFinish(Route route) {
+        Toast.makeText(this, "Stopp wird hinzugefügt...", Toast.LENGTH_SHORT).show();
+        CompletableFuture.runAsync(() -> {
+                    URL expandedUrl = RouteToUrlConverter.getUrl(Routes.addDummyStop(route));
+                    GoogleMapsNavigator.launchUrl(expandedUrl, getApplicationContext());
+                }).thenRun(() -> runOnUiThread(this::finish))
+                .exceptionally(throwable -> {
+                    Log.e(TAG, "Error adding stop", throwable);
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, R.string.error_processing_route, Toast.LENGTH_LONG).show();
+                        finish();
+                    });
+                    return null;
+                });
     }
 
     @Nullable
