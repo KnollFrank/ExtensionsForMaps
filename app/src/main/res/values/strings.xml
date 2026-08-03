@@ -31,7 +31,7 @@
     <string name="cancel">Cancel</string>
 
     <string name="add_stop_limit_reached_title">Limit reached</string>
-    <string name="add_stop_limit_reached_message">Google Maps supports a maximum of 27 stops. Further expansion is unfortunately not possible.</string>
+    <string name="add_stop_limit_reached_message">Google Maps supports a maximum of 27 stops per route. Further expansion is unfortunately not possible.</string>
     <string name="add_stop_suggest_maps_title">Possible in Google Maps</string>
     <string name="add_stop_suggest_maps_message">This route has fewer than 10 stops. You can also add more stops directly in Google Maps using the \"Add stop\" button.\n\nDo you still want this app to add the stop?</string>
     <string name="add_stop_yes">Yes, add it</string>
@@ -81,14 +81,17 @@
     <!-- License -->
     <string name="license_title">License Status</string>
     <string name="onboarding_title">How it works</string>
-    <string name="onboarding_step1">1. Plan your route in Google Maps.</string>
-    <string name="onboarding_step2">2. Tap the three dots (⋮) at the top right and select \"Share directions\".</string>
-    <string name="onboarding_step3">3. Choose \"Route: Add stop\" or \"Route: Sort\".</string>
+    <string name="onboarding_number1">1.</string>
+    <string name="onboarding_number2">2.</string>
+    <string name="onboarding_number3">3.</string>
+    <string name="onboarding_step1">Plan your route in Google Maps.</string>
+    <string name="onboarding_step2">Tap the three dots (⋮) at the top right and select \"Share directions\".</string>
+    <string name="onboarding_step3">Choose \"Route: Add stop\" or \"Route: Sort\".</string>
     <string name="onboarding_step3_hint">(Note: \"Add stop\" is primarily useful from the 10th stop onwards, as Google Maps allows up to 10 stops by default.)</string>
     <string name="onboarding_limit_hint">Note: With the free version, you can create and sort routes with up to 15 stops. From the 16th stop, the Pro version is required. Google Maps itself supports a maximum of 27 stops per route.</string>
 
     <string name="license_status_free">Free Version (Limit: 15 Stops per Route)</string>
-    <string name="license_status_pro">Pro Version (Unlimited Stops)</string>
+    <string name="license_status_pro">Pro Version (Up to 27 Stops per Route)</string>
     <string name="license_enter_key">Enter License Key</string>
     <string name="license_activate">Activate</string>
     <string name="license_key_hint">Enter your key</string>
@@ -96,7 +99,7 @@
     <string name="license_success">Pro Features activated! Thank you for your support.</string>
 
     <string name="upgrade_pro_title">Upgrade to Pro</string>
-    <string name="upgrade_pro_message">You have reached the free limit of 15 stops. Upgrade to Pro to add more stops and sort larger routes.\n\nBenefits:\n- Unlimited stops\n- Professional route optimization</string>
+    <string name="upgrade_pro_message">You have reached the free limit of 15 stops. Upgrade to Pro to add more stops and sort larger routes.\n\nBenefits:\n- Up to 27 stops per Route\n- Professional route optimization</string>
     <string name="upgrade_pro_button">Buy Pro License</string>
     <string name="upgrade_pro_checkout_button">Buy on Gumroad</string>
 
