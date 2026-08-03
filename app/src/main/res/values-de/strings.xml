@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Mehr Stopps für Maps</string>
+    <string name="app_name">Erweiterungen für Maps</string>
     <string name="total_stops_label">Anzahl Stopps: %d</string>
     <string name="plan_route_title">Route planen</string>
     <string name="open_in_google_maps">In Google Maps öffnen</string>
@@ -8,7 +8,7 @@
     <string name="thanks_title">Vielen Dank</string>
     <string name="close">Schließen</string>
     <string name="info_icon_desc">Informations-Icon</string>
-    <string name="accessibility_service_label">Routeoptimizer Automatisierung</string>
+    <string name="accessibility_service_label">Erweiterungen für Maps Automatisierung</string>
     <string name="accessibility_service_description">Erkennt automatisch, wenn Google Maps das Limit von 10 Stopps erreicht hat, und hilft dabei, die Route zu erweitern.</string>
     <string name="coffee_button">Kaffeekasse</string>
     <string name="permissions_title">Automatisierung einrichten</string>

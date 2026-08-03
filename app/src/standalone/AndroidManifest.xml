@@ -8,7 +8,7 @@
             android:icon="@drawable/ic_feature_add_stop"
             android:label="Route: Stopp hinzufügen"
             android:taskAffinity=".addstop"
-            android:theme="@style/Theme.RouteoptimizerForGoogleMaps.Transparent">
+            android:theme="@style/Theme.ExtensionsForMaps.Transparent">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -23,7 +23,7 @@
             android:icon="@drawable/ic_feature_sort"
             android:label="Route: Sortieren"
             android:taskAffinity=".sort"
-            android:theme="@style/Theme.RouteoptimizerForGoogleMaps.Transparent">
+            android:theme="@style/Theme.ExtensionsForMaps.Transparent">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />

@@ -8,4 +8,4 @@
     android:description="@string/accessibility_service_description"
     android:notificationTimeout="250"
     android:packageNames="com.google.android.apps.maps,com.android.intentresolver,android,com.google.android.googlequicksearchbox"
-    android:settingsActivity="de.KnollFrank.routeoptimizerforgooglemaps.MainActivity" />
+    android:settingsActivity="de.knollfrank.extensionsformaps.MainActivity" />

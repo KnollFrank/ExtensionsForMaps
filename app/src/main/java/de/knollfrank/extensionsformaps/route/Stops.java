@@ -1,0 +1,16 @@
+package de.knollfrank.extensionsformaps.route;
+
+import java.util.List;
+
+public class Stops {
+
+    private Stops() {
+    }
+
+    public static List<String> getAddresses(final List<Stop> stops) {
+        return stops
+                .stream()
+                .map(Stop::address)
+                .toList();
+    }
+}

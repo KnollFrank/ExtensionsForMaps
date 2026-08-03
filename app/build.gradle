@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace 'de.KnollFrank.routeoptimizerforgooglemaps'
+    namespace 'de.knollfrank.extensionsformaps'
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -15,7 +15,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "de.KnollFrank.routeoptimizerforgooglemaps"
+        applicationId "de.knollfrank.extensionsformaps"
         minSdk 26
         targetSdk 36
         versionCode 1
@@ -28,8 +28,8 @@ android {
     productFlavors {
         remoteControl {
             dimension "mode"
-            applicationIdSuffix ".remote"
-            versionNameSuffix "-remote"
+            applicationIdSuffix ".remotecontrol"
+            versionNameSuffix "-remotecontrol"
             buildConfigField "boolean", "SHOW_ACCESSIBILITY_SETTINGS", "true"
             buildConfigField "boolean", "FEATURE_ROUTE_PREVIEW_VISIBLE", "true"
         }
