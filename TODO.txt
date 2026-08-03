@@ -1,5 +1,4 @@
 FK-TODO: Routenoptimierung mit Hilfe von https://openrouteservice.org/ statt jsprit
-FK-TODO: Teile des UIs (Optimierung nach Zeit oder Entfernung, Rundreise) von https://www.mapquest.com/routeplanner/ umsetzen
 FK-TODO: Adresseingabefeld von Google Maps um Scanfunktion der Adresse erweitern
 FK-TODO: Fahrt-/Reiseoptionen (z.B. "keine Autobahn") von Google Maps berücksichtigen
          Das ist ein absolut kritischer Einwand für die Routenplanung! Wenn der Apotheken-Bote mit einem klapprigen 50ccm-Roller unterwegs ist oder absichtlich die verstopfte Stadtautobahn meiden möchte, wird deine jsprit-Optimierung komplett unbrauchbar, wenn sie ihn trotzdem über die Schnellstraße schickt.
