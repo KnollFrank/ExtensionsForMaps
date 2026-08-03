@@ -215,6 +215,15 @@
                     android:layout_marginTop="16dp"
                     android:text="@string/license_enter_key"
                     app:layout_constraintTop_toBottomOf="@id/tvLicenseStatus" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBuyLicense"
+                    style="?attr/materialButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/upgrade_pro_checkout_button"
+                    app:layout_constraintTop_toBottomOf="@id/btnActivateLicense" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 

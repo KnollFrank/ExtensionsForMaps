@@ -8,7 +8,7 @@ public class LicenseManagerProvider {
 
     public static LicenseManager getInstance(final Context context) {
         if (instance == null) {
-            instance = new LocalLicenseManager(context.getApplicationContext());
+            instance = new GumroadLicenseManager(context.getApplicationContext());
         }
         return instance;
     }

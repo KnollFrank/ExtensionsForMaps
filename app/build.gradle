@@ -74,6 +74,7 @@ dependencies {
     implementation libs.appcompat
     implementation libs.constraintlayout
     implementation libs.material
+    implementation libs.androidx.browser
 
     // Core App Dependencies
     implementation libs.recyclerview

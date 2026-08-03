@@ -33,14 +33,14 @@ public class LocalLicenseManagerTest {
 
     @Test
     public void testActivation_withWrongKey_fails() {
-        assertFalse(licenseManager.activate("WRONG-KEY"));
+        assertFalse(licenseManager.activate("WRONG-KEY").join());
         assertFalse(licenseManager.isPro());
     }
 
     @Test
     public void testActivation_withCorrectKey_succeeds() {
-        // The fixed key is "PRO-VERSION-KEY"
-        assertTrue(licenseManager.activate("PRO-VERSION-KEY"));
+        // The fixed key is "PRO"
+        assertTrue(licenseManager.activate("PRO").join());
         assertTrue(licenseManager.isPro());
     }
 }

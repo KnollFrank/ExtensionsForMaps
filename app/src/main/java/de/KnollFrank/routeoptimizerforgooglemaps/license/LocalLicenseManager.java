@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import java.util.concurrent.CompletableFuture;
+
 public class LocalLicenseManager implements LicenseManager {
 
     private static final String TAG = "LocalLicenseManager";
@@ -32,11 +34,16 @@ public class LocalLicenseManager implements LicenseManager {
     }
 
     @Override
-    public boolean activate(String licenseKey) {
+    public CompletableFuture<Boolean> activate(String licenseKey) {
         if (FIXED_LICENSE_KEY.equals(licenseKey)) {
             prefs.edit().putBoolean(KEY_IS_PRO, true).apply();
-            return true;
+            return CompletableFuture.completedFuture(true);
         }
-        return false;
+        return CompletableFuture.completedFuture(false);
+    }
+
+    @Override
+    public CompletableFuture<Void> verifyExistingLicense() {
+        return CompletableFuture.completedFuture(null);
     }
 }

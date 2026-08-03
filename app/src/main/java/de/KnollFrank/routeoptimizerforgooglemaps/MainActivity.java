@@ -37,6 +37,12 @@ public class MainActivity extends AppCompatActivity {
         configureCoffeeButton();
         configurePermissionButtons();
         configureLicenseUI();
+        verifyLicenseInBackground();
+    }
+
+    private void verifyLicenseInBackground() {
+        if (BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) return;
+        LicenseManagerProvider.getInstance(this).verifyExistingLicense().thenRun(this::updateLicenseUI);
     }
 
     @Override
@@ -120,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         findViewById(R.id.btnActivateLicense).setOnClickListener(v -> UpgradeDialog.showActivationDialog(this, this::updateLicenseUI));
+        findViewById(R.id.btnBuyLicense).setOnClickListener(v -> UpgradeDialog.openGumroadCheckout(this));
     }
 
     private void updateLicenseUI() {
@@ -131,8 +138,8 @@ public class MainActivity extends AppCompatActivity {
         TextView tvStatus = findViewById(R.id.tvLicenseStatus);
         tvStatus.setText(isPro ? R.string.license_status_pro : R.string.license_status_free);
 
-        Button btnActivate = findViewById(R.id.btnActivateLicense);
-        btnActivate.setVisibility(isPro ? View.GONE : View.VISIBLE);
+        findViewById(R.id.btnActivateLicense).setVisibility(isPro ? View.GONE : View.VISIBLE);
+        findViewById(R.id.btnBuyLicense).setVisibility(isPro ? View.GONE : View.VISIBLE);
     }
 
     // FK-TODO: refactor and move to another class
