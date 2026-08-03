@@ -80,7 +80,14 @@
 
     <!-- License -->
     <string name="license_title">License Status</string>
-    <string name="license_status_free">Free Version (Limit: 15 Stops)</string>
+    <string name="onboarding_title">How it works</string>
+    <string name="onboarding_step1">1. Plan your route in Google Maps.</string>
+    <string name="onboarding_step2">2. Tap the three dots (⋮) at the top right and select \"Share directions\".</string>
+    <string name="onboarding_step3">3. Choose \"Route: Add stop\" or \"Route: Sort\".</string>
+    <string name="onboarding_step3_hint">(Note: \"Add stop\" is primarily useful from the 10th stop onwards, as Google Maps allows up to 10 stops by default.)</string>
+    <string name="onboarding_limit_hint">Note: With the free version, you can create and sort routes with up to 15 stops. From the 16th stop, the Pro version is required. Google Maps itself supports a maximum of 27 stops per route.</string>
+
+    <string name="license_status_free">Free Version (Limit: 15 Stops per Route)</string>
     <string name="license_status_pro">Pro Version (Unlimited Stops)</string>
     <string name="license_enter_key">Enter License Key</string>
     <string name="license_activate">Activate</string>

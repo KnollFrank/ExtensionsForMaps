@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         configurePlanRoute();
+        configureOnboarding();
         configureCoffeeButton();
         configurePermissionButtons();
         configureLicenseUI();
@@ -75,6 +76,12 @@ public class MainActivity extends AppCompatActivity {
         this
                 .<Button>findViewById(R.id.btnGenerateTemplate)
                 .setOnClickListener(onBtnGenerateTemplateClick(sliderTotalStops, this));
+    }
+
+    private void configureOnboarding() {
+        if (!BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
+            findViewById(R.id.cardOnboarding).setVisibility(View.VISIBLE);
+        }
     }
 
     private void configureCoffeeButton() {

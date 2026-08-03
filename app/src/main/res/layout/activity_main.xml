@@ -14,12 +14,99 @@
         android:padding="16dp">
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardOnboarding"
+            style="?attr/materialCardViewFilledStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:cardCornerRadius="24dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:strokeWidth="0dp"
+            tools:visibility="visible">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="24dp">
+
+                <TextView
+                    android:id="@+id/tvOnboardingTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/onboarding_title"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                    android:textColor="?attr/colorOnSurface"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvStep1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/onboarding_step1"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvOnboardingTitle" />
+
+                <TextView
+                    android:id="@+id/tvStep2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/onboarding_step2"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvStep1" />
+
+                <TextView
+                    android:id="@+id/tvStep3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/onboarding_step3"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvStep2" />
+
+                <TextView
+                    android:id="@+id/tvStep3Hint"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:alpha="0.7"
+                    android:text="@string/onboarding_step3_hint"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvStep3" />
+
+                <TextView
+                    android:id="@+id/tvLimitHint"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="?attr/colorSurfaceVariant"
+                    android:padding="12dp"
+                    android:text="@string/onboarding_limit_hint"
+                    android:textAppearance="?attr/textAppearanceLabelMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvStep3Hint" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardPlanning"
             style="?attr/materialCardViewFilledStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             app:cardCornerRadius="24dp"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardOnboarding"
             app:strokeWidth="0dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
