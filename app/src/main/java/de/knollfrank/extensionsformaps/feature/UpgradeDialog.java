@@ -1,5 +1,6 @@
 package de.knollfrank.extensionsformaps.feature;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.view.LayoutInflater;
@@ -20,13 +21,24 @@ public class UpgradeDialog {
     private static final String GUMROAD_URL = "https://knollfrank.gumroad.com/l/yhszp";
 
     public static void show(Context context, Runnable onActivated) {
-        new MaterialAlertDialogBuilder(context)
-                .setTitle(R.string.upgrade_pro_title)
-                .setMessage(R.string.upgrade_pro_message)
-                .setPositiveButton(R.string.upgrade_pro_checkout_button, (dialog, which) -> openGumroadCheckout(context))
-                .setNeutralButton(R.string.license_enter_key, (dialog, which) -> showActivationDialog(context, onActivated))
-                .setNegativeButton(R.string.cancel, null)
-                .show();
+        final AlertDialog dialog =
+                new MaterialAlertDialogBuilder(context)
+                        .setTitle(R.string.upgrade_pro_title)
+                        .setMessage(R.string.upgrade_pro_message)
+                        .setPositiveButton(R.string.upgrade_pro_checkout_button, null) // Listener set later to prevent auto-dismiss
+                        .setNeutralButton(R.string.license_enter_key, (d, which) -> showActivationDialog(context, onActivated, () -> show(context, onActivated)))
+                        .setNegativeButton(R.string.cancel, (d, which) -> {
+                            if (context instanceof final Activity activity) {
+                                activity.finish();
+                            }
+                        })
+                        .setCancelable(false)
+                        .create();
+
+        dialog.show();
+
+        // Override positive button to prevent auto-dismiss when opening checkout
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> openGumroadCheckout(context));
     }
 
     public static void openGumroadCheckout(Context context) {
@@ -35,6 +47,10 @@ public class UpgradeDialog {
     }
 
     public static void showActivationDialog(Context context, Runnable onActivated) {
+        showActivationDialog(context, onActivated, null);
+    }
+
+    public static void showActivationDialog(Context context, Runnable onActivated, Runnable onCancel) {
         View view = LayoutInflater.from(context).inflate(R.layout.dialog_activate_license, null);
         EditText etKey = view.findViewById(R.id.etLicenseKey);
         View progressBar = view.findViewById(R.id.progressBar);
@@ -42,7 +58,13 @@ public class UpgradeDialog {
         AlertDialog dialog = new MaterialAlertDialogBuilder(context)
                 .setView(view)
                 .setPositiveButton(R.string.license_activate, null) // Set listener later to prevent auto-dismiss
-                .setNegativeButton(R.string.cancel, null)
+                .setNegativeButton(R.string.cancel, (d, which) -> {
+                    if (onCancel != null) {
+                        onCancel.run();
+                    } else if (context instanceof final Activity activity) {
+                        activity.finish();
+                    }
+                })
                 .create();
 
         dialog.show();

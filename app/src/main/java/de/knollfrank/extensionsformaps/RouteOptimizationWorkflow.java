@@ -133,15 +133,23 @@ public class RouteOptimizationWorkflow {
             public void onOptimizationSuccess(final Route optimizedRoute) {
                 progressOverlay.hide();
                 GoogleMapsNavigator.launchRouteOverview(optimizedRoute, context);
+                if (context instanceof final Activity activity) {
+                    activity.finish();
+                }
             }
 
             @Override
             public void onError(final String message) {
                 progressOverlay.hide();
                 runOnUiThread(
-                        () -> Toast
-                                .makeText(context, message, Toast.LENGTH_LONG)
-                                .show());
+                        () -> {
+                            Toast
+                                    .makeText(context, message, Toast.LENGTH_LONG)
+                                    .show();
+                            if (context instanceof final Activity activity) {
+                                activity.finish();
+                            }
+                        });
             }
 
             private void showRoutePreviewDialog(final Route route, final Context context) {
@@ -181,6 +189,9 @@ public class RouteOptimizationWorkflow {
                                             @Override
                                             public void onClick(final DialogInterface dialog, final int which) {
                                                 dialog.dismiss();
+                                                if (context instanceof final Activity activity) {
+                                                    activity.finish();
+                                                }
                                             }
                                         })
                                 .create();

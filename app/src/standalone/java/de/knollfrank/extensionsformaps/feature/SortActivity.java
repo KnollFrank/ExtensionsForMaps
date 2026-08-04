@@ -73,14 +73,4 @@ public class SortActivity extends AppCompatActivity {
         }
         return null;
     }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // Once the workflow launches Google Maps, this activity goes to background (onStop).
-        // We finish it then to keep the task list clean.
-        if (!isFinishing()) {
-            finish();
-        }
-    }
 }
