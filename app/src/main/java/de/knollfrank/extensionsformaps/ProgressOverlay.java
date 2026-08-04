@@ -19,6 +19,7 @@ public class ProgressOverlay {
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AlertDialog dialog;
     private TextView statusTextView;
+    private String currentStatus;
 
     public ProgressOverlay(final Context context) {
         this.context = context;
@@ -55,9 +56,19 @@ public class ProgressOverlay {
     }
 
     public void updateStatus(final String message) {
+        this.currentStatus = message;
         mainHandler.post(() -> {
             if (statusTextView != null) {
                 statusTextView.setText(message);
+            }
+        });
+    }
+
+    public void updateProgress(final int percentage) {
+        mainHandler.post(() -> {
+            if (statusTextView != null) {
+                final String text = (currentStatus != null ? currentStatus : "") + " " + percentage + "%";
+                statusTextView.setText(text);
             }
         });
     }

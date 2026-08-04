@@ -85,6 +85,10 @@ public class RouteOptimizationOrchestratorTest {
             }
 
             @Override
+            public void onOptimizationProgress(int progressPercentage) {
+            }
+
+            @Override
             public void onOptimizationSuccess(Route route) {
                 optimizedRoute.set(Optional.of(route));
                 optimizationLatch.countDown();

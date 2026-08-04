@@ -2,6 +2,7 @@ package de.knollfrank.extensionsformaps.optimize;
 
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
+import com.graphhopper.jsprit.core.algorithm.listener.IterationEndsListener;
 import com.graphhopper.jsprit.core.algorithm.state.StateManager;
 import com.graphhopper.jsprit.core.problem.Location;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
@@ -20,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -40,18 +42,42 @@ public class RouteOptimizer {
     }
 
     public Route optimize(final Route route, final OptimizationType optimizationType) throws Exception {
+        return optimize(route, optimizationType, null);
+    }
+
+    public Route optimize(final Route route,
+                          final OptimizationType optimizationType,
+                          final Consumer<Integer> progressListener) throws Exception {
         final List<Stop> allStops = new ArrayList<>(route.waypoints());
         if (optimizationType == OptimizationType.ANY_DESTINATION) {
             allStops.add(route.destination());
         }
 
         final Map<String, Stop> stopById = getStopById(allStops);
+        final VehicleRoutingAlgorithm algorithm = createVehicleRoutingAlgorithm(route, stopById, optimizationType);
+        if (progressListener != null) {
+            final int maxIterations = algorithm.getMaxIterations();
+            algorithm.addListener(
+                    new IterationEndsListener() {
+
+                        private int lastReportedProgress = -1;
+
+                        @Override
+                        public void informIterationEnds(final int i,
+                                                        final VehicleRoutingProblem problem,
+                                                        final Collection<VehicleRoutingProblemSolution> solutions) {
+                            int progress = (int) ((i / (float) maxIterations) * 100);
+                            if (progress != lastReportedProgress) {
+                                progressListener.accept(progress);
+                                lastReportedProgress = progress;
+                            }
+                        }
+                    });
+        }
+
         final VehicleRoutingProblemSolution bestSolution =
                 RouteOptimizer
-                        .getBestSolution(
-                                this
-                                        .createVehicleRoutingAlgorithm(route, stopById, optimizationType)
-                                        .searchSolutions())
+                        .getBestSolution(algorithm.searchSolutions())
                         .orElseThrow(() -> new IllegalStateException("No solution found"));
 
         final List<Stop> optimizedStops = getStops(bestSolution, stopById);

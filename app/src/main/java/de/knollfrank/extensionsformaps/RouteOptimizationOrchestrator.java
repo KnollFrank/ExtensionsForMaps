@@ -20,6 +20,8 @@ public class RouteOptimizationOrchestrator {
 
         void onOptimizationStarted();
 
+        void onOptimizationProgress(int progressPercentage);
+
         void onOptimizationSuccess(Route optimizedRoute);
 
         void onError(String message);
@@ -62,7 +64,8 @@ public class RouteOptimizationOrchestrator {
                 callback.onOptimizationSuccess(
                         routeOptimizer.optimize(
                                 route,
-                                SortConfig.getOptimizationType(context)));
+                                SortConfig.getOptimizationType(context),
+                                callback::onOptimizationProgress));
             } catch (final Exception e) {
                 final String msg = e.getMessage();
                 if (msg != null && msg.startsWith("UNASSIGNED_JOBS:")) {

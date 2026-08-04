@@ -130,6 +130,11 @@ public class RouteOptimizationWorkflow {
             }
 
             @Override
+            public void onOptimizationProgress(int progressPercentage) {
+                progressOverlay.updateProgress(progressPercentage);
+            }
+
+            @Override
             public void onOptimizationSuccess(final Route optimizedRoute) {
                 progressOverlay.hide();
                 GoogleMapsNavigator.launchRouteOverview(optimizedRoute, context);
