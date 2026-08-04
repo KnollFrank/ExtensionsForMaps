@@ -61,8 +61,6 @@ public class UpgradeDialog {
                 .setNegativeButton(R.string.cancel, (d, which) -> {
                     if (onCancel != null) {
                         onCancel.run();
-                    } else if (context instanceof final Activity activity) {
-                        activity.finish();
                     }
                 })
                 .create();
