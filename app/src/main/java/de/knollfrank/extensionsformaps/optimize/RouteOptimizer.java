@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import de.knollfrank.extensionsformaps.coordinate.Geodetic;
@@ -48,6 +49,13 @@ public class RouteOptimizer {
     public Route optimize(final Route route,
                           final OptimizationType optimizationType,
                           final Consumer<Integer> progressListener) throws Exception {
+        return optimize(route, optimizationType, progressListener, () -> false);
+    }
+
+    public Route optimize(final Route route,
+                          final OptimizationType optimizationType,
+                          final Consumer<Integer> progressListener,
+                          final Supplier<Boolean> isCanceled) throws Exception {
         final List<Stop> allStops = new ArrayList<>(route.waypoints());
         if (optimizationType == OptimizationType.ANY_DESTINATION) {
             allStops.add(route.destination());
@@ -55,6 +63,9 @@ public class RouteOptimizer {
 
         final Map<String, Stop> stopById = getStopById(allStops);
         final VehicleRoutingAlgorithm algorithm = createVehicleRoutingAlgorithm(route, stopById, optimizationType);
+
+        algorithm.addTerminationCriterion(discoveredSolution -> isCanceled.get());
+
         if (progressListener != null) {
             final int maxIterations = algorithm.getMaxIterations();
             algorithm.addListener(
@@ -79,6 +90,10 @@ public class RouteOptimizer {
                 RouteOptimizer
                         .getBestSolution(algorithm.searchSolutions())
                         .orElseThrow(() -> new IllegalStateException("No solution found"));
+
+        if (isCanceled.get()) {
+            throw new InterruptedException("Optimization canceled");
+        }
 
         final List<Stop> optimizedStops = getStops(bestSolution, stopById);
 

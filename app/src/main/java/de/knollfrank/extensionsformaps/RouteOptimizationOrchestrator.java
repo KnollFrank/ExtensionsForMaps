@@ -4,6 +4,7 @@ import android.content.Context;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizer;
 import de.knollfrank.extensionsformaps.route.DirectionsUrlPredicate;
@@ -30,6 +31,7 @@ public class RouteOptimizationOrchestrator {
     private final Context context;
     private final Callback callback;
     private final RouteOptimizer routeOptimizer;
+    private final AtomicBoolean isOptimizationCanceled = new AtomicBoolean(false);
 
     public RouteOptimizationOrchestrator(final Context context,
                                          final Callback callback,
@@ -58,6 +60,7 @@ public class RouteOptimizationOrchestrator {
 
     // FK-TODO: spezialisierten callback mit den Methoden onOptimizationStarted(), onOptimizationSuccess() und onError() direkt als Parameter übergeben oder als Continuation zurückgeben.
     public void optimizeRoute(final Route route) {
+        isOptimizationCanceled.set(false);
         callback.onOptimizationStarted();
         new Thread(() -> {
             try {
@@ -65,7 +68,10 @@ public class RouteOptimizationOrchestrator {
                         routeOptimizer.optimize(
                                 route,
                                 SortConfig.getOptimizationType(context),
-                                callback::onOptimizationProgress));
+                                callback::onOptimizationProgress,
+                                isOptimizationCanceled::get));
+            } catch (final InterruptedException e) {
+                // Optimization was canceled, no error message needed
             } catch (final Exception e) {
                 final String msg = e.getMessage();
                 if (msg != null && msg.startsWith("UNASSIGNED_JOBS:")) {
@@ -75,6 +81,10 @@ public class RouteOptimizationOrchestrator {
                 }
             }
         }).start();
+    }
+
+    public void cancelOptimization() {
+        isOptimizationCanceled.set(true);
     }
 
     private static URL expandShortDirectionsUrl(final URL directionsUrl) throws IOException {

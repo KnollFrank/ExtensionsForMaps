@@ -19,10 +19,16 @@ public class ProgressOverlay {
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AlertDialog dialog;
     private TextView statusTextView;
+    private com.google.android.material.progressindicator.LinearProgressIndicator progressBar;
     private String currentStatus;
+    private Runnable onCancelListener;
 
     public ProgressOverlay(final Context context) {
         this.context = context;
+    }
+
+    public void setOnCancelListener(Runnable onCancelListener) {
+        this.onCancelListener = onCancelListener;
     }
 
     public void show() {
@@ -34,11 +40,18 @@ public class ProgressOverlay {
             final ContextThemeWrapper themeContext = new ContextThemeWrapper(context, R.style.Theme_ExtensionsForMaps_Dialog);
             final View view = LayoutInflater.from(themeContext).inflate(R.layout.dialog_progress, null);
             statusTextView = view.findViewById(R.id.tvStatus);
+            progressBar = view.findViewById(R.id.progressBar);
 
-            dialog = new MaterialAlertDialogBuilder(themeContext)
-                    .setView(view)
-                    .setCancelable(false)
-                    .create();
+            MaterialAlertDialogBuilder builder =
+                    new MaterialAlertDialogBuilder(themeContext)
+                            .setView(view)
+                            .setCancelable(false);
+
+            if (onCancelListener != null) {
+                builder.setNegativeButton(R.string.cancel, (d, which) -> onCancelListener.run());
+            }
+
+            dialog = builder.create();
 
             if (dialog.getWindow() != null) {
                 Context baseContext = context;
@@ -69,6 +82,10 @@ public class ProgressOverlay {
             if (statusTextView != null) {
                 final String text = (currentStatus != null ? currentStatus : "") + " " + percentage + "%";
                 statusTextView.setText(text);
+            }
+            if (progressBar != null) {
+                progressBar.setIndeterminate(false);
+                progressBar.setProgress(percentage);
             }
         });
     }

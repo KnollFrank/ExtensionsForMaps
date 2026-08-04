@@ -48,6 +48,7 @@
     <!-- Progress & Status -->
     <string name="status_reading_route">Lese Route…</string>
     <string name="status_optimizing_route">Sortiere Route…</string>
+    <string name="status_sorting_canceled">Sortierung abgebrochen</string>
     <string name="route_preview_title">Routenvorschau</string>
 
     <!-- Errors -->

@@ -41,6 +41,15 @@ public class RouteOptimizationWorkflow {
                         context,
                         createCallback(context, progressOverlay),
                         routeOptimizer);
+        this.progressOverlay.setOnCancelListener(() -> {
+            routeOptimizationOrchestrator.cancelOptimization();
+            Toast
+                    .makeText(context, R.string.status_sorting_canceled, Toast.LENGTH_SHORT)
+                    .show();
+            if (context instanceof final Activity activity) {
+                activity.finish();
+            }
+        });
     }
 
     public void setShowOptimizationTypeDialog(boolean show) {
