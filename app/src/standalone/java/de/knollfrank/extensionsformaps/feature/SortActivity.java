@@ -42,7 +42,9 @@ public class SortActivity extends AppCompatActivity {
                 if (url != null) {
                     startOptimizationWorkflow(url);
                 } else {
-                    Toast.makeText(this, "Keine Google Maps Route gefunden.", Toast.LENGTH_LONG).show();
+                    Toast
+                            .makeText(this, "Keine Google Maps Route gefunden.", Toast.LENGTH_LONG)
+                            .show();
                     finish();
                 }
             } else {
@@ -54,7 +56,6 @@ public class SortActivity extends AppCompatActivity {
     }
 
     private void startOptimizationWorkflow(URL url) {
-        Toast.makeText(this, "Route wird geladen...", Toast.LENGTH_SHORT).show();
         RouteOptimizationWorkflow workflow = new RouteOptimizationWorkflow(RouteOptimizerFactory.createRouteOptimizer(this), this);
         workflow.setShowOptimizationTypeDialog(true);
         workflow.optimizeThenShowRoute(url);

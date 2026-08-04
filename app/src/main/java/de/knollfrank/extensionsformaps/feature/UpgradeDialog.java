@@ -80,30 +80,41 @@ public class UpgradeDialog {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
             etKey.setEnabled(false);
 
-            LicenseManagerProvider.getInstance(context).activate(key).thenAccept(success -> {
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).post(() -> {
-                    if (success) {
-                        Toast.makeText(context, R.string.license_success, Toast.LENGTH_LONG).show();
-                        dialog.dismiss();
-                        if (onActivated != null) {
-                            onActivated.run();
-                        }
-                    } else {
-                        progressBar.setVisibility(View.GONE);
-                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-                        etKey.setEnabled(true);
-                        etKey.setError(context.getString(R.string.license_error_invalid));
-                    }
-                });
-            }).exceptionally(throwable -> {
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).post(() -> {
-                    progressBar.setVisibility(View.GONE);
-                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-                    etKey.setEnabled(true);
-                    Toast.makeText(context, "Error: " + throwable.getMessage(), Toast.LENGTH_LONG).show();
-                });
-                return null;
-            });
+            LicenseManagerProvider
+                    .getInstance(context)
+                    .activate(key)
+                    .thenAccept(success ->
+                            dialog
+                                    .getButton(AlertDialog.BUTTON_POSITIVE)
+                                    .post(() -> {
+                                        if (success) {
+                                            Toast
+                                                    .makeText(context, R.string.license_success, Toast.LENGTH_LONG)
+                                                    .show();
+                                            dialog.dismiss();
+                                            if (onActivated != null) {
+                                                onActivated.run();
+                                            }
+                                        } else {
+                                            progressBar.setVisibility(View.GONE);
+                                            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                                            etKey.setEnabled(true);
+                                            etKey.setError(context.getString(R.string.license_error_invalid));
+                                        }
+                                    }))
+                    .exceptionally(throwable -> {
+                        dialog
+                                .getButton(AlertDialog.BUTTON_POSITIVE)
+                                .post(() -> {
+                                    progressBar.setVisibility(View.GONE);
+                                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                                    etKey.setEnabled(true);
+                                    Toast
+                                            .makeText(context, "Error: " + throwable.getMessage(), Toast.LENGTH_LONG)
+                                            .show();
+                                });
+                        return null;
+                    });
         });
     }
 }

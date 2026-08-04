@@ -52,7 +52,9 @@ public class AddStopActivity extends AppCompatActivity {
                 if (url != null) {
                     processUrl(url);
                 } else {
-                    Toast.makeText(this, "Keine Google Maps Route gefunden.", Toast.LENGTH_LONG).show();
+                    Toast
+                            .makeText(this, "Keine Google Maps Route gefunden.", Toast.LENGTH_LONG)
+                            .show();
                     finish();
                 }
             } else {
@@ -75,7 +77,9 @@ public class AddStopActivity extends AppCompatActivity {
         }).thenAccept(route -> runOnUiThread(() -> handleRoute(route))).exceptionally(throwable -> {
             Log.e(TAG, "Error processing route", throwable);
             runOnUiThread(() -> {
-                Toast.makeText(this, R.string.error_processing_route, Toast.LENGTH_LONG).show();
+                Toast
+                        .makeText(this, R.string.error_processing_route, Toast.LENGTH_LONG)
+                        .show();
                 finish();
             });
             return null;
@@ -119,7 +123,6 @@ public class AddStopActivity extends AppCompatActivity {
     }
 
     private void addStopAndFinish(Route route) {
-        Toast.makeText(this, "Stopp wird vorbereitet...", Toast.LENGTH_SHORT).show();
         CompletableFuture.supplyAsync(() -> RouteToUrlConverter.getUrl(Routes.addDummyStop(route)))
                 .thenAccept(expandedUrl -> runOnUiThread(() -> {
                     if (SortConfig.shouldShowAddStopInstruction(this)) {
@@ -132,7 +135,9 @@ public class AddStopActivity extends AppCompatActivity {
                 .exceptionally(throwable -> {
                     Log.e(TAG, "Error adding stop", throwable);
                     runOnUiThread(() -> {
-                        Toast.makeText(this, R.string.error_processing_route, Toast.LENGTH_LONG).show();
+                        Toast
+                                .makeText(this, R.string.error_processing_route, Toast.LENGTH_LONG)
+                                .show();
                         finish();
                     });
                     return null;
