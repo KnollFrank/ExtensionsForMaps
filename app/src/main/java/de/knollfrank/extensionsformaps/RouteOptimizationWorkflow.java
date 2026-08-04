@@ -1,5 +1,6 @@
 package de.knollfrank.extensionsformaps;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.location.Geocoder;
@@ -95,18 +96,19 @@ public class RouteOptimizationWorkflow {
                         .setSingleChoiceItems(options, checkedItem, (dialog, which) -> {
                             selectedType[0] = (which == 0) ? OptimizationType.FIXED_DESTINATION : OptimizationType.ANY_DESTINATION;
                         })
+                        .setCancelable(false)
                         .setPositiveButton(R.string.ok, (dialog, which) -> {
                             SortConfig.setOptimizationType(context, selectedType[0]);
                             proceedWithRoute(route, context);
                         })
                         .setNegativeButton(R.string.cancel, (dialog, which) -> {
-                            if (context instanceof android.app.Activity) {
-                                ((android.app.Activity) context).finish();
+                            if (context instanceof final Activity activity) {
+                                activity.finish();
                             }
                         })
                         .setOnCancelListener(dialog -> {
-                            if (context instanceof android.app.Activity) {
-                                ((android.app.Activity) context).finish();
+                            if (context instanceof final Activity activity) {
+                                activity.finish();
                             }
                         })
                         .show();
