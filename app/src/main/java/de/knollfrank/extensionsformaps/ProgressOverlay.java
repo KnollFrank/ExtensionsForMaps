@@ -19,8 +19,8 @@ public class ProgressOverlay {
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AlertDialog dialog;
     private TextView statusTextView;
+    private TextView percentageTextView;
     private com.google.android.material.progressindicator.LinearProgressIndicator progressBar;
-    private String currentStatus;
     private Runnable onCancelListener;
 
     public ProgressOverlay(final Context context) {
@@ -40,6 +40,7 @@ public class ProgressOverlay {
             final ContextThemeWrapper themeContext = new ContextThemeWrapper(context, R.style.Theme_ExtensionsForMaps_Dialog);
             final View view = LayoutInflater.from(themeContext).inflate(R.layout.dialog_progress, null);
             statusTextView = view.findViewById(R.id.tvStatus);
+            percentageTextView = view.findViewById(R.id.tvPercentage);
             progressBar = view.findViewById(R.id.progressBar);
 
             MaterialAlertDialogBuilder builder =
@@ -69,7 +70,6 @@ public class ProgressOverlay {
     }
 
     public void updateStatus(final String message) {
-        this.currentStatus = message;
         mainHandler.post(() -> {
             if (statusTextView != null) {
                 statusTextView.setText(message);
@@ -79,9 +79,8 @@ public class ProgressOverlay {
 
     public void updateProgress(final int percentage) {
         mainHandler.post(() -> {
-            if (statusTextView != null) {
-                final String text = (currentStatus != null ? currentStatus : "") + " " + percentage + "%";
-                statusTextView.setText(text);
+            if (percentageTextView != null) {
+                percentageTextView.setText(percentage + "%");
             }
             if (progressBar != null) {
                 progressBar.setIndeterminate(false);
