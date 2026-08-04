@@ -17,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.knollfrank.extensionsformaps.GoogleMapsNavigator;
+import de.knollfrank.extensionsformaps.ProgressOverlay;
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.SortConfig;
 import de.knollfrank.extensionsformaps.UrlExpander;
@@ -29,10 +30,12 @@ import de.knollfrank.extensionsformaps.route.Routes;
 public class AddStopActivity extends AppCompatActivity {
 
     private static final String TAG = AddStopActivity.class.getSimpleName();
+    private ProgressOverlay progressOverlay;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        progressOverlay = new ProgressOverlay(this);
         handleIntent(getIntent());
     }
 
@@ -66,24 +69,35 @@ public class AddStopActivity extends AppCompatActivity {
     }
 
     private void processUrl(URL url) {
-        Toast.makeText(this, "Route wird geladen...", Toast.LENGTH_SHORT).show();
-        CompletableFuture.supplyAsync(() -> {
-            try {
-                URL expandedUrl = UrlExpander.expandUrl(url);
-                return GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(expandedUrl);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }).thenAccept(route -> runOnUiThread(() -> handleRoute(route))).exceptionally(throwable -> {
-            Log.e(TAG, "Error processing route", throwable);
-            runOnUiThread(() -> {
-                Toast
-                        .makeText(this, R.string.error_processing_route, Toast.LENGTH_LONG)
-                        .show();
-                finish();
-            });
-            return null;
-        });
+        progressOverlay.show();
+        progressOverlay.updateStatus(getString(R.string.status_reading_route));
+        CompletableFuture
+                .supplyAsync(
+                        () -> {
+                            try {
+                                URL expandedUrl = UrlExpander.expandUrl(url);
+                                return GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(expandedUrl);
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                .thenAccept(
+                        route -> runOnUiThread(() -> {
+                            progressOverlay.hide();
+                            handleRoute(route);
+                        }))
+                .exceptionally(
+                        throwable -> {
+                            Log.e(TAG, "Error processing route", throwable);
+                            runOnUiThread(() -> {
+                                progressOverlay.hide();
+                                Toast
+                                        .makeText(this, R.string.error_processing_route, Toast.LENGTH_LONG)
+                                        .show();
+                                finish();
+                            });
+                            return null;
+                        });
     }
 
     private void handleRoute(Route route) {
