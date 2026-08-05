@@ -133,6 +133,7 @@ public class AddStopActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.add_stop_yes, (dialog, which) -> addStopAndFinish(route))
                 .setNegativeButton(R.string.cancel, (dialog, which) -> finish())
                 .setOnCancelListener(dialog -> finish())
+                .setCancelable(false)
                 .show();
     }
 

@@ -37,7 +37,7 @@
     <string name="add_stop_limit_reached_title">Limit reached</string>
     <string name="add_stop_limit_reached_message">Google Maps supports a maximum of 27 stops per route. Further expansion is unfortunately not possible.</string>
     <string name="add_stop_suggest_maps_title">Possible in Google Maps</string>
-    <string name="add_stop_suggest_maps_message">This route has fewer than 10 stops. You can also add more stops directly in Google Maps using the \"Add stop\" button.\n\nDo you still want this app to add the stop?</string>
+    <string name="add_stop_suggest_maps_message">This route has fewer than 10 stops. You can also add more stops directly in Google Maps. Do you still want this app to add the stop?</string>
     <string name="add_stop_yes">Yes, add it</string>
 
     <string name="settings_section_optimization_type">Optimization Type</string>
