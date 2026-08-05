@@ -16,6 +16,10 @@
     <string name="permit_accessibility_done">Service enabled ✓</string>
     <string name="permit_done">✓ Enabled</string>
     <string name="error_processing_route">An error occurred while processing the route.</string>
+    <string name="error_no_route_found">No Google Maps route found.</string>
+    <string name="error_with_message">Error: %s</string>
+    <string name="percentage_format">%d%%</string>
+    <string name="address_with_suburb_format">%1$s (%2$s)</string>
     <string name="sort_button_label">↕️ Sort</string>
     <string name="settings_title">Settings</string>
     <string name="settings_section_general">General</string>
@@ -81,6 +85,8 @@
 
     <!-- License -->
     <string name="license_title">License Status</string>
+    <string name="min_stops">11</string>
+    <string name="max_stops">27</string>
     <string name="onboarding_title">How it works</string>
     <string name="onboarding_number1">1.</string>
     <string name="onboarding_number2">2.</string>

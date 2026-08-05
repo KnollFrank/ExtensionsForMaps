@@ -13,6 +13,7 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.RouteOptimizationWorkflow;
 import de.knollfrank.extensionsformaps.route.RouteOptimizerFactory;
 
@@ -43,7 +44,7 @@ public class SortActivity extends AppCompatActivity {
                     startOptimizationWorkflow(url);
                 } else {
                     Toast
-                            .makeText(this, "Keine Google Maps Route gefunden.", Toast.LENGTH_LONG)
+                            .makeText(this, R.string.error_no_route_found, Toast.LENGTH_LONG)
                             .show();
                     finish();
                 }

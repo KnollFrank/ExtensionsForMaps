@@ -56,7 +56,7 @@ public class AddStopActivity extends AppCompatActivity {
                     processUrl(url);
                 } else {
                     Toast
-                            .makeText(this, "Keine Google Maps Route gefunden.", Toast.LENGTH_LONG)
+                            .makeText(this, R.string.error_no_route_found, Toast.LENGTH_LONG)
                             .show();
                     finish();
                 }

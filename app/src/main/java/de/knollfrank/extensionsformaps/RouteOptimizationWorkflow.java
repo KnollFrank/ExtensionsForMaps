@@ -233,7 +233,8 @@ public class RouteOptimizationWorkflow {
                                 new NativeSuburbResolver(
                                         new Geocoder(
                                                 context,
-                                                Locale.getDefault())));
+                                                Locale.getDefault())),
+                                context);
                 return suburbsToAddressesAdder.addSuburbsToAddresses(route);
             }
         };

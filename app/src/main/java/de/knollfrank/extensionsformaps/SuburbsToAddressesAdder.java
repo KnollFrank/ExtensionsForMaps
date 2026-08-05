@@ -1,5 +1,7 @@
 package de.knollfrank.extensionsformaps;
 
+import android.content.Context;
+
 import java.util.List;
 
 import de.knollfrank.extensionsformaps.optimize.NativeSuburbResolver;
@@ -9,9 +11,11 @@ import de.knollfrank.extensionsformaps.route.Stop;
 class SuburbsToAddressesAdder {
 
     private final NativeSuburbResolver nativeSuburbResolver;
+    private final Context context;
 
-    public SuburbsToAddressesAdder(final NativeSuburbResolver nativeSuburbResolver) {
+    public SuburbsToAddressesAdder(final NativeSuburbResolver nativeSuburbResolver, final Context context) {
         this.nativeSuburbResolver = nativeSuburbResolver;
+        this.context = context;
     }
 
 
@@ -36,7 +40,7 @@ class SuburbsToAddressesAdder {
                 .orElse(stop);
     }
 
-    private static Stop addSuburbToAddress(final Stop stop, final String suburb) {
+    private Stop addSuburbToAddress(final Stop stop, final String suburb) {
         return new Stop(
                 stop.id(),
                 addSuburbToAddress(stop.address(), suburb),
@@ -45,7 +49,7 @@ class SuburbsToAddressesAdder {
                 stop.deliveryGroup());
     }
 
-    private static String addSuburbToAddress(final String address, final String suburb) {
-        return address + " (" + suburb + ")";
+    private String addSuburbToAddress(final String address, final String suburb) {
+        return context.getString(R.string.address_with_suburb_format, address, suburb);
     }
 }

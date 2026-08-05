@@ -108,7 +108,7 @@ public class UpgradeDialog {
                                     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
                                     etKey.setEnabled(true);
                                     Toast
-                                            .makeText(context, "Error: " + throwable.getMessage(), Toast.LENGTH_LONG)
+                                            .makeText(context, context.getString(R.string.error_with_message, throwable.getMessage()), Toast.LENGTH_LONG)
                                             .show();
                                 });
                         return null;

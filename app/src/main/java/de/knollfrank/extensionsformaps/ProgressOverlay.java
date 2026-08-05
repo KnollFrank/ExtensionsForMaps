@@ -80,7 +80,7 @@ public class ProgressOverlay {
     public void updateProgress(final int percentage) {
         mainHandler.post(() -> {
             if (percentageTextView != null) {
-                percentageTextView.setText(percentage + "%");
+                percentageTextView.setText(context.getString(R.string.percentage_format, percentage));
             }
             if (progressBar != null) {
                 progressBar.setIndeterminate(false);
