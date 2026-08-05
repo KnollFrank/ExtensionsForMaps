@@ -109,7 +109,7 @@
     <string name="license_success">Pro-Features aktiviert! Vielen Dank für deine Unterstützung.</string>
 
     <string name="upgrade_pro_title">Upgrade auf Pro</string>
-    <string name="upgrade_pro_message">Du hast das kostenlose Limit von 15 Stopps erreicht. Hole dir die Pro-Version, um mehr Stopps hinzuzufügen und größere Routen zu sortieren.\n\nVorteile:\n- Bis zu 27 Stopps pro Route\n- Professionelle Routensortierung</string>
+    <string name="upgrade_pro_message">Du hast das kostenlose Limit von 15 Stopps erreicht. Hole dir die Pro-Version, um mehr Stopps hinzuzufügen und Routen mit bis zu 27 Stopps zu sortieren.</string>
     <string name="upgrade_pro_button">Pro-Lizenz kaufen</string>
     <string name="upgrade_pro_checkout_button">Auf Gumroad kaufen</string>
 

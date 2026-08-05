@@ -108,7 +108,7 @@
     <string name="license_success">Pro Features activated! Thank you for your support.</string>
 
     <string name="upgrade_pro_title">Upgrade to Pro</string>
-    <string name="upgrade_pro_message">You have reached the free limit of 15 stops. Upgrade to Pro to add more stops and sort larger routes.\n\nBenefits:\n- Up to 27 stops per Route\n- Professional route sorting</string>
+    <string name="upgrade_pro_message">You have reached the free limit of 15 stops. Upgrade to Pro to add more stops and sort routes with up to 27 stops.</string>
     <string name="upgrade_pro_button">Buy Pro License</string>
     <string name="upgrade_pro_checkout_button">Buy on Gumroad</string>
 
