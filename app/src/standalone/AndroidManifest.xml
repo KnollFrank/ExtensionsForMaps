@@ -6,7 +6,7 @@
             android:exported="true"
             android:excludeFromRecents="true"
             android:icon="@drawable/ic_feature_add_stop"
-            android:label="Route: Stopp hinzufügen"
+            android:label="@string/label_add_stop"
             android:taskAffinity=".addstop"
             android:theme="@style/Theme.ExtensionsForMaps.Transparent">
             <intent-filter>
@@ -21,7 +21,7 @@
             android:exported="true"
             android:excludeFromRecents="true"
             android:icon="@drawable/ic_feature_sort"
-            android:label="Route: Sortieren"
+            android:label="@string/label_sort"
             android:taskAffinity=".sort"
             android:theme="@style/Theme.ExtensionsForMaps.Transparent">
             <intent-filter>

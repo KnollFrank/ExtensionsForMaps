@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Extensions for Maps</string>
+    <string name="label_add_stop">Route: Add stop</string>
+    <string name="label_sort">Route: Sort</string>
     <string name="total_stops_label">Number of stops: %d</string>
     <string name="plan_route_title">Route Planning</string>
     <string name="open_in_google_maps">Open in Google Maps</string>
