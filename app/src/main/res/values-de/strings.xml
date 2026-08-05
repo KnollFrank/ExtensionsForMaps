@@ -72,7 +72,7 @@
     <string name="api_key_description">Um die Route über das Straßennetz zu sortieren, wird ein API Key von OpenRouteService benötigt. Diesen können Sie hier beantragen:</string>
     <string name="api_key_hint">API Key eingeben</string>
     <string name="api_key_save">Prüfen &amp; Speichern</string>
-    <string name="api_key_error_empty">Bitte gib einen API Key ein</string>
+    <string name="api_key_error_empty">Bitte geben Sie einen API Key ein</string>
     <string name="api_key_error_invalid">API Key ungültig oder Netzwerkfehler: %s</string>
     <string name="api_key_success">API Key erfolgreich gespeichert!</string>
 
@@ -106,10 +106,10 @@
     <string name="license_activate">Aktivieren</string>
     <string name="license_key_hint">Schlüssel hier eingeben</string>
     <string name="license_error_invalid">Ungültiger Lizenzschlüssel.</string>
-    <string name="license_success">Pro-Features aktiviert! Vielen Dank für deine Unterstützung.</string>
+    <string name="license_success">Pro-Features aktiviert! Vielen Dank für Ihre Unterstützung.</string>
 
     <string name="upgrade_pro_title">Upgrade auf Pro</string>
-    <string name="upgrade_pro_message">Du hast das kostenlose Limit von 15 Stopps erreicht. Hole dir die Pro-Version, um mehr Stopps hinzuzufügen und Routen mit bis zu 27 Stopps zu sortieren.</string>
+    <string name="upgrade_pro_message">Sie haben das kostenlose Limit von 15 Stopps erreicht. Holen Sie sich die Pro-Version, um mehr Stopps hinzuzufügen und Routen mit bis zu 27 Stopps zu sortieren.</string>
     <string name="upgrade_pro_button">Pro-Lizenz kaufen</string>
     <string name="upgrade_pro_checkout_button">Auf Gumroad kaufen</string>
 
