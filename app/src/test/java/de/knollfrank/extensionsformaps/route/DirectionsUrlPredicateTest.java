@@ -19,14 +19,14 @@ public class DirectionsUrlPredicateTest {
     }
 
     @Test
-    public void testIsDirectionsUrl_withLegacyUrl_returnsFalse() throws MalformedURLException {
-        assertFalse(DirectionsUrlPredicate.isDirectionsUrl(new URL("http://maps.google.com/maps?saddr=A&daddr=B")));
+    public void testIsDirectionsUrl_withLegacyUrl_returnsTrue() throws MalformedURLException {
+        assertTrue(DirectionsUrlPredicate.isDirectionsUrl(new URL("http://maps.google.com/maps?saddr=A&daddr=B")));
     }
 
     @Test
-    public void testIsShortDirectionsUrl_withLegacyUrl_returnsTrue() throws MalformedURLException {
-        assertTrue(DirectionsUrlPredicate.isShortDirectionsUrl(new URL("http://maps.google.com/maps?saddr=Frauenplan%2021&daddr=discovAIR")));
-        assertTrue(DirectionsUrlPredicate.isShortDirectionsUrl(new URL("https://maps.google.de/maps?saddr=Berlin&daddr=Hamburg")));
+    public void testIsShortDirectionsUrl_withLegacyUrl_returnsFalse() throws MalformedURLException {
+        assertFalse(DirectionsUrlPredicate.isShortDirectionsUrl(new URL("http://maps.google.com/maps?saddr=Frauenplan%2021&daddr=discovAIR")));
+        assertFalse(DirectionsUrlPredicate.isShortDirectionsUrl(new URL("https://maps.google.de/maps?saddr=Berlin&daddr=Hamburg")));
     }
 
     @Test

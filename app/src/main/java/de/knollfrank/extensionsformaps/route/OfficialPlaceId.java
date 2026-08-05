@@ -46,7 +46,11 @@ public class OfficialPlaceId {
     private static final String GHIJ_PREFIX = "GhIJ";
 
     private static boolean isOfficialPlaceId(final String value) {
-        return value.length() == 27 && (value.startsWith(CHIJ_PREFIX) || value.startsWith(GHIJ_PREFIX));
+        // Support both: 
+        // 1. Classic Google Place IDs (27 chars, ChIJ/GhIJ prefix)
+        // 2. Legacy Undocumented IDs (hex-hex format)
+        return (value.length() == 27 && (value.startsWith(CHIJ_PREFIX) || value.startsWith(GHIJ_PREFIX))) ||
+                value.contains(":");
     }
 
     private static String withoutPrefix(final String value) {

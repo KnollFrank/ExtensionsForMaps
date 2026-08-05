@@ -120,14 +120,40 @@ public class GoogleMapsRouteExtractorTest {
     }
 
     @Test
-    public void testExtractRouteFromDirectionsUrl_TooFewStops() throws MalformedURLException {
+    public void testExtractRouteFromDirectionsUrl_LegacyFormat_withGeocode() throws MalformedURLException {
         // Given
-        final URL urlSingleStop = new URL("https://www.google.com/maps/dir/Unterhausen,+72805+Lichtenstein/@48.4734594,8.9303614,31130m/data=!3m1!1e3!4m7!4m6!1m5!1m1!1s0x4799f35ec85b80b1:0xe432d2a55bc3cd11!2m2!1d9.2546378!2d48.4306284!5m1!1e1?entry=ttu&g_ep=EgoyMDI2MDYyNC4wIKXMDSoASAFQAw%3D%3D");
+        final URL url = new URL("https://maps.google.com/maps?saddr=Frauenplan%2021&daddr=Villa%20Kleine%20Wartburg&geocode=FWLDCQMdNoKdACmVpzMsfpykRzE_k6QqgElC-Q%3D%3D;FaeECQMd-4CdAClJ16-GepykRzH-y5yqgElC-Q%3D%3D");
 
-        // When & Then
-        assertThrows(
+        // When
+        final Route route = GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(url);
+
+        // Then
+        {
+            final Stop origin = route.origin();
+            assertEquals("Frauenplan 21", origin.address());
+            assertEquals(
+                    Geodetic.fromLatitudeLongitude(
+                            new Angle(50.971490, DEGREES),
+                            new Angle(10.322486, DEGREES)),
+                    origin.geodetic());
+            assertEquals(
+                    Optional.of(new OfficialPlaceId("ChIJlaczLH6cpEcRP5OkKoBJQvk")),
+                    origin.officialPlaceId());
+        }
+    }
+
+    @Test
+    public void testExtractRouteFromDirectionsUrl_LegacyFormat_failsIfNoCoordinates() throws MalformedURLException {
+        // Given: A legacy URL that has not been expanded yet (no coordinates in !data or path)
+        final URL url = new URL("http://maps.google.com/maps?saddr=Frauenplan%2021&daddr=Villa%20Kleine%20Wartburg%20to:Lutherhaus%20Eisenach");
+
+        // When & Then: Extraction should fail because legacy format does not contain coordinates in plain text
+        final IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(urlSingleStop));
+                () -> GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(url));
+
+        assertTrue(exception.getMessage().contains("Missing latitude for stop 0"));
+        assertTrue(exception.getMessage().contains("Link expansion might have failed"));
     }
 
     private static Route route_CentralApotheke_Hamburg_Unterhausen() {

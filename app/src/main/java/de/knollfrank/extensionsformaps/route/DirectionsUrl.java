@@ -4,6 +4,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
+import de.knollfrank.extensionsformaps.common.URLs;
+
 class DirectionsUrl {
 
     private final URL url;
@@ -23,6 +25,20 @@ class DirectionsUrl {
     }
 
     public Optional<List<String>> getTokensFromDataPart() {
-        return TokenProvider.getTokensFromDataPart(url);
+        if (DirectionsUrlPredicate.isModernDirectionsUrl(url)) {
+            return TokenProvider.getTokensFromDataPart(url);
+        }
+        return Optional.empty();
+    }
+
+    public Optional<List<String>> getGeocodeTokens() {
+        final String query = url.getQuery();
+        if (query == null) {
+            return Optional.empty();
+        }
+        final String geocode = URLs.parseQuery(query).get("geocode");
+        return geocode != null ?
+                Optional.of(List.of(URLs.decode(geocode).split(";"))) :
+                Optional.empty();
     }
 }

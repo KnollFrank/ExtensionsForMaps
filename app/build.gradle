@@ -88,6 +88,7 @@ dependencies {
     implementation libs.retrofit.converter.gson
     implementation libs.gson
     implementation libs.guava
+    implementation libs.protobuf.javalite
 
     testImplementation libs.junit
     testImplementation libs.mockwebserver

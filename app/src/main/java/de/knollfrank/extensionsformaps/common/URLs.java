@@ -6,11 +6,27 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class URLs {
 
     private URLs() {
+    }
+
+    public static Map<String, String> parseQuery(final String query) {
+        final Map<String, String> params = new HashMap<>();
+        if (query == null) {
+            return params;
+        }
+        for (final String param : query.split("&")) {
+            final String[] entry = param.split("=");
+            if (entry.length > 1) {
+                params.put(entry[0], entry[1]);
+            }
+        }
+        return params;
     }
 
     public static URL createUrl(final String url) {

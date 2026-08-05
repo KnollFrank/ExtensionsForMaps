@@ -6,21 +6,24 @@ import java.util.List;
 public class DirectionsUrlPredicate {
 
     public static boolean isDirectionsUrl(final URL url) {
+        return isModernDirectionsUrl(url) || isLegacyDirectionsUrl(url);
+    }
+
+    public static boolean isModernDirectionsUrl(final URL url) {
         return List.of("http", "https").contains(url.getProtocol()) &&
                 url.getHost().contains("google") &&
                 url.getPath().startsWith("/maps/dir/");
     }
 
     public static boolean isShortDirectionsUrl(final URL url) {
-        return isShortDirectionsUrlNewType(url) ||
-                isShortDirectionsUrlOldType(url) ||
-                isLegacyDirectionsUrl(url);
+        return isShortDirectionsUrlNewType(url) || isShortDirectionsUrlOldType(url);
     }
 
-    private static boolean isLegacyDirectionsUrl(final URL url) {
+    public static boolean isLegacyDirectionsUrl(final URL url) {
         final String query = url.getQuery();
-        return url.getHost().contains("google") &&
-                "/maps".equals(url.getPath()) &&
+        final String path = url.getPath();
+        return url.getHost().toLowerCase().contains("google") &&
+                (path.contains("/maps")) &&
                 query != null &&
                 (query.contains("saddr=") || query.contains("daddr="));
     }

@@ -19,6 +19,7 @@ mockito = "5.23.0"
 rules = "1.7.0"
 uiautomator = "2.3.0"
 browser = "1.8.0"
+protobuf = "3.25.1"
 
 [libraries]
 core = { module = "androidx.test:core", version.ref = "rules" }
@@ -43,6 +44,7 @@ robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectr
 rules = { module = "androidx.test:rules", version.ref = "rules" }
 uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
+protobuf-javalite = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protobuf" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

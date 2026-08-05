@@ -3,7 +3,6 @@ package de.knollfrank.extensionsformaps.route;
 import static de.knollfrank.extensionsformaps.coordinate.Unit.DEGREES;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.coordinate.Angle;
@@ -38,10 +37,11 @@ class StopDataConverter {
             final StopData stopData) {
         return new IllegalArgumentException(
                 String.format(
-                        Locale.ROOT,
-                        "Missing %s for stop %s ('%s').",
+                        java.util.Locale.ROOT,
+                        "Missing %s for stop %s ('%s'). Link expansion might have failed.",
                         missingValue,
                         stopData.id,
                         stopData.address));
     }
+
 }
