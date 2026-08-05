@@ -22,6 +22,7 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField "boolean", "SHOW_PLANNING_CARD", "false"
     }
 
     flavorDimensions = ["mode"]
@@ -47,6 +48,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField "boolean", "SHOW_PLANNING_CARD", "true"
+        }
         release {
             optimization {
                 enable false
