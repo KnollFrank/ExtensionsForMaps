@@ -42,13 +42,13 @@
     <string name="add_stop_suggest_maps_message">This route has fewer than 10 stops. You can also add more stops directly in Google Maps. Do you still want this app to add the stop?</string>
     <string name="add_stop_yes">Yes, add it</string>
 
-    <string name="settings_section_optimization_type">Optimization Type</string>
+    <string name="settings_section_optimization_type">Sort Type</string>
     <string name="settings_type_fixed_destination">Lock last destination</string>
     <string name="settings_type_fixed_destination_desc">The origin and destination remain unchanged.</string>
     <string name="settings_type_any_destination">End anywhere</string>
     <string name="settings_type_any_destination_desc">The destination is flexible for a shorter route.</string>
 
-    <string name="sort_dialog_title">Select Optimization Type</string>
+    <string name="sort_dialog_title">Select Sort Type</string>
 
     <!-- Progress & Status -->
     <string name="status_reading_route">Reading route…</string>
@@ -59,7 +59,7 @@
     <!-- Errors -->
     <string name="error_network">Network error: %s</string>
     <string name="error_general">Error: %s</string>
-    <string name="error_optimization">Optimization error: %s</string>
+    <string name="error_optimization">Sorting error: %s</string>
     <string name="error_unassigned_jobs">Unassigned stops: %s</string>
 
     <!-- Delivery Groups -->
@@ -68,7 +68,7 @@
 
     <!-- API Key Activity -->
     <string name="api_key_title">OpenRouteService API Key</string>
-    <string name="api_key_description">To optimize the route using the road network, an API key from OpenRouteService is required. You can request one here:</string>
+    <string name="api_key_description">To sort the route using the road network, an API key from OpenRouteService is required. You can request one here:</string>
     <string name="api_key_hint">Enter API Key</string>
     <string name="api_key_save">Verify &amp; Save</string>
     <string name="api_key_error_empty">Please enter an API key</string>
@@ -108,7 +108,7 @@
     <string name="license_success">Pro Features activated! Thank you for your support.</string>
 
     <string name="upgrade_pro_title">Upgrade to Pro</string>
-    <string name="upgrade_pro_message">You have reached the free limit of 15 stops. Upgrade to Pro to add more stops and sort larger routes.\n\nBenefits:\n- Up to 27 stops per Route\n- Professional route optimization</string>
+    <string name="upgrade_pro_message">You have reached the free limit of 15 stops. Upgrade to Pro to add more stops and sort larger routes.\n\nBenefits:\n- Up to 27 stops per Route\n- Professional route sorting</string>
     <string name="upgrade_pro_button">Buy Pro License</string>
     <string name="upgrade_pro_checkout_button">Buy on Gumroad</string>
 

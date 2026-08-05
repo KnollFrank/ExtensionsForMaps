@@ -43,13 +43,13 @@
     <string name="add_stop_suggest_maps_message">Diese Route hat weniger als 10 Stopps. Sie können weitere Stopps auch direkt in Google Maps ergänzen.\n\nMöchten Sie trotzdem, dass diese App den Stopp hinzufügt?</string>
     <string name="add_stop_yes">Ja, hinzufügen</string>
 
-    <string name="settings_section_optimization_type">Optimierungstyp</string>
+    <string name="settings_section_optimization_type">Sortiertyp</string>
     <string name="settings_type_fixed_destination">Letztes Ziel sperren</string>
     <string name="settings_type_fixed_destination_desc">Start und Ziel bleiben unverändert.</string>
     <string name="settings_type_any_destination">Irgendwo enden</string>
     <string name="settings_type_any_destination_desc">Das Ziel ist flexibel für eine kürzere Route.</string>
 
-    <string name="sort_dialog_title">Optimierungstyp wählen</string>
+    <string name="sort_dialog_title">Sortiertyp wählen</string>
 
     <!-- Progress & Status -->
     <string name="status_reading_route">Lese Route…</string>
@@ -60,7 +60,7 @@
     <!-- Errors -->
     <string name="error_network">Netzwerkfehler: %s</string>
     <string name="error_general">Fehler: %s</string>
-    <string name="error_optimization">Optimierungsfehler: %s</string>
+    <string name="error_optimization">Sortierfehler: %s</string>
     <string name="error_unassigned_jobs">Nicht zugewiesene Stopps: %s</string>
 
     <!-- Delivery Groups -->
@@ -69,7 +69,7 @@
 
     <!-- API Key Activity -->
     <string name="api_key_title">OpenRouteService API Key</string>
-    <string name="api_key_description">Um die Route über das Straßennetz zu optimieren, wird ein API Key von OpenRouteService benötigt. Diesen können Sie hier beantragen:</string>
+    <string name="api_key_description">Um die Route über das Straßennetz zu sortieren, wird ein API Key von OpenRouteService benötigt. Diesen können Sie hier beantragen:</string>
     <string name="api_key_hint">API Key eingeben</string>
     <string name="api_key_save">Prüfen &amp; Speichern</string>
     <string name="api_key_error_empty">Bitte gib einen API Key ein</string>
@@ -109,7 +109,7 @@
     <string name="license_success">Pro-Features aktiviert! Vielen Dank für deine Unterstützung.</string>
 
     <string name="upgrade_pro_title">Upgrade auf Pro</string>
-    <string name="upgrade_pro_message">Du hast das kostenlose Limit von 15 Stopps erreicht. Hole dir die Pro-Version, um mehr Stopps hinzuzufügen und größere Routen zu sortieren.\n\nVorteile:\n- Bis zu 27 Stopps pro Route\n- Professionelle Routenoptimierung</string>
+    <string name="upgrade_pro_message">Du hast das kostenlose Limit von 15 Stopps erreicht. Hole dir die Pro-Version, um mehr Stopps hinzuzufügen und größere Routen zu sortieren.\n\nVorteile:\n- Bis zu 27 Stopps pro Route\n- Professionelle Routensortierung</string>
     <string name="upgrade_pro_button">Pro-Lizenz kaufen</string>
     <string name="upgrade_pro_checkout_button">Auf Gumroad kaufen</string>
 
