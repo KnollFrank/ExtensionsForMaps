@@ -64,6 +64,10 @@ public class UrlExpander {
     }
 
     private static Request createRequest(final URL url) {
-        return new Request.Builder().url(url).head().build();
+        String urlString = url.toString();
+        if (urlString.startsWith("http://")) {
+            urlString = "https://" + urlString.substring(7);
+        }
+        return new Request.Builder().url(urlString).head().build();
     }
 }
