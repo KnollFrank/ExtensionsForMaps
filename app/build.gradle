@@ -36,8 +36,6 @@ android {
         }
         standalone {
             dimension "mode"
-            applicationIdSuffix ".standalone"
-            versionNameSuffix "-standalone"
             buildConfigField "boolean", "SHOW_ACCESSIBILITY_SETTINGS", "false"
             buildConfigField "boolean", "FEATURE_ROUTE_PREVIEW_VISIBLE", "false"
         }
