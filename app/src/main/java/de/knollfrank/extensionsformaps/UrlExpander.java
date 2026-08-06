@@ -25,6 +25,13 @@ public class UrlExpander {
                     .build();
 
     public static URL expandUrl(final URL urlToExpand) throws IOException {
+        // REQUIREMENT 1: If it's already a full Google Maps URL (Legacy or Modern),
+        // return it immediately. No network calls for legacy URLs.
+        if (DirectionsUrlPredicate.isLegacyDirectionsUrl(urlToExpand) ||
+                DirectionsUrlPredicate.isModernDirectionsUrl(urlToExpand)) {
+            return urlToExpand;
+        }
+
         URL currentUrl = urlToExpand;
         for (int attempt = 1; attempt <= 10; attempt++) {
             Log.d(TAG, String.format("Expansion attempt %d for: %s", attempt, currentUrl));
@@ -40,8 +47,9 @@ public class UrlExpander {
                     return resultUrl;
                 }
 
-                // Retry conditions for Google short URLs (not yet ready on their side)
-                if (code == 404 || code == 200) {
+                // REQUIREMENT 2: Stop the hang in tests.
+                // Only retry if it's still a Google short URL type that's not ready.
+                if (DirectionsUrlPredicate.isShortDirectionsUrl(resultUrl) && (code == 404 || code == 200)) {
                     Log.d(TAG, String.format("URL not yet ready (Status %d). Retrying in 500ms...", code));
                     sleep(500);
                     currentUrl = resultUrl;
