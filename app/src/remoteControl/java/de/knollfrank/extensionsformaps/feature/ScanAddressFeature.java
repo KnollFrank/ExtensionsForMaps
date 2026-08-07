@@ -319,6 +319,9 @@ public class ScanAddressFeature implements AccessibilityFeature {
         btn.setPadding(0, 0, 0, 0);
         btn.setBackground(getButtonShape());
         btn.setOnClickListener(v -> {
+            // WICHTIG: Button sofort entfernen, bevor die Kamera-Activity startet!
+            removeScanButton();
+            
             state = State.IDLE;
             clickRetries = 0;
             lastActionTime = 0;
