@@ -271,6 +271,10 @@ public class ScanAddressFeature implements AccessibilityFeature {
         service.dispatchGesture(builder.build(), null, null);
     }
 
+    public void reset() {
+        removeScanButton();
+    }
+
     @Override
     public void onDestroy() {
         removeScanButton();

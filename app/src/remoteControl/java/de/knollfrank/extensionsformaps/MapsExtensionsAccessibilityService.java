@@ -100,15 +100,27 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                 .ifPresent(
                         packageName -> {
                             final String pkg = packageName.toString();
+
+                            // WICHTIG: Wenn wir Google Maps verlassen, muessen Maps-Overlays sofort verschwinden.
+                            // Das gilt auch, wenn wir zu Gemini oder in andere Systembereiche wechseln.
+                            if (!GOOGLE_MAPS_PACKAGE.equals(pkg)) {
+                                resetFeatures();
+                            }
+
                             switch (pkg) {
-                                case GOOGLE_MAPS_PACKAGE -> handleGoogleMapsEvent(event);
-                                case RESOLVER_PACKAGE -> handleResolverEvent(event);
-                                case SYSTEM_PACKAGE -> {
+                                case GOOGLE_MAPS_PACKAGE:
+                                    handleGoogleMapsEvent(event);
+                                    break;
+                                case GOOGLE_APP_PACKAGE:
+                                case GEMINI_APP_PACKAGE:
+                                    handleGoogleAppEvent(event);
+                                    break;
+                                case RESOLVER_PACKAGE:
+                                case SYSTEM_PACKAGE:
                                     if (urlRequester.isWaitingForUrl()) {
                                         handleResolverEvent(event);
                                     }
-                                }
-                                case GOOGLE_APP_PACKAGE, GEMINI_APP_PACKAGE -> handleGoogleAppEvent(event);
+                                    break;
                             }
                         });
     }
@@ -119,7 +131,6 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                 .ifPresent(root -> features.forEach(feature -> feature.onGoogleAppEvent(event, root)));
     }
 
-    // FK-TODO: refactor using streams
     private void resetFeatures() {
         activeServiceHighlightFeature.hide();
         for (final AccessibilityFeature feature : features) {
@@ -127,6 +138,8 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                 addStopFeature.reset();
             } else if (feature instanceof final SortFeature sortFeature) {
                 sortFeature.reset();
+            } else if (feature instanceof final ScanAddressFeature scanAddressFeatureInstance) {
+                scanAddressFeatureInstance.reset();
             }
         }
     }
