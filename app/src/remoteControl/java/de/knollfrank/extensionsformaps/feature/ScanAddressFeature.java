@@ -6,9 +6,11 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -311,6 +313,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
         Button btn = new Button(service);
         btn.setText("📷");
         btn.setPadding(0, 0, 0, 0);
+        btn.setBackground(getButtonShape());
         btn.setOnClickListener(v -> {
             state = State.IDLE;
             clickRetries = 0;
@@ -325,6 +328,15 @@ public class ScanAddressFeature implements AccessibilityFeature {
             }
         });
         return btn;
+    }
+
+    private GradientDrawable getButtonShape() {
+        final GradientDrawable shape = new GradientDrawable();
+        shape.setShape(GradientDrawable.RECTANGLE);
+        shape.setCornerRadius(dpToPx(20)); // Half of 40dp for a circular button
+        shape.setColor(Color.parseColor("#3C4043"));
+        shape.setStroke(dpToPx(2), Color.parseColor("#D4AF37")); // Gold border
+        return shape;
     }
 
     private WindowManager.LayoutParams getLayoutParams(Rect b) {
