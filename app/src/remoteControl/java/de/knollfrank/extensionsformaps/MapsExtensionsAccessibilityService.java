@@ -31,6 +31,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     private static final String RESOLVER_PACKAGE = "com.android.intentresolver";
     private static final String SYSTEM_PACKAGE = "android";
     private static final String GOOGLE_APP_PACKAGE = "com.google.android.googlequicksearchbox";
+    private static final String GEMINI_APP_PACKAGE = "com.google.android.apps.bard";
 
     private List<AccessibilityFeature> features = List.of();
     private StopCountDetector stopCountDetector;
@@ -107,7 +108,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                                         handleResolverEvent(event);
                                     }
                                 }
-                                case GOOGLE_APP_PACKAGE -> handleGoogleAppEvent(event);
+                                case GOOGLE_APP_PACKAGE, GEMINI_APP_PACKAGE -> handleGoogleAppEvent(event);
                             }
                         });
     }
