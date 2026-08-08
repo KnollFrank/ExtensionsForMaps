@@ -1,3 +1,14 @@
+FK-TODO: - Multi-Stop Import (aus der Zwischenablage)
+         - "Adressliste exportieren" (Clean Copy)
+           Meine Route (5 Stopps):
+           1. Start: Frauenplan 21, Eisenach
+           2. Halt: Villa Kleine Wartburg
+           3. Halt: Lutherhaus
+           4. Halt: Kartoffelhaus
+           5. Ziel: discovAIR, Christianstr. 29
+           Gesamtstrecke: 18 km
+         - "Spritkosten / Verdienst-Rechner Overlay": 💰 6,30 €
+         - Audio/Video/Text Notizen (Notes-Plugin)
 FK-TODO: Routenoptimierung mit Hilfe von https://openrouteservice.org/ statt jsprit
 FK-TODO: Adresseingabefeld von Google Maps um Scanfunktion der Adresse erweitern
 FK-TODO: Fahrt-/Reiseoptionen (z.B. "keine Autobahn") von Google Maps berücksichtigen
