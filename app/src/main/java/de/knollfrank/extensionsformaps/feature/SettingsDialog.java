@@ -111,6 +111,7 @@ public class SettingsDialog {
         final AlertDialog settingsDialog = new MaterialAlertDialogBuilder(themedContext)
                 .setTitle(R.string.settings_title)
                 .setView(dialogView)
+                .setCancelable(false)
                 .setPositiveButton(R.string.ok, (d, w) -> {
                     SortConfig.setShouldShowRoutePreview(service, checkBox.isChecked());
                     SortConfig.setOptimizationMethod(
@@ -163,12 +164,14 @@ public class SettingsDialog {
 
         ApiKeyRepository.getApiKey(service).ifPresent(etApiKey::setText);
 
-        final AlertDialog apiKeyDialog = new MaterialAlertDialogBuilder(context)
-                .setTitle(R.string.api_key_title)
-                .setView(dialogView)
-                .setPositiveButton(R.string.api_key_save, null)
-                .setNegativeButton(R.string.cancel, (d, w) -> d.dismiss())
-                .create();
+        final AlertDialog apiKeyDialog =
+                new MaterialAlertDialogBuilder(context)
+                        .setTitle(R.string.api_key_title)
+                        .setView(dialogView)
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.api_key_save, null)
+                        .setNegativeButton(R.string.cancel, (d, w) -> d.dismiss())
+                        .create();
 
         tvLink.setOnClickListener(v -> {
             final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(tvLink.getText().toString()));
