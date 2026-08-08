@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -20,14 +21,15 @@ public class CaptureAddressActivity extends AppCompatActivity {
 
     private static final String TAG = "CaptureAddressActivity";
     private static final String GEMINI_PKG = "com.google.android.apps.bard";
-    
-    private Uri imageUri;
+
+    private Uri cameraImageUri;
+    private Uri finalImageUri;
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
             isGranted -> {
                 if (isGranted) {
-                    launchCamera();
+                    launchMediaChooser();
                 } else {
                     Log.e(TAG, "Camera permission denied");
                     finish();
@@ -35,13 +37,20 @@ public class CaptureAddressActivity extends AppCompatActivity {
             }
     );
 
-    private final ActivityResultLauncher<Uri> takePictureLauncher = registerForActivityResult(
-            new ActivityResultContracts.TakePicture(),
-            success -> {
-                if (success) {
+    private final ActivityResultLauncher<Intent> mediaLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    Intent data = result.getData();
+                    if (data != null && data.getData() != null) {
+                        // User picked an existing photo from gallery
+                        finalImageUri = data.getData();
+                    } else {
+                        // User took a new photo with the camera
+                        finalImageUri = cameraImageUri;
+                    }
                     sendToGemini();
                 } else {
-                    Log.e(TAG, "Image capture failed or cancelled");
                     finish();
                 }
             }
@@ -53,42 +62,58 @@ public class CaptureAddressActivity extends AppCompatActivity {
         Log.d(TAG, "CaptureAddressActivity started");
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            launchCamera();
+            launchMediaChooser();
         } else {
             requestPermissionLauncher.launch(Manifest.permission.CAMERA);
         }
     }
 
-    private void launchCamera() {
+    private void launchMediaChooser() {
         try {
             File storageDir = new File(getCacheDir(), "images");
             if (!storageDir.exists() && !storageDir.mkdirs()) {
                 Log.e(TAG, "Could not create images directory");
             }
             File imageFile = new File(storageDir, "capture_" + System.currentTimeMillis() + ".jpg");
-            imageUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", imageFile);
-            
-            Log.d(TAG, "Launching camera with URI: " + imageUri);
-            takePictureLauncher.launch(imageUri);
+            cameraImageUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", imageFile);
+
+            // Intent 1: Take a photo
+            Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri);
+            captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+            // Intent 2: Pick from gallery
+            Intent pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
+            pickIntent.addCategory(Intent.CATEGORY_OPENABLE);
+            pickIntent.setType("image/*");
+
+            // Chooser: Let the system show all options (Camera, Gallery, etc.)
+            Intent chooserIntent = Intent.createChooser(pickIntent, "Foto aufnehmen oder auswählen");
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{captureIntent});
+
+            mediaLauncher.launch(chooserIntent);
         } catch (Exception e) {
-            Log.e(TAG, "Error preparing camera launch", e);
+            Log.e(TAG, "Error preparing media chooser", e);
             finish();
         }
     }
 
     private void sendToGemini() {
-        // We use ACTION_SEND with both image and text.
-        // Some apps (like Gemini/Assistant) handle this combination specifically.
+        if (finalImageUri == null) {
+            finish();
+            return;
+        }
+
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("image/jpeg");
-        shareIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
-        
+        shareIntent.putExtra(Intent.EXTRA_STREAM, finalImageUri);
+
         // Put the prompt in BOTH common text fields to increase compatibility
         shareIntent.putExtra(Intent.EXTRA_TEXT, ScanAddressFeature.AI_PROMPT);
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Address Extraction");
-        
+
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        
+
         // Target Gemini specifically
         shareIntent.setPackage(GEMINI_PKG);
 
@@ -97,9 +122,6 @@ public class CaptureAddressActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.w(TAG, "Gemini app not found via package name, trying intent-only");
             shareIntent.setPackage(null);
-            
-            // If direct package failed, we try to find an activity that can handle it
-            // or show the chooser as a fallback.
             startActivity(Intent.createChooser(shareIntent, "Bild an Gemini senden"));
         }
         finish();
