@@ -8,11 +8,11 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
+import de.knollfrank.extensionsformaps.accessibility.AccessibilityServices;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContextResolver;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
 import de.knollfrank.extensionsformaps.accessibility.StopCountDetector;
-import de.knollfrank.extensionsformaps.common.AccessibilityServices;
 import de.knollfrank.extensionsformaps.feature.AccessibilityFeature;
 import de.knollfrank.extensionsformaps.feature.ActiveServiceHighlightFeature;
 import de.knollfrank.extensionsformaps.feature.AddStopFeature;
@@ -37,6 +37,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     private StopCountDetector stopCountDetector;
     private RouteUrlRequester urlRequester;
     private ActiveServiceHighlightFeature activeServiceHighlightFeature;
+    // FK-TODO: Field can be converted to a local variable
     private ScanAddressFeature scanAddressFeature;
 
     @Override
@@ -126,8 +127,8 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     }
 
     private void handleGoogleAppEvent(final AccessibilityEvent event) {
-        AccessibilityServices
-                .getRootInActiveWindow(this)
+        new AccessibilityServices(this)
+                .getRootInActiveWindow()
                 .ifPresent(root -> features.forEach(feature -> feature.onGoogleAppEvent(event, root)));
     }
 
@@ -160,8 +161,8 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
             resetFeatures();
         }
         urlRequester.handleGoogleMapsEvent(event);
-        AccessibilityServices
-                .getRootInActiveWindow(this)
+        new AccessibilityServices(this)
+                .getRootInActiveWindow()
                 .ifPresent(
                         root -> {
                             stopCountDetector.detect(root);

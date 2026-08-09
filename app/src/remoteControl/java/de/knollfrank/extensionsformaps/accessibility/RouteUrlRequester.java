@@ -12,7 +12,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
-import de.knollfrank.extensionsformaps.common.AccessibilityServices;
 import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.common.URLs;
 
@@ -58,7 +57,7 @@ public class RouteUrlRequester {
     public void handleResolverEvent() {
         Optionals.ifPresentBoth(
                 routeUrlCallback,
-                AccessibilityServices.getRootInActiveWindow(service),
+                new AccessibilityServices(service).getRootInActiveWindow(),
                 this::handleResolverEvent);
     }
 
