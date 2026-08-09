@@ -8,9 +8,10 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class URLs {
 
@@ -18,16 +19,18 @@ public class URLs {
     }
 
     public static Map<String, String> parseQuery(final String query) {
-        final Map<String, String> params = new HashMap<>();
-        if (query == null) {
-            return params;
-        }
-        final Uri uri = new Uri.Builder().encodedQuery(query).build();
-        // FK-TODO: implement functionally
-        for (final String name : uri.getQueryParameterNames()) {
-            params.put(name, uri.getQueryParameter(name));
-        }
-        return params;
+        final Uri uri =
+                new Uri
+                        .Builder()
+                        .encodedQuery(query)
+                        .build();
+        return uri
+                .getQueryParameterNames()
+                .stream()
+                .collect(
+                        Collectors.toMap(
+                                Function.identity(),
+                                uri::getQueryParameter));
     }
 
     public static URL createUrl(final String url) {
