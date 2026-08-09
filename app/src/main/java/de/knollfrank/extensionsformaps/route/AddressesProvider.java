@@ -1,7 +1,9 @@
 package de.knollfrank.extensionsformaps.route;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import de.knollfrank.extensionsformaps.common.Optionals;
@@ -20,12 +22,10 @@ class AddressesProvider {
         return List.of();
     }
 
+    // FK-TODO: refactor
     private static List<String> getLegacyAddresses(final URL url) {
-        final String query = url.getQuery();
-        if (query == null) return List.of();
-
-        final java.util.Map<String, String> params = URLs.parseQuery(query);
-        final List<String> addresses = new java.util.ArrayList<>();
+        final Map<String, String> params = URLs.parseQuery(url);
+        final List<String> addresses = new ArrayList<>();
 
         // Startadresse (already decoded by URLs.parseQuery)
         final String saddr = params.get("saddr");

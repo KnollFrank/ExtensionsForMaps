@@ -1,7 +1,5 @@
 package de.knollfrank.extensionsformaps.common;
 
-import android.net.Uri;
-
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -10,27 +8,14 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class URLs {
 
     private URLs() {
     }
 
-    public static Map<String, String> parseQuery(final String query) {
-        final Uri uri =
-                new Uri
-                        .Builder()
-                        .encodedQuery(query)
-                        .build();
-        return uri
-                .getQueryParameterNames()
-                .stream()
-                .collect(
-                        Collectors.toMap(
-                                Function.identity(),
-                                uri::getQueryParameter));
+    public static Map<String, String> parseQuery(final URL url) {
+        return QueryParser.parseQuery(url);
     }
 
     public static URL createUrl(final String url) {

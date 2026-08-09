@@ -32,11 +32,7 @@ class DirectionsUrl {
     }
 
     public Optional<List<String>> getGeocodeTokens() {
-        final String query = url.getQuery();
-        if (query == null) {
-            return Optional.empty();
-        }
-        final String geocode = URLs.parseQuery(query).get("geocode");
+        final String geocode = URLs.parseQuery(url).get("geocode");
         return geocode != null ?
                 Optional.of(List.of(geocode.split(";"))) :
                 Optional.empty();
