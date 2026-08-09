@@ -1,5 +1,7 @@
 package de.knollfrank.extensionsformaps.common;
 
+import android.net.Uri;
+
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,11 +22,10 @@ public class URLs {
         if (query == null) {
             return params;
         }
-        for (final String param : query.split("&")) {
-            final String[] entry = param.split("=");
-            if (entry.length > 1) {
-                params.put(entry[0], entry[1]);
-            }
+        final Uri uri = new Uri.Builder().encodedQuery(query).build();
+        // FK-TODO: implement functionally
+        for (final String name : uri.getQueryParameterNames()) {
+            params.put(name, uri.getQueryParameter(name));
         }
         return params;
     }

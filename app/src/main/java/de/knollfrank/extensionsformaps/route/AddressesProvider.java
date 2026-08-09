@@ -27,16 +27,15 @@ class AddressesProvider {
         final java.util.Map<String, String> params = URLs.parseQuery(query);
         final List<String> addresses = new java.util.ArrayList<>();
 
-        // Startadresse
+        // Startadresse (already decoded by URLs.parseQuery)
         final String saddr = params.get("saddr");
-        if (saddr != null) addresses.add(URLs.decode(saddr));
+        if (saddr != null) addresses.add(saddr);
 
         // Zieladressen (können mehrere sein, getrennt durch " to:")
         final String daddr = params.get("daddr");
         if (daddr != null) {
-            final String decodedDaddr = URLs.decode(daddr);
             // Google nutzt " to:" als Trenner für Zwischenstopps im Legacy-Format
-            addresses.addAll(List.of(decodedDaddr.split(" to:")));
+            addresses.addAll(List.of(daddr.split(" to:")));
         }
 
         return addresses;

@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import static de.knollfrank.extensionsformaps.coordinate.Unit.DEGREES;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,6 +17,7 @@ import java.util.Optional;
 import de.knollfrank.extensionsformaps.coordinate.Angle;
 import de.knollfrank.extensionsformaps.coordinate.Geodetic;
 
+@RunWith(RobolectricTestRunner.class)
 public class GoogleMapsRouteExtractorTest {
 
     @Test

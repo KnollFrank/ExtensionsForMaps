@@ -38,7 +38,7 @@ class DirectionsUrl {
         }
         final String geocode = URLs.parseQuery(query).get("geocode");
         return geocode != null ?
-                Optional.of(List.of(URLs.decode(geocode).split(";"))) :
+                Optional.of(List.of(geocode.split(";"))) :
                 Optional.empty();
     }
 }
