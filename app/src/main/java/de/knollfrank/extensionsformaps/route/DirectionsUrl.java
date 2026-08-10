@@ -32,6 +32,7 @@ class DirectionsUrl {
     }
 
     public Optional<List<String>> getGeocodeTokens() {
+        // FK-TODO: introduce Maps class having a method for get() which returns Optional<String>
         final String geocode = URLs.parseQuery(url).get("geocode");
         return geocode != null ?
                 Optional.of(List.of(geocode.split(";"))) :
