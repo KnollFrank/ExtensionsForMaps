@@ -15,8 +15,8 @@ public class URLs {
     private URLs() {
     }
 
-    public static ImmutableMap<String, String> parseQuery(final URL url) {
-        return QueryParser.parseQuery(url);
+    public static ImmutableMap<String, String> getQuery(final URL url) {
+        return QueryProvider.getQuery(url);
     }
 
     public static URL createUrl(final String url) {

@@ -25,7 +25,7 @@ class AddressesProvider {
     }
 
     private static List<String> getLegacyAddresses(final URL url) {
-        return getLegacyAddresses(URLs.parseQuery(url));
+        return getLegacyAddresses(URLs.getQuery(url));
     }
 
     private static ImmutableList<String> getLegacyAddresses(final ImmutableMap<String, String> params) {

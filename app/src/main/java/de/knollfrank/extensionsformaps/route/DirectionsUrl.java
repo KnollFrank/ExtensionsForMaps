@@ -34,7 +34,7 @@ class DirectionsUrl {
 
     public Optional<List<String>> getGeocodeTokens() {
         return Maps
-                .get(URLs.parseQuery(url), "geocode")
+                .get(URLs.getQuery(url), "geocode")
                 .map(DirectionsUrl::getGeocodeTokens);
     }
 

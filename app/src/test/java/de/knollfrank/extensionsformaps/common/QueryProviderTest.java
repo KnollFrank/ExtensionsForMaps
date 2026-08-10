@@ -13,15 +13,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 @RunWith(RobolectricTestRunner.class)
-public class QueryParserTest {
+public class QueryProviderTest {
 
     @Test
-    public void testParseQuery_withLegacyMapsUrl() throws MalformedURLException {
+    public void testGetQuery_withLegacyMapsUrl() throws MalformedURLException {
         // Given
         final URL url = new URL("http://maps.google.com/maps?saddr=Frauenplan+21&daddr=discovAIR&dirflg=d");
 
         // When
-        final ImmutableMap<String, String> params = QueryParser.parseQuery(url);
+        final ImmutableMap<String, String> params = QueryProvider.getQuery(url);
 
         // Then
         assertEquals(
@@ -35,24 +35,24 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_withGeocodeTokens() throws MalformedURLException {
+    public void testGetQuery_withGeocodeTokens() throws MalformedURLException {
         // Given
         final URL url = new URL("https://maps.google.de/maps?saddr=Berlin&daddr=Hamburg&geocode=G123;G456");
 
         // When
-        final ImmutableMap<String, String> params = QueryParser.parseQuery(url);
+        final ImmutableMap<String, String> params = QueryProvider.getQuery(url);
 
         // Then
         assertEquals("G123;G456", params.get("geocode"));
     }
 
     @Test
-    public void testParseQuery_withEncodedSpaces() throws MalformedURLException {
+    public void testGetQuery_withEncodedSpaces() throws MalformedURLException {
         // Given
         final URL url = new URL("https://www.google.com/maps?saddr=San%20Francisco&daddr=Los+Angeles");
 
         // When
-        final ImmutableMap<String, String> params = QueryParser.parseQuery(url);
+        final ImmutableMap<String, String> params = QueryProvider.getQuery(url);
 
         // Then
         assertEquals("San Francisco", params.get("saddr"));
@@ -60,24 +60,24 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_noQueryParameters() throws MalformedURLException {
+    public void testGetQuery_noQueryParameters() throws MalformedURLException {
         // Given
         final URL url = new URL("https://www.google.com/maps/dir/PointA/PointB/");
 
         // When
-        final ImmutableMap<String, String> params = QueryParser.parseQuery(url);
+        final ImmutableMap<String, String> params = QueryProvider.getQuery(url);
 
         // Then
         assertTrue(params.isEmpty());
     }
 
     @Test
-    public void testParseQuery_emptyValue() throws MalformedURLException {
+    public void testGetQuery_emptyValue() throws MalformedURLException {
         // Given
         final URL url = new URL("http://example.com/search?q=&lang=de");
 
         // When
-        final ImmutableMap<String, String> params = QueryParser.parseQuery(url);
+        final ImmutableMap<String, String> params = QueryProvider.getQuery(url);
 
         // Then
         assertEquals("", params.get("q"));
@@ -85,24 +85,24 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_multipleSameKeys_returnsFirstOne() throws MalformedURLException {
+    public void testGetQuery_multipleSameKeys_returnsFirstOne() throws MalformedURLException {
         // Given: android.net.Uri returns the first value for getQueryParameter if multiple exist
         URL url = new URL("http://example.com/?a=1&a=2");
 
         // When
-        final ImmutableMap<String, String> params = QueryParser.parseQuery(url);
+        final ImmutableMap<String, String> params = QueryProvider.getQuery(url);
 
         // Then
         assertEquals("1", params.get("a"));
     }
 
     @Test
-    public void testParseQuery_withSpecialCharacters() throws MalformedURLException {
+    public void testGetQuery_withSpecialCharacters() throws MalformedURLException {
         // Given
         final URL url = new URL("https://www.google.com/maps?g_st=ac&utm_source=test.source");
 
         // When
-        final ImmutableMap<String, String> params = QueryParser.parseQuery(url);
+        final ImmutableMap<String, String> params = QueryProvider.getQuery(url);
 
         // Then
         assertEquals("ac", params.get("g_st"));

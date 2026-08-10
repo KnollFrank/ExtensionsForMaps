@@ -9,12 +9,12 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.function.Function;
 
-class QueryParser {
+class QueryProvider {
 
-    public static ImmutableMap<String, String> parseQuery(final URL url) {
-        return QueryParser
+    public static ImmutableMap<String, String> getQuery(final URL url) {
+        return QueryProvider
                 .getQueryAsUri(url)
-                .map(QueryParser::parseQuery)
+                .map(QueryProvider::getQuery)
                 .orElse(ImmutableMap.of());
     }
 
@@ -27,7 +27,7 @@ class QueryParser {
                                 .build());
     }
 
-    private static ImmutableMap<String, String> parseQuery(final Uri uri) {
+    private static ImmutableMap<String, String> getQuery(final Uri uri) {
         return uri
                 .getQueryParameterNames()
                 .stream()
