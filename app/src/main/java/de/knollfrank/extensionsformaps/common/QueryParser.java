@@ -6,14 +6,12 @@ import android.net.Uri.Builder;
 import com.google.common.collect.ImmutableMap;
 
 import java.net.URL;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 class QueryParser {
 
-    public static Map<String, String> parseQuery(final URL url) {
+    public static ImmutableMap<String, String> parseQuery(final URL url) {
         return QueryParser
                 .getQueryAsUri(url)
                 .map(QueryParser::parseQuery)
@@ -29,12 +27,12 @@ class QueryParser {
                                 .build());
     }
 
-    private static Map<String, String> parseQuery(final Uri uri) {
+    private static ImmutableMap<String, String> parseQuery(final Uri uri) {
         return uri
                 .getQueryParameterNames()
                 .stream()
                 .collect(
-                        Collectors.toUnmodifiableMap(
+                        ImmutableMap.toImmutableMap(
                                 Function.identity(),
                                 uri::getQueryParameter));
     }

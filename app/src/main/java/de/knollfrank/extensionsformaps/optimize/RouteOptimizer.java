@@ -1,5 +1,6 @@
 package de.knollfrank.extensionsformaps.optimize;
 
+import com.google.common.collect.ImmutableMap;
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
 import com.graphhopper.jsprit.core.algorithm.listener.IterationEndsListener;
@@ -19,12 +20,10 @@ import com.graphhopper.jsprit.core.util.Solutions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import de.knollfrank.extensionsformaps.coordinate.Geodetic;
 import de.knollfrank.extensionsformaps.route.Route;
@@ -61,7 +60,7 @@ public class RouteOptimizer {
             allStops.add(route.destination());
         }
 
-        final Map<String, Stop> stopById = getStopById(allStops);
+        final ImmutableMap<String, Stop> stopById = getStopById(allStops);
         final VehicleRoutingAlgorithm algorithm = createVehicleRoutingAlgorithm(route, stopById, optimizationType);
 
         algorithm.addTerminationCriterion(discoveredSolution -> isCanceled.get());
@@ -107,18 +106,18 @@ public class RouteOptimizer {
         }
     }
 
-    private static Map<String, Stop> getStopById(final List<Stop> stops) {
+    private static ImmutableMap<String, Stop> getStopById(final List<Stop> stops) {
         return stops
                 .stream()
                 .collect(
-                        Collectors.toUnmodifiableMap(
+                        ImmutableMap.toImmutableMap(
                                 Stop::id,
                                 Function.identity()));
     }
 
     private VehicleRoutingAlgorithm createVehicleRoutingAlgorithm(
             final Route route,
-            final Map<String, Stop> stopById,
+            final ImmutableMap<String, Stop> stopById,
             final OptimizationType optimizationType) throws Exception {
         final VehicleRoutingProblem vehicleRoutingProblem = createVehicleRoutingProblem(route, stopById, optimizationType);
         final StateManager stateManager = new StateManager(vehicleRoutingProblem);
@@ -137,7 +136,7 @@ public class RouteOptimizer {
 
     private VehicleRoutingProblem createVehicleRoutingProblem(
             final Route route,
-            final Map<String, Stop> stopById,
+            final ImmutableMap<String, Stop> stopById,
             final OptimizationType optimizationType) throws Exception {
         final VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
         // ANFORDERUNG 1: Eiserne Zustellungs-Garantie wird am Ende durch unassignedJobs Check erzwungen.
@@ -173,7 +172,7 @@ public class RouteOptimizer {
         return vehicleBuilder.build();
     }
 
-    private static List<Service> createServices(final Map<String, Stop> stopById) {
+    private static List<Service> createServices(final ImmutableMap<String, Stop> stopById) {
         return stopById
                 .entrySet()
                 .stream()
@@ -220,7 +219,7 @@ public class RouteOptimizer {
     }
 
     private static List<Stop> getStops(final VehicleRoutingProblemSolution solution,
-                                       final Map<String, Stop> stopById) {
+                                       final ImmutableMap<String, Stop> stopById) {
         // FK-TODO: refactor
         final List<Stop> waypoints = new ArrayList<>();
         for (final VehicleRoute vehicleRoute : solution.getRoutes()) {

@@ -1,9 +1,10 @@
 package de.knollfrank.extensionsformaps.route;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import de.knollfrank.extensionsformaps.common.Optionals;
@@ -24,7 +25,7 @@ class AddressesProvider {
 
     // FK-TODO: refactor
     private static List<String> getLegacyAddresses(final URL url) {
-        final Map<String, String> params = URLs.parseQuery(url);
+        final ImmutableMap<String, String> params = URLs.parseQuery(url);
         final List<String> addresses = new ArrayList<>();
 
         // Startadresse (already decoded by URLs.parseQuery)

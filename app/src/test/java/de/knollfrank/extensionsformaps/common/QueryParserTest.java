@@ -11,7 +11,6 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 public class QueryParserTest {
@@ -22,7 +21,7 @@ public class QueryParserTest {
         final URL url = new URL("http://maps.google.com/maps?saddr=Frauenplan+21&daddr=discovAIR&dirflg=d");
 
         // When
-        final Map<String, String> params = QueryParser.parseQuery(url);
+        final ImmutableMap<String, String> params = QueryParser.parseQuery(url);
 
         // Then
         assertEquals(
@@ -41,7 +40,7 @@ public class QueryParserTest {
         final URL url = new URL("https://maps.google.de/maps?saddr=Berlin&daddr=Hamburg&geocode=G123;G456");
 
         // When
-        final Map<String, String> params = QueryParser.parseQuery(url);
+        final ImmutableMap<String, String> params = QueryParser.parseQuery(url);
 
         // Then
         assertEquals("G123;G456", params.get("geocode"));
@@ -53,7 +52,7 @@ public class QueryParserTest {
         final URL url = new URL("https://www.google.com/maps?saddr=San%20Francisco&daddr=Los+Angeles");
 
         // When
-        final Map<String, String> params = QueryParser.parseQuery(url);
+        final ImmutableMap<String, String> params = QueryParser.parseQuery(url);
 
         // Then
         assertEquals("San Francisco", params.get("saddr"));
@@ -66,7 +65,7 @@ public class QueryParserTest {
         final URL url = new URL("https://www.google.com/maps/dir/PointA/PointB/");
 
         // When
-        final Map<String, String> params = QueryParser.parseQuery(url);
+        final ImmutableMap<String, String> params = QueryParser.parseQuery(url);
 
         // Then
         assertTrue(params.isEmpty());
@@ -78,7 +77,7 @@ public class QueryParserTest {
         final URL url = new URL("http://example.com/search?q=&lang=de");
 
         // When
-        final Map<String, String> params = QueryParser.parseQuery(url);
+        final ImmutableMap<String, String> params = QueryParser.parseQuery(url);
 
         // Then
         assertEquals("", params.get("q"));
@@ -91,7 +90,7 @@ public class QueryParserTest {
         URL url = new URL("http://example.com/?a=1&a=2");
 
         // When
-        final Map<String, String> params = QueryParser.parseQuery(url);
+        final ImmutableMap<String, String> params = QueryParser.parseQuery(url);
 
         // Then
         assertEquals("1", params.get("a"));
@@ -103,7 +102,7 @@ public class QueryParserTest {
         final URL url = new URL("https://www.google.com/maps?g_st=ac&utm_source=test.source");
 
         // When
-        final Map<String, String> params = QueryParser.parseQuery(url);
+        final ImmutableMap<String, String> params = QueryParser.parseQuery(url);
 
         // Then
         assertEquals("ac", params.get("g_st"));

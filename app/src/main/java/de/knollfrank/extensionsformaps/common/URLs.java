@@ -1,5 +1,7 @@
 package de.knollfrank.extensionsformaps.common;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -7,14 +9,13 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 
 public class URLs {
 
     private URLs() {
     }
 
-    public static Map<String, String> parseQuery(final URL url) {
+    public static ImmutableMap<String, String> parseQuery(final URL url) {
         return QueryParser.parseQuery(url);
     }
 
