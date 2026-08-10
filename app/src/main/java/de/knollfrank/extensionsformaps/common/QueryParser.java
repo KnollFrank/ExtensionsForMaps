@@ -34,7 +34,7 @@ class QueryParser {
                 .getQueryParameterNames()
                 .stream()
                 .collect(
-                        Collectors.toMap(
+                        Collectors.toUnmodifiableMap(
                                 Function.identity(),
                                 uri::getQueryParameter));
     }
