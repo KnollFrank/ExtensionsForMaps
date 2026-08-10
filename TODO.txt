@@ -9,6 +9,7 @@ FK-TODO: - Multi-Stop Import (aus der Zwischenablage)
            Gesamtstrecke: 18 km
          - "Spritkosten / Verdienst-Rechner Overlay": 💰 6,30 €
          - Audio/Video/Text Notizen (Notes-Plugin)
+         - Wetter Plugin wie in OsmAnd
 FK-TODO: Routenoptimierung mit Hilfe von https://openrouteservice.org/ statt jsprit
 FK-TODO: Adresseingabefeld von Google Maps um Scanfunktion der Adresse erweitern
 FK-TODO: Fahrt-/Reiseoptionen (z.B. "keine Autobahn") von Google Maps berücksichtigen
