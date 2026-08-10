@@ -54,13 +54,6 @@ public class Maps {
                                 entry -> entry.getValue().orElseThrow()));
     }
 
-    private static <K, V> Stream<Entry<K, V>> getEntryStream(final Collection<? extends Map<K, V>> maps) {
-        return maps
-                .stream()
-                .map(Map::entrySet)
-                .flatMap(Set::stream);
-    }
-
     public static <Key, Value, ValueMapped> ImmutableMap<Key, ValueMapped> mapValues(
             final Map<Key, Value> map,
             final Function<Value, ValueMapped> valueMapper) {
@@ -95,5 +88,12 @@ public class Maps {
                 .stream()
                 .filter(entry -> predicate.test(entry.getKey(), entry.getValue()))
                 .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
+    }
+
+    private static <K, V> Stream<Entry<K, V>> getEntryStream(final Collection<? extends Map<K, V>> maps) {
+        return maps
+                .stream()
+                .map(Map::entrySet)
+                .flatMap(Set::stream);
     }
 }

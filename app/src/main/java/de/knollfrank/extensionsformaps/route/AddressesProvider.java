@@ -1,12 +1,13 @@
 package de.knollfrank.extensionsformaps.route;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import de.knollfrank.extensionsformaps.common.Maps;
 import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.common.Strings;
 import de.knollfrank.extensionsformaps.common.URLs;
@@ -23,23 +24,24 @@ class AddressesProvider {
         return List.of();
     }
 
-    // FK-TODO: refactor
     private static List<String> getLegacyAddresses(final URL url) {
-        final ImmutableMap<String, String> params = URLs.parseQuery(url);
-        final List<String> addresses = new ArrayList<>();
+        return getLegacyAddresses(URLs.parseQuery(url));
+    }
 
-        // Startadresse (already decoded by URLs.parseQuery)
-        final String saddr = params.get("saddr");
-        if (saddr != null) addresses.add(saddr);
-
+    private static ImmutableList<String> getLegacyAddresses(final ImmutableMap<String, String> params) {
+        final ImmutableList.Builder<String> addressesBuilder = ImmutableList.builder();
+        // Startadresse
+        Maps
+                .get(params, "saddr")
+                .ifPresent(addressesBuilder::add);
         // Zieladressen (können mehrere sein, getrennt durch " to:")
-        final String daddr = params.get("daddr");
-        if (daddr != null) {
-            // Google nutzt " to:" als Trenner für Zwischenstopps im Legacy-Format
-            addresses.addAll(List.of(daddr.split(" to:")));
-        }
-
-        return addresses;
+        Maps
+                .get(params, "daddr")
+                .ifPresent(
+                        daddr ->
+                                // Google nutzt " to:" als Trenner für Zwischenstopps im Legacy-Format
+                                addressesBuilder.addAll(List.of(daddr.split(" to:"))));
+        return addressesBuilder.build();
     }
 
     private static List<String> getPathParts(final URL directionsUrl) {

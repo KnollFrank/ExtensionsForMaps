@@ -25,6 +25,7 @@ public class DirectionsUrlPredicate {
         return url.getHost().toLowerCase().contains("google") &&
                 (path.contains("/maps")) &&
                 query != null &&
+                // FK-TODO: DRY with AddressesProvider's usage of saddr and daddr, extract constant
                 (query.contains("saddr=") || query.contains("daddr="));
     }
 
