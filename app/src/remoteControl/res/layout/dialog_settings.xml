@@ -166,5 +166,4 @@
             android:text="@string/settings_type_any_destination_desc"
             android:textSize="12sp" />
     </LinearLayout>
-
 </LinearLayout>

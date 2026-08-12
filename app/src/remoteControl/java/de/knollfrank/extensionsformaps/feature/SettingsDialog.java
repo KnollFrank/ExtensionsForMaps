@@ -40,7 +40,10 @@ public class SettingsDialog {
 
     public void show() {
         final Context themedContext = new ContextThemeWrapper(service, R.style.Theme_ExtensionsForMaps_Dialog);
-        final View dialogView = LayoutInflater.from(themedContext).inflate(R.layout.dialog_settings, null);
+        final View dialogView =
+                LayoutInflater
+                        .from(themedContext)
+                        .inflate(R.layout.dialog_settings, null);
 
         final CheckBox checkBox = dialogView.findViewById(R.id.checkBoxShowPreview);
         checkBox.setChecked(SortConfig.shouldShowRoutePreview(service));
