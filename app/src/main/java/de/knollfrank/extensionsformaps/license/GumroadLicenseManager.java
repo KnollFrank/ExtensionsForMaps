@@ -51,8 +51,8 @@ class GumroadLicenseManager implements LicenseManager {
                             }
 
                             @Override
-                            public void onFailure(final Call<GumroadResponse> call, final Throwable t) {
-                                future.completeExceptionally(t);
+                            public void onFailure(final Call<GumroadResponse> call, final Throwable throwable) {
+                                future.completeExceptionally(throwable);
                             }
 
                             private static boolean isValid(final Response<GumroadResponse> response) {

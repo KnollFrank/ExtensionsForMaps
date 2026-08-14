@@ -45,7 +45,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void verifyLicenseInBackground() {
         if (BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) return;
-        LicenseManagerProvider.getInstance(this).verifyExistingLicense().thenRun(this::updateLicenseUI);
+        LicenseManagerProvider
+                .getInstance(this)
+                .verifyExistingLicense()
+                .thenRun(this::updateLicenseUI);
     }
 
     @Override
