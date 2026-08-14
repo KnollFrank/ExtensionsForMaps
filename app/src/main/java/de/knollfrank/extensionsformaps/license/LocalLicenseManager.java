@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture;
 class LocalLicenseManager implements LicenseManager {
 
     private static final String KEY_IS_PRO = "is_pro";
-    private static final String FIXED_LICENSE_KEY = "PRO";
+    static final String FIXED_LICENSE_KEY = "PRO";
 
     private final SharedPreferences preferences;
 
