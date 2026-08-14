@@ -67,15 +67,15 @@ public class OsrmRoutingMatrixProvider implements RoutingMatrixProvider {
         final List<List<Double>> distances = response.distances();
         final List<List<Double>> durations = response.durations();
         final int size = distances.size();
-        for (int i = 0; i < size; i++) {
-            final List<Double> rowDist = distances.get(i);
-            final List<Double> rowDur = durations.get(i);
-            for (int j = 0; j < size; j++) {
-                final Double dist = rowDist.get(j);
-                final Double dur = rowDur.get(j);
+        for (int row = 0; row < size; row++) {
+            final List<Double> rowDist = distances.get(row);
+            final List<Double> rowDur = durations.get(row);
+            for (int column = 0; column < size; column++) {
+                final Double dist = rowDist.get(column);
+                final Double dur = rowDur.get(column);
                 distanceDurationTableBuilder.put(
-                        stops.get(i),
-                        stops.get(j),
+                        stops.get(row),
+                        stops.get(column),
                         dist == null || dur == null ?
                                 new DistanceDuration(Double.MAX_VALUE, Double.MAX_VALUE) :
                                 new DistanceDuration(dist, dur));
