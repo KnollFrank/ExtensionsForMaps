@@ -8,6 +8,7 @@ import de.knollfrank.extensionsformaps.optimize.OptimizationType;
 public class SortConfig {
 
     public enum OptimizationMethod {
+
         HAVERSINE,
         OPEN_ROUTE_SERVICE
     }

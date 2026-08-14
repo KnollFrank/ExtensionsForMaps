@@ -16,12 +16,14 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.IOException;
+import java.util.List;
 
 import de.knollfrank.extensionsformaps.ApiKeyRepository;
 import de.knollfrank.extensionsformaps.BuildConfig;
@@ -45,94 +47,112 @@ public class SettingsDialog {
                         .from(themedContext)
                         .inflate(R.layout.dialog_settings, null);
 
-        final CheckBox checkBox = dialogView.findViewById(R.id.checkBoxShowPreview);
-        checkBox.setChecked(SortConfig.shouldShowRoutePreview(service));
+        final CheckBox checkBoxShowPreview = dialogView.findViewById(R.id.checkBoxShowPreview);
+        checkBoxShowPreview.setChecked(SortConfig.shouldShowRoutePreview(service));
 
-        final View tvGeneralLabel = dialogView.findViewById(R.id.tvGeneralLabel);
-        final int visibility = BuildConfig.FEATURE_ROUTE_PREVIEW_VISIBLE ? View.VISIBLE : View.GONE;
-        checkBox.setVisibility(visibility);
-        tvGeneralLabel.setVisibility(visibility);
+        List
+                .of(
+                        checkBoxShowPreview,
+                        dialogView.findViewById(R.id.tvGeneralLabel))
+                .forEach(view -> view.setVisibility(BuildConfig.FEATURE_ROUTE_PREVIEW_VISIBLE ? View.VISIBLE : View.GONE));
 
-        final View layoutHaversine = dialogView.findViewById(R.id.layoutHaversine);
         final RadioButton rbHaversine = dialogView.findViewById(R.id.rbHaversine);
         final View layoutOrs = dialogView.findViewById(R.id.layoutOrs);
         final RadioButton rbOrs = dialogView.findViewById(R.id.rbOrs);
         final TextView tvOrsDesc = dialogView.findViewById(R.id.tvOrsDesc);
-        final View btnConfigureOrs = dialogView.findViewById(R.id.btnConfigureOrs);
 
-        final View layoutFixedDest = dialogView.findViewById(R.id.layoutFixedDest);
         final RadioButton rbFixedDest = dialogView.findViewById(R.id.rbFixedDest);
-        final View layoutAnyDest = dialogView.findViewById(R.id.layoutAnyDest);
         final RadioButton rbAnyDest = dialogView.findViewById(R.id.rbAnyDest);
 
-        // Manual RadioButton management to allow clicking the whole container/description
-        final View.OnClickListener haversineClick = v -> {
-            rbHaversine.setChecked(true);
-            rbOrs.setChecked(false);
-        };
-        final View.OnClickListener orsClick = v -> {
-            if (rbOrs.isEnabled()) {
-                rbOrs.setChecked(true);
-                rbHaversine.setChecked(false);
-            }
-        };
+        dialogView
+                .findViewById(R.id.layoutHaversine)
+                .setOnClickListener(
+                        view -> {
+                            // Manual RadioButton management to allow clicking the whole container/description
+                            rbHaversine.setChecked(true);
+                            rbOrs.setChecked(false);
+                        });
+        layoutOrs.setOnClickListener(
+                view -> {
+                    if (rbOrs.isEnabled()) {
+                        rbOrs.setChecked(true);
+                        rbHaversine.setChecked(false);
+                    }
+                });
 
-        layoutHaversine.setOnClickListener(haversineClick);
-        layoutOrs.setOnClickListener(orsClick);
+        dialogView
+                .findViewById(R.id.layoutFixedDest)
+                .setOnClickListener(
+                        view -> {
+                            rbFixedDest.setChecked(true);
+                            rbAnyDest.setChecked(false);
+                        });
+        dialogView
+                .findViewById(R.id.layoutAnyDest)
+                .setOnClickListener(
+                        view -> {
+                            rbAnyDest.setChecked(true);
+                            rbFixedDest.setChecked(false);
+                        });
 
-        final View.OnClickListener fixedDestClick = v -> {
-            rbFixedDest.setChecked(true);
-            rbAnyDest.setChecked(false);
-        };
-        final View.OnClickListener anyDestClick = v -> {
-            rbAnyDest.setChecked(true);
-            rbFixedDest.setChecked(false);
-        };
-
-        layoutFixedDest.setOnClickListener(fixedDestClick);
-        layoutAnyDest.setOnClickListener(anyDestClick);
-
-        final Runnable updateOrsState = () -> {
-            final boolean hasApiKey = ApiKeyRepository.getApiKey(service).isPresent();
-            layoutOrs.setEnabled(hasApiKey);
-            rbOrs.setEnabled(hasApiKey);
-            tvOrsDesc.setAlpha(hasApiKey ? 0.7f : 0.3f);
-            if (!hasApiKey && rbOrs.isChecked()) {
-                rbHaversine.setChecked(true);
-                rbOrs.setChecked(false);
-            }
-        };
+        final Runnable updateOrsState =
+                () -> {
+                    final boolean hasApiKey =
+                            ApiKeyRepository
+                                    .getApiKey(service)
+                                    .isPresent();
+                    layoutOrs.setEnabled(hasApiKey);
+                    rbOrs.setEnabled(hasApiKey);
+                    tvOrsDesc.setAlpha(hasApiKey ? 0.7f : 0.3f);
+                    if (!hasApiKey && rbOrs.isChecked()) {
+                        rbHaversine.setChecked(true);
+                        rbOrs.setChecked(false);
+                    }
+                };
 
         updateOrsState.run();
 
-        final SharedPreferences.OnSharedPreferenceChangeListener prefsListener = (sharedPreferences, key) ->
-                ContextCompat.getMainExecutor(service).execute(updateOrsState);
+        final SharedPreferences.OnSharedPreferenceChangeListener prefsListener =
+                new SharedPreferences.OnSharedPreferenceChangeListener() {
+
+                    @Override
+                    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, @Nullable final String key) {
+                        ContextCompat.getMainExecutor(service).execute(updateOrsState);
+                    }
+                };
 
         final SharedPreferences prefs = ApiKeyRepository.getSharedPreferences(service);
         prefs.registerOnSharedPreferenceChangeListener(prefsListener);
 
-        final AlertDialog settingsDialog = new MaterialAlertDialogBuilder(themedContext)
-                .setTitle(R.string.settings_title)
-                .setView(dialogView)
-                .setCancelable(false)
-                .setPositiveButton(R.string.ok, (d, w) -> {
-                    SortConfig.setShouldShowRoutePreview(service, checkBox.isChecked());
-                    SortConfig.setOptimizationMethod(
-                            service,
-                            rbOrs.isChecked() ?
-                                    SortConfig.OptimizationMethod.OPEN_ROUTE_SERVICE :
-                                    SortConfig.OptimizationMethod.HAVERSINE);
-                    SortConfig.setOptimizationType(
-                            service,
-                            rbAnyDest.isChecked() ?
-                                    OptimizationType.ANY_DESTINATION :
-                                    OptimizationType.FIXED_DESTINATION);
-                })
-                .setNegativeButton(R.string.cancel, (d, w) -> d.dismiss())
-                .setOnDismissListener(d -> prefs.unregisterOnSharedPreferenceChangeListener(prefsListener))
-                .create();
+        final AlertDialog settingsDialog =
+                new MaterialAlertDialogBuilder(themedContext)
+                        .setTitle(R.string.settings_title)
+                        .setView(dialogView)
+                        .setCancelable(false)
+                        .setPositiveButton(
+                                R.string.ok,
+                                (dialog, which) -> {
+                                    SortConfig.setShouldShowRoutePreview(service, checkBoxShowPreview.isChecked());
+                                    SortConfig.setOptimizationMethod(
+                                            service,
+                                            rbOrs.isChecked() ?
+                                                    SortConfig.OptimizationMethod.OPEN_ROUTE_SERVICE :
+                                                    SortConfig.OptimizationMethod.HAVERSINE);
+                                    SortConfig.setOptimizationType(
+                                            service,
+                                            rbAnyDest.isChecked() ?
+                                                    OptimizationType.ANY_DESTINATION :
+                                                    OptimizationType.FIXED_DESTINATION);
+                                })
+                        .setNegativeButton(
+                                R.string.cancel,
+                                (dialog, which) -> dialog.dismiss())
+                        .setOnDismissListener(dialog -> prefs.unregisterOnSharedPreferenceChangeListener(prefsListener))
+                        .create();
 
-        btnConfigureOrs.setOnClickListener(v -> showApiKeyDialog(themedContext, settingsDialog));
+        dialogView
+                .findViewById(R.id.btnConfigureOrs)
+                .setOnClickListener(view -> showApiKeyDialog(themedContext, settingsDialog));
 
         if (SortConfig.getOptimizationMethod(service) == SortConfig.OptimizationMethod.HAVERSINE) {
             rbHaversine.setChecked(true);
@@ -160,7 +180,10 @@ public class SettingsDialog {
     }
 
     private void showApiKeyDialog(final Context context, final AlertDialog parentDialog) {
-        final View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_api_key, null);
+        final View dialogView =
+                LayoutInflater
+                        .from(context)
+                        .inflate(R.layout.dialog_api_key, null);
         final EditText etApiKey = dialogView.findViewById(R.id.etApiKey);
         final ProgressBar progressBar = dialogView.findViewById(R.id.progressBar);
         final TextView tvLink = dialogView.findViewById(R.id.tvLink);
@@ -173,11 +196,16 @@ public class SettingsDialog {
                         .setView(dialogView)
                         .setCancelable(false)
                         .setPositiveButton(R.string.api_key_save, null)
-                        .setNegativeButton(R.string.cancel, (d, w) -> d.dismiss())
+                        .setNegativeButton(
+                                R.string.cancel,
+                                (dialog, which) -> dialog.dismiss())
                         .create();
 
         tvLink.setOnClickListener(v -> {
-            final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(tvLink.getText().toString()));
+            final Intent intent =
+                    new Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(tvLink.getText().toString()));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             service.startActivity(intent);
             // Close both dialogs so they don't cover the browser
@@ -191,34 +219,47 @@ public class SettingsDialog {
 
         apiKeyDialog.show();
 
-        apiKeyDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            final String apiKey = etApiKey.getText().toString().trim();
-            if (apiKey.isEmpty()) {
-                etApiKey.setError(service.getString(R.string.api_key_error_empty));
-                return;
-            }
+        apiKeyDialog
+                .getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(
+                        view -> {
+                            final String apiKey = etApiKey.getText().toString().trim();
+                            if (apiKey.isEmpty()) {
+                                etApiKey.setError(service.getString(R.string.api_key_error_empty));
+                                return;
+                            }
 
-            progressBar.setVisibility(View.VISIBLE);
-            apiKeyDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-            etApiKey.setEnabled(false);
+                            progressBar.setVisibility(View.VISIBLE);
+                            apiKeyDialog
+                                    .getButton(AlertDialog.BUTTON_POSITIVE)
+                                    .setEnabled(false);
+                            etApiKey.setEnabled(false);
 
-            new Thread(() -> {
-                try {
-                    OpenRouteServiceRoutingMatrixProvider.validateApiKey(apiKey);
-                    ContextCompat.getMainExecutor(service).execute(() -> {
-                        ApiKeyRepository.saveApiKey(service, apiKey);
-                        Toast.makeText(service, R.string.api_key_success, Toast.LENGTH_SHORT).show();
-                        apiKeyDialog.dismiss();
-                    });
-                } catch (final IOException e) {
-                    ContextCompat.getMainExecutor(service).execute(() -> {
-                        progressBar.setVisibility(View.GONE);
-                        apiKeyDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-                        etApiKey.setEnabled(true);
-                        etApiKey.setError(service.getString(R.string.api_key_error_invalid, e.getMessage()));
-                    });
-                }
-            }).start();
-        });
+                            new Thread(() -> {
+                                try {
+                                    OpenRouteServiceRoutingMatrixProvider.validateApiKey(apiKey);
+                                    ContextCompat
+                                            .getMainExecutor(service)
+                                            .execute(() -> {
+                                                ApiKeyRepository.saveApiKey(service, apiKey);
+                                                Toast
+                                                        .makeText(service, R.string.api_key_success, Toast.LENGTH_SHORT)
+                                                        .show();
+                                                apiKeyDialog.dismiss();
+                                            });
+                                } catch (final IOException e) {
+                                    ContextCompat
+                                            .getMainExecutor(service)
+                                            .execute(() -> {
+                                                progressBar.setVisibility(View.GONE);
+                                                apiKeyDialog
+                                                        .getButton(AlertDialog.BUTTON_POSITIVE)
+                                                        .setEnabled(true);
+                                                etApiKey.setEnabled(true);
+                                                etApiKey.setError(service.getString(R.string.api_key_error_invalid, e.getMessage()));
+                                            });
+                                }
+                            }).start();
+                        });
     }
 }

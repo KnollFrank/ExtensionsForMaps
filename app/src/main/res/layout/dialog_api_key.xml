@@ -34,7 +34,6 @@
             android:layout_height="wrap_content"
             android:inputType="textVisiblePassword"
             android:maxLines="1" />
-
     </com.google.android.material.textfield.TextInputLayout>
 
     <ProgressBar
@@ -44,5 +43,4 @@
         android:layout_gravity="center"
         android:layout_marginTop="16dp"
         android:visibility="gone" />
-
 </LinearLayout>
