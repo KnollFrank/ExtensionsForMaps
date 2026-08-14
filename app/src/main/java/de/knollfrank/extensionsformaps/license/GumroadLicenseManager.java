@@ -74,24 +74,26 @@ class GumroadLicenseManager implements LicenseManager {
 
     @Override
     public CompletableFuture<Void> verifyExistingLicense() {
-        String licenseKey = prefs.getString(KEY_LICENSE_KEY, null);
+        final String licenseKey = prefs.getString(KEY_LICENSE_KEY, null);
         if (licenseKey == null) {
             return CompletableFuture.completedFuture(null);
         }
-
-        CompletableFuture<Void> future = new CompletableFuture<>();
+        final CompletableFuture<Void> future = new CompletableFuture<>();
         gumroadService
                 .verifyLicense(GUMROAD_PRODUCT_ID, licenseKey)
                 .enqueue(
                         new Callback<>() {
 
                             @Override
-                            public void onResponse(Call<GumroadResponse> call, Response<GumroadResponse> response) {
+                            public void onResponse(final Call<GumroadResponse> call, final Response<GumroadResponse> response) {
                                 if (response.isSuccessful() && response.body() != null) {
                                     boolean isValid = response.body().isSuccess() && response.body().getPurchase().isValid();
                                     if (!isValid) {
                                         // Deactivate Pro if no longer valid
-                                        prefs.edit().putBoolean(KEY_IS_PRO, false).apply();
+                                        prefs
+                                                .edit()
+                                                .putBoolean(KEY_IS_PRO, false)
+                                                .apply();
                                     }
                                 }
                                 future.complete(null);
