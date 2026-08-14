@@ -28,38 +28,47 @@ class GumroadLicenseManager implements LicenseManager {
     }
 
     @Override
-    public boolean isProFeatureRequired(int currentStopCount) {
+    public boolean isProFeatureRequired(final int currentStopCount) {
         return currentStopCount > 15;
     }
 
     @Override
     public CompletableFuture<Boolean> activate(final String licenseKey) {
-        CompletableFuture<Boolean> future = new CompletableFuture<>();
-
+        final CompletableFuture<Boolean> future = new CompletableFuture<>();
         gumroadService
                 .verifyLicense(GUMROAD_PRODUCT_ID, licenseKey)
                 .enqueue(
                         new Callback<>() {
 
                             @Override
-                            public void onResponse(Call<GumroadResponse> call, Response<GumroadResponse> response) {
-                                if (response.isSuccessful() && response.body() != null && response.body().isSuccess() && response.body().getPurchase().isValid()) {
-                                    prefs.edit()
-                                            .putBoolean(KEY_IS_PRO, true)
-                                            .putString(KEY_LICENSE_KEY, licenseKey)
-                                            .apply();
-                                    future.complete(true);
-                                } else {
-                                    future.complete(false);
+                            public void onResponse(final Call<GumroadResponse> call, final Response<GumroadResponse> response) {
+                                final boolean valid = isValid(response);
+                                if (valid) {
+                                    setActivated();
                                 }
+                                future.complete(valid);
                             }
 
                             @Override
-                            public void onFailure(Call<GumroadResponse> call, Throwable t) {
+                            public void onFailure(final Call<GumroadResponse> call, final Throwable t) {
                                 future.completeExceptionally(t);
                             }
-                        });
 
+                            private static boolean isValid(final Response<GumroadResponse> response) {
+                                return response.isSuccessful() &&
+                                        response.body() != null &&
+                                        response.body().isSuccess() &&
+                                        response.body().getPurchase().isValid();
+                            }
+
+                            private void setActivated() {
+                                prefs
+                                        .edit()
+                                        .putBoolean(KEY_IS_PRO, true)
+                                        .putString(KEY_LICENSE_KEY, licenseKey)
+                                        .apply();
+                            }
+                        });
         return future;
     }
 
