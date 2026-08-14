@@ -12,6 +12,9 @@ import androidx.browser.customtabs.CustomTabsIntent;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import java.util.List;
+import java.util.Optional;
+
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.databinding.DialogActivateLicenseBinding;
 import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
@@ -20,97 +23,119 @@ public class UpgradeDialog {
 
     private static final String GUMROAD_URL = "https://knollfrank.gumroad.com/l/yhszp";
 
-    public static void show(Context context, Runnable onActivated) {
-        final AlertDialog dialog =
+    public static void showUpgradeDialog(final Context context, final Runnable onActivated) {
+        final AlertDialog upgradeDialog =
                 new MaterialAlertDialogBuilder(context)
                         .setTitle(R.string.upgrade_pro_title)
                         .setMessage(R.string.upgrade_pro_message)
                         .setPositiveButton(R.string.upgrade_pro_checkout_button, null) // Listener set later to prevent auto-dismiss
-                        .setNeutralButton(R.string.license_enter_key, (d, which) -> showActivationDialog(context, onActivated, () -> show(context, onActivated)))
-                        .setNegativeButton(R.string.cancel, (d, which) -> {
-                            if (context instanceof final Activity activity) {
-                                activity.finish();
-                            }
-                        })
+                        .setNeutralButton(
+                                R.string.license_enter_key,
+                                (dialog, which) ->
+                                        showActivationDialog(
+                                                context,
+                                                onActivated,
+                                                () -> showUpgradeDialog(context, onActivated)))
+                        .setNegativeButton(
+                                R.string.cancel,
+                                (dialog, which) -> {
+                                    if (context instanceof final Activity activity) {
+                                        activity.finish();
+                                    }
+                                })
                         .setCancelable(false)
                         .create();
 
-        dialog.show();
+        upgradeDialog.show();
 
         // Override positive button to prevent auto-dismiss when opening checkout
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> openGumroadCheckout(context));
+        upgradeDialog
+                .getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(v -> openGumroadCheckout(context));
     }
 
-    public static void openGumroadCheckout(Context context) {
-        CustomTabsIntent intent = new CustomTabsIntent.Builder().build();
-        intent.launchUrl(context, Uri.parse(GUMROAD_URL));
+    public static void openGumroadCheckout(final Context context) {
+        new CustomTabsIntent
+                .Builder()
+                .build()
+                .launchUrl(context, Uri.parse(GUMROAD_URL));
     }
 
-    public static void showActivationDialog(Context context, Runnable onActivated) {
-        showActivationDialog(context, onActivated, null);
-    }
-
-    public static void showActivationDialog(Context context, Runnable onActivated, Runnable onCancel) {
+    public static void showActivationDialog(final Context context,
+                                            final Runnable onActivated,
+                                            final Runnable onCancel) {
         final DialogActivateLicenseBinding binding = DialogActivateLicenseBinding.inflate(LayoutInflater.from(context));
+        final AlertDialog activationDialog =
+                new MaterialAlertDialogBuilder(context)
+                        .setView(binding.getRoot())
+                        .setPositiveButton(R.string.license_activate, null) // Set listener later to prevent auto-dismiss
+                        .setNegativeButton(
+                                R.string.cancel,
+                                (dialogInterface, which) -> onCancel.run())
+                        .create();
 
-        AlertDialog dialog = new MaterialAlertDialogBuilder(context)
-                .setView(binding.getRoot())
-                .setPositiveButton(R.string.license_activate, null) // Set listener later to prevent auto-dismiss
-                .setNegativeButton(R.string.cancel, (d, which) -> {
-                    if (onCancel != null) {
-                        onCancel.run();
-                    }
-                })
-                .create();
+        activationDialog.show();
 
-        dialog.show();
+        activationDialog
+                .getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(
+                        new View.OnClickListener() {
 
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            String key = binding.etLicenseKey.getText() != null ? binding.etLicenseKey.getText().toString().trim() : "";
-            if (key.isEmpty()) {
-                binding.etLicenseKey.setError(context.getString(R.string.license_key_hint));
-                return;
-            }
+                            @Override
+                            public void onClick(final View view) {
+                                final String licenseKey =
+                                        Optional
+                                                .ofNullable(binding.etLicenseKey.getText())
+                                                .map(_licenseKey -> _licenseKey.toString().trim())
+                                                .orElse("");
+                                if (licenseKey.isEmpty()) {
+                                    binding.etLicenseKey.setError(context.getString(R.string.license_key_hint));
+                                    return;
+                                }
 
-            binding.progressBar.setVisibility(View.VISIBLE);
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-            binding.etLicenseKey.setEnabled(false);
+                                binding.progressBar.setVisibility(View.VISIBLE);
+                                setEnabled(false);
 
-            LicenseManagerProvider
-                    .getInstance(context)
-                    .activate(key)
-                    .thenAccept(success ->
-                            dialog
-                                    .getButton(AlertDialog.BUTTON_POSITIVE)
-                                    .post(() -> {
-                                        if (success) {
-                                            Toast
-                                                    .makeText(context, R.string.license_success, Toast.LENGTH_LONG)
-                                                    .show();
-                                            dialog.dismiss();
-                                            if (onActivated != null) {
-                                                onActivated.run();
-                                            }
-                                        } else {
-                                            binding.progressBar.setVisibility(View.GONE);
-                                            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-                                            binding.etLicenseKey.setEnabled(true);
-                                            binding.etLicenseKey.setError(context.getString(R.string.license_error_invalid));
-                                        }
-                                    }))
-                    .exceptionally(throwable -> {
-                        dialog
-                                .getButton(AlertDialog.BUTTON_POSITIVE)
-                                .post(() -> {
-                                    binding.progressBar.setVisibility(View.GONE);
-                                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-                                    binding.etLicenseKey.setEnabled(true);
-                                    Toast
-                                            .makeText(context, context.getString(R.string.error_with_message, throwable.getMessage()), Toast.LENGTH_LONG)
-                                            .show();
-                                });
-                        return null;
-                    });
-        });
+                                LicenseManagerProvider
+                                        .getInstance(context)
+                                        .activate(licenseKey)
+                                        .thenAccept(success ->
+                                                            activationDialog
+                                                                    .getButton(AlertDialog.BUTTON_POSITIVE)
+                                                                    .post(() -> {
+                                                                        if (success) {
+                                                                            Toast
+                                                                                    .makeText(context, R.string.license_success, Toast.LENGTH_LONG)
+                                                                                    .show();
+                                                                            activationDialog.dismiss();
+                                                                            onActivated.run();
+                                                                        } else {
+                                                                            binding.progressBar.setVisibility(View.GONE);
+                                                                            setEnabled(true);
+                                                                            binding.etLicenseKey.setError(context.getString(R.string.license_error_invalid));
+                                                                        }
+                                                                    }))
+                                        .exceptionally(throwable -> {
+                                            activationDialog
+                                                    .getButton(AlertDialog.BUTTON_POSITIVE)
+                                                    .post(() -> {
+                                                        binding.progressBar.setVisibility(View.GONE);
+                                                        setEnabled(true);
+                                                        Toast
+                                                                .makeText(context, context.getString(R.string.error_with_message, throwable.getMessage()), Toast.LENGTH_LONG)
+                                                                .show();
+                                                    });
+                                            return null;
+                                        });
+                            }
+
+                            private void setEnabled(final boolean enabled) {
+                                List
+                                        .of(
+                                                activationDialog.getButton(AlertDialog.BUTTON_POSITIVE),
+                                                binding.etLicenseKey)
+                                        .forEach(view -> view.setEnabled(enabled));
+                            }
+                        });
     }
 }

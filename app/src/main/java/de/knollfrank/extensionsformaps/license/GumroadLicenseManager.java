@@ -51,7 +51,7 @@ public class GumroadLicenseManager implements LicenseManager {
     }
 
     @Override
-    public CompletableFuture<Boolean> activate(String licenseKey) {
+    public CompletableFuture<Boolean> activate(final String licenseKey) {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
 
         gumroadService

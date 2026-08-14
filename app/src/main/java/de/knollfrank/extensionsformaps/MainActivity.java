@@ -18,6 +18,7 @@ import com.google.android.material.slider.Slider;
 import java.net.URL;
 import java.util.List;
 
+import de.knollfrank.extensionsformaps.common.Runnables;
 import de.knollfrank.extensionsformaps.databinding.ActivityMainBinding;
 import de.knollfrank.extensionsformaps.feature.UpgradeDialog;
 import de.knollfrank.extensionsformaps.license.LicenseManager;
@@ -129,8 +130,13 @@ public class MainActivity extends AppCompatActivity {
             binding.cardLicense.setVisibility(View.GONE);
             return;
         }
-        binding.btnActivateLicense.setOnClickListener(v -> UpgradeDialog.showActivationDialog(this, this::updateLicenseUI));
-        binding.btnBuyLicense.setOnClickListener(v -> UpgradeDialog.openGumroadCheckout(this));
+        binding.btnActivateLicense.setOnClickListener(
+                view ->
+                        UpgradeDialog.showActivationDialog(
+                                this,
+                                this::updateLicenseUI,
+                                Runnables.empty()));
+        binding.btnBuyLicense.setOnClickListener(view -> UpgradeDialog.openGumroadCheckout(this));
     }
 
     private void updateLicenseUI() {

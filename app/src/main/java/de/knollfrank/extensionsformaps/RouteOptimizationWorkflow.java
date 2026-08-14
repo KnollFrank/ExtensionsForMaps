@@ -79,7 +79,7 @@ public class RouteOptimizationWorkflow {
                             LicenseManagerProvider.getInstance(context).isProFeatureRequired(enrichedRoute.stops().size()) &&
                             !LicenseManagerProvider.getInstance(context).isPro()) {
                         progressOverlay.hide();
-                        UpgradeDialog.show(context, () -> onExtractRouteFromDirectionsUrlSuccess(route));
+                        UpgradeDialog.showUpgradeDialog(context, () -> onExtractRouteFromDirectionsUrlSuccess(route));
                         return;
                     }
 

@@ -115,7 +115,7 @@ public class AddStopActivity extends AppCompatActivity {
     }
 
     private void showUpgradeDialog(Route route) {
-        UpgradeDialog.show(this, () -> handleRoute(route));
+        UpgradeDialog.showUpgradeDialog(this, () -> handleRoute(route));
     }
 
     private void showLimitReachedDialog() {
