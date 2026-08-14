@@ -15,6 +15,7 @@ import androidx.test.core.app.ApplicationProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.concurrent.CompletableFuture;
@@ -46,24 +47,26 @@ public class GumroadLicenseManagerTest {
     @Test
     public void testActivate_success() {
         // Given
-        String key = "VALID-KEY";
-        Call<GumroadResponse> mockCall = mock(Call.class);
-        GumroadResponse successResponse = mock(GumroadResponse.class);
-        GumroadResponse.Purchase mockPurchase = mock(GumroadResponse.Purchase.class);
-        
+        final String key = "VALID-KEY";
+        final Call<GumroadResponse> mockCall = mock(Call.class);
+        final GumroadResponse successResponse = mock(GumroadResponse.class);
+        final GumroadResponse.Purchase mockPurchase = mock(GumroadResponse.Purchase.class);
+
         when(successResponse.isSuccess()).thenReturn(true);
         when(successResponse.getPurchase()).thenReturn(mockPurchase);
         when(mockPurchase.isValid()).thenReturn(true);
 
         when(mockService.verifyLicense(anyString(), anyString())).thenReturn(mockCall);
-        doAnswer(invocation -> {
-            Callback<GumroadResponse> callback = invocation.getArgument(0);
-            callback.onResponse(mockCall, Response.success(successResponse));
-            return null;
-        }).when(mockCall).enqueue(any());
+        Mockito
+                .doAnswer(invocation -> {
+                    final Callback<GumroadResponse> callback = invocation.getArgument(0);
+                    callback.onResponse(mockCall, Response.success(successResponse));
+                    return null;
+                })
+                .when(mockCall).enqueue(any());
 
         // When
-        CompletableFuture<Boolean> future = licenseManager.activate(key);
+        final CompletableFuture<Boolean> future = licenseManager.activate(key);
 
         // Then
         assertTrue(future.join());
@@ -77,7 +80,7 @@ public class GumroadLicenseManagerTest {
         Call<GumroadResponse> mockCall = mock(Call.class);
         GumroadResponse successResponse = mock(GumroadResponse.class);
         GumroadResponse.Purchase mockPurchase = mock(GumroadResponse.Purchase.class);
-        
+
         when(successResponse.isSuccess()).thenReturn(true);
         when(successResponse.getPurchase()).thenReturn(mockPurchase);
         when(mockPurchase.isValid()).thenReturn(false); // Valid includes refunded check
@@ -132,7 +135,7 @@ public class GumroadLicenseManagerTest {
         Call<GumroadResponse> mockCall = mock(Call.class);
         GumroadResponse refundedResponse = mock(GumroadResponse.class);
         GumroadResponse.Purchase mockPurchase = mock(GumroadResponse.Purchase.class);
-        
+
         when(refundedResponse.isSuccess()).thenReturn(true);
         when(refundedResponse.getPurchase()).thenReturn(mockPurchase);
         when(mockPurchase.isValid()).thenReturn(false); // Refunded
