@@ -2,7 +2,7 @@ package de.knollfrank.extensionsformaps.license;
 
 import com.google.gson.annotations.SerializedName;
 
-public class GumroadResponse {
+class GumroadResponse {
 
     @SerializedName("success")
     private boolean success;

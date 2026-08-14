@@ -1,6 +1,5 @@
 package de.knollfrank.extensionsformaps.license;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.util.concurrent.CompletableFuture;
@@ -8,36 +7,19 @@ import java.util.concurrent.CompletableFuture;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
-public class GumroadLicenseManager implements LicenseManager {
+class GumroadLicenseManager implements LicenseManager {
 
-    private static final String PREFS_NAME = "license_prefs";
     private static final String KEY_IS_PRO = "is_pro";
     private static final String KEY_LICENSE_KEY = "license_key";
     private static final String GUMROAD_PRODUCT_ID = "-QghnDM3ybPOOTcK762teA==";
-    private static final String BASE_URL = "https://api.gumroad.com/";
 
-    private final SharedPreferences prefs;
     private final GumroadService gumroadService;
+    private final SharedPreferences prefs;
 
-    public GumroadLicenseManager(Context context) {
-        this(context, createDefaultService());
-    }
-
-    GumroadLicenseManager(Context context, GumroadService gumroadService) {
-        this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    public GumroadLicenseManager(final GumroadService gumroadService, final SharedPreferences prefs) {
         this.gumroadService = gumroadService;
-    }
-
-    private static GumroadService createDefaultService() {
-        return new Retrofit
-                .Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-                .create(GumroadService.class);
+        this.prefs = prefs;
     }
 
     @Override

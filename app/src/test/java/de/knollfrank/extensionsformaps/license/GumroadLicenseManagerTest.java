@@ -34,7 +34,7 @@ public class GumroadLicenseManagerTest {
     public void setUp() {
         context = ApplicationProvider.getApplicationContext();
         mockService = mock(GumroadService.class);
-        licenseManager = new GumroadLicenseManager(context, mockService);
+        licenseManager = new GumroadLicenseManager(mockService, context.getSharedPreferences("license_prefs", Context.MODE_PRIVATE));
     }
 
     @Test

@@ -5,7 +5,7 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public interface GumroadService {
+interface GumroadService {
 
     @FormUrlEncoded
     @POST("v2/licenses/verify")
