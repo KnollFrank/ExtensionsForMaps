@@ -21,6 +21,7 @@ import de.knollfrank.extensionsformaps.ProgressOverlay;
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.SortConfig;
 import de.knollfrank.extensionsformaps.UrlExpander;
+import de.knollfrank.extensionsformaps.databinding.DialogAddStopInstructionBinding;
 import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
 import de.knollfrank.extensionsformaps.route.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.Route;
@@ -160,14 +161,13 @@ public class AddStopActivity extends AppCompatActivity {
     }
 
     private void showInstructionDialog(URL url) {
-        android.view.View view = android.view.LayoutInflater.from(this).inflate(R.layout.dialog_add_stop_instruction, null);
-        android.widget.CheckBox cbDontShowAgain = view.findViewById(R.id.cbDontShowAgain);
+        final DialogAddStopInstructionBinding binding = DialogAddStopInstructionBinding.inflate(getLayoutInflater());
 
         new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.add_stop_instruction_title)
-                .setView(view)
+                .setView(binding.getRoot())
                 .setPositiveButton(R.string.ok, (dialog, which) -> {
-                    if (cbDontShowAgain.isChecked()) {
+                    if (binding.cbDontShowAgain.isChecked()) {
                         SortConfig.setShouldShowAddStopInstruction(this, false);
                     }
                     GoogleMapsNavigator.launchUrl(url, getApplicationContext());

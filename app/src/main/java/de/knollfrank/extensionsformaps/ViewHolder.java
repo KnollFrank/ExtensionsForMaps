@@ -4,8 +4,6 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,44 +14,33 @@ import java.util.List;
 import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.common.Lists;
+import de.knollfrank.extensionsformaps.databinding.ItemStopBinding;
 import de.knollfrank.extensionsformaps.route.DeliveryGroup;
 import de.knollfrank.extensionsformaps.route.DeliveryGroups;
 
 class ViewHolder extends RecyclerView.ViewHolder {
 
-    public final TextView tvDotsTop;
-    public final TextView tvDotsBottom;
-    public final TextView tvIndexLetter;
-    public final View viewOriginMarker;
-    public final ImageView ivDestinationMarker;
-    public final TextView tvAddress;
-    public final Spinner spinnerDeliveryGroup;
+    public final ItemStopBinding binding;
     public final ArrayAdapter<Optional<DeliveryGroup>> spinnerDeliveryGroupAdapter;
 
-    public ViewHolder(final View itemView) {
-        super(itemView);
-        tvDotsTop = itemView.findViewById(R.id.tvDotsTop);
-        tvDotsBottom = itemView.findViewById(R.id.tvDotsBottom);
-        tvIndexLetter = itemView.findViewById(R.id.tvIndexLetter);
-        viewOriginMarker = itemView.findViewById(R.id.viewOriginMarker);
-        ivDestinationMarker = itemView.findViewById(R.id.ivDestinationMarker);
-        tvAddress = itemView.findViewById(R.id.tvAddress);
-        spinnerDeliveryGroup = itemView.findViewById(R.id.spinnerDeliveryGroup);
+    public ViewHolder(final ItemStopBinding binding) {
+        super(binding.getRoot());
+        this.binding = binding;
         spinnerDeliveryGroupAdapter =
                 createAndConfigureSpinnerDeliveryGroupAdapter(
                         getDeliveryGroupOptions(DeliveryGroups.DELIVERY_GROUPS),
-                        itemView.getContext());
-        spinnerDeliveryGroup.setAdapter(spinnerDeliveryGroupAdapter);
+                        binding.getRoot().getContext());
+        binding.spinnerDeliveryGroup.setAdapter(spinnerDeliveryGroupAdapter);
     }
 
     public void setDots(final int position, final int numStops) {
-        tvDotsTop.setVisibility(position == 0 ? View.INVISIBLE : View.VISIBLE);
-        tvDotsBottom.setVisibility(position == numStops - 1 ? View.INVISIBLE : View.VISIBLE);
+        binding.tvDotsTop.setVisibility(position == 0 ? View.INVISIBLE : View.VISIBLE);
+        binding.tvDotsBottom.setVisibility(position == numStops - 1 ? View.INVISIBLE : View.VISIBLE);
     }
 
     public void setIndexLetterForPosition(final int position) {
-        tvIndexLetter.setVisibility(View.VISIBLE);
-        tvIndexLetter.setText(getIndexLetter(position));
+        binding.tvIndexLetter.setVisibility(View.VISIBLE);
+        binding.tvIndexLetter.setText(getIndexLetter(position));
     }
 
     private static Optional<DeliveryGroup>[] getDeliveryGroupOptions(final List<DeliveryGroup> deliveryGroups) {

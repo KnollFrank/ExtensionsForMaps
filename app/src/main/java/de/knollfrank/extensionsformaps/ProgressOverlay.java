@@ -5,22 +5,20 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import de.knollfrank.extensionsformaps.databinding.DialogProgressBinding;
 
 public class ProgressOverlay {
 
     private final Context context;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AlertDialog dialog;
-    private TextView statusTextView;
-    private TextView percentageTextView;
-    private com.google.android.material.progressindicator.LinearProgressIndicator progressBar;
+    private DialogProgressBinding binding;
     private Runnable onCancelListener;
 
     public ProgressOverlay(final Context context) {
@@ -38,14 +36,11 @@ public class ProgressOverlay {
             }
 
             final ContextThemeWrapper themeContext = new ContextThemeWrapper(context, R.style.Theme_ExtensionsForMaps_Dialog);
-            final View view = LayoutInflater.from(themeContext).inflate(R.layout.dialog_progress, null);
-            statusTextView = view.findViewById(R.id.tvStatus);
-            percentageTextView = view.findViewById(R.id.tvPercentage);
-            progressBar = view.findViewById(R.id.progressBar);
+            binding = DialogProgressBinding.inflate(LayoutInflater.from(themeContext));
 
             MaterialAlertDialogBuilder builder =
                     new MaterialAlertDialogBuilder(themeContext)
-                            .setView(view)
+                            .setView(binding.getRoot())
                             .setCancelable(false);
 
             if (onCancelListener != null) {
@@ -71,20 +66,18 @@ public class ProgressOverlay {
 
     public void updateStatus(final String message) {
         mainHandler.post(() -> {
-            if (statusTextView != null) {
-                statusTextView.setText(message);
+            if (binding != null) {
+                binding.tvStatus.setText(message);
             }
         });
     }
 
     public void updateProgress(final int percentage) {
         mainHandler.post(() -> {
-            if (percentageTextView != null) {
-                percentageTextView.setText(context.getString(R.string.percentage_format, percentage));
-            }
-            if (progressBar != null) {
-                progressBar.setIndeterminate(false);
-                progressBar.setProgress(percentage);
+            if (binding != null) {
+                binding.tvPercentage.setText(context.getString(R.string.percentage_format, percentage));
+                binding.progressBar.setIndeterminate(false);
+                binding.progressBar.setProgress(percentage);
             }
         });
     }
@@ -94,7 +87,7 @@ public class ProgressOverlay {
             if (dialog != null && dialog.isShowing()) {
                 dialog.dismiss();
                 dialog = null;
-                statusTextView = null;
+                binding = null;
             }
         });
     }

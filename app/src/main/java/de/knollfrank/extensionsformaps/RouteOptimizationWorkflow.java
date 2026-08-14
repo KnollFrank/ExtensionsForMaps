@@ -8,19 +8,18 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.net.URL;
 import java.util.Locale;
 
+import de.knollfrank.extensionsformaps.databinding.DialogRoutePreviewBinding;
 import de.knollfrank.extensionsformaps.feature.UpgradeDialog;
 import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
 import de.knollfrank.extensionsformaps.optimize.NativeSuburbResolver;
@@ -171,20 +170,16 @@ public class RouteOptimizationWorkflow {
             }
 
             private void showRoutePreviewDialog(final Route route, final ContextThemeWrapper context) {
-                final View dialogView =
-                        LayoutInflater
-                                .from(context)
-                                .inflate(R.layout.dialog_route_preview, null);
+                final DialogRoutePreviewBinding binding = DialogRoutePreviewBinding.inflate(LayoutInflater.from(context));
                 final StopsAdapter stopsAdapter = new StopsAdapter();
                 stopsAdapter.setRoute(route);
-                final RecyclerView recyclerViewStops = dialogView.findViewById(R.id.recyclerViewStops);
-                recyclerViewStops.setLayoutManager(new LinearLayoutManager(context));
-                recyclerViewStops.setAdapter(stopsAdapter);
+                binding.recyclerViewStops.setLayoutManager(new LinearLayoutManager(context));
+                binding.recyclerViewStops.setAdapter(stopsAdapter);
                 final AlertDialog dialog =
                         new MaterialAlertDialogBuilder(context)
                                 .setTitle(R.string.route_preview_title)
                                 .setCancelable(false)
-                                .setView(dialogView)
+                                .setView(binding.getRoot())
                                 .setPositiveButton(
                                         R.string.ok,
                                         new DialogInterface.OnClickListener() {

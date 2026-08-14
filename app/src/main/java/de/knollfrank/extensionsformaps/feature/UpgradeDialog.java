@@ -5,7 +5,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -14,6 +13,7 @@ import androidx.browser.customtabs.CustomTabsIntent;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import de.knollfrank.extensionsformaps.R;
+import de.knollfrank.extensionsformaps.databinding.DialogActivateLicenseBinding;
 import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
 
 public class UpgradeDialog {
@@ -51,12 +51,10 @@ public class UpgradeDialog {
     }
 
     public static void showActivationDialog(Context context, Runnable onActivated, Runnable onCancel) {
-        View view = LayoutInflater.from(context).inflate(R.layout.dialog_activate_license, null);
-        EditText etKey = view.findViewById(R.id.etLicenseKey);
-        View progressBar = view.findViewById(R.id.progressBar);
+        final DialogActivateLicenseBinding binding = DialogActivateLicenseBinding.inflate(LayoutInflater.from(context));
 
         AlertDialog dialog = new MaterialAlertDialogBuilder(context)
-                .setView(view)
+                .setView(binding.getRoot())
                 .setPositiveButton(R.string.license_activate, null) // Set listener later to prevent auto-dismiss
                 .setNegativeButton(R.string.cancel, (d, which) -> {
                     if (onCancel != null) {
@@ -68,15 +66,15 @@ public class UpgradeDialog {
         dialog.show();
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            String key = etKey.getText().toString().trim();
+            String key = binding.etLicenseKey.getText() != null ? binding.etLicenseKey.getText().toString().trim() : "";
             if (key.isEmpty()) {
-                etKey.setError(context.getString(R.string.license_key_hint));
+                binding.etLicenseKey.setError(context.getString(R.string.license_key_hint));
                 return;
             }
 
-            progressBar.setVisibility(View.VISIBLE);
+            binding.progressBar.setVisibility(View.VISIBLE);
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-            etKey.setEnabled(false);
+            binding.etLicenseKey.setEnabled(false);
 
             LicenseManagerProvider
                     .getInstance(context)
@@ -94,19 +92,19 @@ public class UpgradeDialog {
                                                 onActivated.run();
                                             }
                                         } else {
-                                            progressBar.setVisibility(View.GONE);
+                                            binding.progressBar.setVisibility(View.GONE);
                                             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-                                            etKey.setEnabled(true);
-                                            etKey.setError(context.getString(R.string.license_error_invalid));
+                                            binding.etLicenseKey.setEnabled(true);
+                                            binding.etLicenseKey.setError(context.getString(R.string.license_error_invalid));
                                         }
                                     }))
                     .exceptionally(throwable -> {
                         dialog
                                 .getButton(AlertDialog.BUTTON_POSITIVE)
                                 .post(() -> {
-                                    progressBar.setVisibility(View.GONE);
+                                    binding.progressBar.setVisibility(View.GONE);
                                     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-                                    etKey.setEnabled(true);
+                                    binding.etLicenseKey.setEnabled(true);
                                     Toast
                                             .makeText(context, context.getString(R.string.error_with_message, throwable.getMessage()), Toast.LENGTH_LONG)
                                             .show();

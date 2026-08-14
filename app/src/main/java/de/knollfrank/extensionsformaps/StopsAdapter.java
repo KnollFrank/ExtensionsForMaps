@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import de.knollfrank.extensionsformaps.databinding.ItemStopBinding;
 import de.knollfrank.extensionsformaps.route.DeliveryGroup;
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.Stop;
@@ -40,12 +41,9 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
-        final ViewHolder holder =
-                new ViewHolder(
-                        LayoutInflater
-                                .from(parent.getContext())
-                                .inflate(R.layout.item_stop, parent, false));
-        holder.spinnerDeliveryGroup.setOnItemSelectedListener(
+        final ItemStopBinding binding = ItemStopBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        final ViewHolder holder = new ViewHolder(binding);
+        holder.binding.spinnerDeliveryGroup.setOnItemSelectedListener(
                 new AdapterView.OnItemSelectedListener() {
 
                     @Override
@@ -69,22 +67,23 @@ class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         final Stop stop = route.orElseThrow().stops().get(position);
-        holder.tvAddress.setText(stop.address());
+        holder.binding.tvAddress.setText(stop.address());
         holder.setDots(position, getItemCount());
         // Marker logic
-        holder.tvIndexLetter.setVisibility(View.GONE);
-        holder.viewOriginMarker.setVisibility(View.GONE);
-        holder.ivDestinationMarker.setVisibility(View.GONE);
+        holder.binding.tvIndexLetter.setVisibility(View.GONE);
+        holder.binding.viewOriginMarker.setVisibility(View.GONE);
+        holder.binding.ivDestinationMarker.setVisibility(View.GONE);
         if (isOriginOfRoute(position)) {
-            holder.viewOriginMarker.setVisibility(View.VISIBLE);
-            holder.spinnerDeliveryGroup.setVisibility(View.GONE);
+            holder.binding.viewOriginMarker.setVisibility(View.VISIBLE);
+            holder.binding.spinnerDeliveryGroup.setVisibility(View.GONE);
         } else if (isDestinationOfRoute(position)) {
-            holder.ivDestinationMarker.setVisibility(View.VISIBLE);
-            holder.spinnerDeliveryGroup.setVisibility(View.GONE);
+            holder.binding.ivDestinationMarker.setVisibility(View.VISIBLE);
+            holder.binding.spinnerDeliveryGroup.setVisibility(View.GONE);
         } else {
+            holder.binding.tvIndexLetter.setVisibility(View.VISIBLE);
             holder.setIndexLetterForPosition(position - 1);
-            holder.spinnerDeliveryGroup.setVisibility(View.VISIBLE);
-            holder.spinnerDeliveryGroup.setSelection(
+            holder.binding.spinnerDeliveryGroup.setVisibility(View.VISIBLE);
+            holder.binding.spinnerDeliveryGroup.setSelection(
                     holder.spinnerDeliveryGroupAdapter.getPosition(
                             deliveryGroups.get(position)));
         }

@@ -8,19 +8,17 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
-import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.slider.Slider;
 
 import java.net.URL;
 import java.util.List;
 
+import de.knollfrank.extensionsformaps.databinding.ActivityMainBinding;
 import de.knollfrank.extensionsformaps.feature.UpgradeDialog;
 import de.knollfrank.extensionsformaps.license.LicenseManager;
 import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
@@ -29,10 +27,13 @@ import de.knollfrank.extensionsformaps.route.RouteToUrlConverter;
 
 public class MainActivity extends AppCompatActivity {
 
+    private ActivityMainBinding binding;
+
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
         configurePlanRoute();
         configureOnboarding();
         configureCoffeeButton();
@@ -60,42 +61,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void configurePlanRoute() {
-        final View cardPlanning = findViewById(R.id.cardPlanning);
         if (!BuildConfig.SHOW_PLANNING_CARD) {
-            cardPlanning.setVisibility(View.GONE);
+            binding.cardPlanning.setVisibility(View.GONE);
             return;
         }
-        final Slider sliderTotalStops = findViewById(R.id.sliderTotalStops);
-        final TextView tvTotalStopsLabel = findViewById(R.id.tvTotalStopsLabel);
-        tvTotalStopsLabel.setText(getString(R.string.total_stops_label, (int) sliderTotalStops.getValue()));
-        sliderTotalStops.addOnChangeListener(
+        binding.tvTotalStopsLabel.setText(getString(R.string.total_stops_label, (int) binding.sliderTotalStops.getValue()));
+        binding.sliderTotalStops.addOnChangeListener(
                 new Slider.OnChangeListener() {
 
                     @Override
                     public void onValueChange(@NonNull final Slider slider,
                                               final float value,
                                               final boolean fromUser) {
-                        tvTotalStopsLabel.setText(getString(R.string.total_stops_label, (int) value));
+                        binding.tvTotalStopsLabel.setText(getString(R.string.total_stops_label, (int) value));
                     }
                 });
-        this
-                .<Button>findViewById(R.id.btnGenerateTemplate)
-                .setOnClickListener(onBtnGenerateTemplateClick(sliderTotalStops, this));
+        binding.btnGenerateTemplate.setOnClickListener(onBtnGenerateTemplateClick(binding.sliderTotalStops, this));
     }
 
     private void configureOnboarding() {
         if (!BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
-            findViewById(R.id.cardOnboarding).setVisibility(View.VISIBLE);
+            binding.cardOnboarding.setVisibility(View.VISIBLE);
         }
     }
 
     private void configureCoffeeButton() {
-        final View btnCoffee = findViewById(R.id.btnCoffee);
         if (!BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
-            btnCoffee.setVisibility(View.GONE);
+            binding.btnCoffee.setVisibility(View.GONE);
             return;
         }
-        btnCoffee.setOnClickListener(
+        binding.btnCoffee.setOnClickListener(
                 view ->
                         startActivity(
                                 new Intent(
@@ -105,19 +100,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void configurePermissionButtons() {
         if (!BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
-            findViewById(R.id.cardPermissions).setVisibility(View.GONE);
+            binding.cardPermissions.setVisibility(View.GONE);
             return;
         }
-        this
-                .findViewById(R.id.btnPermitAccessibility)
-                .setOnClickListener(
-                        new View.OnClickListener() {
+        binding.btnPermitAccessibility.setOnClickListener(
+                new View.OnClickListener() {
 
-                            @Override
-                            public void onClick(final View view) {
-                                startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
-                            }
-                        });
+                    @Override
+                    public void onClick(final View view) {
+                        startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                    }
+                });
     }
 
     private void updatePermissionButtonStates() {
@@ -128,17 +121,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void updatePermitAccessibilityButtonState() {
         final boolean accessibilityServiceEnabled = isAccessibilityServiceEnabled();
-        final MaterialButton btnAccessibility = findViewById(R.id.btnPermitAccessibility);
-        btnAccessibility.setText(accessibilityServiceEnabled ? R.string.permit_accessibility_done : R.string.permit_accessibility);
+        binding.btnPermitAccessibility.setText(accessibilityServiceEnabled ? R.string.permit_accessibility_done : R.string.permit_accessibility);
     }
 
     private void configureLicenseUI() {
         if (BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
-            findViewById(R.id.cardLicense).setVisibility(View.GONE);
+            binding.cardLicense.setVisibility(View.GONE);
             return;
         }
-        findViewById(R.id.btnActivateLicense).setOnClickListener(v -> UpgradeDialog.showActivationDialog(this, this::updateLicenseUI));
-        findViewById(R.id.btnBuyLicense).setOnClickListener(v -> UpgradeDialog.openGumroadCheckout(this));
+        binding.btnActivateLicense.setOnClickListener(v -> UpgradeDialog.showActivationDialog(this, this::updateLicenseUI));
+        binding.btnBuyLicense.setOnClickListener(v -> UpgradeDialog.openGumroadCheckout(this));
     }
 
     private void updateLicenseUI() {
@@ -147,11 +139,10 @@ public class MainActivity extends AppCompatActivity {
         LicenseManager licenseManager = LicenseManagerProvider.getInstance(this);
         boolean isPro = licenseManager.isPro();
 
-        TextView tvStatus = findViewById(R.id.tvLicenseStatus);
-        tvStatus.setText(isPro ? R.string.license_status_pro : R.string.license_status_free);
+        binding.tvLicenseStatus.setText(isPro ? R.string.license_status_pro : R.string.license_status_free);
 
-        findViewById(R.id.btnActivateLicense).setVisibility(isPro ? View.GONE : View.VISIBLE);
-        findViewById(R.id.btnBuyLicense).setVisibility(isPro ? View.GONE : View.VISIBLE);
+        binding.btnActivateLicense.setVisibility(isPro ? View.GONE : View.VISIBLE);
+        binding.btnBuyLicense.setVisibility(isPro ? View.GONE : View.VISIBLE);
     }
 
     // FK-TODO: refactor and move to another class
