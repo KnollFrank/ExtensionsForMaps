@@ -11,8 +11,8 @@ import retrofit2.Response;
 
 class GumroadLicenseManager implements LicenseManager {
 
-    private static final String KEY_IS_PRO = "is_pro";
-    private static final String KEY_LICENSE_KEY = "license_key";
+    static final String KEY_IS_PRO = "is_pro";
+    static final String KEY_LICENSE_KEY = "license_key";
     private static final String GUMROAD_PRODUCT_ID = "-QghnDM3ybPOOTcK762teA==";
 
     private final GumroadService gumroadService;

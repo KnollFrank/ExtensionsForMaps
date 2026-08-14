@@ -4,11 +4,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -35,7 +35,7 @@ public class GumroadLicenseManagerTest {
     public void setUp() {
         context = ApplicationProvider.getApplicationContext();
         mockService = mock(GumroadService.class);
-        licenseManager = new GumroadLicenseManager(mockService, context.getSharedPreferences("license_prefs", Context.MODE_PRIVATE));
+        licenseManager = new GumroadLicenseManager(mockService, getLicensePrefs());
     }
 
     @Test
@@ -99,15 +99,18 @@ public class GumroadLicenseManagerTest {
         // Given
         final String key = "INVALID-KEY";
         final Call<GumroadResponse> mockCall = mock(Call.class);
-        GumroadResponse failureResponse = mock(GumroadResponse.class);
+        final GumroadResponse failureResponse = mock(GumroadResponse.class);
         when(failureResponse.isSuccess()).thenReturn(false);
 
         when(mockService.verifyLicense(anyString(), anyString())).thenReturn(mockCall);
-        doAnswer(invocation -> {
-            Callback<GumroadResponse> callback = invocation.getArgument(0);
-            callback.onResponse(mockCall, Response.success(failureResponse));
-            return null;
-        }).when(mockCall).enqueue(any());
+        Mockito
+                .doAnswer(
+                        invocation -> {
+                            Callback<GumroadResponse> callback = invocation.getArgument(0);
+                            callback.onResponse(mockCall, Response.success(failureResponse));
+                            return null;
+                        })
+                .when(mockCall).enqueue(any());
 
         // When
         CompletableFuture<Boolean> future = licenseManager.activate(key);
@@ -120,32 +123,34 @@ public class GumroadLicenseManagerTest {
     @Test
     public void testVerifyExistingLicense_deactivatesIfRefunded() {
         // Given: Already pro
-        context.getSharedPreferences("license_prefs", Context.MODE_PRIVATE)
+        getLicensePrefs()
                 .edit()
-                .putBoolean("is_pro", true)
-                .putString("license_key", "SOME-KEY")
+                .putBoolean(GumroadLicenseManager.KEY_IS_PRO, true)
+                .putString(GumroadLicenseManager.KEY_LICENSE_KEY, "SOME-KEY")
                 .apply();
 
-        Call<GumroadResponse> mockCall = mock(Call.class);
-        GumroadResponse refundedResponse = mock(GumroadResponse.class);
-        GumroadResponse.Purchase mockPurchase = mock(GumroadResponse.Purchase.class);
-
-        when(refundedResponse.isSuccess()).thenReturn(true);
-        when(refundedResponse.getPurchase()).thenReturn(mockPurchase);
-        when(mockPurchase.isValid()).thenReturn(false); // Refunded
-
+        final Call<GumroadResponse> mockCall = mock(Call.class);
+        final GumroadResponse refundedResponse = mock(GumroadResponse.class);
+        configure(refundedResponse, false); // Refunded
         when(mockService.verifyLicense(anyString(), anyString())).thenReturn(mockCall);
-        doAnswer(invocation -> {
-            Callback<GumroadResponse> callback = invocation.getArgument(0);
-            callback.onResponse(mockCall, Response.success(refundedResponse));
-            return null;
-        }).when(mockCall).enqueue(any());
+        Mockito
+                .doAnswer(
+                        invocation -> {
+                            final Callback<GumroadResponse> callback = invocation.getArgument(0);
+                            callback.onResponse(mockCall, Response.success(refundedResponse));
+                            return null;
+                        })
+                .when(mockCall).enqueue(any());
 
         // When
         licenseManager.verifyExistingLicense().join();
 
         // Then
         assertFalse(licenseManager.isPro());
+    }
+
+    private SharedPreferences getLicensePrefs() {
+        return context.getSharedPreferences("license_prefs", Context.MODE_PRIVATE);
     }
 
     private static void configure(final GumroadResponse successResponse, final boolean isValid) {
