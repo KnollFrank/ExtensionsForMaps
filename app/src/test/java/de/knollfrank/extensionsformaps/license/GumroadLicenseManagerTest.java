@@ -50,19 +50,15 @@ public class GumroadLicenseManagerTest {
         final String key = "VALID-KEY";
         final Call<GumroadResponse> mockCall = mock(Call.class);
         final GumroadResponse successResponse = mock(GumroadResponse.class);
-        final GumroadResponse.Purchase mockPurchase = mock(GumroadResponse.Purchase.class);
-
-        when(successResponse.isSuccess()).thenReturn(true);
-        when(successResponse.getPurchase()).thenReturn(mockPurchase);
-        when(mockPurchase.isValid()).thenReturn(true);
-
+        configure(successResponse, true);
         when(mockService.verifyLicense(anyString(), anyString())).thenReturn(mockCall);
         Mockito
-                .doAnswer(invocation -> {
-                    final Callback<GumroadResponse> callback = invocation.getArgument(0);
-                    callback.onResponse(mockCall, Response.success(successResponse));
-                    return null;
-                })
+                .doAnswer(
+                        invocation -> {
+                            final Callback<GumroadResponse> callback = invocation.getArgument(0);
+                            callback.onResponse(mockCall, Response.success(successResponse));
+                            return null;
+                        })
                 .when(mockCall).enqueue(any());
 
         // When
@@ -76,24 +72,22 @@ public class GumroadLicenseManagerTest {
     @Test
     public void testActivate_refunded_fails() {
         // Given
-        String key = "REFUNDED-KEY";
-        Call<GumroadResponse> mockCall = mock(Call.class);
-        GumroadResponse successResponse = mock(GumroadResponse.class);
-        GumroadResponse.Purchase mockPurchase = mock(GumroadResponse.Purchase.class);
-
-        when(successResponse.isSuccess()).thenReturn(true);
-        when(successResponse.getPurchase()).thenReturn(mockPurchase);
-        when(mockPurchase.isValid()).thenReturn(false); // Valid includes refunded check
-
+        final String key = "REFUNDED-KEY";
+        final Call<GumroadResponse> mockCall = mock(Call.class);
+        final GumroadResponse successResponse = mock(GumroadResponse.class);
+        configure(successResponse, false);
         when(mockService.verifyLicense(anyString(), anyString())).thenReturn(mockCall);
-        doAnswer(invocation -> {
-            Callback<GumroadResponse> callback = invocation.getArgument(0);
-            callback.onResponse(mockCall, Response.success(successResponse));
-            return null;
-        }).when(mockCall).enqueue(any());
+        Mockito
+                .doAnswer(
+                        invocation -> {
+                            final Callback<GumroadResponse> callback = invocation.getArgument(0);
+                            callback.onResponse(mockCall, Response.success(successResponse));
+                            return null;
+                        })
+                .when(mockCall).enqueue(any());
 
         // When
-        CompletableFuture<Boolean> future = licenseManager.activate(key);
+        final CompletableFuture<Boolean> future = licenseManager.activate(key);
 
         // Then
         assertFalse(future.join());
@@ -103,8 +97,8 @@ public class GumroadLicenseManagerTest {
     @Test
     public void testActivate_failure() {
         // Given
-        String key = "INVALID-KEY";
-        Call<GumroadResponse> mockCall = mock(Call.class);
+        final String key = "INVALID-KEY";
+        final Call<GumroadResponse> mockCall = mock(Call.class);
         GumroadResponse failureResponse = mock(GumroadResponse.class);
         when(failureResponse.isSuccess()).thenReturn(false);
 
@@ -152,5 +146,12 @@ public class GumroadLicenseManagerTest {
 
         // Then
         assertFalse(licenseManager.isPro());
+    }
+
+    private static void configure(final GumroadResponse successResponse, final boolean isValid) {
+        when(successResponse.isSuccess()).thenReturn(true);
+        final GumroadResponse.Purchase mockPurchase = mock(GumroadResponse.Purchase.class);
+        when(successResponse.getPurchase()).thenReturn(mockPurchase);
+        when(mockPurchase.isValid()).thenReturn(isValid); // Valid includes refunded check
     }
 }
