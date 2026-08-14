@@ -52,14 +52,7 @@ public class GumroadLicenseManagerTest {
         final GumroadResponse successResponse = mock(GumroadResponse.class);
         configure(successResponse, true);
         when(mockService.verifyLicense(anyString(), anyString())).thenReturn(mockCall);
-        Mockito
-                .doAnswer(
-                        invocation -> {
-                            final Callback<GumroadResponse> callback = invocation.getArgument(0);
-                            callback.onResponse(mockCall, Response.success(successResponse));
-                            return null;
-                        })
-                .when(mockCall).enqueue(any());
+        call_enqueue_onResponse_gumroadResponse(mockCall, successResponse);
 
         // When
         final CompletableFuture<Boolean> future = licenseManager.activate(key);
@@ -77,14 +70,7 @@ public class GumroadLicenseManagerTest {
         final GumroadResponse successResponse = mock(GumroadResponse.class);
         configure(successResponse, false);
         when(mockService.verifyLicense(anyString(), anyString())).thenReturn(mockCall);
-        Mockito
-                .doAnswer(
-                        invocation -> {
-                            final Callback<GumroadResponse> callback = invocation.getArgument(0);
-                            callback.onResponse(mockCall, Response.success(successResponse));
-                            return null;
-                        })
-                .when(mockCall).enqueue(any());
+        call_enqueue_onResponse_gumroadResponse(mockCall, successResponse);
 
         // When
         final CompletableFuture<Boolean> future = licenseManager.activate(key);
@@ -103,14 +89,7 @@ public class GumroadLicenseManagerTest {
         when(failureResponse.isSuccess()).thenReturn(false);
 
         when(mockService.verifyLicense(anyString(), anyString())).thenReturn(mockCall);
-        Mockito
-                .doAnswer(
-                        invocation -> {
-                            Callback<GumroadResponse> callback = invocation.getArgument(0);
-                            callback.onResponse(mockCall, Response.success(failureResponse));
-                            return null;
-                        })
-                .when(mockCall).enqueue(any());
+        call_enqueue_onResponse_gumroadResponse(mockCall, failureResponse);
 
         // When
         CompletableFuture<Boolean> future = licenseManager.activate(key);
@@ -133,14 +112,7 @@ public class GumroadLicenseManagerTest {
         final GumroadResponse refundedResponse = mock(GumroadResponse.class);
         configure(refundedResponse, false); // Refunded
         when(mockService.verifyLicense(anyString(), anyString())).thenReturn(mockCall);
-        Mockito
-                .doAnswer(
-                        invocation -> {
-                            final Callback<GumroadResponse> callback = invocation.getArgument(0);
-                            callback.onResponse(mockCall, Response.success(refundedResponse));
-                            return null;
-                        })
-                .when(mockCall).enqueue(any());
+        call_enqueue_onResponse_gumroadResponse(mockCall, refundedResponse);
 
         // When
         licenseManager.verifyExistingLicense().join();
@@ -158,5 +130,16 @@ public class GumroadLicenseManagerTest {
         final GumroadResponse.Purchase mockPurchase = mock(GumroadResponse.Purchase.class);
         when(successResponse.getPurchase()).thenReturn(mockPurchase);
         when(mockPurchase.isValid()).thenReturn(isValid); // Valid includes refunded check
+    }
+
+    private static void call_enqueue_onResponse_gumroadResponse(final Call<GumroadResponse> call, final GumroadResponse gumroadResponse) {
+        Mockito
+                .doAnswer(
+                        invocation -> {
+                            final Callback<GumroadResponse> callback = invocation.getArgument(0);
+                            callback.onResponse(call, Response.success(gumroadResponse));
+                            return null;
+                        })
+                .when(call).enqueue(any());
     }
 }
