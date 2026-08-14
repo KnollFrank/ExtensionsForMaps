@@ -2,6 +2,7 @@ package de.knollfrank.extensionsformaps.license;
 
 import android.content.SharedPreferences;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import retrofit2.Call;
@@ -15,16 +16,16 @@ class GumroadLicenseManager implements LicenseManager {
     private static final String GUMROAD_PRODUCT_ID = "-QghnDM3ybPOOTcK762teA==";
 
     private final GumroadService gumroadService;
-    private final SharedPreferences prefs;
+    private final SharedPreferences preferences;
 
-    public GumroadLicenseManager(final GumroadService gumroadService, final SharedPreferences prefs) {
+    public GumroadLicenseManager(final GumroadService gumroadService, final SharedPreferences preferences) {
         this.gumroadService = gumroadService;
-        this.prefs = prefs;
+        this.preferences = preferences;
     }
 
     @Override
     public boolean isPro() {
-        return prefs.getBoolean(KEY_IS_PRO, false);
+        return preferences.getBoolean(KEY_IS_PRO, false);
     }
 
     @Override
@@ -62,7 +63,7 @@ class GumroadLicenseManager implements LicenseManager {
                             }
 
                             private void setActivated() {
-                                prefs
+                                preferences
                                         .edit()
                                         .putBoolean(KEY_IS_PRO, true)
                                         .putString(KEY_LICENSE_KEY, licenseKey)
@@ -74,10 +75,13 @@ class GumroadLicenseManager implements LicenseManager {
 
     @Override
     public CompletableFuture<Void> verifyExistingLicense() {
-        final String licenseKey = prefs.getString(KEY_LICENSE_KEY, null);
-        if (licenseKey == null) {
-            return CompletableFuture.completedFuture(null);
-        }
+        final Optional<String> licenseKey = Optional.ofNullable(preferences.getString(KEY_LICENSE_KEY, null));
+        return licenseKey.isPresent() ?
+                verifyExistingLicense(licenseKey.orElseThrow()) :
+                CompletableFuture.completedFuture(null);
+    }
+
+    private CompletableFuture<Void> verifyExistingLicense(final String licenseKey) {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         gumroadService
                 .verifyLicense(GUMROAD_PRODUCT_ID, licenseKey)
@@ -90,7 +94,7 @@ class GumroadLicenseManager implements LicenseManager {
                                     boolean isValid = response.body().isSuccess() && response.body().getPurchase().isValid();
                                     if (!isValid) {
                                         // Deactivate Pro if no longer valid
-                                        prefs
+                                        preferences
                                                 .edit()
                                                 .putBoolean(KEY_IS_PRO, false)
                                                 .apply();
