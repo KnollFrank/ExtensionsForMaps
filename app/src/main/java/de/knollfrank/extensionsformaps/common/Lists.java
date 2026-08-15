@@ -13,6 +13,13 @@ public class Lists {
     private Lists() {
     }
 
+    public static <T> List<T> concat(final List<List<T>> lists) {
+        return lists
+                .stream()
+                .flatMap(List::stream)
+                .toList();
+    }
+
     public static <T> List<IndexedElement<T>> asIndexedElements(final List<T> elements) {
         return IntStream
                 .range(0, elements.size())

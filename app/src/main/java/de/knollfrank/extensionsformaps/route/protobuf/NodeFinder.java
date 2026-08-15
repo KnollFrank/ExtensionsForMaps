@@ -1,20 +1,28 @@
 package de.knollfrank.extensionsformaps.route.protobuf;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import de.knollfrank.extensionsformaps.common.Lists;
 
 public class NodeFinder {
 
-    // FK-TODO: refactor
     public static List<Node> findWaypointContainers(final List<Node> rootNodes, final int expectedCount) {
-        final List<Node> all4mContainers = new ArrayList<>();
-        findAllContainersByFieldId(rootNodes, 4, all4mContainers);
-        return all4mContainers
+        return NodeFinder
+                .getAllNodes(rootNodes)
                 .stream()
+                .filter(NodeFinder::is4mContainer)
                 .map(NodeFinder::getWaypointChildren)
                 .filter(waypointChildrenOf4mContainer -> waypointChildrenOf4mContainer.size() == expectedCount)
                 .findFirst()
                 .orElse(List.of());
+    }
+
+    private static List<Node> getAllNodes(final List<Node> rootNodes) {
+        return Lists.concat(
+                rootNodes
+                        .stream()
+                        .map(Nodes::getAllNodes)
+                        .toList());
     }
 
     private static List<Node> getWaypointChildren(final Node node) {
@@ -25,19 +33,15 @@ public class NodeFinder {
                 .toList();
     }
 
-    private static boolean isWaypoint(final Node node) {
-        return node.fieldId() == 1 && node.isContainer();
+    private static boolean is4mContainer(final Node node) {
+        return isContainerHavingFieldId(node, 4);
     }
 
-    // FK-TODO: refactor
-    private static void findAllContainersByFieldId(final List<Node> nodes,
-                                                   final int fieldId,
-                                                   final List<Node> result) {
-        for (final Node node : nodes) {
-            if (node.fieldId() == fieldId && node.isContainer()) {
-                result.add(node);
-            }
-            findAllContainersByFieldId(node.children(), fieldId, result);
-        }
+    private static boolean isWaypoint(final Node node) {
+        return isContainerHavingFieldId(node, 1);
+    }
+
+    private static boolean isContainerHavingFieldId(final Node node, final int fieldId) {
+        return node.isContainer() && node.fieldId() == fieldId;
     }
 }
