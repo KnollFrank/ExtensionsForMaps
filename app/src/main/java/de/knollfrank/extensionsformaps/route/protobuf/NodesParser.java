@@ -7,7 +7,6 @@ import java.util.List;
 
 public class NodesParser {
 
-    // FK-TODO: refactor
     public static List<Node> parseNodes(final List<String> tokens) {
         return new Worker(tokens.iterator()).parseNodes();
     }
