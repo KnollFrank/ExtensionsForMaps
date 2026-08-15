@@ -66,7 +66,13 @@ public class RouteOptimizerTest {
                         tuebingen);
 
         // When
-        final Route optimizedRoute = routeOptimizer.optimize(route, OptimizationType.FIXED_DESTINATION);
+        final Route optimizedRoute =
+                routeOptimizer.optimize(
+                        route,
+                        OptimizationType.FIXED_DESTINATION,
+                        progressPercentage -> {
+                        },
+                        () -> false);
 
         // Then: Even if Wurmlingen has no group, Hechingen should be FIRST because it HAS a group with low sequence order.
         assertEquals(
@@ -121,7 +127,13 @@ public class RouteOptimizerTest {
                         tuebingen);
 
         // When
-        final Route optimizedRoute = routeOptimizer.optimize(route, OptimizationType.FIXED_DESTINATION);
+        final Route optimizedRoute =
+                routeOptimizer.optimize(
+                        route,
+                        OptimizationType.FIXED_DESTINATION,
+                        progressPercentage -> {
+                        },
+                        () -> false);
 
         // Then: Should visit Hechingen FIRST because it's in Group 1, even if Wurmlingen is much closer
         assertEquals(
@@ -180,7 +192,13 @@ public class RouteOptimizerTest {
         final Route route = new Route(berlin, waypoints, berlin);
 
         // When
-        final Route optimizedRoute = routeOptimizer.optimize(route, OptimizationType.FIXED_DESTINATION);
+        final Route optimizedRoute =
+                routeOptimizer.optimize(
+                        route,
+                        OptimizationType.FIXED_DESTINATION,
+                        progressPercentage -> {
+                        },
+                        () -> false);
 
         // Then
         for (int i = 0; i < numGroups; i++) {
@@ -238,7 +256,13 @@ public class RouteOptimizerTest {
                         berlin_origin_destination);
 
         // When
-        final Route optimizedRoute = routeOptimizer.optimize(route, OptimizationType.FIXED_DESTINATION);
+        final Route optimizedRoute =
+                routeOptimizer.optimize(
+                        route,
+                        OptimizationType.FIXED_DESTINATION,
+                        progressPercentage -> {
+                        },
+                        () -> false);
 
         // Then
         assertEquals(
@@ -288,7 +312,13 @@ public class RouteOptimizerTest {
         final Route route = new Route(berlin, List.of(potsdam), munich);
 
         // When: ANY_DESTINATION
-        final Route optimizedAny = routeOptimizer.optimize(route, OptimizationType.ANY_DESTINATION);
+        final Route optimizedAny =
+                routeOptimizer.optimize(
+                        route,
+                        OptimizationType.ANY_DESTINATION,
+                        progressPercentage1 -> {
+                        },
+                        () -> false);
 
         // Then: Should end at Munich (it's the furthest from Berlin)
         // Order: Berlin -> Potsdam -> Munich
@@ -297,7 +327,13 @@ public class RouteOptimizerTest {
 
         // When: Swap Munich and Potsdam in input, but still ANY_DESTINATION
         final Route routeSwapped = new Route(berlin, List.of(munich), potsdam);
-        final Route optimizedAnySwapped = routeOptimizer.optimize(routeSwapped, OptimizationType.ANY_DESTINATION);
+        final Route optimizedAnySwapped =
+                routeOptimizer.optimize(
+                        routeSwapped,
+                        OptimizationType.ANY_DESTINATION,
+                        progressPercentage -> {
+                        },
+                        () -> false);
 
         // Then: Should still end at Munich (the furthest)
         // Order: Berlin -> Potsdam -> Munich
@@ -344,7 +380,13 @@ public class RouteOptimizerTest {
         final Route route = new Route(berlin, List.of(munich), potsdam);
 
         // When: FIXED_DESTINATION (Default)
-        final Route optimizedFixed = routeOptimizer.optimize(route, OptimizationType.FIXED_DESTINATION);
+        final Route optimizedFixed =
+                routeOptimizer.optimize(
+                        route,
+                        OptimizationType.FIXED_DESTINATION,
+                        progressPercentage -> {
+                        },
+                        () -> false);
 
         // Then: Destination MUST remain Potsdam
         assertEquals(potsdam, optimizedFixed.destination());
@@ -394,7 +436,13 @@ public class RouteOptimizerTest {
                         berlin);
 
         // When
-        final Route optimizedRoute = routeOptimizer.optimize(route, OptimizationType.FIXED_DESTINATION);
+        final Route optimizedRoute =
+                routeOptimizer.optimize(
+                        route,
+                        OptimizationType.FIXED_DESTINATION,
+                        progressPercentage -> {
+                        },
+                        () -> false);
 
         // Then: Should visit Stadt FIRST because it's in Group 1, even if Dorf is closer
         assertEquals(
@@ -459,7 +507,13 @@ public class RouteOptimizerTest {
                         start_LimoneSulGarda_west,
                         List.of(malcesine_east, rivaDelGarda_north),
                         start_LimoneSulGarda_west);
-        final Route haversineRoute = haversineRouteOptimizer.optimize(west_east_north_west, OptimizationType.FIXED_DESTINATION);
+        final Route haversineRoute =
+                haversineRouteOptimizer.optimize(
+                        west_east_north_west,
+                        OptimizationType.FIXED_DESTINATION,
+                        progressPercentage1 -> {
+                        },
+                        () -> false);
 
         // Then
         assertEquals(west_east_north_west, haversineRoute);
@@ -470,13 +524,17 @@ public class RouteOptimizerTest {
         // ==========================================================
         // FK-TODO: für diesen Unittest bitte kein Internetzugriff, sondern hart codierte RoutingMatrices verwenden.
         // When
+        final Route route = new Route(
+                start_LimoneSulGarda_west,
+                List.of(malcesine_east, rivaDelGarda_north),
+                malcesine_east);
         final Route osrmRoute =
                 osrmRouteOptimizer.optimize(
-                        new Route(
-                                start_LimoneSulGarda_west,
-                                List.of(malcesine_east, rivaDelGarda_north),
-                                malcesine_east),
-                        OptimizationType.FIXED_DESTINATION);
+                        route,
+                        OptimizationType.FIXED_DESTINATION,
+                        progressPercentage -> {
+                        },
+                        () -> false);
 
         // Then
         assertEquals(
@@ -487,4 +545,5 @@ public class RouteOptimizerTest {
                         malcesine_east),
                 osrmRoute);
     }
+
 }

@@ -37,19 +37,9 @@ public class RouteOptimizer {
         this.vehicleRoutingTransportCostsProvider = vehicleRoutingTransportCostsProvider;
     }
 
-    public Route optimize(final Route route, final OptimizationType optimizationType) throws Exception {
-        return optimize(route, optimizationType, null);
-    }
-
     public Route optimize(final Route route,
                           final OptimizationType optimizationType,
-                          final Consumer<Integer> progressListener) throws Exception {
-        return optimize(route, optimizationType, progressListener, () -> false);
-    }
-
-    public Route optimize(final Route route,
-                          final OptimizationType optimizationType,
-                          final Consumer<Integer> progressListener,
+                          final Consumer<Integer> progressPercentageListener,
                           final Supplier<Boolean> isCanceled) throws Exception {
         final List<Stop> allStops = new ArrayList<>(route.waypoints());
         if (optimizationType == OptimizationType.ANY_DESTINATION) {
@@ -60,10 +50,7 @@ public class RouteOptimizer {
         final VehicleRoutingAlgorithm algorithm = createVehicleRoutingAlgorithm(route, stopById, optimizationType);
 
         algorithm.addTerminationCriterion(discoveredSolution -> isCanceled.get());
-
-        if (progressListener != null) {
-            algorithm.addListener(getIterationEndsListener(progressListener, algorithm.getMaxIterations()));
-        }
+        algorithm.addListener(getIterationEndsListener(progressPercentageListener, algorithm.getMaxIterations()));
 
         final VehicleRoutingProblemSolution bestSolution =
                 RouteOptimizer
@@ -86,24 +73,24 @@ public class RouteOptimizer {
         }
     }
 
-    private static IterationEndsListener getIterationEndsListener(final Consumer<Integer> progressListener,
+    private static IterationEndsListener getIterationEndsListener(final Consumer<Integer> progressPercentageListener,
                                                                   final int maxIterations) {
         return new IterationEndsListener() {
 
-            private int lastReportedProgress = -1;
+            private int lastReportedProgressPercentage = -1;
 
             @Override
             public void informIterationEnds(final int i,
                                             final VehicleRoutingProblem problem,
                                             final Collection<VehicleRoutingProblemSolution> solutions) {
-                final int progress = getProgress(i);
-                if (progress != lastReportedProgress) {
-                    progressListener.accept(progress);
-                    lastReportedProgress = progress;
+                final int progressPercentage = getProgressPercentage(i);
+                if (progressPercentage != lastReportedProgressPercentage) {
+                    progressPercentageListener.accept(progressPercentage);
+                    lastReportedProgressPercentage = progressPercentage;
                 }
             }
 
-            private int getProgress(final int i) {
+            private int getProgressPercentage(final int i) {
                 return (int) ((i / (float) maxIterations) * 100);
             }
         };
