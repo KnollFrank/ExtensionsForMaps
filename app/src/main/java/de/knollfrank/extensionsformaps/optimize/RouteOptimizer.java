@@ -66,23 +66,7 @@ public class RouteOptimizer {
         algorithm.addTerminationCriterion(discoveredSolution -> isCanceled.get());
 
         if (progressListener != null) {
-            final int maxIterations = algorithm.getMaxIterations();
-            algorithm.addListener(
-                    new IterationEndsListener() {
-
-                        private int lastReportedProgress = -1;
-
-                        @Override
-                        public void informIterationEnds(final int i,
-                                                        final VehicleRoutingProblem problem,
-                                                        final Collection<VehicleRoutingProblemSolution> solutions) {
-                            int progress = (int) ((i / (float) maxIterations) * 100);
-                            if (progress != lastReportedProgress) {
-                                progressListener.accept(progress);
-                                lastReportedProgress = progress;
-                            }
-                        }
-                    });
+            algorithm.addListener(getIterationEndsListener(progressListener, algorithm.getMaxIterations()));
         }
 
         final VehicleRoutingProblemSolution bestSolution =
@@ -104,6 +88,29 @@ public class RouteOptimizer {
         } else {
             return new Route(route.origin(), optimizedStops, route.destination());
         }
+    }
+
+    private static IterationEndsListener getIterationEndsListener(final Consumer<Integer> progressListener,
+                                                                  final int maxIterations) {
+        return new IterationEndsListener() {
+
+            private int lastReportedProgress = -1;
+
+            @Override
+            public void informIterationEnds(final int i,
+                                            final VehicleRoutingProblem problem,
+                                            final Collection<VehicleRoutingProblemSolution> solutions) {
+                final int progress = getProgress(i);
+                if (progress != lastReportedProgress) {
+                    progressListener.accept(progress);
+                    lastReportedProgress = progress;
+                }
+            }
+
+            private int getProgress(final int i) {
+                return (int) ((i / (float) maxIterations) * 100);
+            }
+        };
     }
 
     private static ImmutableMap<String, Stop> getStopById(final List<Stop> stops) {
