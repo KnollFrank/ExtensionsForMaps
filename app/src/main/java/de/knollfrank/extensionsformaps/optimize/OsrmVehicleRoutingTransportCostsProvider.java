@@ -29,16 +29,8 @@ public class OsrmVehicleRoutingTransportCostsProvider implements VehicleRoutingT
                         routingMatrix
                                 .getDistanceDurationByStopIdTable()
                                 .get(from.id(), to.id());
-                if (distanceDuration != null) {
-                    matrixBuilder.addTransportDistance(from.id(), to.id(), distanceDuration.distance());
-                    matrixBuilder.addTransportTime(from.id(), to.id(), distanceDuration.duration());
-                } else {
-                    // FK-TODO: throw Exception
-                    matrixBuilder.addTransportDistance(
-                            from.id(),
-                            to.id(),
-                            HaversineDistanceCalculator.calculateDistance(from, to));
-                }
+                matrixBuilder.addTransportDistance(from.id(), to.id(), distanceDuration.distance());
+                matrixBuilder.addTransportTime(from.id(), to.id(), distanceDuration.duration());
             }
         }
         return matrixBuilder.build();
