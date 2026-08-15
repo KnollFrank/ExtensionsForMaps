@@ -25,6 +25,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import de.knollfrank.extensionsformaps.common.InitAndLast;
+import de.knollfrank.extensionsformaps.common.Lists;
 import de.knollfrank.extensionsformaps.coordinate.Geodetic;
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.Stop;
@@ -58,10 +60,11 @@ public class RouteOptimizer {
         }
         final List<Stop> optimizedStops = getStops(bestSolution, stopById);
         if (optimizationType == OptimizationType.ANY_DESTINATION) {
-            final Stop newDestination = optimizedStops.get(optimizedStops.size() - 1);
-            final List<Stop> newWaypoints = new ArrayList<>(optimizedStops);
-            newWaypoints.remove(newWaypoints.size() - 1);
-            return new Route(route.origin(), newWaypoints, newDestination);
+            final InitAndLast<Stop> stopInitAndLast = Lists.asInitAndLast(optimizedStops).orElseThrow();
+            return new Route(
+                    route.origin(),
+                    stopInitAndLast.init(),
+                    stopInitAndLast.last());
         } else {
             return new Route(route.origin(), optimizedStops, route.destination());
         }

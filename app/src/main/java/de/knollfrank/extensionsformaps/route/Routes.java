@@ -16,6 +16,6 @@ public class Routes {
     private static List<Stop> addDummyStop(final List<Stop> stops) {
         return Lists.concat(
                 stops,
-                Lists.getLastElement(stops).orElseThrow());
+                Lists.getLast(stops).orElseThrow());
     }
 }

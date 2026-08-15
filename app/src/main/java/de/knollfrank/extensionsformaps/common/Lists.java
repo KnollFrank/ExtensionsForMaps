@@ -29,6 +29,15 @@ public class Lists {
                                 getTail(ts).orElseThrow()));
     }
 
+    public static <T> Optional<InitAndLast<T>> asInitAndLast(final List<T> ts) {
+        return ts.isEmpty() ?
+                Optional.empty() :
+                Optional.of(
+                        new InitAndLast<>(
+                                getInit(ts).orElseThrow(),
+                                getLast(ts).orElseThrow()));
+    }
+
     public static <T> Optional<T> getElementAtIndex(final List<T> ts, final int index) {
         return 0 <= index && index < ts.size() ?
                 Optional.of(ts.get(index)) :
@@ -39,14 +48,20 @@ public class Lists {
         return getElementAtIndex(ts, 0);
     }
 
-    public static <T> Optional<T> getLastElement(final List<T> ts) {
-        return getElementAtIndex(ts, ts.size() - 1);
-    }
-
     public static <T> Optional<List<T>> getTail(final List<T> ts) {
         return ts.isEmpty() ?
                 Optional.empty() :
                 Optional.of(ts.subList(1, ts.size()));
+    }
+
+    public static <T> Optional<T> getLast(final List<T> ts) {
+        return getElementAtIndex(ts, ts.size() - 1);
+    }
+
+    public static <T> Optional<List<T>> getInit(final List<T> ts) {
+        return ts.isEmpty() ?
+                Optional.empty() :
+                Optional.of(ts.subList(0, ts.size() - 1));
     }
 
     public static <T> List<T> concat(final T head, final List<T> tail) {
