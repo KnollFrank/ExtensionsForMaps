@@ -45,24 +45,18 @@ public class RouteOptimizer {
         if (optimizationType == OptimizationType.ANY_DESTINATION) {
             allStops.add(route.destination());
         }
-
         final ImmutableMap<String, Stop> stopById = getStopById(allStops);
         final VehicleRoutingAlgorithm algorithm = createVehicleRoutingAlgorithm(route, stopById, optimizationType);
-
         algorithm.addTerminationCriterion(discoveredSolution -> isCanceled.get());
         algorithm.addListener(getIterationEndsListener(progressPercentageListener, algorithm.getMaxIterations()));
-
         final VehicleRoutingProblemSolution bestSolution =
                 RouteOptimizer
                         .getBestSolution(algorithm.searchSolutions())
                         .orElseThrow(() -> new IllegalStateException("No solution found"));
-
         if (isCanceled.get()) {
             throw new InterruptedException("Optimization canceled");
         }
-
         final List<Stop> optimizedStops = getStops(bestSolution, stopById);
-
         if (optimizationType == OptimizationType.ANY_DESTINATION) {
             final Stop newDestination = optimizedStops.get(optimizedStops.size() - 1);
             final List<Stop> newWaypoints = new ArrayList<>(optimizedStops);
