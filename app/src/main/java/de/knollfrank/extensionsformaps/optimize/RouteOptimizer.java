@@ -37,10 +37,6 @@ public class RouteOptimizer {
         this.vehicleRoutingTransportCostsProvider = vehicleRoutingTransportCostsProvider;
     }
 
-    public Route optimize(final Route route) throws Exception {
-        return optimize(route, OptimizationType.FIXED_DESTINATION);
-    }
-
     public Route optimize(final Route route, final OptimizationType optimizationType) throws Exception {
         return optimize(route, optimizationType, null);
     }

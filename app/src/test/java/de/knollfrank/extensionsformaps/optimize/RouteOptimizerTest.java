@@ -66,7 +66,7 @@ public class RouteOptimizerTest {
                         tuebingen);
 
         // When
-        final Route optimizedRoute = routeOptimizer.optimize(route);
+        final Route optimizedRoute = routeOptimizer.optimize(route, OptimizationType.FIXED_DESTINATION);
 
         // Then: Even if Wurmlingen has no group, Hechingen should be FIRST because it HAS a group with low sequence order.
         assertEquals(
@@ -121,7 +121,7 @@ public class RouteOptimizerTest {
                         tuebingen);
 
         // When
-        final Route optimizedRoute = routeOptimizer.optimize(route);
+        final Route optimizedRoute = routeOptimizer.optimize(route, OptimizationType.FIXED_DESTINATION);
 
         // Then: Should visit Hechingen FIRST because it's in Group 1, even if Wurmlingen is much closer
         assertEquals(
@@ -180,7 +180,7 @@ public class RouteOptimizerTest {
         final Route route = new Route(berlin, waypoints, berlin);
 
         // When
-        final Route optimizedRoute = routeOptimizer.optimize(route);
+        final Route optimizedRoute = routeOptimizer.optimize(route, OptimizationType.FIXED_DESTINATION);
 
         // Then
         for (int i = 0; i < numGroups; i++) {
@@ -238,7 +238,7 @@ public class RouteOptimizerTest {
                         berlin_origin_destination);
 
         // When
-        final Route optimizedRoute = routeOptimizer.optimize(route);
+        final Route optimizedRoute = routeOptimizer.optimize(route, OptimizationType.FIXED_DESTINATION);
 
         // Then
         assertEquals(
@@ -394,7 +394,7 @@ public class RouteOptimizerTest {
                         berlin);
 
         // When
-        final Route optimizedRoute = routeOptimizer.optimize(route);
+        final Route optimizedRoute = routeOptimizer.optimize(route, OptimizationType.FIXED_DESTINATION);
 
         // Then: Should visit Stadt FIRST because it's in Group 1, even if Dorf is closer
         assertEquals(
@@ -459,7 +459,7 @@ public class RouteOptimizerTest {
                         start_LimoneSulGarda_west,
                         List.of(malcesine_east, rivaDelGarda_north),
                         start_LimoneSulGarda_west);
-        final Route haversineRoute = haversineRouteOptimizer.optimize(west_east_north_west);
+        final Route haversineRoute = haversineRouteOptimizer.optimize(west_east_north_west, OptimizationType.FIXED_DESTINATION);
 
         // Then
         assertEquals(west_east_north_west, haversineRoute);
@@ -475,7 +475,8 @@ public class RouteOptimizerTest {
                         new Route(
                                 start_LimoneSulGarda_west,
                                 List.of(malcesine_east, rivaDelGarda_north),
-                                malcesine_east));
+                                malcesine_east),
+                        OptimizationType.FIXED_DESTINATION);
 
         // Then
         assertEquals(
