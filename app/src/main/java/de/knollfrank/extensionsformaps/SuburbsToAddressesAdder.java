@@ -50,6 +50,7 @@ class SuburbsToAddressesAdder {
     }
 
     private String addSuburbToAddress(final String address, final String suburb) {
+        // FK-TODO: inline R.string.address_with_suburb_format
         return context.getString(R.string.address_with_suburb_format, address, suburb);
     }
 }

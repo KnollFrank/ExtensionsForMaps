@@ -5,9 +5,6 @@ import de.knollfrank.extensionsformaps.route.Stop;
 class HaversineDistanceCalculator {
 
     public static double calculateDistance(final Stop from, final Stop to) {
-        if (from.geodetic() == null || to.geodetic() == null) {
-            return 0.0;
-        }
         return calculateHaversineDistance(
                 from.geodetic().getLatitude().toDegrees(),
                 from.geodetic().getLongitude().toDegrees(),
@@ -15,7 +12,10 @@ class HaversineDistanceCalculator {
                 to.geodetic().getLongitude().toDegrees());
     }
 
-    private static double calculateHaversineDistance(final double lat1, final double lon1, final double lat2, final double lon2) {
+    private static double calculateHaversineDistance(final double lat1,
+                                                     final double lon1,
+                                                     final double lat2,
+                                                     final double lon2) {
         final double R = 6371000.0; // Earth's radius in meters
         final double dLat = Math.toRadians(lat2 - lat1);
         final double dLon = Math.toRadians(lon2 - lon1);
