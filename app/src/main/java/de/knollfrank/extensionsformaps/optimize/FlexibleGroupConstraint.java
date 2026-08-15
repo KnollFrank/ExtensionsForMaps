@@ -23,7 +23,6 @@ class FlexibleGroupConstraint implements SoftActivityConstraint {
                            final TourActivity newAct,
                            final TourActivity nextAct,
                            final double prevActDepTime) {
-
         final int newJobOrder = getSequenceOrderOrDefault(context.getJob());
         double totalPenalty = 0.0;
         final VehicleRoute route = context.getRoute();
