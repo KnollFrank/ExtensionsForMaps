@@ -8,12 +8,13 @@ import android.view.accessibility.AccessibilityWindowInfo;
 
 import com.google.common.collect.ImmutableList;
 
-import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.common.URLs;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 
 // FK-TODO: refactor
 public class RouteUrlRequester {
@@ -24,7 +25,7 @@ public class RouteUrlRequester {
     @FunctionalInterface
     public interface RouteUrlCallback {
 
-        void onRouteUrlExtracted(URL routeUrl);
+        void onRouteUrlExtracted(DirectionsUrl directionsUrl);
     }
 
     private final AccessibilityService service;
@@ -73,8 +74,10 @@ public class RouteUrlRequester {
             final CharSequence urlText = urlNodes.get(0).getText();
             if (urlText != null) {
                 Log.d(TAG, "Extracted URL: " + urlText);
-                final URL routeUrl = URLs.createUrl(urlText.toString());
-                routeUrlCallback.onRouteUrlExtracted(routeUrl);
+                routeUrlCallback.onRouteUrlExtracted(
+                        DirectionsUrlFactory
+                                .createDirectionsUrl(URLs.createUrl(urlText.toString()))
+                                .orElseThrow());
                 this.routeUrlCallback = Optional.empty();
                 service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
             }

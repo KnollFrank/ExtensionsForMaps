@@ -2,17 +2,12 @@ package de.knollfrank.extensionsformaps;
 
 import android.content.Context;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizer;
 import de.knollfrank.extensionsformaps.route.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
-import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
-import de.knollfrank.extensionsformaps.route.url.LongDirectionsUrl;
-import de.knollfrank.extensionsformaps.route.url.ShortDirectionsUrl;
 
 public class RouteOptimizationOrchestrator {
 
@@ -45,23 +40,11 @@ public class RouteOptimizationOrchestrator {
     }
 
     // FK-TODO: spezialisierten callback mit den Methoden onExtractRouteFromDirectionsUrlStarted(), onExtractRouteFromDirectionsUrlSuccess() und onError() direkt als Parameter übergeben oder als Continuation zurückgeben.
-    public void extractRouteFromDirectionsUrl(final URL url) {
+    public void extractRouteFromDirectionsUrl(final DirectionsUrl directionsUrl) {
         callback.onExtractRouteFromDirectionsUrlStarted();
         new Thread(() -> {
             try {
-                final DirectionsUrl directionsUrl =
-                        DirectionsUrlFactory
-                                .createDirectionsUrl(url)
-                                .orElseThrow(() -> new IllegalArgumentException("Invalid URL: " + url));
-                final LongDirectionsUrl longDirectionsUrl =
-                        directionsUrl instanceof final ShortDirectionsUrl shortUrl ?
-                                shortUrl.expand() :
-                                (LongDirectionsUrl) directionsUrl;
-
-                callback.onExtractRouteFromDirectionsUrlSuccess(
-                        GoogleMapsRouteExtractor.extractRoute(longDirectionsUrl));
-            } catch (final IOException e) {
-                callback.onError(context.getString(R.string.error_network, e.getMessage()));
+                callback.onExtractRouteFromDirectionsUrlSuccess(GoogleMapsRouteExtractor.extractRoute(directionsUrl));
             } catch (final Exception e) {
                 callback.onError(context.getString(R.string.error_general, e.getMessage()));
             }

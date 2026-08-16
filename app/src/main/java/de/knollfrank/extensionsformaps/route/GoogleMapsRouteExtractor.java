@@ -8,9 +8,9 @@ import de.knollfrank.extensionsformaps.route.protobuf.Datatype;
 import de.knollfrank.extensionsformaps.route.protobuf.Node;
 import de.knollfrank.extensionsformaps.route.protobuf.NodeFinder;
 import de.knollfrank.extensionsformaps.route.protobuf.NodesParser;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 import de.knollfrank.extensionsformaps.route.url.LegacyDirectionsUrl;
-import de.knollfrank.extensionsformaps.route.url.LongDirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.ModernDirectionsUrl;
 
 // FK-TODO: brauchen Gesamtunittest, der eine Google Maps Directions URL entgegennimmt und eine korrekt sortierte (optimierte) Google Maps Directions URL erzeugt.
@@ -20,12 +20,12 @@ public class GoogleMapsRouteExtractor {
     // FK-TODO: remove or inline method
     public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) {
         return DirectionsUrlFactory
-                .createLongDirectionsUrl(directionsUrl)
+                .createDirectionsUrl(directionsUrl)
                 .map(GoogleMapsRouteExtractor::extractRoute)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Invalid URL: %s is not a valid Long Google Maps directions URL.", directionsUrl)));
     }
 
-    public static Route extractRoute(final LongDirectionsUrl directionsUrl) {
+    public static Route extractRoute(final DirectionsUrl directionsUrl) {
         if (directionsUrl instanceof final ModernDirectionsUrl modernDirectionsUrl) {
             return extractRoute(modernDirectionsUrl);
         } else if (directionsUrl instanceof final LegacyDirectionsUrl legacyDirectionsUrl) {

@@ -24,7 +24,7 @@ class UrlExpander {
                     .readTimeout(10, TimeUnit.SECONDS)
                     .build();
 
-    public static LongDirectionsUrl expandUrl(final ShortDirectionsUrl shortDirectionsUrl) throws IOException {
+    public static DirectionsUrl expandUrl(final ShortDirectionsUrl shortDirectionsUrl) throws IOException {
         URL currentUrl = shortDirectionsUrl.url();
         for (int attempt = 1; attempt <= 10; attempt++) {
             Log.d(TAG, String.format("Expansion attempt %d for: %s", attempt, currentUrl));
@@ -35,9 +35,10 @@ class UrlExpander {
 
                 Log.d(TAG, String.format("Result: %s (Status: %d)", resultUrl, code));
 
-                final var longDirectionsUrl = DirectionsUrlFactory.createLongDirectionsUrl(resultUrl);
-                if (longDirectionsUrl.isPresent()) {
-                    return longDirectionsUrl.get();
+                // FK-FIXME: aua, mögliche Endlosschleife
+                final var directionsUrl = DirectionsUrlFactory.createDirectionsUrl(resultUrl);
+                if (directionsUrl.isPresent()) {
+                    return directionsUrl.get();
                 }
 
                 // REQUIREMENT 2: Stop the hang in tests.

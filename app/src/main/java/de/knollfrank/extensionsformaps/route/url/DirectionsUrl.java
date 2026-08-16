@@ -1,8 +1,11 @@
 package de.knollfrank.extensionsformaps.route.url;
 
 import java.net.URL;
+import java.util.List;
 
-public interface DirectionsUrl {
+public sealed interface DirectionsUrl permits ModernDirectionsUrl, LegacyDirectionsUrl {
 
     URL url();
+
+    List<String> getUrlDecodedAddresses();
 }

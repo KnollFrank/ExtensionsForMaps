@@ -6,7 +6,7 @@ import java.util.List;
 import de.knollfrank.extensionsformaps.common.Maps;
 import de.knollfrank.extensionsformaps.common.URLs;
 
-public record LegacyDirectionsUrl(URL url) implements LongDirectionsUrl {
+public record LegacyDirectionsUrl(URL url) implements DirectionsUrl {
 
     @Override
     public List<String> getUrlDecodedAddresses() {

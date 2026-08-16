@@ -48,7 +48,7 @@ public class UrlExpanderTest {
         final ShortDirectionsUrl shortUrl = new ShortDirectionsUrl(url);
 
         // When
-        final LongDirectionsUrl expandedUrl = UrlExpander.expandUrl(shortUrl);
+        final DirectionsUrl expandedUrl = UrlExpander.expandUrl(shortUrl);
 
         // Then
         assertEquals(targetUrl, expandedUrl.url());
@@ -68,7 +68,7 @@ public class UrlExpanderTest {
         final ShortDirectionsUrl shortUrl = new ShortDirectionsUrl(url);
 
         // When
-        final LongDirectionsUrl expandedUrl = UrlExpander.expandUrl(shortUrl);
+        final DirectionsUrl expandedUrl = UrlExpander.expandUrl(shortUrl);
 
         // Then
         assertEquals(targetUrl, expandedUrl.url());

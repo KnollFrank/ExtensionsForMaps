@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-import java.net.URL;
 import java.util.Locale;
 
 import de.knollfrank.extensionsformaps.databinding.DialogRoutePreviewBinding;
@@ -26,6 +25,7 @@ import de.knollfrank.extensionsformaps.optimize.NativeSuburbResolver;
 import de.knollfrank.extensionsformaps.optimize.OptimizationType;
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizer;
 import de.knollfrank.extensionsformaps.route.Route;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
 public class RouteOptimizationWorkflow {
 
@@ -235,7 +235,7 @@ public class RouteOptimizationWorkflow {
         };
     }
 
-    public void optimizeThenShowRoute(final URL directionsUrl) {
+    public void optimizeThenShowRoute(final DirectionsUrl directionsUrl) {
         routeOptimizationOrchestrator.extractRouteFromDirectionsUrl(directionsUrl);
     }
 

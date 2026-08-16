@@ -10,16 +10,11 @@ public class DirectionsUrlFactory {
     public static Optional<DirectionsUrl> createDirectionsUrl(final URL url) {
         return Optionals
                 .streamOfPresentElements(
-                        createLongDirectionsUrl(url),
-                        ShortDirectionsUrlFactory.createShortDirectionsUrl(url))
-                .findFirst();
-    }
-
-    public static Optional<? extends LongDirectionsUrl> createLongDirectionsUrl(final URL url) {
-        return Optionals
-                .streamOfPresentElements(
                         ModernDirectionsUrlFactory.createModernDirectionsUrl(url),
-                        LegacyDirectionsUrlFactory.createLegacyDirectionsUrl(url))
+                        LegacyDirectionsUrlFactory.createLegacyDirectionsUrl(url),
+                        ShortDirectionsUrlFactory
+                                .createShortDirectionsUrl(url)
+                                .map(ShortDirectionsUrl::expand))
                 .findFirst();
     }
 }

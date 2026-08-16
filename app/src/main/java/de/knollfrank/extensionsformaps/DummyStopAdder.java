@@ -6,7 +6,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 
@@ -14,19 +13,15 @@ import de.knollfrank.extensionsformaps.route.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.RouteToUrlConverter;
 import de.knollfrank.extensionsformaps.route.Routes;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
-import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
-import de.knollfrank.extensionsformaps.route.url.LongDirectionsUrl;
-import de.knollfrank.extensionsformaps.route.url.ShortDirectionsUrl;
 
 public class DummyStopAdder {
 
     private static final String TAG = DummyStopAdder.class.getSimpleName();
 
-    // FK-TODO: replace URL with DirectionsUrl or LongDirectionsUrl
-    public static CompletableFuture<Void> addDummyStopToDirectionsUrlThenOpenInGoogleMaps(final URL url,
+    public static CompletableFuture<Void> addDummyStopToDirectionsUrlThenOpenInGoogleMaps(final DirectionsUrl directionsUrl,
                                                                                           final Context context) {
         return CompletableFuture
-                .supplyAsync(() -> addDummyStop(url))
+                .supplyAsync(() -> addDummyStop(directionsUrl))
                 .handle((final URL directionsUrlWithDummyStop, final Throwable throwable) -> {
                     if (throwable != null) {
                         Log.e(TAG, "Error adding dummy stop to directions URL", throwable);
@@ -38,23 +33,10 @@ public class DummyStopAdder {
                 });
     }
 
-    private static URL addDummyStop(final URL url) {
-        final DirectionsUrl directionsUrl =
-                DirectionsUrlFactory
-                        .createDirectionsUrl(url)
-                        .orElseThrow(() -> new IllegalArgumentException("Invalid URL: " + url));
-        try {
-            final LongDirectionsUrl longDirectionsUrl =
-                    directionsUrl instanceof final ShortDirectionsUrl shortUrl ?
-                            shortUrl.expand() :
-                            (LongDirectionsUrl) directionsUrl;
-
-            return RouteToUrlConverter.getUrl(
-                    Routes.addDummyStop(
-                            GoogleMapsRouteExtractor.extractRoute(longDirectionsUrl)));
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
+    private static URL addDummyStop(final DirectionsUrl directionsUrl) {
+        return RouteToUrlConverter.getUrl(
+                Routes.addDummyStop(
+                        GoogleMapsRouteExtractor.extractRoute(directionsUrl)));
     }
 
     private static void displayErrorProcessingRoute(final Context context) {

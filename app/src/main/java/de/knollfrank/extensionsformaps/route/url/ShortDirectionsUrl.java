@@ -3,9 +3,13 @@ package de.knollfrank.extensionsformaps.route.url;
 import java.io.IOException;
 import java.net.URL;
 
-public record ShortDirectionsUrl(URL url) implements DirectionsUrl {
+record ShortDirectionsUrl(URL url) {
 
-    public LongDirectionsUrl expand() throws IOException {
-        return UrlExpander.expandUrl(this);
+    public DirectionsUrl expand() {
+        try {
+            return UrlExpander.expandUrl(this);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

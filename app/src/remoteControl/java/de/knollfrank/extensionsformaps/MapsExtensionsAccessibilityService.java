@@ -4,7 +4,6 @@ import android.accessibilityservice.AccessibilityService;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
-import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +22,7 @@ import de.knollfrank.extensionsformaps.optimize.OsrmVehicleRoutingTransportCosts
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizer;
 import de.knollfrank.extensionsformaps.optimize.VehicleRoutingTransportCostsProvider;
 import de.knollfrank.extensionsformaps.optimize.ors.OpenRouteServiceRoutingMatrixProvider;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
 public class MapsExtensionsAccessibilityService extends AccessibilityService {
 
@@ -55,12 +55,12 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                         new RouteUrlRequester.RouteUrlCallback() {
 
                             @Override
-                            public void onRouteUrlExtracted(final URL routeUrl) {
+                            public void onRouteUrlExtracted(final DirectionsUrl directionsUrl) {
                                 final ProgressOverlay progressOverlay = new ProgressOverlay(MapsExtensionsAccessibilityService.this);
                                 progressOverlay.show();
                                 DummyStopAdder
                                         .addDummyStopToDirectionsUrlThenOpenInGoogleMaps(
-                                                routeUrl,
+                                                directionsUrl,
                                                 MapsExtensionsAccessibilityService.this)
                                         .thenRun(() -> {
                                             progressOverlay.hide();
@@ -74,13 +74,13 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                 new SortFeature(
                         this,
                         urlRequester,
-                        routeUrl -> {
-                            Log.d(TAG, "Extracted route URL for SORT: " + routeUrl);
+                        directionsUrl -> {
+                            Log.d(TAG, "Extracted route URL for SORT: " + directionsUrl);
                             final RouteOptimizationWorkflow routeOptimizationWorkflow =
                                     new RouteOptimizationWorkflow(
                                             new RouteOptimizer(getVehicleRoutingTransportCostsProvider()),
                                             MapsExtensionsAccessibilityService.this);
-                            routeOptimizationWorkflow.optimizeThenShowRoute(routeUrl);
+                            routeOptimizationWorkflow.optimizeThenShowRoute(directionsUrl);
                         });
         activeServiceHighlightFeature = new ActiveServiceHighlightFeature(this);
         scanAddressFeature = new ScanAddressFeature(this);
