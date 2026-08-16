@@ -9,16 +9,17 @@ import de.knollfrank.extensionsformaps.common.Optionals;
 public class DirectionsUrlFactory {
 
     public static CompletableFuture<Optional<DirectionsUrl>> createDirectionsUrl(final URL url) {
-        final Optional<DirectionsUrl> directionsUrl = _createDirectionsUrl(url);
-        return directionsUrl.isPresent() ?
-                CompletableFuture.completedFuture(directionsUrl) :
-                ShortDirectionsUrlFactory
-                        .createShortDirectionsUrl(url)
-                        .map(shortDirectionsUrl ->
-                                     shortDirectionsUrl
-                                             .expand()
-                                             .thenApply(Optional::of))
-                        .orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()));
+        return Optionals
+                .streamOfPresentElements(
+                        DirectionsUrlFactory
+                                ._createDirectionsUrl(url)
+                                .map(CompletableFuture::completedFuture),
+                        ShortDirectionsUrlFactory
+                                .createShortDirectionsUrl(url)
+                                .map(ShortDirectionsUrl::expand))
+                .findFirst()
+                .map(directionsUrlCompletableFuture -> directionsUrlCompletableFuture.thenApply(Optional::of))
+                .orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()));
     }
 
     private static Optional<DirectionsUrl> _createDirectionsUrl(final URL url) {
