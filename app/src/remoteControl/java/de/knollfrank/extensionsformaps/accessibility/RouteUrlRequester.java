@@ -12,7 +12,6 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.common.URLs;
@@ -77,15 +76,11 @@ public class RouteUrlRequester {
             final CharSequence urlText = urlNodes.get(0).getText();
             if (urlText != null) {
                 Log.d(TAG, "Extracted URL: " + urlText);
-                CompletableFuture
-                        .supplyAsync(
-                                () ->
-                                        DirectionsUrlFactory
-                                                .createDirectionsUrl(URLs.createUrl(urlText.toString()))
-                                                .orElseThrow())
+                DirectionsUrlFactory
+                        .createDirectionsUrl(URLs.createUrl(urlText.toString()))
                         .thenAcceptAsync(
-                                directionsUrl -> {
-                                    routeUrlCallback.onRouteUrlExtracted(directionsUrl);
+                                optionalDirectionsUrl -> {
+                                    routeUrlCallback.onRouteUrlExtracted(optionalDirectionsUrl.orElseThrow());
                                     service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
                                 },
                                 ContextCompat.getMainExecutor(service));

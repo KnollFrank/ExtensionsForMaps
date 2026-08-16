@@ -74,19 +74,13 @@ public class AddStopActivity extends AppCompatActivity {
     private void processUrl(final URL url) {
         progressOverlay.show();
         progressOverlay.updateStatus(getString(R.string.status_reading_route));
-        CompletableFuture
-                .supplyAsync(
-                        () -> {
-                            try {
-                                final DirectionsUrl directionsUrl =
-                                        DirectionsUrlFactory
-                                                .createDirectionsUrl(url)
-                                                .orElseThrow(() -> new IllegalArgumentException("Invalid URL: " + url));
-                                return GoogleMapsRouteExtractor.extractRoute(directionsUrl);
-                            } catch (final Exception e) {
-                                throw new RuntimeException(e);
-                            }
-                        })
+        DirectionsUrlFactory
+                .createDirectionsUrl(url)
+                .thenApply(
+                        optionalDirectionsUrl ->
+                                optionalDirectionsUrl
+                                        .map(GoogleMapsRouteExtractor::extractRoute)
+                                        .orElseThrow(() -> new IllegalArgumentException("Invalid URL: " + url)))
                 .handleAsync(
                         (route, throwable) -> {
                             progressOverlay.hide();

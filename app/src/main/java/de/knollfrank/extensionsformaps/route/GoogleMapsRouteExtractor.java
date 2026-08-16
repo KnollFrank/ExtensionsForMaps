@@ -4,6 +4,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.concurrent.CompletableFuture;
+
 import de.knollfrank.extensionsformaps.route.protobuf.Datatype;
 import de.knollfrank.extensionsformaps.route.protobuf.Node;
 import de.knollfrank.extensionsformaps.route.protobuf.NodeFinder;
@@ -18,11 +20,14 @@ import de.knollfrank.extensionsformaps.route.url.ModernDirectionsUrl;
 public class GoogleMapsRouteExtractor {
 
     // FK-TODO: remove or inline method
-    public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) {
+    public static CompletableFuture<Route> extractRouteFromDirectionsUrl(final URL directionsUrl) {
         return DirectionsUrlFactory
                 .createDirectionsUrl(directionsUrl)
-                .map(GoogleMapsRouteExtractor::extractRoute)
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Invalid URL: %s is not a valid Long Google Maps directions URL.", directionsUrl)));
+                .thenApply(
+                        optionalDirectionsUrl ->
+                                optionalDirectionsUrl
+                                        .map(GoogleMapsRouteExtractor::extractRoute)
+                                        .orElseThrow(() -> new IllegalArgumentException(String.format("Invalid URL: %s is not a valid Long Google Maps directions URL.", directionsUrl))));
     }
 
     public static Route extractRoute(final DirectionsUrl directionsUrl) {

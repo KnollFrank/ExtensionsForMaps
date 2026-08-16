@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.RouteOptimizationWorkflow;
 import de.knollfrank.extensionsformaps.route.RouteOptimizerFactory;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 
 public class SortActivity extends AppCompatActivity {
@@ -62,14 +63,14 @@ public class SortActivity extends AppCompatActivity {
     private void startOptimizationWorkflow(final URL url) {
         final RouteOptimizationWorkflow workflow = new RouteOptimizationWorkflow(RouteOptimizerFactory.createRouteOptimizer(this), this);
         workflow.setShowOptimizationTypeDialog(true);
-        CompletableFuture
-                .supplyAsync(
-                        () ->
-                                DirectionsUrlFactory
-                                        .createDirectionsUrl(url)
-                                        .orElseThrow(() -> new IllegalArgumentException("Invalid URL: " + url)))
+        DirectionsUrlFactory
+                .createDirectionsUrl(url)
                 .thenAcceptAsync(
-                        workflow::optimizeThenShowRoute,
+                        optionalDirectionsUrl -> {
+                            final DirectionsUrl directionsUrl =
+                                    optionalDirectionsUrl.orElseThrow(() -> new IllegalArgumentException("Invalid URL: " + url));
+                            workflow.optimizeThenShowRoute(directionsUrl);
+                        },
                         ContextCompat.getMainExecutor(this))
                 .exceptionally(
                         throwable -> {

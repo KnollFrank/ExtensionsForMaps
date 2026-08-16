@@ -17,6 +17,7 @@ public class DirectionsUrlFactoryTest {
     public void testIsDirectionsUrl_withModernUrl() throws MalformedURLException {
         assertTrue(DirectionsUrlFactory
                            .createDirectionsUrl(new URL("https://www.google.com/maps/dir/PointA/PointB/"))
+                           .join()
                            .isPresent());
     }
 
@@ -25,6 +26,7 @@ public class DirectionsUrlFactoryTest {
         assertTrue(
                 DirectionsUrlFactory
                         .createDirectionsUrl(new URL("http://maps.google.com/maps?saddr=A&daddr=B"))
+                        .join()
                         .isPresent());
     }
 

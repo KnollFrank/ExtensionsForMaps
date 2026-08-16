@@ -2,19 +2,27 @@ package de.knollfrank.extensionsformaps.route.url;
 
 import java.net.URL;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import de.knollfrank.extensionsformaps.common.Optionals;
 
 public class DirectionsUrlFactory {
 
-    public static Optional<DirectionsUrl> createDirectionsUrl(final URL url) {
+    public static CompletableFuture<Optional<DirectionsUrl>> createDirectionsUrl(final URL url) {
+        final Optional<DirectionsUrl> directionsUrl = _createDirectionsUrl(url);
+        return directionsUrl.isPresent() ?
+                CompletableFuture.completedFuture(directionsUrl) :
+                ShortDirectionsUrlFactory
+                        .createShortDirectionsUrl(url)
+                        .map(shortDirectionsUrl -> CompletableFuture.supplyAsync(() -> Optional.of(shortDirectionsUrl.expand())))
+                        .orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()));
+    }
+
+    private static Optional<DirectionsUrl> _createDirectionsUrl(final URL url) {
         return Optionals
-                .streamOfPresentElements(
+                .<DirectionsUrl>streamOfPresentElements(
                         ModernDirectionsUrlFactory.createModernDirectionsUrl(url),
-                        LegacyDirectionsUrlFactory.createLegacyDirectionsUrl(url),
-                        ShortDirectionsUrlFactory
-                                .createShortDirectionsUrl(url)
-                                .map(ShortDirectionsUrl::expand))
+                        LegacyDirectionsUrlFactory.createLegacyDirectionsUrl(url))
                 .findFirst();
     }
 }

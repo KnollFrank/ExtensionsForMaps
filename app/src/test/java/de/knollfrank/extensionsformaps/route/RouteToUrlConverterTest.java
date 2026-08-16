@@ -240,7 +240,11 @@ public class RouteToUrlConverterTest {
         final URL url = RouteToUrlConverter.getUrl(route);
 
         // Then
-        assertEquals(GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(url), route);
+        assertEquals(
+                GoogleMapsRouteExtractor
+                        .extractRouteFromDirectionsUrl(url)
+                        .join(),
+                route);
     }
 
     @Test
@@ -283,7 +287,11 @@ public class RouteToUrlConverterTest {
         assertTrue(url.toString().contains(officialPlaceId.toUndocumentedPlaceId().value()));
 
         // 2. Verifiziere den Round-Trip (lossless extraction)
-        assertEquals(route, GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(url));
+        assertEquals(
+                route,
+                GoogleMapsRouteExtractor
+                        .extractRouteFromDirectionsUrl(url)
+                        .join());
     }
 
     private static Stop createWaypoint(final int i, final Optional<OfficialPlaceId> officialPlaceId) {
