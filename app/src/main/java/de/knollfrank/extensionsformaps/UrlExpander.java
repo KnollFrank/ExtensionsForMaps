@@ -11,6 +11,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+// FK-TODO: refactor
 public class UrlExpander {
 
     private static final String TAG = UrlExpander.class.getSimpleName();
@@ -27,8 +28,7 @@ public class UrlExpander {
     public static URL expandUrl(final URL urlToExpand) throws IOException {
         // REQUIREMENT 1: If it's already a full Google Maps URL (Legacy or Modern),
         // return it immediately. No network calls for legacy URLs.
-        if (DirectionsUrlPredicate.isLegacyDirectionsUrl(urlToExpand) ||
-                DirectionsUrlPredicate.isModernDirectionsUrl(urlToExpand)) {
+        if (DirectionsUrlPredicate.isDirectionsUrl(urlToExpand)) {
             return urlToExpand;
         }
 

@@ -1,5 +1,7 @@
 package de.knollfrank.extensionsformaps.route;
 
+import com.codepoetics.ambivalence.Either;
+
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -14,43 +16,49 @@ import de.knollfrank.extensionsformaps.route.protobuf.NodesParser;
 public class GoogleMapsRouteExtractor {
 
     public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) {
-        return DirectionsUrl
-                .of(directionsUrl)
+        return DirectionsUrlFactory
+                .createDirectionsUrl(directionsUrl)
                 .map(GoogleMapsRouteExtractor::extractRoute)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Invalid URL: %s is not a valid Google Maps directions URL.", directionsUrl)));
     }
 
+    private static Route extractRoute(final Either<ModernDirectionsUrl, LegacyDirectionsUrl> directionsUrl) {
+        return directionsUrl.join(
+                GoogleMapsRouteExtractor::extractRoute,
+                GoogleMapsRouteExtractor::extractRoute);
+    }
+
     // FK-TODO: refactor
-    private static Route extractRoute(final DirectionsUrl directionsUrl) {
+    private static Route extractRoute(final LegacyDirectionsUrl directionsUrl) {
         final List<StopData> stopDataList = AddressToStopDataConverter.convert(directionsUrl.getUrlDecodedAddresses());
-        directionsUrl
-                .getTokensFromDataPart()
-                .map(NodesParser::parseNodes)
-                .map(rootNodes -> NodeFinder.findWaypointContainers(rootNodes, stopDataList.size()))
-                .ifPresent(
-                        waypointContainers -> {
-                            // 3. Extrahiere die Daten für jeden Stopp aus seinem jeweiligen Sub-Baum
-                            for (int i = 0; i < waypointContainers.size(); i++) {
-                                final Node waypoint = waypointContainers.get(i);
-                                final StopData stopData = stopDataList.get(i);
-                                extractDataFromSubtree(waypoint, stopData);
-                            }
-                        });
-        directionsUrl
-                .getGeocodeTokens()
-                .ifPresent(tokens -> {
-                    for (int i = 0; i < Math.min(tokens.size(), stopDataList.size()); i++) {
-                        final String token = tokens.get(i);
-                        final StopData stopData = stopDataList.get(i);
-                        GeocodeTokenParser
-                                .parseToken(token)
-                                .ifPresent(data -> {
-                                    data.latitude.ifPresent(lat -> stopData.latitude = Optional.of(lat));
-                                    data.longitude.ifPresent(lon -> stopData.longitude = Optional.of(lon));
-                                    data.featureId.ifPresent(fid -> stopData.officialPlaceId = Optional.of(new OfficialPlaceId(fid)));
-                                });
-                    }
-                });
+        final List<String> tokens = directionsUrl.getGeocodeTokens();
+        for (int i = 0; i < Math.min(tokens.size(), stopDataList.size()); i++) {
+            final String token = tokens.get(i);
+            final StopData stopData = stopDataList.get(i);
+            GeocodeTokenParser
+                    .parseToken(token)
+                    .ifPresent(data -> {
+                        data.latitude.ifPresent(lat -> stopData.latitude = Optional.of(lat));
+                        data.longitude.ifPresent(lon -> stopData.longitude = Optional.of(lon));
+                        data.featureId.ifPresent(fid -> stopData.officialPlaceId = Optional.of(new OfficialPlaceId(fid)));
+                    });
+        }
+        return RouteFactory.createRoute(StopDataConverter.asStops(stopDataList));
+    }
+
+    // FK-TODO: refactor
+    private static Route extractRoute(final ModernDirectionsUrl directionsUrl) {
+        final List<StopData> stopDataList = AddressToStopDataConverter.convert(directionsUrl.getUrlDecodedAddresses());
+        final List<Node> waypointContainers =
+                NodeFinder.findWaypointContainers(
+                        NodesParser.parseNodes(directionsUrl.getTokensFromDataPart()),
+                        stopDataList.size());
+        // 3. Extrahiere die Daten für jeden Stopp aus seinem jeweiligen Sub-Baum
+        for (int i = 0; i < waypointContainers.size(); i++) {
+            final Node waypoint = waypointContainers.get(i);
+            final StopData stopData = stopDataList.get(i);
+            extractDataFromSubtree(waypoint, stopData);
+        }
         return RouteFactory.createRoute(StopDataConverter.asStops(stopDataList));
     }
 
