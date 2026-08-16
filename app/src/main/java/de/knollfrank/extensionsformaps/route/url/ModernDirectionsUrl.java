@@ -7,10 +7,10 @@ public record ModernDirectionsUrl(URL url) implements DirectionsUrl {
 
     @Override
     public List<String> getUrlDecodedAddresses() {
-        return ModernAddressesProvider.getUrlDecodedAddresses(url);
+        return ModernAddressesProvider.getUrlDecodedAddresses(this);
     }
 
     public List<String> getTokensFromDataPart() {
-        return TokenProvider.getTokensFromDataPart(url).orElseThrow();
+        return TokenProvider.getTokensFromDataPart(this);
     }
 }
