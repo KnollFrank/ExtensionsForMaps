@@ -12,12 +12,20 @@ public class DirectionsUrlFactory {
     public static Optional<Either<ModernDirectionsUrl, LegacyDirectionsUrl>> createDirectionsUrl(final URL url) {
         return Optionals
                 .streamOfPresentElements(
-                        ModernDirectionsUrlFactory
-                                .createModernDirectionsUrl(url)
-                                .<Either<ModernDirectionsUrl, LegacyDirectionsUrl>>map(Either::ofLeft),
-                        LegacyDirectionsUrlFactory
-                                .createLegacyDirectionsUrl(url)
-                                .<Either<ModernDirectionsUrl, LegacyDirectionsUrl>>map(Either::ofRight))
+                        createModernDirectionsUrl(url),
+                        createLegacyDirectionsUrl(url))
                 .findFirst();
+    }
+
+    private static Optional<Either<ModernDirectionsUrl, LegacyDirectionsUrl>> createModernDirectionsUrl(final URL url) {
+        return ModernDirectionsUrlFactory
+                .createModernDirectionsUrl(url)
+                .map(Either::ofLeft);
+    }
+
+    private static Optional<Either<ModernDirectionsUrl, LegacyDirectionsUrl>> createLegacyDirectionsUrl(final URL url) {
+        return LegacyDirectionsUrlFactory
+                .createLegacyDirectionsUrl(url)
+                .map(Either::ofRight);
     }
 }
