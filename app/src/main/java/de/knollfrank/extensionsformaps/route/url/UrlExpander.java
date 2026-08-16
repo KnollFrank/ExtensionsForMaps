@@ -11,7 +11,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 // FK-TODO: refactor
-public class UrlExpander {
+class UrlExpander {
 
     private static final String TAG = UrlExpander.class.getSimpleName();
 

@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps;
+package de.knollfrank.extensionsformaps.route.url;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,9 +11,6 @@ import org.robolectric.RobolectricTestRunner;
 import java.io.IOException;
 import java.net.URL;
 
-import de.knollfrank.extensionsformaps.route.url.LongDirectionsUrl;
-import de.knollfrank.extensionsformaps.route.url.ShortDirectionsUrl;
-import de.knollfrank.extensionsformaps.route.url.UrlExpander;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 

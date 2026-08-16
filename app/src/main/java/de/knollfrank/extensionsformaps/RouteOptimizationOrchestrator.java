@@ -13,7 +13,6 @@ import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 import de.knollfrank.extensionsformaps.route.url.LongDirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.ShortDirectionsUrl;
-import de.knollfrank.extensionsformaps.route.url.UrlExpander;
 
 public class RouteOptimizationOrchestrator {
 
@@ -56,7 +55,7 @@ public class RouteOptimizationOrchestrator {
                                 .orElseThrow(() -> new IllegalArgumentException("Invalid URL: " + url));
                 final LongDirectionsUrl longDirectionsUrl =
                         directionsUrl instanceof final ShortDirectionsUrl shortUrl ?
-                                UrlExpander.expandUrl(shortUrl) :
+                                shortUrl.expand() :
                                 (LongDirectionsUrl) directionsUrl;
 
                 callback.onExtractRouteFromDirectionsUrlSuccess(

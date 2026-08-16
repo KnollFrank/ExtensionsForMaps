@@ -17,7 +17,6 @@ import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 import de.knollfrank.extensionsformaps.route.url.LongDirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.ShortDirectionsUrl;
-import de.knollfrank.extensionsformaps.route.url.UrlExpander;
 
 public class DummyStopAdder {
 
@@ -47,7 +46,7 @@ public class DummyStopAdder {
         try {
             final LongDirectionsUrl longDirectionsUrl =
                     directionsUrl instanceof final ShortDirectionsUrl shortUrl ?
-                            UrlExpander.expandUrl(shortUrl) :
+                            shortUrl.expand() :
                             (LongDirectionsUrl) directionsUrl;
 
             return RouteToUrlConverter.getUrl(
