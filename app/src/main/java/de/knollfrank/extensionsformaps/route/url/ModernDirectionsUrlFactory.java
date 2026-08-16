@@ -12,7 +12,7 @@ class ModernDirectionsUrlFactory {
                 Optional.empty();
     }
 
-    public static boolean isModernDirectionsUrl(final URL url) {
+    private static boolean isModernDirectionsUrl(final URL url) {
         return List.of("http", "https").contains(url.getProtocol()) &&
                 url.getHost().contains("google") &&
                 url.getPath().startsWith("/maps/dir/");

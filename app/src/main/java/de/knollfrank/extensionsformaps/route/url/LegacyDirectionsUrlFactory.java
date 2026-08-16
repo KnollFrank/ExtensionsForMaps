@@ -11,7 +11,7 @@ class LegacyDirectionsUrlFactory {
                 Optional.empty();
     }
 
-    public static boolean isLegacyDirectionsUrl(final URL url) {
+    private static boolean isLegacyDirectionsUrl(final URL url) {
         final String query = url.getQuery();
         final String path = url.getPath();
         return url.getHost().toLowerCase().contains("google") &&

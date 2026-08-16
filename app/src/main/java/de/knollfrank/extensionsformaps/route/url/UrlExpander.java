@@ -4,8 +4,10 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import de.knollfrank.extensionsformaps.common.Optionals;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -35,8 +37,7 @@ class UrlExpander {
 
                 Log.d(TAG, String.format("Result: %s (Status: %d)", resultUrl, code));
 
-                // FK-FIXME: aua, mögliche Endlosschleife
-                final var directionsUrl = DirectionsUrlFactory.createDirectionsUrl(resultUrl);
+                final var directionsUrl = createDirectionsUrl(resultUrl);
                 if (directionsUrl.isPresent()) {
                     return directionsUrl.get();
                 }
@@ -57,6 +58,14 @@ class UrlExpander {
             }
         }
         throw new IOException("Failed to expand short URL after 10 attempts: " + shortDirectionsUrl.url());
+    }
+
+    private static Optional<? extends DirectionsUrl> createDirectionsUrl(final URL url) {
+        return Optionals
+                .streamOfPresentElements(
+                        ModernDirectionsUrlFactory.createModernDirectionsUrl(url),
+                        LegacyDirectionsUrlFactory.createLegacyDirectionsUrl(url))
+                .findFirst();
     }
 
     private static void sleep(final long millis) {
