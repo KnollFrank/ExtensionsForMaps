@@ -139,7 +139,8 @@ public class AddStopActivity extends AppCompatActivity {
     }
 
     private void addStopAndFinish(Route route) {
-        CompletableFuture.supplyAsync(() -> RouteToUrlConverter.getUrl(Routes.addDummyStop(route)))
+        CompletableFuture
+                .supplyAsync(() -> RouteToUrlConverter.getUrl(Routes.addDummyStop(route)))
                 .thenAccept(expandedUrl -> runOnUiThread(() -> {
                     if (SortConfig.shouldShowAddStopInstruction(this)) {
                         showInstructionDialog(expandedUrl);
