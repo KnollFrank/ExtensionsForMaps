@@ -88,7 +88,6 @@ dependencies {
     implementation libs.gson
     implementation libs.guava
     implementation libs.protobuf.javalite
-    implementation libs.ambivalence
 
     testImplementation libs.junit
     testImplementation libs.mockwebserver

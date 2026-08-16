@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import de.knollfrank.extensionsformaps.route.TokenProvider;
+import de.knollfrank.extensionsformaps.route.url.TokenProvider;
 
 public class NodesParserTest {
 

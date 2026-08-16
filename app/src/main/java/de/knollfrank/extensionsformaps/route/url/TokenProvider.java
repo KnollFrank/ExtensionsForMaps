@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.route;
+package de.knollfrank.extensionsformaps.route.url;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -27,9 +27,9 @@ public class TokenProvider {
         return directionsUrl.toString().contains(DATA_PART_MARKER) ?
                 Optional.of(
                         directionsUrl
-                        .toString()
-                        .split(DATA_PART_MARKER)[1]
-                        .split("\\?")[0]) :
+                                .toString()
+                                .split(DATA_PART_MARKER)[1]
+                                .split("\\?")[0]) :
                 Optional.empty();
     }
 

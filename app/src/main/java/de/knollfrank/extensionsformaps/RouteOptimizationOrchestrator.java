@@ -9,7 +9,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizer;
 import de.knollfrank.extensionsformaps.route.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.Route;
-import de.knollfrank.extensionsformaps.route.url.DirectionsUrlPredicate;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
+import de.knollfrank.extensionsformaps.route.url.LongDirectionsUrl;
+import de.knollfrank.extensionsformaps.route.url.ShortDirectionsUrl;
+import de.knollfrank.extensionsformaps.route.url.UrlExpander;
 
 public class RouteOptimizationOrchestrator {
 
@@ -42,14 +46,21 @@ public class RouteOptimizationOrchestrator {
     }
 
     // FK-TODO: spezialisierten callback mit den Methoden onExtractRouteFromDirectionsUrlStarted(), onExtractRouteFromDirectionsUrlSuccess() und onError() direkt als Parameter übergeben oder als Continuation zurückgeben.
-    public void extractRouteFromDirectionsUrl(final URL directionsUrl) {
+    public void extractRouteFromDirectionsUrl(final URL url) {
         callback.onExtractRouteFromDirectionsUrlStarted();
         new Thread(() -> {
             try {
+                final DirectionsUrl directionsUrl =
+                        DirectionsUrlFactory
+                                .createDirectionsUrl(url)
+                                .orElseThrow(() -> new IllegalArgumentException("Invalid URL: " + url));
+                final LongDirectionsUrl longDirectionsUrl =
+                        directionsUrl instanceof final ShortDirectionsUrl shortUrl ?
+                                UrlExpander.expandUrl(shortUrl) :
+                                (LongDirectionsUrl) directionsUrl;
+
                 callback.onExtractRouteFromDirectionsUrlSuccess(
-                        GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(
-                                expandShortDirectionsUrl(
-                                        directionsUrl)));
+                        GoogleMapsRouteExtractor.extractRoute(longDirectionsUrl));
             } catch (final IOException e) {
                 callback.onError(context.getString(R.string.error_network, e.getMessage()));
             } catch (final Exception e) {
@@ -85,11 +96,5 @@ public class RouteOptimizationOrchestrator {
 
     public void cancelOptimization() {
         isOptimizationCanceled.set(true);
-    }
-
-    private static URL expandShortDirectionsUrl(final URL directionsUrl) throws IOException {
-        return DirectionsUrlPredicate.isShortDirectionsUrl(directionsUrl) ?
-                UrlExpander.expandUrl(directionsUrl) :
-                directionsUrl;
     }
 }

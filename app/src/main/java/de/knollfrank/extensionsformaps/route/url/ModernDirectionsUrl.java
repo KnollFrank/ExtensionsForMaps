@@ -3,16 +3,9 @@ package de.knollfrank.extensionsformaps.route.url;
 import java.net.URL;
 import java.util.List;
 
-import de.knollfrank.extensionsformaps.route.TokenProvider;
+public record ModernDirectionsUrl(URL url) implements LongDirectionsUrl {
 
-public class ModernDirectionsUrl {
-
-    private final URL url;
-
-    ModernDirectionsUrl(final URL url) {
-        this.url = url;
-    }
-
+    @Override
     public List<String> getUrlDecodedAddresses() {
         return ModernAddressesProvider.getUrlDecodedAddresses(url);
     }

@@ -1,7 +1,5 @@
 package de.knollfrank.extensionsformaps.route;
 
-import com.codepoetics.ambivalence.Either;
-
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -12,26 +10,30 @@ import de.knollfrank.extensionsformaps.route.protobuf.NodeFinder;
 import de.knollfrank.extensionsformaps.route.protobuf.NodesParser;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 import de.knollfrank.extensionsformaps.route.url.LegacyDirectionsUrl;
+import de.knollfrank.extensionsformaps.route.url.LongDirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.ModernDirectionsUrl;
 
 // FK-TODO: brauchen Gesamtunittest, der eine Google Maps Directions URL entgegennimmt und eine korrekt sortierte (optimierte) Google Maps Directions URL erzeugt.
 // FK-TODO: GoogleMapsRouteExtractor und RouteToUrlConverter sind invers zueinander. Führe wie in SettingsSearch ein Converter-Interface ein
 public class GoogleMapsRouteExtractor {
 
+    // FK-TODO: remove or inline method
     public static Route extractRouteFromDirectionsUrl(final URL directionsUrl) {
         return DirectionsUrlFactory
-                .createDirectionsUrl(directionsUrl)
+                .createLongDirectionsUrl(directionsUrl)
                 .map(GoogleMapsRouteExtractor::extractRoute)
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Invalid URL: %s is not a valid Google Maps directions URL.", directionsUrl)));
+                .orElseThrow(() -> new IllegalArgumentException(String.format("Invalid URL: %s is not a valid Long Google Maps directions URL.", directionsUrl)));
     }
 
-    private static Route extractRoute(final Either<ModernDirectionsUrl, LegacyDirectionsUrl> directionsUrl) {
-        return directionsUrl.join(
-                GoogleMapsRouteExtractor::extractRoute,
-                GoogleMapsRouteExtractor::extractRoute);
+    public static Route extractRoute(final LongDirectionsUrl directionsUrl) {
+        if (directionsUrl instanceof final ModernDirectionsUrl modernDirectionsUrl) {
+            return extractRoute(modernDirectionsUrl);
+        } else if (directionsUrl instanceof final LegacyDirectionsUrl legacyDirectionsUrl) {
+            return extractRoute(legacyDirectionsUrl);
+        }
+        throw new IllegalArgumentException("Unsupported DirectionsUrl type: " + directionsUrl.getClass().getName());
     }
 
-    // FK-TODO: refactor
     private static Route extractRoute(final LegacyDirectionsUrl directionsUrl) {
         final List<StopData> stopDataList = AddressToStopDataConverter.convert(directionsUrl.getUrlDecodedAddresses());
         final List<String> tokens = directionsUrl.getGeocodeTokens();
@@ -72,7 +74,6 @@ public class GoogleMapsRouteExtractor {
             stopData.officialPlaceId = Optional.of(PlaceIdParser.getOfficialPlaceId(node));
         } else if (Datatype.DOUBLE.equals(node.datatype())) {
             final double value = Double.parseDouble(node.value());
-            // Flexibles Mapping für beide bekannten Google-Koordinatenformate (alt: 3d/4d, neu: 2d/1d)
             if (node.fieldId() == 3 || node.fieldId() == 2) {
                 stopData.latitude = Optional.of(value);
             } else if (node.fieldId() == 4 || node.fieldId() == 1) {

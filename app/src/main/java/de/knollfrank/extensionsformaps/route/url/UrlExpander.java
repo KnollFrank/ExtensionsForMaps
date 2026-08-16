@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps;
+package de.knollfrank.extensionsformaps.route.url;
 
 import android.util.Log;
 
@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
-import de.knollfrank.extensionsformaps.route.url.DirectionsUrlPredicate;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -25,14 +24,8 @@ public class UrlExpander {
                     .readTimeout(10, TimeUnit.SECONDS)
                     .build();
 
-    public static URL expandUrl(final URL urlToExpand) throws IOException {
-        // REQUIREMENT 1: If it's already a full Google Maps URL (Legacy or Modern),
-        // return it immediately. No network calls for legacy URLs.
-        if (DirectionsUrlPredicate.isDirectionsUrl(urlToExpand)) {
-            return urlToExpand;
-        }
-
-        URL currentUrl = urlToExpand;
+    public static LongDirectionsUrl expandUrl(final ShortDirectionsUrl shortDirectionsUrl) throws IOException {
+        URL currentUrl = shortDirectionsUrl.url();
         for (int attempt = 1; attempt <= 10; attempt++) {
             Log.d(TAG, String.format("Expansion attempt %d for: %s", attempt, currentUrl));
 
@@ -42,19 +35,19 @@ public class UrlExpander {
 
                 Log.d(TAG, String.format("Result: %s (Status: %d)", resultUrl, code));
 
-                // If it's no longer a short URL, we are successful
-                if (!DirectionsUrlPredicate.isShortDirectionsUrl(resultUrl)) {
-                    return resultUrl;
+                final var longDirectionsUrl = DirectionsUrlFactory.createLongDirectionsUrl(resultUrl);
+                if (longDirectionsUrl.isPresent()) {
+                    return longDirectionsUrl.get();
                 }
 
                 // REQUIREMENT 2: Stop the hang in tests.
                 // Only retry if it's still a Google short URL type that's not ready.
-                if (DirectionsUrlPredicate.isShortDirectionsUrl(resultUrl) && (code == 404 || code == 200)) {
+                if (ShortDirectionsUrlFactory.createShortDirectionsUrl(resultUrl).isPresent() && (code == 404 || code == 200)) {
                     Log.d(TAG, String.format("URL not yet ready (Status %d). Retrying in 500ms...", code));
                     sleep(500);
                     currentUrl = resultUrl;
                 } else {
-                    return resultUrl;
+                    throw new IOException("Failed to expand short URL to a valid long Directions URL: " + resultUrl);
                 }
             } catch (final IOException e) {
                 if (attempt == 10) throw e;
@@ -62,7 +55,7 @@ public class UrlExpander {
                 sleep(500);
             }
         }
-        return currentUrl;
+        throw new IOException("Failed to expand short URL after 10 attempts: " + shortDirectionsUrl.url());
     }
 
     private static void sleep(final long millis) {
