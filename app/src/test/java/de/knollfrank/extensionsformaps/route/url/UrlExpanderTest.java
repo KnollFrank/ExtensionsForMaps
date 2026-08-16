@@ -43,12 +43,15 @@ public class UrlExpanderTest {
                         .setResponseCode(301)
                         .setHeader("Location", targetUrl.toString()));
         mockWebServer.enqueue(new MockResponse().setResponseCode(200));
-        
+
         final URL url = new URL(baseUrl + "/short");
         final ShortDirectionsUrl shortUrl = new ShortDirectionsUrl(url);
 
         // When
-        final DirectionsUrl expandedUrl = UrlExpander.expandUrl(shortUrl);
+        final DirectionsUrl expandedUrl =
+                UrlExpander
+                        .expandUrl(shortUrl)
+                        .join();
 
         // Then
         assertEquals(targetUrl, expandedUrl.url());
@@ -63,12 +66,15 @@ public class UrlExpanderTest {
                         .setResponseCode(302)
                         .setHeader("Location", targetUrl.toString()));
         mockWebServer.enqueue(new MockResponse().setResponseCode(404));
-        
+
         final URL url = new URL(baseUrl + "/short-to-broken-link");
         final ShortDirectionsUrl shortUrl = new ShortDirectionsUrl(url);
 
         // When
-        final DirectionsUrl expandedUrl = UrlExpander.expandUrl(shortUrl);
+        final DirectionsUrl expandedUrl =
+                UrlExpander
+                        .expandUrl(shortUrl)
+                        .join();
 
         // Then
         assertEquals(targetUrl, expandedUrl.url());
@@ -83,12 +89,14 @@ public class UrlExpanderTest {
                         .setResponseCode(301)
                         .setHeader("Location", targetUrl.toString()));
         mockWebServer.enqueue(new MockResponse().setResponseCode(200));
-        
+
         final URL originalUrl = new URL(baseUrl + "/test");
         final ShortDirectionsUrl shortUrl = new ShortDirectionsUrl(originalUrl);
 
         // When
-        UrlExpander.expandUrl(shortUrl);
+        UrlExpander
+                .expandUrl(shortUrl)
+                .join();
 
         // Then
         final okhttp3.mockwebserver.RecordedRequest request = mockWebServer.takeRequest();

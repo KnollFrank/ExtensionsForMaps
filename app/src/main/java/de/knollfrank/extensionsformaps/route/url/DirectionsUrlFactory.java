@@ -14,7 +14,10 @@ public class DirectionsUrlFactory {
                 CompletableFuture.completedFuture(directionsUrl) :
                 ShortDirectionsUrlFactory
                         .createShortDirectionsUrl(url)
-                        .map(shortDirectionsUrl -> CompletableFuture.supplyAsync(() -> Optional.of(shortDirectionsUrl.expand())))
+                        .map(shortDirectionsUrl ->
+                                     shortDirectionsUrl
+                                             .expand()
+                                             .thenApply(Optional::of))
                         .orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()));
     }
 

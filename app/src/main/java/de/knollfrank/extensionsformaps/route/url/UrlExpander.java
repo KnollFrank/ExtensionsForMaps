@@ -5,6 +5,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import de.knollfrank.extensionsformaps.common.Optionals;
@@ -26,7 +27,11 @@ class UrlExpander {
                     .readTimeout(10, TimeUnit.SECONDS)
                     .build();
 
-    public static DirectionsUrl expandUrl(final ShortDirectionsUrl shortDirectionsUrl) throws IOException {
+    public static CompletableFuture<DirectionsUrl> expandUrl(final ShortDirectionsUrl shortDirectionsUrl) {
+        return CompletableFuture.supplyAsync(() -> _expandUrl(shortDirectionsUrl));
+    }
+
+    private static DirectionsUrl _expandUrl(final ShortDirectionsUrl shortDirectionsUrl) {
         URL currentUrl = shortDirectionsUrl.url();
         for (int attempt = 1; attempt <= 10; attempt++) {
             Log.d(TAG, String.format("Expansion attempt %d for: %s", attempt, currentUrl));
@@ -37,7 +42,7 @@ class UrlExpander {
 
                 Log.d(TAG, String.format("Result: %s (Status: %d)", resultUrl, code));
 
-                final var directionsUrl = createDirectionsUrl(resultUrl);
+                final Optional<? extends DirectionsUrl> directionsUrl = createDirectionsUrl(resultUrl);
                 if (directionsUrl.isPresent()) {
                     return directionsUrl.get();
                 }
@@ -49,15 +54,17 @@ class UrlExpander {
                     sleep(500);
                     currentUrl = resultUrl;
                 } else {
-                    throw new IOException("Failed to expand short URL to a valid long Directions URL: " + resultUrl);
+                    throw new RuntimeException(new IOException("Failed to expand short URL to a valid long Directions URL: " + resultUrl));
                 }
             } catch (final IOException e) {
-                if (attempt == 10) throw e;
+                if (attempt == 10) {
+                    throw new RuntimeException(e);
+                }
                 Log.w(TAG, "Network error during expansion, retrying...", e);
                 sleep(500);
             }
         }
-        throw new IOException("Failed to expand short URL after 10 attempts: " + shortDirectionsUrl.url());
+        throw new RuntimeException(new IOException("Failed to expand short URL after 10 attempts: " + shortDirectionsUrl.url()));
     }
 
     private static Optional<? extends DirectionsUrl> createDirectionsUrl(final URL url) {
