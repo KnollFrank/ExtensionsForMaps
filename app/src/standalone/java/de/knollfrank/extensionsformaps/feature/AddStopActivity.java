@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -20,13 +21,14 @@ import de.knollfrank.extensionsformaps.GoogleMapsNavigator;
 import de.knollfrank.extensionsformaps.ProgressOverlay;
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.SortConfig;
-import de.knollfrank.extensionsformaps.UrlExpander;
 import de.knollfrank.extensionsformaps.databinding.DialogAddStopInstructionBinding;
 import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
 import de.knollfrank.extensionsformaps.route.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.RouteToUrlConverter;
 import de.knollfrank.extensionsformaps.route.Routes;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 
 public class AddStopActivity extends AppCompatActivity {
 
@@ -69,36 +71,37 @@ public class AddStopActivity extends AppCompatActivity {
         }
     }
 
-    private void processUrl(URL url) {
+    private void processUrl(final URL url) {
         progressOverlay.show();
         progressOverlay.updateStatus(getString(R.string.status_reading_route));
         CompletableFuture
                 .supplyAsync(
                         () -> {
                             try {
-                                URL expandedUrl = UrlExpander.expandUrl(url);
-                                return GoogleMapsRouteExtractor.extractRouteFromDirectionsUrl(expandedUrl);
-                            } catch (Exception e) {
+                                final DirectionsUrl directionsUrl =
+                                        DirectionsUrlFactory
+                                                .createDirectionsUrl(url)
+                                                .orElseThrow(() -> new IllegalArgumentException("Invalid URL: " + url));
+                                return GoogleMapsRouteExtractor.extractRoute(directionsUrl);
+                            } catch (final Exception e) {
                                 throw new RuntimeException(e);
                             }
                         })
-                .thenAccept(
-                        route -> runOnUiThread(() -> {
+                .handleAsync(
+                        (route, throwable) -> {
                             progressOverlay.hide();
-                            handleRoute(route);
-                        }))
-                .exceptionally(
-                        throwable -> {
-                            Log.e(TAG, "Error processing route", throwable);
-                            runOnUiThread(() -> {
-                                progressOverlay.hide();
+                            if (throwable != null) {
+                                Log.e(TAG, "Error processing route", throwable);
                                 Toast
                                         .makeText(this, R.string.error_processing_route, Toast.LENGTH_LONG)
                                         .show();
                                 finish();
-                            });
+                            } else {
+                                handleRoute(route);
+                            }
                             return null;
-                        });
+                        },
+                        ContextCompat.getMainExecutor(this));
     }
 
     private void handleRoute(Route route) {
@@ -138,27 +141,28 @@ public class AddStopActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void addStopAndFinish(Route route) {
+    private void addStopAndFinish(final Route route) {
         CompletableFuture
                 .supplyAsync(() -> RouteToUrlConverter.getUrl(Routes.addDummyStop(route)))
-                .thenAccept(expandedUrl -> runOnUiThread(() -> {
-                    if (SortConfig.shouldShowAddStopInstruction(this)) {
-                        showInstructionDialog(expandedUrl);
-                    } else {
-                        GoogleMapsNavigator.launchUrl(expandedUrl, getApplicationContext());
-                        finish();
-                    }
-                }))
-                .exceptionally(throwable -> {
-                    Log.e(TAG, "Error adding stop", throwable);
-                    runOnUiThread(() -> {
-                        Toast
-                                .makeText(this, R.string.error_processing_route, Toast.LENGTH_LONG)
-                                .show();
-                        finish();
-                    });
-                    return null;
-                });
+                .handleAsync(
+                        (expandedUrl, throwable) -> {
+                            if (throwable != null) {
+                                Log.e(TAG, "Error adding stop", throwable);
+                                Toast
+                                        .makeText(this, R.string.error_processing_route, Toast.LENGTH_LONG)
+                                        .show();
+                                finish();
+                            } else {
+                                if (SortConfig.shouldShowAddStopInstruction(this)) {
+                                    showInstructionDialog(expandedUrl);
+                                } else {
+                                    GoogleMapsNavigator.launchUrl(expandedUrl, getApplicationContext());
+                                    finish();
+                                }
+                            }
+                            return null;
+                        },
+                        ContextCompat.getMainExecutor(this));
     }
 
     private void showInstructionDialog(URL url) {

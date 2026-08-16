@@ -7,15 +7,18 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.RouteOptimizationWorkflow;
 import de.knollfrank.extensionsformaps.route.RouteOptimizerFactory;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 
 public class SortActivity extends AppCompatActivity {
 
@@ -39,7 +42,7 @@ public class SortActivity extends AppCompatActivity {
         if (Intent.ACTION_SEND.equals(action) && "text/plain".equals(type)) {
             String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
             if (sharedText != null) {
-                URL url = extractUrl(sharedText);
+                final URL url = extractUrl(sharedText);
                 if (url != null) {
                     startOptimizationWorkflow(url);
                 } else {
@@ -56,20 +59,38 @@ public class SortActivity extends AppCompatActivity {
         }
     }
 
-    private void startOptimizationWorkflow(URL url) {
-        RouteOptimizationWorkflow workflow = new RouteOptimizationWorkflow(RouteOptimizerFactory.createRouteOptimizer(this), this);
+    private void startOptimizationWorkflow(final URL url) {
+        final RouteOptimizationWorkflow workflow = new RouteOptimizationWorkflow(RouteOptimizerFactory.createRouteOptimizer(this), this);
         workflow.setShowOptimizationTypeDialog(true);
-        workflow.optimizeThenShowRoute(url);
+        CompletableFuture
+                .supplyAsync(
+                        () ->
+                                DirectionsUrlFactory
+                                        .createDirectionsUrl(url)
+                                        .orElseThrow(() -> new IllegalArgumentException("Invalid URL: " + url)))
+                .thenAcceptAsync(
+                        workflow::optimizeThenShowRoute,
+                        ContextCompat.getMainExecutor(this))
+                .exceptionally(
+                        throwable -> {
+                            Log.e(TAG, "Error creating DirectionsUrl", throwable);
+                            runOnUiThread(() ->
+                                                  Toast
+                                                          .makeText(this, R.string.error_general, Toast.LENGTH_LONG)
+                                                          .show());
+                            return null;
+                        });
     }
 
+    // FK-TODO: use Optional<URL>
     @Nullable
-    private URL extractUrl(String text) {
-        Pattern pattern = Pattern.compile("https?://\\S+");
-        Matcher matcher = pattern.matcher(text);
+    private URL extractUrl(final String text) {
+        final Pattern pattern = Pattern.compile("https?://\\S+");
+        final Matcher matcher = pattern.matcher(text);
         if (matcher.find()) {
             try {
                 return new URL(matcher.group());
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 Log.e(TAG, "Malformed URL: " + matcher.group(), e);
             }
         }

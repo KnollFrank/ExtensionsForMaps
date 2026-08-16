@@ -6,10 +6,13 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
+import androidx.core.content.ContextCompat;
+
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.common.URLs;
@@ -74,12 +77,19 @@ public class RouteUrlRequester {
             final CharSequence urlText = urlNodes.get(0).getText();
             if (urlText != null) {
                 Log.d(TAG, "Extracted URL: " + urlText);
-                routeUrlCallback.onRouteUrlExtracted(
-                        DirectionsUrlFactory
-                                .createDirectionsUrl(URLs.createUrl(urlText.toString()))
-                                .orElseThrow());
+                CompletableFuture
+                        .supplyAsync(
+                                () ->
+                                        DirectionsUrlFactory
+                                                .createDirectionsUrl(URLs.createUrl(urlText.toString()))
+                                                .orElseThrow())
+                        .thenAcceptAsync(
+                                directionsUrl -> {
+                                    routeUrlCallback.onRouteUrlExtracted(directionsUrl);
+                                    service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
+                                },
+                                ContextCompat.getMainExecutor(service));
                 this.routeUrlCallback = Optional.empty();
-                service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
             }
         }
     }
