@@ -1,14 +1,23 @@
 package de.knollfrank.extensionsformaps.common;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Optionals {
 
     private Optionals() {
+    }
+
+    @SafeVarargs
+    public static <T> Stream<T> streamOfPresentElements(final Optional<? extends T>... elements) {
+        return Arrays
+                .stream(elements)
+                .flatMap(Optional::stream);
     }
 
     public static <T> Set<T> asSet(final Optional<T> optional) {
