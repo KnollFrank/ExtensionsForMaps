@@ -42,11 +42,13 @@ public class GoogleMapsRouteExtractor {
                     for (int i = 0; i < Math.min(tokens.size(), stopDataList.size()); i++) {
                         final String token = tokens.get(i);
                         final StopData stopData = stopDataList.get(i);
-                        GeocodeTokenParser.parseToken(token).ifPresent(data -> {
-                            data.latitude.ifPresent(lat -> stopData.latitude = Optional.of(lat));
-                            data.longitude.ifPresent(lon -> stopData.longitude = Optional.of(lon));
-                            data.featureId.ifPresent(fid -> stopData.officialPlaceId = Optional.of(new OfficialPlaceId(fid)));
-                        });
+                        GeocodeTokenParser
+                                .parseToken(token)
+                                .ifPresent(data -> {
+                                    data.latitude.ifPresent(lat -> stopData.latitude = Optional.of(lat));
+                                    data.longitude.ifPresent(lon -> stopData.longitude = Optional.of(lon));
+                                    data.featureId.ifPresent(fid -> stopData.officialPlaceId = Optional.of(new OfficialPlaceId(fid)));
+                                });
                     }
                 });
         return RouteFactory.createRoute(StopDataConverter.asStops(stopDataList));

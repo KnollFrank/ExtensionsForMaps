@@ -26,10 +26,9 @@ class DirectionsUrl {
     }
 
     public Optional<List<String>> getTokensFromDataPart() {
-        if (DirectionsUrlPredicate.isModernDirectionsUrl(url)) {
-            return TokenProvider.getTokensFromDataPart(url);
-        }
-        return Optional.empty();
+        return DirectionsUrlPredicate.isModernDirectionsUrl(url) ?
+                TokenProvider.getTokensFromDataPart(url) :
+                Optional.empty();
     }
 
     public Optional<List<String>> getGeocodeTokens() {
