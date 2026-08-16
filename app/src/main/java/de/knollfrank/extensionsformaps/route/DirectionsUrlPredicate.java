@@ -15,18 +15,18 @@ public class DirectionsUrlPredicate {
                 url.getPath().startsWith("/maps/dir/");
     }
 
-    public static boolean isShortDirectionsUrl(final URL url) {
-        return isShortDirectionsUrlNewType(url) || isShortDirectionsUrlOldType(url);
-    }
-
     public static boolean isLegacyDirectionsUrl(final URL url) {
         final String query = url.getQuery();
         final String path = url.getPath();
         return url.getHost().toLowerCase().contains("google") &&
-                (path.contains("/maps")) &&
+                path.contains("/maps") &&
                 query != null &&
                 // FK-TODO: DRY with AddressesProvider's usage of saddr and daddr, extract constant
                 (query.contains("saddr=") || query.contains("daddr="));
+    }
+
+    public static boolean isShortDirectionsUrl(final URL url) {
+        return isShortDirectionsUrlNewType(url) || isShortDirectionsUrlOldType(url);
     }
 
     private static boolean isShortDirectionsUrlNewType(final URL url) {
