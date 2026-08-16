@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.route;
+package de.knollfrank.extensionsformaps.route.url;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.route;
+package de.knollfrank.extensionsformaps.route.url;
 
 import java.net.URL;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 import de.knollfrank.extensionsformaps.common.Maps;
 import de.knollfrank.extensionsformaps.common.URLs;
 
-class LegacyDirectionsUrl {
+public class LegacyDirectionsUrl {
 
     private final URL url;
 

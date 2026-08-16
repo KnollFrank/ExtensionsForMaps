@@ -1,11 +1,11 @@
-package de.knollfrank.extensionsformaps.route;
+package de.knollfrank.extensionsformaps.route.url;
 
 import com.codepoetics.ambivalence.Either;
 
 import java.net.URL;
 import java.util.Optional;
 
-class DirectionsUrlFactory {
+public class DirectionsUrlFactory {
 
     public static Optional<Either<ModernDirectionsUrl, LegacyDirectionsUrl>> createDirectionsUrl(final URL url) {
         {

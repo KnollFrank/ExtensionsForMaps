@@ -1,9 +1,11 @@
-package de.knollfrank.extensionsformaps.route;
+package de.knollfrank.extensionsformaps.route.url;
 
 import java.net.URL;
 import java.util.List;
 
-class ModernDirectionsUrl {
+import de.knollfrank.extensionsformaps.route.TokenProvider;
+
+public class ModernDirectionsUrl {
 
     private final URL url;
 

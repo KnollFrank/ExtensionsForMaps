@@ -10,10 +10,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 
-import de.knollfrank.extensionsformaps.route.DirectionsUrlPredicate;
 import de.knollfrank.extensionsformaps.route.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.RouteToUrlConverter;
 import de.knollfrank.extensionsformaps.route.Routes;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrlPredicate;
 
 public class DummyStopAdder {
 

@@ -10,6 +10,9 @@ import de.knollfrank.extensionsformaps.route.protobuf.Datatype;
 import de.knollfrank.extensionsformaps.route.protobuf.Node;
 import de.knollfrank.extensionsformaps.route.protobuf.NodeFinder;
 import de.knollfrank.extensionsformaps.route.protobuf.NodesParser;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
+import de.knollfrank.extensionsformaps.route.url.LegacyDirectionsUrl;
+import de.knollfrank.extensionsformaps.route.url.ModernDirectionsUrl;
 
 // FK-TODO: brauchen Gesamtunittest, der eine Google Maps Directions URL entgegennimmt und eine korrekt sortierte (optimierte) Google Maps Directions URL erzeugt.
 // FK-TODO: GoogleMapsRouteExtractor und RouteToUrlConverter sind invers zueinander. Führe wie in SettingsSearch ein Converter-Interface ein

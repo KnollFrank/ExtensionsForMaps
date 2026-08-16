@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
-import de.knollfrank.extensionsformaps.route.DirectionsUrlPredicate;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrlPredicate;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;

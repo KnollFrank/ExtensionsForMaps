@@ -10,6 +10,8 @@ import org.robolectric.RobolectricTestRunner;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrlPredicate;
+
 @RunWith(RobolectricTestRunner.class)
 public class DirectionsUrlPredicateTest {
 

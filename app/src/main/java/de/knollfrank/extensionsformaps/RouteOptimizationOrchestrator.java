@@ -7,9 +7,9 @@ import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizer;
-import de.knollfrank.extensionsformaps.route.DirectionsUrlPredicate;
 import de.knollfrank.extensionsformaps.route.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.Route;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrlPredicate;
 
 public class RouteOptimizationOrchestrator {
 
