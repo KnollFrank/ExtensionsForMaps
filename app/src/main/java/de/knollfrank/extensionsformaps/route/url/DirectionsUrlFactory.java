@@ -5,21 +5,19 @@ import com.codepoetics.ambivalence.Either;
 import java.net.URL;
 import java.util.Optional;
 
+import de.knollfrank.extensionsformaps.common.Optionals;
+
 public class DirectionsUrlFactory {
 
     public static Optional<Either<ModernDirectionsUrl, LegacyDirectionsUrl>> createDirectionsUrl(final URL url) {
-        {
-            final Optional<ModernDirectionsUrl> modernDirectionsUrl = ModernDirectionsUrlFactory.createModernDirectionsUrl(url);
-            if (modernDirectionsUrl.isPresent()) {
-                return Optional.of(Either.ofLeft(modernDirectionsUrl.get()));
-            }
-        }
-        {
-            final Optional<LegacyDirectionsUrl> legacyDirectionsUrl = LegacyDirectionsUrlFactory.createLegacyDirectionsUrl(url);
-            if (legacyDirectionsUrl.isPresent()) {
-                return Optional.of(Either.ofRight(legacyDirectionsUrl.get()));
-            }
-        }
-        return Optional.empty();
+        return Optionals
+                .streamOfPresentElements(
+                        ModernDirectionsUrlFactory
+                                .createModernDirectionsUrl(url)
+                                .<Either<ModernDirectionsUrl, LegacyDirectionsUrl>>map(Either::ofLeft),
+                        LegacyDirectionsUrlFactory
+                                .createLegacyDirectionsUrl(url)
+                                .<Either<ModernDirectionsUrl, LegacyDirectionsUrl>>map(Either::ofRight))
+                .findFirst();
     }
 }
