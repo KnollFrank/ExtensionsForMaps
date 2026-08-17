@@ -13,7 +13,7 @@ class StopData {
     public Optional<Double> latitude = Optional.empty();
     public Optional<Double> longitude = Optional.empty();
 
-    public StopData(final String address, final String id) {
+    public StopData(final String id, final String address) {
         this.id = id;
         this.address = address;
     }
