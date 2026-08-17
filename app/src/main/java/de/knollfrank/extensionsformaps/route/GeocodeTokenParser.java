@@ -2,6 +2,7 @@ package de.knollfrank.extensionsformaps.route;
 
 import com.google.protobuf.CodedInputStream;
 import com.google.protobuf.WireFormat;
+
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -10,40 +11,52 @@ import java.util.Optional;
 public class GeocodeTokenParser {
 
     public static class GeocodeData {
+
         public Optional<Double> latitude = Optional.empty();
         public Optional<Double> longitude = Optional.empty();
         public List<String> extractedStrings = new ArrayList<>();
-        public Optional<String> featureId = Optional.empty();
-
-        public GeocodeData() {}
+        public Optional<String> officialPlaceId = Optional.empty();
     }
 
     private static class ParserState {
-        Long id1 = null;
-        Long id2 = null;
+
+        public Long id1 = null;
+        public Long id2 = null;
     }
 
     public static Optional<GeocodeData> parseToken(final String token) {
         try {
-            String cleanToken = token.replace("-", "+").replace("_", "/");
-            byte[] decodedBytes = Base64.getDecoder().decode(cleanToken);
-
-            CodedInputStream input = CodedInputStream.newInstance(decodedBytes);
-            GeocodeData data = new GeocodeData();
-            ParserState state = new ParserState();
-            parseProtobufStream(input, data, state);
-
-            if (state.id1 != null && state.id2 != null) {
-                // Return as Official Place ID (Base64 encoded Protobuf)
-                final UndocumentedPlaceId undocumentedId = new UndocumentedPlaceId(
-                        String.format("0x%x:0x%x", state.id1, state.id2));
-                data.featureId = Optional.of(undocumentedId.toOfficialPlaceId().value());
-            }
-
-            return Optional.of(data);
-        } catch (Exception e) {
+            return parseCleanToken(getCleanToken(token));
+        } catch (final Exception e) {
             return Optional.empty();
         }
+    }
+
+    private static String getCleanToken(final String token) {
+        return token
+                .replace("-", "+")
+                .replace("_", "/");
+    }
+
+    private static Optional<GeocodeData> parseCleanToken(final String cleanToken) throws Exception {
+        final byte[] decodedBytes = Base64.getDecoder().decode(cleanToken);
+        final CodedInputStream input = CodedInputStream.newInstance(decodedBytes);
+        final GeocodeData data = new GeocodeData();
+        final ParserState state = new ParserState();
+        parseProtobufStream(input, data, state);
+
+        if (state.id1 != null && state.id2 != null) {
+            // Return as Official Place ID (Base64 encoded Protobuf)
+            final UndocumentedPlaceId undocumentedId =
+                    new UndocumentedPlaceId(
+                            String.format(
+                                    "0x%x:0x%x",
+                                    state.id1,
+                                    state.id2));
+            data.officialPlaceId = Optional.of(undocumentedId.toOfficialPlaceId().value());
+        }
+
+        return Optional.of(data);
     }
 
     private static void parseProtobufStream(CodedInputStream input, GeocodeData data, ParserState state) throws Exception {
@@ -67,7 +80,7 @@ public class GeocodeTokenParser {
                         if (text.length() >= 3 && text.matches("^[\\w\\-.:/]+$")) {
                             data.extractedStrings.add(text);
                             if (text.startsWith("0x") && text.contains(":")) {
-                                data.featureId = Optional.of(text);
+                                data.officialPlaceId = Optional.of(text);
                             }
                         }
                     }
