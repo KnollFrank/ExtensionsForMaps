@@ -37,23 +37,21 @@ public class GeocodeTokenParser {
         final GeocodeData data = new GeocodeData();
         final ParserState state = new ParserState();
         parseProtobufStream(input, data, state);
-        if (state.id1.isPresent() && state.id2.isPresent()) {
-            data.officialPlaceId =
-                    Optional.of(
-                            GeocodeTokenParser
-                                    .getUndocumentedPlaceId(state)
-                                    .toOfficialPlaceId()
-                                    .value());
-        }
+        state.id1.ifPresent(
+                id1 ->
+                        state.id2.ifPresent(
+                                id2 ->
+                                        data.officialPlaceId =
+                                                Optional.of(
+                                                        GeocodeTokenParser
+                                                                .getUndocumentedPlaceId(id1, id2)
+                                                                .toOfficialPlaceId()
+                                                                .value())));
         return Optional.of(data);
     }
 
-    private static UndocumentedPlaceId getUndocumentedPlaceId(final ParserState state) {
-        return new UndocumentedPlaceId(
-                String.format(
-                        "0x%x:0x%x",
-                        state.id1.orElseThrow(),
-                        state.id2.orElseThrow()));
+    private static UndocumentedPlaceId getUndocumentedPlaceId(final long id1, final long id2) {
+        return new UndocumentedPlaceId(String.format("0x%x:0x%x", id1, id2));
     }
 
     private static void parseProtobufStream(final CodedInputStream input,
@@ -116,7 +114,7 @@ public class GeocodeTokenParser {
             CodedInputStream subInput = CodedInputStream.newInstance(bytes);
             parseProtobufStream(subInput, data, state);
             return true;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return false;
         }
     }
