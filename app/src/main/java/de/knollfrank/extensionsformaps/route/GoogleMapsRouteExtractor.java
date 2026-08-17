@@ -3,6 +3,7 @@ package de.knollfrank.extensionsformaps.route;
 import java.util.List;
 import java.util.Optional;
 
+import de.knollfrank.extensionsformaps.common.Lists;
 import de.knollfrank.extensionsformaps.route.protobuf.Datatype;
 import de.knollfrank.extensionsformaps.route.protobuf.Node;
 import de.knollfrank.extensionsformaps.route.protobuf.NodeFinder;
@@ -44,16 +45,16 @@ public class GoogleMapsRouteExtractor {
     // FK-TODO: refactor
     private static Route extractRoute(final ModernDirectionsUrl directionsUrl) {
         final List<StopData> stopDataList = AddressToStopDataConverter.convert(directionsUrl.getUrlDecodedAddresses());
-        final List<Node> waypointContainers =
-                NodeFinder.findWaypointContainers(
-                        NodesParser.parseNodes(directionsUrl.getTokensFromDataPart()),
-                        stopDataList.size());
         // 3. Extrahiere die Daten für jeden Stopp aus seinem jeweiligen Sub-Baum
-        for (int i = 0; i < waypointContainers.size(); i++) {
-            final Node waypoint = waypointContainers.get(i);
-            final StopData stopData = stopDataList.get(i);
-            extractDataFromSubtree(waypoint, stopData);
-        }
+        NodeFinder
+                .findWaypointContainers(
+                        NodesParser.parseNodes(directionsUrl.getTokensFromDataPart()),
+                        stopDataList.size())
+                .ifPresent(
+                        waypointContainers ->
+                                Lists
+                                        .zip(waypointContainers, stopDataList)
+                                        .forEach(waypoint_stopData -> extractDataFromSubtree(waypoint_stopData.first, waypoint_stopData.second)));
         return RouteFactory.createRoute(StopDataConverter.asStops(stopDataList));
     }
 

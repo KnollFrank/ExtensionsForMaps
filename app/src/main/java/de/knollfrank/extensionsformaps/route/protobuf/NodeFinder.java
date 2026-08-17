@@ -1,20 +1,20 @@
 package de.knollfrank.extensionsformaps.route.protobuf;
 
 import java.util.List;
+import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.common.Lists;
 
 public class NodeFinder {
 
-    public static List<Node> findWaypointContainers(final List<Node> rootNodes, final int expectedCount) {
+    public static Optional<List<Node>> findWaypointContainers(final List<Node> rootNodes, final int expectedCount) {
         return NodeFinder
                 .getAllNodes(rootNodes)
                 .stream()
                 .filter(NodeFinder::is4mContainer)
                 .map(NodeFinder::getWaypointChildren)
                 .filter(waypointChildrenOf4mContainer -> waypointChildrenOf4mContainer.size() == expectedCount)
-                .findFirst()
-                .orElse(List.of());
+                .findFirst();
     }
 
     private static List<Node> getAllNodes(final List<Node> rootNodes) {
