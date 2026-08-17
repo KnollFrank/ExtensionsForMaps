@@ -36,7 +36,8 @@ public class DummyStopAdder {
     private static URL addDummyStop(final DirectionsUrl directionsUrl) {
         return RouteToUrlConverter.getUrl(
                 Routes.addDummyStop(
-                        GoogleMapsRouteExtractor.extractRoute(directionsUrl)));
+                        GoogleMapsRouteExtractor.extractRoute(
+                                directionsUrl)));
     }
 
     private static void displayErrorProcessingRoute(final Context context) {
