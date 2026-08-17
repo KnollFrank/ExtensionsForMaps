@@ -1,34 +1,19 @@
 package de.knollfrank.extensionsformaps.route;
 
-import java.net.URL;
 import java.util.List;
 import java.util.Optional;
-
-import java.util.concurrent.CompletableFuture;
 
 import de.knollfrank.extensionsformaps.route.protobuf.Datatype;
 import de.knollfrank.extensionsformaps.route.protobuf.Node;
 import de.knollfrank.extensionsformaps.route.protobuf.NodeFinder;
 import de.knollfrank.extensionsformaps.route.protobuf.NodesParser;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
-import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 import de.knollfrank.extensionsformaps.route.url.LegacyDirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.ModernDirectionsUrl;
 
 // FK-TODO: brauchen Gesamtunittest, der eine Google Maps Directions URL entgegennimmt und eine korrekt sortierte (optimierte) Google Maps Directions URL erzeugt.
 // FK-TODO: GoogleMapsRouteExtractor und RouteToUrlConverter sind invers zueinander. Führe wie in SettingsSearch ein Converter-Interface ein
 public class GoogleMapsRouteExtractor {
-
-    // FK-TODO: remove or inline method
-    public static CompletableFuture<Route> extractRouteFromDirectionsUrl(final URL directionsUrl) {
-        return DirectionsUrlFactory
-                .createDirectionsUrl(directionsUrl)
-                .thenApply(
-                        optionalDirectionsUrl ->
-                                optionalDirectionsUrl
-                                        .map(GoogleMapsRouteExtractor::extractRoute)
-                                        .orElseThrow(() -> new IllegalArgumentException(String.format("Invalid URL: %s is not a valid Long Google Maps directions URL.", directionsUrl))));
-    }
 
     public static Route extractRoute(final DirectionsUrl directionsUrl) {
         if (directionsUrl instanceof final ModernDirectionsUrl modernDirectionsUrl) {

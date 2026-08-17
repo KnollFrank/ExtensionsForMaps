@@ -15,30 +15,51 @@ public class DirectionsUrlFactoryTest {
 
     @Test
     public void testIsDirectionsUrl_withModernUrl() throws MalformedURLException {
-        assertTrue(DirectionsUrlFactory
-                           .createDirectionsUrl(new URL("https://www.google.com/maps/dir/PointA/PointB/"))
-                           .join()
-                           .isPresent());
+        assertTrue(
+                DirectionsUrlFactory
+                        .createDirectionsUrl(
+                                new URL(
+                                        "https://www.google.com/maps/dir/PointA/PointB/"))
+                        .join()
+                        .isPresent());
     }
 
     @Test
     public void testIsDirectionsUrl_withLegacyUrl_returnsTrue() throws MalformedURLException {
         assertTrue(
                 DirectionsUrlFactory
-                        .createDirectionsUrl(new URL("http://maps.google.com/maps?saddr=A&daddr=B"))
+                        .createDirectionsUrl(
+                                new URL(
+                                        "http://maps.google.com/maps?saddr=A&daddr=B"))
                         .join()
                         .isPresent());
+    }
+
+    @Test
+    public void testIsDirectionsUrl_InvalidDirectionsUrlFormat() throws MalformedURLException {
+        assertFalse(
+                DirectionsUrlFactory
+                        .createDirectionsUrl(
+                                new URL(
+                                        "https://www.google.com/maps/place/Berlin/data=!3m1!4b1!4m6!3m5!1s0x47a84e373f035901:0x42120465b5e3b70/place/Central-Apotheke/"))
+                        .join()
+                        .isPresent());
+
     }
 
     @Test
     public void testIsShortDirectionsUrl_withLegacyUrl_returnsFalse() throws MalformedURLException {
         assertFalse(
                 ShortDirectionsUrlFactory
-                        .createShortDirectionsUrl(new URL("http://maps.google.com/maps?saddr=Frauenplan%2021&daddr=discovAIR"))
+                        .createShortDirectionsUrl(
+                                new URL(
+                                        "http://maps.google.com/maps?saddr=Frauenplan%2021&daddr=discovAIR"))
                         .isPresent());
         assertFalse(
                 ShortDirectionsUrlFactory
-                        .createShortDirectionsUrl(new URL("https://maps.google.de/maps?saddr=Berlin&daddr=Hamburg"))
+                        .createShortDirectionsUrl(
+                                new URL(
+                                        "https://maps.google.de/maps?saddr=Berlin&daddr=Hamburg"))
                         .isPresent());
     }
 
