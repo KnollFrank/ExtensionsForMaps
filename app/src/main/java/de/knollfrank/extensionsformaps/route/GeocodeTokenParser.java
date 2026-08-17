@@ -27,13 +27,13 @@ public class GeocodeTokenParser {
 
     public static Optional<GeocodeData> parseToken(final String token) {
         try {
-            return parse(getCodedInputStream(token));
+            return Optional.of(parse(getCodedInputStream(token)));
         } catch (final Exception e) {
             return Optional.empty();
         }
     }
 
-    private static Optional<GeocodeData> parse(final CodedInputStream input) throws Exception {
+    private static GeocodeData parse(final CodedInputStream input) throws Exception {
         final GeocodeData data = new GeocodeData();
         final ParserState state = new ParserState();
         parseProtobufStream(input, data, state);
@@ -47,7 +47,7 @@ public class GeocodeTokenParser {
                                                                 .getUndocumentedPlaceId(id1, id2)
                                                                 .toOfficialPlaceId()
                                                                 .value())));
-        return Optional.of(data);
+        return data;
     }
 
     private static UndocumentedPlaceId getUndocumentedPlaceId(final long id1, final long id2) {
