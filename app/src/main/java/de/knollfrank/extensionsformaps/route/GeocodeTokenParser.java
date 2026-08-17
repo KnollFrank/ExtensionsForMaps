@@ -111,7 +111,7 @@ public class GeocodeTokenParser {
                                                 final GeocodeData data,
                                                 final ParserState state) {
         try {
-            CodedInputStream subInput = CodedInputStream.newInstance(bytes);
+            final CodedInputStream subInput = CodedInputStream.newInstance(bytes);
             parseProtobufStream(subInput, data, state);
             return true;
         } catch (final Exception e) {
