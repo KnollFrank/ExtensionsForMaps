@@ -48,14 +48,14 @@ public class RouteOptimizationWorkflowLicenseTest {
         // Given
         when(mockLicenseManager.isPro()).thenReturn(false);
         when(mockLicenseManager.isProFeatureRequired(16)).thenReturn(true);
-        
+
         Context context = new ContextThemeWrapper(RuntimeEnvironment.getApplication(), R.style.Theme_ExtensionsForMaps);
         RouteOptimizationWorkflow workflow = new RouteOptimizationWorkflow(mockRouteOptimizer, context);
-        
-        Stop stop = new Stop("1", "Addr", Optional.empty(), 
-            Geodetic.fromLatitudeLongitude(new Angle(0, Unit.DEGREES), new Angle(0, Unit.DEGREES)), 
-            Optional.empty());
-        
+
+        Stop stop = new Stop("1", "Addr", Optional.empty(),
+                             Geodetic.fromLatitudeLongitude(new Angle(0, Unit.DEGREES), new Angle(0, Unit.DEGREES)),
+                             Optional.empty());
+
         Route route = new Route(stop, Collections.nCopies(14, stop), stop);
 
         // When
@@ -67,7 +67,7 @@ public class RouteOptimizationWorkflowLicenseTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        
+
         Shadows.shadowOf(Looper.getMainLooper()).idle();
 
         // Then
