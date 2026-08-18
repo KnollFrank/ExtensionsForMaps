@@ -2,15 +2,17 @@ package de.knollfrank.extensionsformaps.route;
 
 import android.net.Uri;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.knollfrank.extensionsformaps.common.URLs;
+import de.knollfrank.extensionsformaps.route.url.ModernDirectionsUrl;
+import de.knollfrank.extensionsformaps.route.url.ModernDirectionsUrlFactory;
 
 class RouteToUnofficialUrlConverter {
 
-    public static URL getUnofficialUrl(final Route route) {
+    // FK-TODO: refactor
+    public static ModernDirectionsUrl getUnofficialUrl(final Route route) {
         final StringBuilder pathBuilder = new StringBuilder("https://www.google.com/maps/dir");
         final List<String> dataTokens = new ArrayList<>();
 
@@ -44,6 +46,8 @@ class RouteToUnofficialUrlConverter {
         }
 
         pathBuilder.append("/data=").append(dataBuilder).append("?entry=ttu");
-        return URLs.createUrl(pathBuilder.toString());
+        return ModernDirectionsUrlFactory
+                .createModernDirectionsUrl(URLs.createUrl(pathBuilder.toString()))
+                .orElseThrow();
     }
 }

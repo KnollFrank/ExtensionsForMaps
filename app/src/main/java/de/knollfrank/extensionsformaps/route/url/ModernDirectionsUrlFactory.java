@@ -4,7 +4,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
-class ModernDirectionsUrlFactory {
+public class ModernDirectionsUrlFactory {
 
     public static Optional<ModernDirectionsUrl> createModernDirectionsUrl(final URL url) {
         return isModernDirectionsUrl(url) ?

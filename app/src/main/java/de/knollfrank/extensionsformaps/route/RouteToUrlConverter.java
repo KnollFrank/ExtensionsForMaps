@@ -11,7 +11,10 @@ public class RouteToUrlConverter {
         return Optionals
                 .streamOfPresentElements(
                         RouteToOfficialUrlConverter.getOfficialUrl(route),
-                        Optional.of(RouteToUnofficialUrlConverter.getUnofficialUrl(route)))
+                        Optional.of(
+                                RouteToUnofficialUrlConverter
+                                        .getUnofficialUrl(route)
+                                        .url()))
                 .findFirst()
                 .orElseThrow();
     }
