@@ -17,11 +17,7 @@ import de.knollfrank.extensionsformaps.feature.ActiveServiceHighlightFeature;
 import de.knollfrank.extensionsformaps.feature.AddStopFeature;
 import de.knollfrank.extensionsformaps.feature.ScanAddressFeature;
 import de.knollfrank.extensionsformaps.feature.SortFeature;
-import de.knollfrank.extensionsformaps.optimize.HaversineVehicleRoutingTransportCostsProvider;
-import de.knollfrank.extensionsformaps.optimize.OsrmVehicleRoutingTransportCostsProvider;
-import de.knollfrank.extensionsformaps.optimize.RouteOptimizer;
-import de.knollfrank.extensionsformaps.optimize.VehicleRoutingTransportCostsProvider;
-import de.knollfrank.extensionsformaps.optimize.ors.OpenRouteServiceRoutingMatrixProvider;
+import de.knollfrank.extensionsformaps.route.RouteOptimizerFactory;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
 public class MapsExtensionsAccessibilityService extends AccessibilityService {
@@ -78,7 +74,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                             Log.d(TAG, "Extracted route URL for SORT: " + directionsUrl);
                             final RouteOptimizationWorkflow routeOptimizationWorkflow =
                                     new RouteOptimizationWorkflow(
-                                            new RouteOptimizer(getVehicleRoutingTransportCostsProvider()),
+                                            RouteOptimizerFactory.createRouteOptimizer(this),
                                             MapsExtensionsAccessibilityService.this);
                             routeOptimizationWorkflow.optimizeThenShowRoute(directionsUrl);
                         });
@@ -172,15 +168,5 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
 
     private void handleResolverEvent(final AccessibilityEvent event) {
         urlRequester.handleResolverEvent();
-    }
-
-    private VehicleRoutingTransportCostsProvider getVehicleRoutingTransportCostsProvider() {
-        if (SortConfig.getOptimizationMethod(this) == SortConfig.OptimizationMethod.HAVERSINE) {
-            return new HaversineVehicleRoutingTransportCostsProvider();
-        } else {
-            return new OsrmVehicleRoutingTransportCostsProvider(
-                    new OpenRouteServiceRoutingMatrixProvider(
-                            ApiKeyRepository.getApiKey(this).orElseThrow()));
-        }
     }
 }

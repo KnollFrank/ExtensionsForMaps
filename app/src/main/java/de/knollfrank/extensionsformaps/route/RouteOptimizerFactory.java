@@ -12,11 +12,11 @@ import de.knollfrank.extensionsformaps.optimize.ors.OpenRouteServiceRoutingMatri
 
 public class RouteOptimizerFactory {
 
-    public static RouteOptimizer createRouteOptimizer(Context context) {
+    public static RouteOptimizer createRouteOptimizer(final Context context) {
         return new RouteOptimizer(getVehicleRoutingTransportCostsProvider(context));
     }
 
-    private static VehicleRoutingTransportCostsProvider getVehicleRoutingTransportCostsProvider(Context context) {
+    private static VehicleRoutingTransportCostsProvider getVehicleRoutingTransportCostsProvider(final Context context) {
         if (SortConfig.getOptimizationMethod(context) == SortConfig.OptimizationMethod.HAVERSINE) {
             return new HaversineVehicleRoutingTransportCostsProvider();
         } else {
