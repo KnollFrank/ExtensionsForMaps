@@ -7,6 +7,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import de.knollfrank.extensionsformaps.common.URLs;
@@ -14,7 +15,13 @@ import de.knollfrank.extensionsformaps.coordinate.Angle;
 
 class RouteToOfficialUrlConverter {
 
-    public static URL getOfficialUrl(final Route route) {
+    public static Optional<URL> getOfficialUrl(final Route route) {
+        return route.stops().size() <= 10 ?
+                Optional.of(_getOfficialUrl(route)) :
+                Optional.empty();
+    }
+
+    private static URL _getOfficialUrl(final Route route) {
         final Uri.Builder builder = createUriBuilder();
         appendPoint(builder, "origin", route.origin());
         appendPoint(builder, "destination", route.destination());

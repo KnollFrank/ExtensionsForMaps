@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.RouteOptimizationWorkflow;
-import de.knollfrank.extensionsformaps.route.RouteOptimizerFactory;
+import de.knollfrank.extensionsformaps.optimize.RouteOptimizerFactory;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 

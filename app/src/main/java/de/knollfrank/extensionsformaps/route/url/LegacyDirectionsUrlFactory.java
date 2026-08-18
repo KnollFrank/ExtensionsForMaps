@@ -3,6 +3,7 @@ package de.knollfrank.extensionsformaps.route.url;
 import java.net.URL;
 import java.util.Optional;
 
+// FK-TODO: move createLegacyDirectionsUrl() into LegacyDirectionsUrl and check in it's constructor. Dito for ModernDirectionsUrlFactory
 class LegacyDirectionsUrlFactory {
 
     public static Optional<LegacyDirectionsUrl> createLegacyDirectionsUrl(final URL url) {
