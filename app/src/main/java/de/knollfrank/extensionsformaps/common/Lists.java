@@ -108,6 +108,11 @@ public class Lists {
                 .toList();
     }
 
+    public static <A, B> Pair<List<A>, List<B>> truncateToCommonSize(final List<A> as, final List<B> bs) {
+        final int size = Math.min(as.size(), bs.size());
+        return Pair.create(as.subList(0, size), bs.subList(0, size));
+    }
+
     public static List<Integer> createRange(final int startInclusive, final int endInclusive) {
         return IntStream
                 .rangeClosed(startInclusive, endInclusive)

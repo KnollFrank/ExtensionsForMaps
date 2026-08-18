@@ -5,8 +5,8 @@ import android.content.Context;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizer;
-import de.knollfrank.extensionsformaps.route.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.Route;
+import de.knollfrank.extensionsformaps.route.extract.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
 public class RouteOptimizationOrchestrator {

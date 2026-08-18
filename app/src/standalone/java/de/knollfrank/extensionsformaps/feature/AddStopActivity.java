@@ -23,11 +23,10 @@ import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.SortConfig;
 import de.knollfrank.extensionsformaps.databinding.DialogAddStopInstructionBinding;
 import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
-import de.knollfrank.extensionsformaps.route.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.RouteToUrlConverter;
 import de.knollfrank.extensionsformaps.route.Routes;
-import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
+import de.knollfrank.extensionsformaps.route.extract.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 
 public class AddStopActivity extends AppCompatActivity {

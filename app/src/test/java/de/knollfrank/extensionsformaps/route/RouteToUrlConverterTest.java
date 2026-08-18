@@ -15,6 +15,7 @@ import java.util.Optional;
 import de.knollfrank.extensionsformaps.common.Lists;
 import de.knollfrank.extensionsformaps.coordinate.Angle;
 import de.knollfrank.extensionsformaps.coordinate.Geodetic;
+import de.knollfrank.extensionsformaps.route.extract.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 
 @RunWith(RobolectricTestRunner.class)

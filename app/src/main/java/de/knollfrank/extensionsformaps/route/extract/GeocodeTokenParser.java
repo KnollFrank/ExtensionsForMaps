@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.route;
+package de.knollfrank.extensionsformaps.route.extract;
 
 import com.google.protobuf.CodedInputStream;
 import com.google.protobuf.WireFormat;
@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-public class GeocodeTokenParser {
+import de.knollfrank.extensionsformaps.route.UndocumentedPlaceId;
+
+class GeocodeTokenParser {
 
     public static class GeocodeData {
 

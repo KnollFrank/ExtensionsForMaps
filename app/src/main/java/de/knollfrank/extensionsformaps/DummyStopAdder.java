@@ -9,9 +9,9 @@ import android.widget.Toast;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 
-import de.knollfrank.extensionsformaps.route.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.RouteToUrlConverter;
 import de.knollfrank.extensionsformaps.route.Routes;
+import de.knollfrank.extensionsformaps.route.extract.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
 public class DummyStopAdder {

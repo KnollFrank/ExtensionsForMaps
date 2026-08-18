@@ -1,9 +1,11 @@
-package de.knollfrank.extensionsformaps.route;
+package de.knollfrank.extensionsformaps.route.extract;
 
 import androidx.annotation.NonNull;
 
 import java.util.Optional;
 import java.util.StringJoiner;
+
+import de.knollfrank.extensionsformaps.route.OfficialPlaceId;
 
 class StopData {
 

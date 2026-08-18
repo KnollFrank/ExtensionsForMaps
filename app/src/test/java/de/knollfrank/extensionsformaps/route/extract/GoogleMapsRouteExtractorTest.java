@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.route;
+package de.knollfrank.extensionsformaps.route.extract;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -16,6 +16,9 @@ import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.coordinate.Angle;
 import de.knollfrank.extensionsformaps.coordinate.Geodetic;
+import de.knollfrank.extensionsformaps.route.OfficialPlaceId;
+import de.knollfrank.extensionsformaps.route.Route;
+import de.knollfrank.extensionsformaps.route.Stop;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 

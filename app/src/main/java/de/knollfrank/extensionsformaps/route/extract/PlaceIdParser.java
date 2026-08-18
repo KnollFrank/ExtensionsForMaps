@@ -1,5 +1,7 @@
-package de.knollfrank.extensionsformaps.route;
+package de.knollfrank.extensionsformaps.route.extract;
 
+import de.knollfrank.extensionsformaps.route.OfficialPlaceId;
+import de.knollfrank.extensionsformaps.route.UndocumentedPlaceId;
 import de.knollfrank.extensionsformaps.route.protobuf.Datatype;
 import de.knollfrank.extensionsformaps.route.protobuf.Node;
 

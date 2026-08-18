@@ -1,6 +1,7 @@
 package de.knollfrank.extensionsformaps.route;
 
 import de.knollfrank.extensionsformaps.common.URLs;
+import de.knollfrank.extensionsformaps.route.extract.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 
 public class RouteTemplateFactory {

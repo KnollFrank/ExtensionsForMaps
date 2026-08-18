@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.route;
+package de.knollfrank.extensionsformaps.route.extract;
 
 import static de.knollfrank.extensionsformaps.coordinate.Unit.DEGREES;
 
@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.coordinate.Angle;
 import de.knollfrank.extensionsformaps.coordinate.Geodetic;
+import de.knollfrank.extensionsformaps.route.Stop;
 
 class StopDataConverter {
 
