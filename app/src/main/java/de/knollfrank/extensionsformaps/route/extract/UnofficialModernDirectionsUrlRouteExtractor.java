@@ -12,15 +12,15 @@ import de.knollfrank.extensionsformaps.route.protobuf.NodeFinder;
 import de.knollfrank.extensionsformaps.route.protobuf.NodesParser;
 import de.knollfrank.extensionsformaps.route.url.UnofficialModernDirectionsUrl;
 
-class ModernDirectionsUrlRouteExtractor {
+class UnofficialModernDirectionsUrlRouteExtractor {
 
     // FK-TODO: refactor
-    public static Route extractRoute(final UnofficialModernDirectionsUrl directionsUrl) {
-        final List<StopData> stopDataList = AddressToStopDataConverter.convert(directionsUrl.getUrlDecodedAddresses());
+    public static Route extractRoute(final UnofficialModernDirectionsUrl unofficialModernDirectionsUrl) {
+        final List<StopData> stopDataList = AddressToStopDataConverter.convert(unofficialModernDirectionsUrl.getUrlDecodedAddresses());
         // 3. Extrahiere die Daten für jeden Stopp aus seinem jeweiligen Sub-Baum
         NodeFinder
                 .findWaypointContainers(
-                        NodesParser.parseNodes(directionsUrl.getTokensFromDataPart()),
+                        NodesParser.parseNodes(unofficialModernDirectionsUrl.getTokensFromDataPart()),
                         stopDataList.size())
                 .ifPresent(
                         waypointContainers ->

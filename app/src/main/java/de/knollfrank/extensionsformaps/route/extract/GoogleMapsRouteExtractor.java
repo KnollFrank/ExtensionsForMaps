@@ -11,8 +11,8 @@ public class GoogleMapsRouteExtractor {
 
     public static Route extractRoute(final DirectionsUrl directionsUrl) {
         return switch (directionsUrl) {
-            case UnofficialModernDirectionsUrl unofficialModernDirectionsUrl -> ModernDirectionsUrlRouteExtractor.extractRoute(unofficialModernDirectionsUrl);
-            case UnofficialLegacyDirectionsUrl unofficialLegacyDirectionsUrl -> LegacyDirectionsUrlRouteExtractor.extractRoute(unofficialLegacyDirectionsUrl);
+            case UnofficialModernDirectionsUrl unofficialModernDirectionsUrl -> UnofficialModernDirectionsUrlRouteExtractor.extractRoute(unofficialModernDirectionsUrl);
+            case UnofficialLegacyDirectionsUrl unofficialLegacyDirectionsUrl -> UnofficialLegacyDirectionsUrlRouteExtractor.extractRoute(unofficialLegacyDirectionsUrl);
         };
     }
 }

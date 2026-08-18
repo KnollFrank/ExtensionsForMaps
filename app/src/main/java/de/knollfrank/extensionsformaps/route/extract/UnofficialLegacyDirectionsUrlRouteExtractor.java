@@ -11,16 +11,16 @@ import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.RouteFactory;
 import de.knollfrank.extensionsformaps.route.url.UnofficialLegacyDirectionsUrl;
 
-class LegacyDirectionsUrlRouteExtractor {
+class UnofficialLegacyDirectionsUrlRouteExtractor {
 
-    public static Route extractRoute(final UnofficialLegacyDirectionsUrl directionsUrl) {
-        final List<StopData> stopDataList = AddressToStopDataConverter.convert(directionsUrl.getUrlDecodedAddresses());
-        extractDataFromGeocodeTokensIntoStopDataList(directionsUrl.getGeocodeTokens(), stopDataList);
+    public static Route extractRoute(final UnofficialLegacyDirectionsUrl unofficialLegacyDirectionsUrl) {
+        final List<StopData> stopDataList = AddressToStopDataConverter.convert(unofficialLegacyDirectionsUrl.getUrlDecodedAddresses());
+        extractDataFromGeocodeTokensIntoStopDataList(unofficialLegacyDirectionsUrl.getGeocodeTokens(), stopDataList);
         return RouteFactory.createRoute(StopDataConverter.asStops(stopDataList));
     }
 
     private static void extractDataFromGeocodeTokensIntoStopDataList(final List<String> geocodeTokens, final List<StopData> stopDataList) {
-        LegacyDirectionsUrlRouteExtractor
+        UnofficialLegacyDirectionsUrlRouteExtractor
                 .zipToShortest(geocodeTokens, stopDataList)
                 .forEach(token_stopData -> extractDataFromGeocodeTokenIntoStopData(token_stopData.first, token_stopData.second));
     }
