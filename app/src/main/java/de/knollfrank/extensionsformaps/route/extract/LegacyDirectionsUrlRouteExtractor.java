@@ -9,11 +9,11 @@ import de.knollfrank.extensionsformaps.common.Lists;
 import de.knollfrank.extensionsformaps.route.OfficialPlaceId;
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.RouteFactory;
-import de.knollfrank.extensionsformaps.route.url.LegacyDirectionsUrl;
+import de.knollfrank.extensionsformaps.route.url.UnofficialLegacyDirectionsUrl;
 
 class LegacyDirectionsUrlRouteExtractor {
 
-    public static Route extractRoute(final LegacyDirectionsUrl directionsUrl) {
+    public static Route extractRoute(final UnofficialLegacyDirectionsUrl directionsUrl) {
         final List<StopData> stopDataList = AddressToStopDataConverter.convert(directionsUrl.getUrlDecodedAddresses());
         extractDataFromGeocodeTokensIntoStopDataList(directionsUrl.getGeocodeTokens(), stopDataList);
         return RouteFactory.createRoute(StopDataConverter.asStops(stopDataList));

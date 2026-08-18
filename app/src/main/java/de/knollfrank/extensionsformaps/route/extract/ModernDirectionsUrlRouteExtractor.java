@@ -10,12 +10,12 @@ import de.knollfrank.extensionsformaps.route.protobuf.Datatype;
 import de.knollfrank.extensionsformaps.route.protobuf.Node;
 import de.knollfrank.extensionsformaps.route.protobuf.NodeFinder;
 import de.knollfrank.extensionsformaps.route.protobuf.NodesParser;
-import de.knollfrank.extensionsformaps.route.url.ModernDirectionsUrl;
+import de.knollfrank.extensionsformaps.route.url.UnofficialModernDirectionsUrl;
 
 class ModernDirectionsUrlRouteExtractor {
 
     // FK-TODO: refactor
-    public static Route extractRoute(final ModernDirectionsUrl directionsUrl) {
+    public static Route extractRoute(final UnofficialModernDirectionsUrl directionsUrl) {
         final List<StopData> stopDataList = AddressToStopDataConverter.convert(directionsUrl.getUrlDecodedAddresses());
         // 3. Extrahiere die Daten für jeden Stopp aus seinem jeweiligen Sub-Baum
         NodeFinder

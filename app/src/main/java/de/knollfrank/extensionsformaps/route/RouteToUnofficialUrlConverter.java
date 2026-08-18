@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.knollfrank.extensionsformaps.common.URLs;
-import de.knollfrank.extensionsformaps.route.url.ModernDirectionsUrl;
-import de.knollfrank.extensionsformaps.route.url.ModernDirectionsUrlFactory;
+import de.knollfrank.extensionsformaps.route.url.UnofficialModernDirectionsUrl;
+import de.knollfrank.extensionsformaps.route.url.UnofficialModernDirectionsUrlFactory;
 
 class RouteToUnofficialUrlConverter {
 
     // FK-TODO: refactor
-    public static ModernDirectionsUrl getUnofficialUrl(final Route route) {
+    public static UnofficialModernDirectionsUrl getUnofficialUrl(final Route route) {
         final StringBuilder pathBuilder = new StringBuilder("https://www.google.com/maps/dir");
         final List<String> dataTokens = new ArrayList<>();
 
@@ -46,8 +46,8 @@ class RouteToUnofficialUrlConverter {
         }
 
         pathBuilder.append("/data=").append(dataBuilder).append("?entry=ttu");
-        return ModernDirectionsUrlFactory
-                .createModernDirectionsUrl(URLs.createUrl(pathBuilder.toString()))
+        return UnofficialModernDirectionsUrlFactory
+                .createUnofficialModernDirectionsUrl(URLs.createUrl(pathBuilder.toString()))
                 .orElseThrow();
     }
 }

@@ -70,8 +70,8 @@ class UrlExpander {
     private static Optional<? extends DirectionsUrl> createDirectionsUrl(final URL url) {
         return Optionals
                 .streamOfPresentElements(
-                        ModernDirectionsUrlFactory.createModernDirectionsUrl(url),
-                        LegacyDirectionsUrlFactory.createLegacyDirectionsUrl(url))
+                        UnofficialModernDirectionsUrlFactory.createUnofficialModernDirectionsUrl(url),
+                        UnofficialLegacyDirectionsUrlFactory.createUnofficialLegacyDirectionsUrl(url))
                 .findFirst();
     }
 

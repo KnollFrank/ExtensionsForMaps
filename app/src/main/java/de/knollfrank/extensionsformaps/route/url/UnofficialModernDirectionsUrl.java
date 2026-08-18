@@ -3,7 +3,7 @@ package de.knollfrank.extensionsformaps.route.url;
 import java.net.URL;
 import java.util.List;
 
-public record ModernDirectionsUrl(URL url) implements DirectionsUrl {
+public record UnofficialModernDirectionsUrl(URL url) implements DirectionsUrl {
 
     @Override
     public List<String> getUrlDecodedAddresses() {

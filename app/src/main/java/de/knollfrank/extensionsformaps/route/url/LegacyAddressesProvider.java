@@ -11,8 +11,8 @@ import de.knollfrank.extensionsformaps.common.URLs;
 // FK-TODO: add unit test
 class LegacyAddressesProvider {
 
-    public static List<String> getUrlDecodedAddresses(final LegacyDirectionsUrl legacyDirectionsUrl) {
-        return getLegacyAddresses(URLs.getQuery(legacyDirectionsUrl.url()));
+    public static List<String> getUrlDecodedAddresses(final UnofficialLegacyDirectionsUrl unofficialLegacyDirectionsUrl) {
+        return getLegacyAddresses(URLs.getQuery(unofficialLegacyDirectionsUrl.url()));
     }
 
     private static ImmutableList<String> getLegacyAddresses(final ImmutableMap<String, String> params) {

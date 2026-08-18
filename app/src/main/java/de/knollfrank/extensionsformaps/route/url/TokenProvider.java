@@ -9,9 +9,9 @@ public class TokenProvider {
 
     private static final String DATA_PART_MARKER = "data=";
 
-    public static List<String> getTokensFromDataPart(final ModernDirectionsUrl modernDirectionsUrl) {
+    public static List<String> getTokensFromDataPart(final UnofficialModernDirectionsUrl unofficialModernDirectionsUrl) {
         return TokenProvider
-                .getDataPart(modernDirectionsUrl.url())
+                .getDataPart(unofficialModernDirectionsUrl.url())
                 .map(TokenProvider::getTokens)
                 .orElseThrow();
     }

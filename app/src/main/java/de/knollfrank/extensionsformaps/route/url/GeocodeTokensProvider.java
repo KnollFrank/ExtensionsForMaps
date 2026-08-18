@@ -7,9 +7,9 @@ import de.knollfrank.extensionsformaps.common.URLs;
 
 class GeocodeTokensProvider {
 
-    public static List<String> getGeocodeTokens(final LegacyDirectionsUrl legacyDirectionsUrl) {
+    public static List<String> getGeocodeTokens(final UnofficialLegacyDirectionsUrl unofficialLegacyDirectionsUrl) {
         return Maps
-                .get(URLs.getQuery(legacyDirectionsUrl.url()), "geocode")
+                .get(URLs.getQuery(unofficialLegacyDirectionsUrl.url()), "geocode")
                 .map(GeocodeTokensProvider::getGeocodeTokens)
                 .orElseGet(List::of);
     }

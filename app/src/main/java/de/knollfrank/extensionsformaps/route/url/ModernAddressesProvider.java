@@ -11,8 +11,8 @@ import de.knollfrank.extensionsformaps.common.URLs;
 // FK-TODO: add unit test
 class ModernAddressesProvider {
 
-    public static List<String> getUrlDecodedAddresses(final ModernDirectionsUrl modernDirectionsUrl) {
-        return URLs.decode(getPathParts(modernDirectionsUrl.url()));
+    public static List<String> getUrlDecodedAddresses(final UnofficialModernDirectionsUrl unofficialModernDirectionsUrl) {
+        return URLs.decode(getPathParts(unofficialModernDirectionsUrl.url()));
     }
 
     private static List<String> getPathParts(final URL directionsUrl) {
