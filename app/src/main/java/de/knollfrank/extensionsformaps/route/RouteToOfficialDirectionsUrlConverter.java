@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import de.knollfrank.extensionsformaps.common.URLs;
 import de.knollfrank.extensionsformaps.coordinate.Angle;
+import de.knollfrank.extensionsformaps.coordinate.Geodetic;
 import de.knollfrank.extensionsformaps.route.url.OfficialDirectionsUrl;
 
 class RouteToOfficialDirectionsUrlConverter {
@@ -71,12 +72,6 @@ class RouteToOfficialDirectionsUrlConverter {
                 .orElse("");
     }
 
-    private static String formatStop(final Stop stop) {
-        return stop.officialPlaceId().isPresent() ?
-                stop.address() :
-                formatCoordinates(stop);
-    }
-
     private static String formatStops(final List<Stop> stops) {
         return stops
                 .stream()
@@ -84,8 +79,14 @@ class RouteToOfficialDirectionsUrlConverter {
                 .collect(Collectors.joining("|"));
     }
 
-    private static String formatCoordinates(final Stop stop) {
-        return format(stop.geodetic().getLatitude()) + "," + format(stop.geodetic().getLongitude());
+    private static String formatStop(final Stop stop) {
+        return stop.officialPlaceId().isPresent() ?
+                stop.address() :
+                format(stop.geodetic());
+    }
+
+    private static String format(final Geodetic geodetic) {
+        return format(geodetic.getLatitude()) + "," + format(geodetic.getLongitude());
     }
 
     public static String format(final Angle angle) {
