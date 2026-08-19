@@ -1,5 +1,6 @@
 package de.knollfrank.extensionsformaps.feature;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,9 +25,10 @@ import de.knollfrank.extensionsformaps.SortConfig;
 import de.knollfrank.extensionsformaps.databinding.DialogAddStopInstructionBinding;
 import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
 import de.knollfrank.extensionsformaps.route.Route;
-import de.knollfrank.extensionsformaps.route.RouteToUrlConverter;
+import de.knollfrank.extensionsformaps.route.RouteToDirectionsUrlConverter;
 import de.knollfrank.extensionsformaps.route.Routes;
 import de.knollfrank.extensionsformaps.route.extract.GoogleMapsRouteExtractor;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 
 public class AddStopActivity extends AppCompatActivity {
@@ -136,9 +138,9 @@ public class AddStopActivity extends AppCompatActivity {
 
     private void addStopAndFinish(final Route route) {
         CompletableFuture
-                .supplyAsync(() -> RouteToUrlConverter.getUrl(Routes.addDummyStop(route)))
+                .supplyAsync(() -> RouteToDirectionsUrlConverter.getDirectionsUrl(Routes.addDummyStop(route)))
                 .handleAsync(
-                        (expandedUrl, throwable) -> {
+                        (directionsUrl, throwable) -> {
                             if (throwable != null) {
                                 Log.e(TAG, "Error adding stop", throwable);
                                 Toast
@@ -147,9 +149,9 @@ public class AddStopActivity extends AppCompatActivity {
                                 finish();
                             } else {
                                 if (SortConfig.shouldShowAddStopInstruction(this)) {
-                                    showInstructionDialog(expandedUrl);
+                                    showInstructionDialog(directionsUrl);
                                 } else {
-                                    GoogleMapsNavigator.launchUrl(expandedUrl, getApplicationContext());
+                                    GoogleMapsNavigator.launchUrl(directionsUrl.url(), getApplicationContext());
                                     finish();
                                 }
                             }
@@ -158,19 +160,21 @@ public class AddStopActivity extends AppCompatActivity {
                         ContextCompat.getMainExecutor(this));
     }
 
-    private void showInstructionDialog(URL url) {
+    private void showInstructionDialog(final DirectionsUrl directionsUrl) {
         final DialogAddStopInstructionBinding binding = DialogAddStopInstructionBinding.inflate(getLayoutInflater());
 
         new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.add_stop_instruction_title)
                 .setView(binding.getRoot())
-                .setPositiveButton(R.string.ok, (dialog, which) -> {
-                    if (binding.cbDontShowAgain.isChecked()) {
-                        SortConfig.setShouldShowAddStopInstruction(this, false);
-                    }
-                    GoogleMapsNavigator.launchUrl(url, getApplicationContext());
-                    finish();
-                })
+                .setPositiveButton(
+                        R.string.ok,
+                        (dialog, which) -> {
+                            if (binding.cbDontShowAgain.isChecked()) {
+                                SortConfig.setShouldShowAddStopInstruction(this, false);
+                            }
+                            GoogleMapsNavigator.launchUrl(directionsUrl.url(), this.getApplicationContext());
+                            finish();
+                        })
                 .setCancelable(false)
                 .show();
     }

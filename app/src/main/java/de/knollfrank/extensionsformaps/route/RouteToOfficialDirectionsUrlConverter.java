@@ -2,7 +2,6 @@ package de.knollfrank.extensionsformaps.route;
 
 import android.net.Uri;
 
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.List;
@@ -12,21 +11,22 @@ import java.util.stream.Collectors;
 
 import de.knollfrank.extensionsformaps.common.URLs;
 import de.knollfrank.extensionsformaps.coordinate.Angle;
+import de.knollfrank.extensionsformaps.route.url.OfficialDirectionsUrl;
 
-class RouteToOfficialUrlConverter {
+class RouteToOfficialDirectionsUrlConverter {
 
-    public static Optional<URL> getOfficialUrl(final Route route) {
+    public static Optional<OfficialDirectionsUrl> getOfficialDirectionsUrl(final Route route) {
         return route.stops().size() <= 10 ?
                 Optional.of(_getOfficialUrl(route)) :
                 Optional.empty();
     }
 
-    private static URL _getOfficialUrl(final Route route) {
+    private static OfficialDirectionsUrl _getOfficialUrl(final Route route) {
         final Uri.Builder builder = createUriBuilder();
         appendPoint(builder, "origin", route.origin());
         appendPoint(builder, "destination", route.destination());
         appendWaypoints(builder, route.waypoints());
-        return URLs.createUrl(builder.build().toString());
+        return new OfficialDirectionsUrl(URLs.createUrl(builder.build().toString()));
     }
 
     private static Uri.Builder createUriBuilder() {
@@ -60,7 +60,7 @@ class RouteToOfficialUrlConverter {
     private static String formatPlaceIds(final List<Stop> stops) {
         return stops
                 .stream()
-                .map(RouteToOfficialUrlConverter::formatPlaceId)
+                .map(RouteToOfficialDirectionsUrlConverter::formatPlaceId)
                 .collect(Collectors.joining("|"));
     }
 
@@ -80,7 +80,7 @@ class RouteToOfficialUrlConverter {
     private static String formatStops(final List<Stop> stops) {
         return stops
                 .stream()
-                .map(RouteToOfficialUrlConverter::formatStop)
+                .map(RouteToOfficialDirectionsUrlConverter::formatStop)
                 .collect(Collectors.joining("|"));
     }
 

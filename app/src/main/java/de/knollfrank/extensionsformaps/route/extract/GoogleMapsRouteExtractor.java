@@ -2,6 +2,7 @@ package de.knollfrank.extensionsformaps.route.extract;
 
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
+import de.knollfrank.extensionsformaps.route.url.OfficialDirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.UnofficialLegacyDirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.UnofficialModernDirectionsUrl;
 
@@ -9,10 +10,13 @@ import de.knollfrank.extensionsformaps.route.url.UnofficialModernDirectionsUrl;
 // FK-TODO: GoogleMapsRouteExtractor und RouteToUrlConverter sind invers zueinander. Führe wie in SettingsSearch ein Converter-Interface ein
 public class GoogleMapsRouteExtractor {
 
+    // FK-TODO: brauchen Converter<DirectionsUrl, URL> aus SettingsSearch-Projekt
     public static Route extractRoute(final DirectionsUrl directionsUrl) {
         return switch (directionsUrl) {
-            case UnofficialModernDirectionsUrl unofficialModernDirectionsUrl -> UnofficialModernDirectionsUrlRouteExtractor.extractRoute(unofficialModernDirectionsUrl);
-            case UnofficialLegacyDirectionsUrl unofficialLegacyDirectionsUrl -> UnofficialLegacyDirectionsUrlRouteExtractor.extractRoute(unofficialLegacyDirectionsUrl);
+            case final UnofficialModernDirectionsUrl unofficialModernDirectionsUrl -> UnofficialModernDirectionsUrlRouteExtractor.extractRoute(unofficialModernDirectionsUrl);
+            case final UnofficialLegacyDirectionsUrl unofficialLegacyDirectionsUrl -> UnofficialLegacyDirectionsUrlRouteExtractor.extractRoute(unofficialLegacyDirectionsUrl);
+            // FK-FIXME: not yet implemented
+            case final OfficialDirectionsUrl officialDirectionsUrl -> throw new IllegalStateException("not yet implemented");
         };
     }
 }

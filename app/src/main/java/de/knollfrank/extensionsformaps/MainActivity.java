@@ -15,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.slider.Slider;
 
-import java.net.URL;
 import java.util.List;
 
 import de.knollfrank.extensionsformaps.common.Runnables;
@@ -24,7 +23,8 @@ import de.knollfrank.extensionsformaps.feature.UpgradeDialog;
 import de.knollfrank.extensionsformaps.license.LicenseManager;
 import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
 import de.knollfrank.extensionsformaps.route.RouteTemplateFactory;
-import de.knollfrank.extensionsformaps.route.RouteToUrlConverter;
+import de.knollfrank.extensionsformaps.route.RouteToDirectionsUrlConverter;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -173,12 +173,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(final View view) {
                 GoogleMapsNavigator.launchUrl(
-                        createDirectionsUrlTemplate(getSliderTotalStops()),
+                        this
+                                .createDirectionsUrlTemplate(getSliderTotalStops())
+                                .url(),
                         context);
             }
 
-            private URL createDirectionsUrlTemplate(final int totalStops) {
-                return RouteToUrlConverter.getUrl(
+            private DirectionsUrl createDirectionsUrlTemplate(final int totalStops) {
+                return RouteToDirectionsUrlConverter.getDirectionsUrl(
                         RouteTemplateFactory.createRouteTemplate(
                                 totalStops));
             }

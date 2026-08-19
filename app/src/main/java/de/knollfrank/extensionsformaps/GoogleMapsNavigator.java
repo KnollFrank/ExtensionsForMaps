@@ -7,12 +7,16 @@ import android.net.Uri;
 import java.net.URL;
 
 import de.knollfrank.extensionsformaps.route.Route;
-import de.knollfrank.extensionsformaps.route.RouteToUrlConverter;
+import de.knollfrank.extensionsformaps.route.RouteToDirectionsUrlConverter;
 
 public class GoogleMapsNavigator {
 
     public static void launchRouteOverview(final Route route, final Context context) {
-        launchUrl(RouteToUrlConverter.getUrl(route), context);
+        launchUrl(
+                RouteToDirectionsUrlConverter
+                        .getDirectionsUrl(route)
+                        .url(),
+                context);
     }
 
     public static void launchUrl(final URL url, final Context context) {

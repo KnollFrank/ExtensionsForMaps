@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,13 +15,13 @@ import de.knollfrank.extensionsformaps.common.Lists;
 import de.knollfrank.extensionsformaps.coordinate.Angle;
 import de.knollfrank.extensionsformaps.coordinate.Geodetic;
 import de.knollfrank.extensionsformaps.route.extract.GoogleMapsRouteExtractor;
-import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
 @RunWith(RobolectricTestRunner.class)
-public class RouteToUrlConverterTest {
+public class RouteToDirectionsUrlConverterTest {
 
     @Test
-    public void testGetUrl_OriginAndDestination() {
+    public void testGetDirectionsUrl_OriginAndDestination() {
         // Given
         final Route route =
                 new Route(
@@ -45,30 +44,30 @@ public class RouteToUrlConverterTest {
                                 Optional.empty()));
 
         // When
-        final URL result = RouteToUrlConverter.getUrl(route);
+        final DirectionsUrl directionsUrl = RouteToDirectionsUrlConverter.getDirectionsUrl(route);
 
         // Then
         assertEquals(
                 "https://www.google.com/maps/dir/?api=1&origin=48.5016154%2C8.9930185&destination=48.476549%2C8.9349058",
-                result.toString());
+                directionsUrl.url().toString());
     }
 
     @Test
-    public void testGetUrl_WithWaypoints() {
+    public void testGetDirectionsUrl_WithWaypoints() {
         // Given
         final Route route = RouteTestFactory.createRouteWithTwoWaypoints();
 
         // When
-        final URL result = RouteToUrlConverter.getUrl(route);
+        final DirectionsUrl directionsUrl = RouteToDirectionsUrlConverter.getDirectionsUrl(route);
 
         // Then
         assertEquals(
                 "https://www.google.com/maps/dir/?api=1&origin=10%2C20&destination=30%2C40&waypoints=15%2C25",
-                result.toString());
+                directionsUrl.url().toString());
     }
 
     @Test
-    public void testGetUrl_WithMultipleWaypoints() {
+    public void testGetDirectionsUrl_WithMultipleWaypoints() {
         // Given
         final Route route =
                 new Route(
@@ -107,16 +106,16 @@ public class RouteToUrlConverterTest {
                                 Optional.empty()));
 
         // When
-        final URL result = RouteToUrlConverter.getUrl(route);
+        final DirectionsUrl directionsUrl = RouteToDirectionsUrlConverter.getDirectionsUrl(route);
 
         // Then
         assertEquals(
                 "https://www.google.com/maps/dir/?api=1&origin=10%2C20&destination=30%2C40&waypoints=15%2C25%7C20%2C30",
-                result.toString());
+                directionsUrl.url().toString());
     }
 
     @Test
-    public void testGetUrl_WithPlaceIds() {
+    public void testGetDirectionsUrl_WithPlaceIds() {
         // Given
         final Route route =
                 new Route(
@@ -147,16 +146,16 @@ public class RouteToUrlConverterTest {
                                 Optional.empty()));
 
         // When
-        final URL result = RouteToUrlConverter.getUrl(route);
+        final DirectionsUrl directionsUrl = RouteToDirectionsUrlConverter.getDirectionsUrl(route);
 
         // Then
         assertEquals(
                 "https://www.google.com/maps/dir/?api=1&origin=Origin%20City&origin_place_id=ChIJ1V1RE0v8mUcROpsR_6oBUjQ&destination=Destination%20Landmark&destination_place_id=ChIJsYBbyF7zmUcREc3DW6XSMuQ&waypoints=Waypoint%20Street&waypoint_place_ids=ChIJsYBbyF7zmUcREc3DW6XSMuQ",
-                result.toString());
+                directionsUrl.url().toString());
     }
 
     @Test
-    public void testGetUrl_WithMixedPlaceIds() {
+    public void testGetDirectionsUrl_WithMixedPlaceIds() {
         // Given
         final Route route =
                 new Route(
@@ -195,16 +194,16 @@ public class RouteToUrlConverterTest {
                                 Optional.empty()));
 
         // When
-        final URL result = RouteToUrlConverter.getUrl(route);
+        final DirectionsUrl directionsUrl = RouteToDirectionsUrlConverter.getDirectionsUrl(route);
 
         // Then
         assertEquals(
                 "https://www.google.com/maps/dir/?api=1&origin=Origin&origin_place_id=ChIJsYBbyF7zmUcREc3DW6XSMuQ&destination=Destination&destination_place_id=ChIJsYBbyF7zmUcREc3DW6XSMuQ&waypoints=W1%7C20%2C30&waypoint_place_ids=ChIJsYBbyF7zmUcREc3DW6XSMuQ%7C",
-                result.toString());
+                directionsUrl.url().toString());
     }
 
     @Test
-    public void testGetUrl_WithManyStops() {
+    public void testGetDirectionsUrl_WithManyStops() {
         // Given: Route with 12 stops (origin, destination, 10 waypoints)
         final Stop origin =
                 new Stop(
@@ -239,14 +238,14 @@ public class RouteToUrlConverterTest {
         final Route route = new Route(origin, waypoints, destination);
 
         // When
-        final URL url = RouteToUrlConverter.getUrl(route);
+        final DirectionsUrl directionsUrl = RouteToDirectionsUrlConverter.getDirectionsUrl(route);
 
         // Then
-        assertEquals(extractRoute(url), route);
+        assertEquals(GoogleMapsRouteExtractor.extractRoute(directionsUrl), route);
     }
 
     @Test
-    public void testGetUrl_WithManyStopsAndPlaceId() {
+    public void testGetDirectionsUrl_WithManyStopsAndPlaceId() {
         // Given: Route with 12 stops (origin, destination, 10 waypoints)
         // One waypoint has a Place ID.
         final OfficialPlaceId officialPlaceId = new OfficialPlaceId("ChIJgUbEo8cfqokR5lP9_Wh_DaM");
@@ -278,14 +277,14 @@ public class RouteToUrlConverterTest {
                                 Optional.empty()));
 
         // When
-        final URL url = RouteToUrlConverter.getUrl(route);
+        final DirectionsUrl directionsUrl = RouteToDirectionsUrlConverter.getDirectionsUrl(route);
 
         // Then
         // 1. Verifiziere, dass die Place-ID im data-Part vorkommt (als Hex kodiert)
-        assertTrue(url.toString().contains(officialPlaceId.toUndocumentedPlaceId().value()));
+        assertTrue(directionsUrl.url().toString().contains(officialPlaceId.toUndocumentedPlaceId().value()));
 
         // 2. Verifiziere den Round-Trip (lossless extraction)
-        assertEquals(extractRoute(url), route);
+        assertEquals(GoogleMapsRouteExtractor.extractRoute(directionsUrl), route);
     }
 
     private static Stop createWaypoint(final int i, final Optional<OfficialPlaceId> officialPlaceId) {
@@ -297,13 +296,5 @@ public class RouteToUrlConverterTest {
                         new Angle(48.5 + i * 0.01, DEGREES),
                         new Angle(9.0 + i * 0.01, DEGREES)),
                 Optional.empty());
-    }
-
-    private static Route extractRoute(final URL url) {
-        return GoogleMapsRouteExtractor.extractRoute(
-                DirectionsUrlFactory
-                        .createDirectionsUrl(url)
-                        .join()
-                        .orElseThrow());
     }
 }

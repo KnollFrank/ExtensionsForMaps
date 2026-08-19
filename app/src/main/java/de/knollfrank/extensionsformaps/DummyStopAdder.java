@@ -6,10 +6,9 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 
-import de.knollfrank.extensionsformaps.route.RouteToUrlConverter;
+import de.knollfrank.extensionsformaps.route.RouteToDirectionsUrlConverter;
 import de.knollfrank.extensionsformaps.route.Routes;
 import de.knollfrank.extensionsformaps.route.extract.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
@@ -22,19 +21,19 @@ public class DummyStopAdder {
                                                                                           final Context context) {
         return CompletableFuture
                 .supplyAsync(() -> addDummyStop(directionsUrl))
-                .handle((final URL directionsUrlWithDummyStop, final Throwable throwable) -> {
+                .handle((final DirectionsUrl directionsUrlWithDummyStop, final Throwable throwable) -> {
                     if (throwable != null) {
                         Log.e(TAG, "Error adding dummy stop to directions URL", throwable);
                         displayErrorProcessingRoute(context);
                     } else {
-                        GoogleMapsNavigator.launchUrl(directionsUrlWithDummyStop, context);
+                        GoogleMapsNavigator.launchUrl(directionsUrlWithDummyStop.url(), context);
                     }
                     return null;
                 });
     }
 
-    private static URL addDummyStop(final DirectionsUrl directionsUrl) {
-        return RouteToUrlConverter.getUrl(
+    private static DirectionsUrl addDummyStop(final DirectionsUrl directionsUrl) {
+        return RouteToDirectionsUrlConverter.getDirectionsUrl(
                 Routes.addDummyStop(
                         GoogleMapsRouteExtractor.extractRoute(
                                 directionsUrl)));
