@@ -1,5 +1,7 @@
 package de.knollfrank.extensionsformaps.common;
 
+import android.net.Uri;
+
 import com.google.common.collect.ImmutableMap;
 
 import java.io.UnsupportedEncodingException;
@@ -19,12 +21,20 @@ public class URLs {
         return QueryProvider.getQuery(url);
     }
 
+    public static URL createUrl(final Uri uri) {
+        return createUrl(uri.toString());
+    }
+
     public static URL createUrl(final String url) {
         try {
             return new URL(url);
         } catch (final MalformedURLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Uri createUri(final URL url) {
+        return Uri.parse(url.toString());
     }
 
     public static String encode(final String str) {

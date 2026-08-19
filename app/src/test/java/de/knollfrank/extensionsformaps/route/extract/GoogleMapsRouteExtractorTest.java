@@ -150,6 +150,53 @@ public class GoogleMapsRouteExtractorTest {
         assertTrue(exception.getMessage().contains("Link expansion might have failed"));
     }
 
+    @Test
+    public void testExtractRouteFromDirectionsUrl_OfficialFormat_Simple() throws MalformedURLException {
+        // Given
+        final DirectionsUrl directionsUrl = getDirectionsUrl("https://www.google.com/maps/dir/?api=1&origin=48.5216,9.0576&destination=45.4642,9.1900");
+
+        // When
+        final Route route = GoogleMapsRouteExtractor.extractRoute(directionsUrl);
+
+        // Then
+        assertEquals(
+                Geodetic.fromLatitudeLongitude(
+                        new Angle(48.5216, DEGREES),
+                        new Angle(9.0576, DEGREES)),
+                route.origin().geodetic());
+        assertEquals(
+                Geodetic.fromLatitudeLongitude(
+                        new Angle(45.4642, DEGREES),
+                        new Angle(9.1900, DEGREES)),
+                route.destination().geodetic());
+    }
+
+    @Test
+    public void testExtractRouteFromDirectionsUrl_OfficialFormat_WithWaypointsAndPlaceIds() throws MalformedURLException {
+        // Given
+        final String url = "https://www.google.com/maps/dir/?api=1" +
+                "&origin=52.5200,13.4050&origin_place_id=ChIJ1V1RE0v8mUcROpsR_6oBUjQ" +
+                "&destination=45.4642,9.1900" +
+                "&waypoints=53.5511,9.9937|48.1351,11.5820" +
+                "&waypoint_place_ids=ChIJuRMYfoNhsUcRoDrWe_I9JgQ|ChIJsYBbyF7zmUcREc3DW6XSMuQ";
+        final DirectionsUrl directionsUrl = getDirectionsUrl(url);
+
+        // When
+        final Route route = GoogleMapsRouteExtractor.extractRoute(directionsUrl);
+
+        // Then
+        assertEquals("52.5200,13.4050", route.origin().address());
+        assertEquals(Optional.of(new OfficialPlaceId("ChIJ1V1RE0v8mUcROpsR_6oBUjQ")), route.origin().officialPlaceId());
+
+        assertEquals(2, route.waypoints().size());
+        assertEquals("53.5511,9.9937", route.waypoints().get(0).address());
+        assertEquals(Optional.of(new OfficialPlaceId("ChIJuRMYfoNhsUcRoDrWe_I9JgQ")), route.waypoints().get(0).officialPlaceId());
+        assertEquals("48.1351,11.5820", route.waypoints().get(1).address());
+        assertEquals(Optional.of(new OfficialPlaceId("ChIJsYBbyF7zmUcREc3DW6XSMuQ")), route.waypoints().get(1).officialPlaceId());
+
+        assertEquals("45.4642,9.1900", route.destination().address());
+    }
+
     private static Route route_CentralApotheke_Hamburg_Unterhausen() {
         return new Route(
                 new Stop(

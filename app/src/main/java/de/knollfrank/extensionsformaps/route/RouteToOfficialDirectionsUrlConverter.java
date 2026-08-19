@@ -13,21 +13,26 @@ import de.knollfrank.extensionsformaps.common.URLs;
 import de.knollfrank.extensionsformaps.coordinate.Angle;
 import de.knollfrank.extensionsformaps.coordinate.Geodetic;
 import de.knollfrank.extensionsformaps.route.url.OfficialDirectionsUrl;
+import de.knollfrank.extensionsformaps.route.url.OfficialDirectionsUrlFactory;
 
 class RouteToOfficialDirectionsUrlConverter {
 
     public static Optional<OfficialDirectionsUrl> getOfficialDirectionsUrl(final Route route) {
         return route.stops().size() <= 10 ?
-                Optional.of(_getOfficialUrl(route)) :
+                Optional.of(_getOfficialDirectionsUrl(route)) :
                 Optional.empty();
     }
 
-    private static OfficialDirectionsUrl _getOfficialUrl(final Route route) {
+    private static OfficialDirectionsUrl _getOfficialDirectionsUrl(final Route route) {
+        return createOfficialDirectionsUrl(getOfficialDirectionsUri(route));
+    }
+
+    private static Uri getOfficialDirectionsUri(final Route route) {
         final Uri.Builder builder = createUriBuilder();
         appendPoint(builder, "origin", route.origin());
         appendPoint(builder, "destination", route.destination());
         appendWaypoints(builder, route.waypoints());
-        return new OfficialDirectionsUrl(URLs.createUrl(builder.build().toString()));
+        return builder.build();
     }
 
     private static Uri.Builder createUriBuilder() {
@@ -92,5 +97,11 @@ class RouteToOfficialDirectionsUrlConverter {
     public static String format(final Angle angle) {
         final DecimalFormat df = new DecimalFormat("#.#######", DecimalFormatSymbols.getInstance(Locale.US));
         return df.format(angle.toDegrees());
+    }
+
+    private static OfficialDirectionsUrl createOfficialDirectionsUrl(final Uri uri) {
+        return OfficialDirectionsUrlFactory
+                .createOfficialDirectionsUrl(URLs.createUrl(uri))
+                .orElseThrow();
     }
 }

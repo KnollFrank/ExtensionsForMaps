@@ -15,6 +15,7 @@ public class UnofficialModernDirectionsUrlFactory {
     private static boolean isUnofficialModernDirectionsUrl(final URL url) {
         return List.of("http", "https").contains(url.getProtocol()) &&
                 url.getHost().contains("google") &&
-                url.getPath().startsWith("/maps/dir/");
+                url.getPath().startsWith("/maps/dir/") &&
+                !OfficialDirectionsUrlFactory.isOfficialDirectionsUrl(url);
     }
 }

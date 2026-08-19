@@ -25,6 +25,7 @@ public class DirectionsUrlFactory {
     private static Optional<DirectionsUrl> _createDirectionsUrl(final URL url) {
         return Optionals
                 .<DirectionsUrl>streamOfPresentElements(
+                        OfficialDirectionsUrlFactory.createOfficialDirectionsUrl(url),
                         UnofficialModernDirectionsUrlFactory.createUnofficialModernDirectionsUrl(url),
                         UnofficialLegacyDirectionsUrlFactory.createUnofficialLegacyDirectionsUrl(url))
                 .findFirst();

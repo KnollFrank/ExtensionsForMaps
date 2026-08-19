@@ -15,8 +15,7 @@ public class GoogleMapsRouteExtractor {
         return switch (directionsUrl) {
             case final UnofficialModernDirectionsUrl unofficialModernDirectionsUrl -> UnofficialModernDirectionsUrlRouteExtractor.extractRoute(unofficialModernDirectionsUrl);
             case final UnofficialLegacyDirectionsUrl unofficialLegacyDirectionsUrl -> UnofficialLegacyDirectionsUrlRouteExtractor.extractRoute(unofficialLegacyDirectionsUrl);
-            // FK-FIXME: not yet implemented
-            case final OfficialDirectionsUrl officialDirectionsUrl -> throw new IllegalStateException("not yet implemented");
+            case final OfficialDirectionsUrl officialDirectionsUrl -> OfficialDirectionsUrlRouteExtractor.extractRoute(officialDirectionsUrl);
         };
     }
 }
