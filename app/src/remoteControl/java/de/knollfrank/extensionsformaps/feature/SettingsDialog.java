@@ -32,9 +32,11 @@ import de.knollfrank.extensionsformaps.optimize.ors.OpenRouteServiceRoutingMatri
 public class SettingsDialog {
 
     private final AccessibilityService service;
+    private final ApiKeyRepository apiKeyRepository;
 
     public SettingsDialog(final AccessibilityService service) {
         this.service = service;
+        this.apiKeyRepository = new ApiKeyRepository(service);
     }
 
     public void show() {
@@ -76,10 +78,7 @@ public class SettingsDialog {
 
         final Runnable updateOrsState =
                 () -> {
-                    final boolean hasApiKey =
-                            ApiKeyRepository
-                                    .getApiKey(service)
-                                    .isPresent();
+                    final boolean hasApiKey = apiKeyRepository.getApiKey().isPresent();
                     binding.layoutOrs.setEnabled(hasApiKey);
                     binding.rbOrs.setEnabled(hasApiKey);
                     binding.tvOrsDesc.setAlpha(hasApiKey ? 0.7f : 0.3f);
@@ -100,7 +99,7 @@ public class SettingsDialog {
                     }
                 };
 
-        final SharedPreferences prefs = ApiKeyRepository.getSharedPreferences(service);
+        final SharedPreferences prefs = apiKeyRepository.getSharedPreferences();
         prefs.registerOnSharedPreferenceChangeListener(prefsListener);
 
         final AlertDialog settingsDialog =
@@ -159,7 +158,7 @@ public class SettingsDialog {
     private void showApiKeyDialog(final Context context, final AlertDialog parentDialog) {
         final DialogApiKeyBinding binding = DialogApiKeyBinding.inflate(LayoutInflater.from(context));
 
-        ApiKeyRepository.getApiKey(service).ifPresent(binding.etApiKey::setText);
+        apiKeyRepository.getApiKey().ifPresent(binding.etApiKey::setText);
 
         final AlertDialog apiKeyDialog =
                 new MaterialAlertDialogBuilder(context)
@@ -215,7 +214,7 @@ public class SettingsDialog {
                                     ContextCompat
                                             .getMainExecutor(service)
                                             .execute(() -> {
-                                                ApiKeyRepository.saveApiKey(service, apiKey);
+                                                apiKeyRepository.saveApiKey(apiKey);
                                                 Toast
                                                         .makeText(service, R.string.api_key_success, Toast.LENGTH_SHORT)
                                                         .show();

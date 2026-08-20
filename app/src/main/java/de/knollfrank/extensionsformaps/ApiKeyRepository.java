@@ -8,26 +8,28 @@ import java.util.Optional;
 public class ApiKeyRepository {
 
     private static final String KEY_ORS_API_KEY = "ors_api_key";
+    private final Context context;
 
-    private ApiKeyRepository() {
+    public ApiKeyRepository(final Context context) {
+        this.context = context;
     }
 
-    public static void saveApiKey(final Context context, final String apiKey) {
-        ApiKeyRepository
-                .getSharedPreferences(context)
+    public void saveApiKey(final String apiKey) {
+        this
+                .getSharedPreferences()
                 .edit()
                 .putString(KEY_ORS_API_KEY, apiKey)
                 .apply();
     }
 
-    public static Optional<String> getApiKey(final Context context) {
+    public Optional<String> getApiKey() {
         return Optional.ofNullable(
-                ApiKeyRepository
-                        .getSharedPreferences(context)
+                this
+                        .getSharedPreferences()
                         .getString(KEY_ORS_API_KEY, null));
     }
 
-    public static SharedPreferences getSharedPreferences(final Context context) {
+    public SharedPreferences getSharedPreferences() {
         return context.getSharedPreferences("route_optimizer_prefs", Context.MODE_PRIVATE);
     }
 }

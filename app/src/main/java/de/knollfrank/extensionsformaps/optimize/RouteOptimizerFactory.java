@@ -18,7 +18,7 @@ public class RouteOptimizerFactory {
         } else {
             return new OsrmVehicleRoutingTransportCostsProvider(
                     new OpenRouteServiceRoutingMatrixProvider(
-                            ApiKeyRepository.getApiKey(context).orElseThrow()));
+                            new ApiKeyRepository(context).getApiKey().orElseThrow()));
         }
     }
 }
