@@ -3,6 +3,7 @@ package de.knollfrank.extensionsformaps.route;
 import android.net.Uri;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import de.knollfrank.extensionsformaps.common.URLs;
 import de.knollfrank.extensionsformaps.coordinate.Angle;
@@ -16,26 +17,39 @@ import de.knollfrank.extensionsformaps.route.url.UnofficialModernDirectionsUrlFa
 class RouteToUnofficialModernDirectionsUrlConverter {
 
     public static UnofficialModernDirectionsUrl getUnofficialModernDirectionsUrl(final Route route) {
-        final StringBuilder pathBuilder = new StringBuilder("https://www.google.com/maps/dir");
-        for (final Stop stop : route.stops()) {
-            pathBuilder.append("/").append(Uri.encode(stop.address()));
-        }
-
-        final List<Node> rootNodes =
-                List.of(
-                        NodeFactory.createContainer(
-                                3,
-                                List.of(
-                                        NodeFactory.createLeaf(1, Datatype.ENUM, "3"),
-                                        NodeFactory.createLeaf(4, Datatype.BOOLEAN, "1"))),
-                        NodeFactory.createContainer(
-                                4,
-                                List.of(NodeFactory.createContainer(4, createStopNodes(route.stops())))));
-
-        pathBuilder.append("/data=").append(NodeSerializer.serialize(rootNodes)).append("?entry=ttu");
+        final String url = getUrl(route);
         return UnofficialModernDirectionsUrlFactory
-                .createUnofficialModernDirectionsUrl(URLs.createUrl(pathBuilder.toString()))
+                .createUnofficialModernDirectionsUrl(URLs.createUrl(url))
                 .orElseThrow();
+    }
+
+    private static String getUrl(final Route route) {
+        return "https://www.google.com/maps/dir" +
+                getAddresses(route.stops()) +
+                "/data=" +
+                NodeSerializer.serialize(
+                        List.of(
+                                NodeFactory.createContainer(
+                                        3,
+                                        List.of(
+                                                NodeFactory.createLeaf(1, Datatype.ENUM, "3"),
+                                                NodeFactory.createLeaf(4, Datatype.BOOLEAN, "1"))),
+                                NodeFactory.createContainer(
+                                        4,
+                                        List.of(NodeFactory.createContainer(4, createStopNodes(route.stops())))))) +
+                "?entry=ttu";
+    }
+
+    private static String getAddresses(final List<Stop> stops) {
+        final String prefix_delimiter = "/";
+        return stops
+                .stream()
+                .map(RouteToUnofficialModernDirectionsUrlConverter::getAddress)
+                .collect(Collectors.joining(prefix_delimiter, prefix_delimiter, ""));
+    }
+
+    private static String getAddress(final Stop stop) {
+        return Uri.encode(stop.address());
     }
 
     private static List<Node> createStopNodes(final List<Stop> stops) {
