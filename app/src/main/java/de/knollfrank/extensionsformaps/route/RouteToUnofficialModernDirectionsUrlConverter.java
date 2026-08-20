@@ -8,9 +8,11 @@ import java.util.stream.Collectors;
 import de.knollfrank.extensionsformaps.common.URLs;
 import de.knollfrank.extensionsformaps.coordinate.Angle;
 import de.knollfrank.extensionsformaps.route.protobuf.Datatype;
+import de.knollfrank.extensionsformaps.route.protobuf.DirectionsVisibility;
 import de.knollfrank.extensionsformaps.route.protobuf.Node;
 import de.knollfrank.extensionsformaps.route.protobuf.NodeFactory;
 import de.knollfrank.extensionsformaps.route.protobuf.NodeSerializer;
+import de.knollfrank.extensionsformaps.route.protobuf.TravelMode;
 import de.knollfrank.extensionsformaps.route.url.UnofficialModernDirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.UnofficialModernDirectionsUrlFactory;
 
@@ -49,22 +51,34 @@ class RouteToUnofficialModernDirectionsUrlConverter {
     }
 
     private static Node createMapViewContextNode() {
-        final int mapViewContext = 3;
-        final int travelMode = 1;
-        final int viewState = 4;
-        final String drivingMode = "3";
-        final String showDirectionsLayer = "1";
+        final int mapViewContextId = 3;
         return NodeFactory.createContainer(
-                mapViewContext,
+                mapViewContextId,
                 List.of(
-                        NodeFactory.createLeaf(travelMode, Datatype.ENUM, drivingMode),
-                        NodeFactory.createLeaf(viewState, Datatype.BOOLEAN, showDirectionsLayer)));
+                        createTravelModeNode(TravelMode.DRIVING),
+                        createViewStateNode(DirectionsVisibility.VISIBLE)));
+    }
+
+    private static Node createTravelModeNode(final TravelMode travelMode) {
+        final int travelModeId = 1;
+        return NodeFactory.createLeaf(travelModeId, Datatype.ENUM, travelMode.value);
+    }
+
+    private static Node createViewStateNode(final DirectionsVisibility directionsVisibility) {
+        final int viewStateId = 4;
+        return NodeFactory.createLeaf(viewStateId, Datatype.BOOLEAN, directionsVisibility.value);
     }
 
     private static Node createRouteDataNode(final List<Node> stopNodes) {
+        final int routeDataId = 4;
         return NodeFactory.createContainer(
-                4,
-                List.of(NodeFactory.createContainer(4, stopNodes)));
+                routeDataId,
+                List.of(createStopsNode(stopNodes)));
+    }
+
+    private static Node createStopsNode(final List<Node> stopNodes) {
+        final int stopsId = 4;
+        return NodeFactory.createContainer(stopsId, stopNodes);
     }
 
     private static List<Node> createStopNodes(final List<Stop> stops) {
