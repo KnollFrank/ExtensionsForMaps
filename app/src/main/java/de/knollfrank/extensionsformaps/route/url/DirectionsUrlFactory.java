@@ -11,10 +11,10 @@ public class DirectionsUrlFactory {
     public static CompletableFuture<Optional<DirectionsUrl>> createDirectionsUrl(final URL url) {
         return Optionals
                 .streamOfPresentElements(
-                        DirectionsUrlFactory
+                        () -> DirectionsUrlFactory
                                 ._createDirectionsUrl(url)
                                 .map(CompletableFuture::completedFuture),
-                        ShortDirectionsUrlFactory
+                        () -> ShortDirectionsUrlFactory
                                 .createShortDirectionsUrl(url)
                                 .map(ShortDirectionsUrl::expand))
                 .findFirst()
@@ -25,9 +25,9 @@ public class DirectionsUrlFactory {
     private static Optional<DirectionsUrl> _createDirectionsUrl(final URL url) {
         return Optionals
                 .<DirectionsUrl>streamOfPresentElements(
-                        OfficialDirectionsUrlFactory.createOfficialDirectionsUrl(url),
-                        UnofficialModernDirectionsUrlFactory.createUnofficialModernDirectionsUrl(url),
-                        UnofficialLegacyDirectionsUrlFactory.createUnofficialLegacyDirectionsUrl(url))
+                        () -> OfficialDirectionsUrlFactory.createOfficialDirectionsUrl(url),
+                        () -> UnofficialModernDirectionsUrlFactory.createUnofficialModernDirectionsUrl(url),
+                        () -> UnofficialLegacyDirectionsUrlFactory.createUnofficialLegacyDirectionsUrl(url))
                 .findFirst();
     }
 }

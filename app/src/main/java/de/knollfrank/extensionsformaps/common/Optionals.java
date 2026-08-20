@@ -15,13 +15,6 @@ public class Optionals {
     }
 
     @SafeVarargs
-    public static <T> Stream<T> streamOfPresentElements(final Optional<? extends T>... elements) {
-        return Arrays
-                .stream(elements)
-                .flatMap(Optional::stream);
-    }
-
-    @SafeVarargs
     public static <T> Stream<T> streamOfPresentElements(final Supplier<Optional<? extends T>>... elements) {
         return Arrays
                 .stream(elements)
