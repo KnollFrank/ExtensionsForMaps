@@ -44,14 +44,27 @@ class RouteToUnofficialModernDirectionsUrlConverter {
     private static String getDataPart(final List<Stop> stops) {
         return NodeSerializer.serialize(
                 List.of(
-                        NodeFactory.createContainer(
-                                3,
-                                List.of(
-                                        NodeFactory.createLeaf(1, Datatype.ENUM, "3"),
-                                        NodeFactory.createLeaf(4, Datatype.BOOLEAN, "1"))),
-                        NodeFactory.createContainer(
-                                4,
-                                List.of(NodeFactory.createContainer(4, createStopNodes(stops))))));
+                        createMapViewContextNode(),
+                        createRouteDataNode(createStopNodes(stops))));
+    }
+
+    private static Node createMapViewContextNode() {
+        final int mapViewContext = 3;
+        final int travelMode = 1;
+        final int viewState = 4;
+        final String drivingMode = "3";
+        final String showDirectionsLayer = "1";
+        return NodeFactory.createContainer(
+                mapViewContext,
+                List.of(
+                        NodeFactory.createLeaf(travelMode, Datatype.ENUM, drivingMode),
+                        NodeFactory.createLeaf(viewState, Datatype.BOOLEAN, showDirectionsLayer)));
+    }
+
+    private static Node createRouteDataNode(final List<Node> stopNodes) {
+        return NodeFactory.createContainer(
+                4,
+                List.of(NodeFactory.createContainer(4, stopNodes)));
     }
 
     private static List<Node> createStopNodes(final List<Stop> stops) {
