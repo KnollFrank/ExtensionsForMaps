@@ -25,31 +25,33 @@ class RouteToUnofficialModernDirectionsUrlConverter {
 
     private static String getUrl(final Route route) {
         return "https://www.google.com/maps/dir" +
-                getAddresses(route.stops()) +
-                "/data=" +
-                NodeSerializer.serialize(
-                        List.of(
-                                NodeFactory.createContainer(
-                                        3,
-                                        List.of(
-                                                NodeFactory.createLeaf(1, Datatype.ENUM, "3"),
-                                                NodeFactory.createLeaf(4, Datatype.BOOLEAN, "1"))),
-                                NodeFactory.createContainer(
-                                        4,
-                                        List.of(NodeFactory.createContainer(4, createStopNodes(route.stops())))))) +
+                "/" + getAddresses(route.stops()) +
+                "/data=" + getDataPart(route.stops()) +
                 "?entry=ttu";
     }
 
     private static String getAddresses(final List<Stop> stops) {
-        final String prefix_delimiter = "/";
         return stops
                 .stream()
                 .map(RouteToUnofficialModernDirectionsUrlConverter::getAddress)
-                .collect(Collectors.joining(prefix_delimiter, prefix_delimiter, ""));
+                .collect(Collectors.joining("/"));
     }
 
     private static String getAddress(final Stop stop) {
         return Uri.encode(stop.address());
+    }
+
+    private static String getDataPart(final List<Stop> stops) {
+        return NodeSerializer.serialize(
+                List.of(
+                        NodeFactory.createContainer(
+                                3,
+                                List.of(
+                                        NodeFactory.createLeaf(1, Datatype.ENUM, "3"),
+                                        NodeFactory.createLeaf(4, Datatype.BOOLEAN, "1"))),
+                        NodeFactory.createContainer(
+                                4,
+                                List.of(NodeFactory.createContainer(4, createStopNodes(stops))))));
     }
 
     private static List<Node> createStopNodes(final List<Stop> stops) {
