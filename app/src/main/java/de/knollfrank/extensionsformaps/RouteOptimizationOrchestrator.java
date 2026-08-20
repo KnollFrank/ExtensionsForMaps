@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizer;
 import de.knollfrank.extensionsformaps.route.Route;
-import de.knollfrank.extensionsformaps.route.extract.GoogleMapsRouteExtractor;
+import de.knollfrank.extensionsformaps.route.RouteDirectionsUrlConverter;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
 public class RouteOptimizationOrchestrator {
@@ -44,7 +44,7 @@ public class RouteOptimizationOrchestrator {
         callback.onExtractRouteFromDirectionsUrlStarted();
         new Thread(() -> {
             try {
-                callback.onExtractRouteFromDirectionsUrlSuccess(GoogleMapsRouteExtractor.extractRoute(directionsUrl));
+                callback.onExtractRouteFromDirectionsUrlSuccess(RouteDirectionsUrlConverter.getRoute(directionsUrl));
             } catch (final Exception e) {
                 callback.onError(context.getString(R.string.error_general, e.getMessage()));
             }

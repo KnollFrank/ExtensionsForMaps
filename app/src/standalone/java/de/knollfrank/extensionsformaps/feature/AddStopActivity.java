@@ -25,7 +25,7 @@ import de.knollfrank.extensionsformaps.SortConfig;
 import de.knollfrank.extensionsformaps.databinding.DialogAddStopInstructionBinding;
 import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
 import de.knollfrank.extensionsformaps.route.Route;
-import de.knollfrank.extensionsformaps.route.RouteToDirectionsUrlConverter;
+import de.knollfrank.extensionsformaps.route.RouteDirectionsUrlConverter;
 import de.knollfrank.extensionsformaps.route.Routes;
 import de.knollfrank.extensionsformaps.route.extract.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
@@ -138,7 +138,7 @@ public class AddStopActivity extends AppCompatActivity {
 
     private void addStopAndFinish(final Route route) {
         CompletableFuture
-                .supplyAsync(() -> RouteToDirectionsUrlConverter.getDirectionsUrl(Routes.addDummyStop(route)))
+                .supplyAsync(() -> RouteDirectionsUrlConverter.getDirectionsUrl(Routes.addDummyStop(route)))
                 .handleAsync(
                         (directionsUrl, throwable) -> {
                             if (throwable != null) {

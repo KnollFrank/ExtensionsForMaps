@@ -22,8 +22,8 @@ import de.knollfrank.extensionsformaps.databinding.ActivityMainBinding;
 import de.knollfrank.extensionsformaps.feature.UpgradeDialog;
 import de.knollfrank.extensionsformaps.license.LicenseManager;
 import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
+import de.knollfrank.extensionsformaps.route.RouteDirectionsUrlConverter;
 import de.knollfrank.extensionsformaps.route.RouteTemplateFactory;
-import de.knollfrank.extensionsformaps.route.RouteToDirectionsUrlConverter;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
 public class MainActivity extends AppCompatActivity {
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             private DirectionsUrl createDirectionsUrlTemplate(final int totalStops) {
-                return RouteToDirectionsUrlConverter.getDirectionsUrl(
+                return RouteDirectionsUrlConverter.getDirectionsUrl(
                         RouteTemplateFactory.createRouteTemplate(
                                 totalStops));
             }

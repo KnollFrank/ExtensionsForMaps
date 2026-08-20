@@ -8,9 +8,8 @@ import android.widget.Toast;
 
 import java.util.concurrent.CompletableFuture;
 
-import de.knollfrank.extensionsformaps.route.RouteToDirectionsUrlConverter;
+import de.knollfrank.extensionsformaps.route.RouteDirectionsUrlConverter;
 import de.knollfrank.extensionsformaps.route.Routes;
-import de.knollfrank.extensionsformaps.route.extract.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
 public class DummyStopAdder {
@@ -33,9 +32,9 @@ public class DummyStopAdder {
     }
 
     private static DirectionsUrl addDummyStop(final DirectionsUrl directionsUrl) {
-        return RouteToDirectionsUrlConverter.getDirectionsUrl(
+        return RouteDirectionsUrlConverter.getDirectionsUrl(
                 Routes.addDummyStop(
-                        GoogleMapsRouteExtractor.extractRoute(
+                        RouteDirectionsUrlConverter.getRoute(
                                 directionsUrl)));
     }
 

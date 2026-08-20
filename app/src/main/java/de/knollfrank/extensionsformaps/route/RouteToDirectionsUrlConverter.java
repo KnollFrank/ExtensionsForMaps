@@ -5,7 +5,7 @@ import java.util.Optional;
 import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
-public class RouteToDirectionsUrlConverter {
+class RouteToDirectionsUrlConverter {
 
     public static DirectionsUrl getDirectionsUrl(final Route route) {
         return Optionals

@@ -14,7 +14,6 @@ import java.util.Optional;
 import de.knollfrank.extensionsformaps.common.Lists;
 import de.knollfrank.extensionsformaps.coordinate.Angle;
 import de.knollfrank.extensionsformaps.coordinate.Geodetic;
-import de.knollfrank.extensionsformaps.route.extract.GoogleMapsRouteExtractor;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
 @RunWith(RobolectricTestRunner.class)
@@ -241,7 +240,7 @@ public class RouteToDirectionsUrlConverterTest {
         final DirectionsUrl directionsUrl = RouteToDirectionsUrlConverter.getDirectionsUrl(route);
 
         // Then
-        assertEquals(GoogleMapsRouteExtractor.extractRoute(directionsUrl), route);
+        assertEquals(RouteDirectionsUrlConverter.getRoute(directionsUrl), route);
     }
 
     @Test
@@ -284,7 +283,7 @@ public class RouteToDirectionsUrlConverterTest {
         assertTrue(directionsUrl.url().toString().contains(officialPlaceId.toUndocumentedPlaceId().value()));
 
         // 2. Verifiziere den Round-Trip (lossless extraction)
-        assertEquals(GoogleMapsRouteExtractor.extractRoute(directionsUrl), route);
+        assertEquals(RouteDirectionsUrlConverter.getRoute(directionsUrl), route);
     }
 
     private static Stop createWaypoint(final int i, final Optional<OfficialPlaceId> officialPlaceId) {
