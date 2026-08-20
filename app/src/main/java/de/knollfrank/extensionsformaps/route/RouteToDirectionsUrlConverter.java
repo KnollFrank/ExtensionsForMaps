@@ -10,8 +10,8 @@ class RouteToDirectionsUrlConverter {
     public static DirectionsUrl getDirectionsUrl(final Route route) {
         return Optionals
                 .streamOfPresentElements(
-                        RouteToOfficialDirectionsUrlConverter.getOfficialDirectionsUrl(route),
-                        Optional.of(RouteToUnofficialModernDirectionsUrlConverter.getUnofficialModernDirectionsUrl(route)))
+                        () -> RouteToOfficialDirectionsUrlConverter.getOfficialDirectionsUrl(route),
+                        () -> Optional.of(RouteToUnofficialModernDirectionsUrlConverter.getUnofficialModernDirectionsUrl(route)))
                 .findFirst()
                 .orElseThrow();
     }

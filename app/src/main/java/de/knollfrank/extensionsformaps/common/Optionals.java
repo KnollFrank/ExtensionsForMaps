@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,6 +18,14 @@ public class Optionals {
     public static <T> Stream<T> streamOfPresentElements(final Optional<? extends T>... elements) {
         return Arrays
                 .stream(elements)
+                .flatMap(Optional::stream);
+    }
+
+    @SafeVarargs
+    public static <T> Stream<T> streamOfPresentElements(final Supplier<Optional<? extends T>>... elements) {
+        return Arrays
+                .stream(elements)
+                .map(Supplier::get)
                 .flatMap(Optional::stream);
     }
 
