@@ -92,54 +92,63 @@ class RouteToUnofficialModernDirectionsUrlConverter {
     private static Node createStopNode(final Stop stop) {
         return stop
                 .officialPlaceId()
-                .map(officialPlaceId -> createStopNodeWithPlaceId(officialPlaceId, stop.geodetic()))
+                .map(officialPlaceId -> createStopNodeWithPlaceId(stop.geodetic(), officialPlaceId))
                 .orElseGet(() -> createStopNodeWithoutPlaceId(stop.geodetic()));
     }
 
-    private static Node createStopNodeWithPlaceId(final OfficialPlaceId officialPlaceId,
-                                                  final Geodetic geodetic) {
+    private static Node createStopNodeWithPlaceId(final Geodetic geodetic, final OfficialPlaceId officialPlaceId) {
+        final int stopEntryId = 1;
+        final int stopDetailsId = 1;
+        final int placeIdFieldId = 1;
+        final int geodeticCoordinatesId = 8;
+        final int latitudeFieldId = 3;
+        final int longitudeFieldId = 4;
         // Linear sequence was: 1m5, 1m4, 1sPID, 8m2, 3dLAT, 4dLON
         // This corresponds to:
         // 1m5 -> [1m4 -> [1sPID, 8m2 -> [3dLAT, 4dLON]]]
         return NodeFactory.createContainer(
-                1,
+                stopEntryId,
                 List.of(
                         NodeFactory.createContainer(
-                                1,
+                                stopDetailsId,
                                 List.of(
                                         NodeFactory.createLeaf(
-                                                1,
+                                                placeIdFieldId,
                                                 Datatype.STRING,
                                                 officialPlaceId.toUndocumentedPlaceId().value()),
                                         NodeFactory.createContainer(
-                                                8,
+                                                geodeticCoordinatesId,
                                                 List.of(
                                                         NodeFactory.createLeaf(
-                                                                3,
+                                                                latitudeFieldId,
                                                                 Datatype.DOUBLE,
                                                                 format(geodetic.getLatitude())),
                                                         NodeFactory.createLeaf(
-                                                                4,
+                                                                longitudeFieldId,
                                                                 Datatype.DOUBLE,
                                                                 format(geodetic.getLongitude()))))))));
     }
 
     private static Node createStopNodeWithoutPlaceId(final Geodetic geodetic) {
+        final int stopEntryId = 1;
+        final int coordinatesId = 2;
+        final int longitudeFieldId = 1;
+        final int latitudeFieldId = 2;
         // Linear sequence was: 1m3, 2m2, 1dLON, 2dLAT
         // This corresponds to:
         // 1m3 -> [2m2 -> [1dLON, 2dLAT]]
         return NodeFactory.createContainer(
-                1,
+                stopEntryId,
                 List.of(
                         NodeFactory.createContainer(
-                                2,
+                                coordinatesId,
                                 List.of(
                                         NodeFactory.createLeaf(
-                                                1,
+                                                longitudeFieldId,
                                                 Datatype.DOUBLE,
                                                 format(geodetic.getLongitude())),
                                         NodeFactory.createLeaf(
-                                                2,
+                                                latitudeFieldId,
                                                 Datatype.DOUBLE,
                                                 format(geodetic.getLatitude()))))));
     }
