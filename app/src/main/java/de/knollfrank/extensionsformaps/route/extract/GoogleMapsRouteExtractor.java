@@ -10,12 +10,14 @@ import de.knollfrank.extensionsformaps.route.url.UnofficialModernDirectionsUrl;
 // FK-TODO: GoogleMapsRouteExtractor und RouteToUrlConverter sind invers zueinander. Führe wie in SettingsSearch ein Converter-Interface ein
 public class GoogleMapsRouteExtractor {
 
-    // FK-TODO: brauchen Converter<DirectionsUrl, URL> aus SettingsSearch-Projekt
     public static Route extractRoute(final DirectionsUrl directionsUrl) {
         return switch (directionsUrl) {
-            case final UnofficialModernDirectionsUrl unofficialModernDirectionsUrl -> UnofficialModernDirectionsUrlRouteExtractor.extractRoute(unofficialModernDirectionsUrl);
-            case final UnofficialLegacyDirectionsUrl unofficialLegacyDirectionsUrl -> UnofficialLegacyDirectionsUrlRouteExtractor.extractRoute(unofficialLegacyDirectionsUrl);
-            case final OfficialDirectionsUrl officialDirectionsUrl -> OfficialDirectionsUrlRouteExtractor.extractRoute(officialDirectionsUrl);
+            case final UnofficialModernDirectionsUrl unofficialModernDirectionsUrl ->
+                    UnofficialModernDirectionsUrlRouteExtractor.extractRoute(unofficialModernDirectionsUrl);
+            case final UnofficialLegacyDirectionsUrl unofficialLegacyDirectionsUrl ->
+                    UnofficialLegacyDirectionsUrlRouteExtractor.extractRoute(unofficialLegacyDirectionsUrl);
+            case final OfficialDirectionsUrl officialDirectionsUrl ->
+                    OfficialDirectionsUrlRouteExtractor.extractRoute(officialDirectionsUrl);
         };
     }
 }
