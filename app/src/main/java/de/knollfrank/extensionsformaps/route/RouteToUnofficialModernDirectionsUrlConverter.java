@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import de.knollfrank.extensionsformaps.common.URLs;
 import de.knollfrank.extensionsformaps.coordinate.Angle;
+import de.knollfrank.extensionsformaps.coordinate.Geodetic;
 import de.knollfrank.extensionsformaps.route.protobuf.Datatype;
 import de.knollfrank.extensionsformaps.route.protobuf.DirectionsVisibility;
 import de.knollfrank.extensionsformaps.route.protobuf.Node;
@@ -89,17 +90,14 @@ class RouteToUnofficialModernDirectionsUrlConverter {
     }
 
     private static Node createStopNode(final Stop stop) {
-        final Angle lat = stop.geodetic().getLatitude();
-        final Angle lon = stop.geodetic().getLongitude();
-
-        return stop.officialPlaceId().isPresent() ?
-                createStopNodeWithPlaceId(stop.officialPlaceId().get(), lat, lon) :
-                createStopNodeWithoutPlaceId(lat, lon);
+        return stop
+                .officialPlaceId()
+                .map(officialPlaceId -> createStopNodeWithPlaceId(officialPlaceId, stop.geodetic()))
+                .orElseGet(() -> createStopNodeWithoutPlaceId(stop.geodetic()));
     }
 
     private static Node createStopNodeWithPlaceId(final OfficialPlaceId officialPlaceId,
-                                                  final Angle lat,
-                                                  final Angle lon) {
+                                                  final Geodetic geodetic) {
         // Linear sequence was: 1m5, 1m4, 1sPID, 8m2, 3dLAT, 4dLON
         // This corresponds to:
         // 1m5 -> [1m4 -> [1sPID, 8m2 -> [3dLAT, 4dLON]]]
@@ -109,15 +107,24 @@ class RouteToUnofficialModernDirectionsUrlConverter {
                         NodeFactory.createContainer(
                                 1,
                                 List.of(
-                                        NodeFactory.createLeaf(1, Datatype.STRING, officialPlaceId.toUndocumentedPlaceId().value()),
+                                        NodeFactory.createLeaf(
+                                                1,
+                                                Datatype.STRING,
+                                                officialPlaceId.toUndocumentedPlaceId().value()),
                                         NodeFactory.createContainer(
                                                 8,
                                                 List.of(
-                                                        NodeFactory.createLeaf(3, Datatype.DOUBLE, format(lat)),
-                                                        NodeFactory.createLeaf(4, Datatype.DOUBLE, format(lon))))))));
+                                                        NodeFactory.createLeaf(
+                                                                3,
+                                                                Datatype.DOUBLE,
+                                                                format(geodetic.getLatitude())),
+                                                        NodeFactory.createLeaf(
+                                                                4,
+                                                                Datatype.DOUBLE,
+                                                                format(geodetic.getLongitude()))))))));
     }
 
-    private static Node createStopNodeWithoutPlaceId(final Angle lat, final Angle lon) {
+    private static Node createStopNodeWithoutPlaceId(final Geodetic geodetic) {
         // Linear sequence was: 1m3, 2m2, 1dLON, 2dLAT
         // This corresponds to:
         // 1m3 -> [2m2 -> [1dLON, 2dLAT]]
@@ -127,8 +134,14 @@ class RouteToUnofficialModernDirectionsUrlConverter {
                         NodeFactory.createContainer(
                                 2,
                                 List.of(
-                                        NodeFactory.createLeaf(1, Datatype.DOUBLE, format(lon)),
-                                        NodeFactory.createLeaf(2, Datatype.DOUBLE, format(lat))))));
+                                        NodeFactory.createLeaf(
+                                                1,
+                                                Datatype.DOUBLE,
+                                                format(geodetic.getLongitude())),
+                                        NodeFactory.createLeaf(
+                                                2,
+                                                Datatype.DOUBLE,
+                                                format(geodetic.getLatitude()))))));
     }
 
     private static String format(final Angle angle) {
