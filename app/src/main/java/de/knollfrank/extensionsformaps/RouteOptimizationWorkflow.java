@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 
 import de.knollfrank.extensionsformaps.databinding.DialogRoutePreviewBinding;
 import de.knollfrank.extensionsformaps.feature.UpgradeDialog;
@@ -104,8 +105,7 @@ public class RouteOptimizationWorkflow {
             }
 
             private void showOptimizationTypeDialog(final Route route, final Context context) {
-                // FK-TODO: refactor to AtomicReference instead of OptimizationType[]
-                final OptimizationType[] selectedType = {SortConfig.getOptimizationType(context)};
+                final AtomicReference<OptimizationType> selectedType = new AtomicReference<>(SortConfig.getOptimizationType(context));
                 new MaterialAlertDialogBuilder(context)
                         .setTitle(R.string.sort_dialog_title)
                         .setSingleChoiceItems(
@@ -113,17 +113,17 @@ public class RouteOptimizationWorkflow {
                                         context.getString(R.string.settings_type_fixed_destination),
                                         context.getString(R.string.settings_type_any_destination)
                                 },
-                                (selectedType[0] == OptimizationType.FIXED_DESTINATION) ? 0 : 1,
+                                selectedType.get() == OptimizationType.FIXED_DESTINATION ? 0 : 1,
                                 (dialog, which) ->
-                                        selectedType[0] =
+                                        selectedType.set(
                                                 which == 0 ?
                                                         OptimizationType.FIXED_DESTINATION :
-                                                        OptimizationType.ANY_DESTINATION)
+                                                        OptimizationType.ANY_DESTINATION))
                         .setCancelable(false)
                         .setPositiveButton(
                                 R.string.ok,
                                 (dialog, which) -> {
-                                    SortConfig.setOptimizationType(context, selectedType[0]);
+                                    SortConfig.setOptimizationType(context, selectedType.get());
                                     proceedWithRoute(route, context);
                                 })
                         .setNegativeButton(
