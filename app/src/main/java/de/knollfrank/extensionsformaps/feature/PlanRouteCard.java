@@ -23,20 +23,20 @@ public class PlanRouteCard extends MaterialCardView {
 
     private ViewPlanRouteBinding binding;
 
-    public PlanRouteCard(@NonNull Context context) {
+    public PlanRouteCard(@NonNull final Context context) {
         this(context, null);
     }
 
-    public PlanRouteCard(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public PlanRouteCard(@NonNull final Context context, @Nullable final AttributeSet attrs) {
         this(context, attrs, com.google.android.material.R.attr.materialCardViewFilledStyle);
     }
 
-    public PlanRouteCard(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public PlanRouteCard(@NonNull final Context context, @Nullable final AttributeSet attrs, final int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context);
     }
 
-    private void init(Context context) {
+    private void init(final Context context) {
         binding = ViewPlanRouteBinding.inflate(LayoutInflater.from(context), this);
         configurePlanRoute();
     }
