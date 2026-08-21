@@ -13,8 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.slider.Slider;
-
 import java.util.List;
 
 import de.knollfrank.extensionsformaps.common.Runnables;
@@ -22,9 +20,6 @@ import de.knollfrank.extensionsformaps.databinding.ActivityMainBinding;
 import de.knollfrank.extensionsformaps.feature.UpgradeDialog;
 import de.knollfrank.extensionsformaps.license.LicenseManager;
 import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
-import de.knollfrank.extensionsformaps.route.RouteDirectionsUrlConverter;
-import de.knollfrank.extensionsformaps.route.RouteTemplateFactory;
-import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        configurePlanRoute();
         configureOnboarding();
         configureCoffeeButton();
         configurePermissionButtons();
@@ -54,25 +48,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onNewIntent(@NonNull final Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-    }
-
-    private void configurePlanRoute() {
-        if (!BuildConfig.SHOW_PLANNING_CARD) {
-            binding.cardPlanning.setVisibility(View.GONE);
-            return;
-        }
-        binding.tvTotalStopsLabel.setText(getString(R.string.total_stops_label, (int) binding.sliderTotalStops.getValue()));
-        binding.sliderTotalStops.addOnChangeListener(
-                new Slider.OnChangeListener() {
-
-                    @Override
-                    public void onValueChange(@NonNull final Slider slider,
-                                              final float value,
-                                              final boolean fromUser) {
-                        binding.tvTotalStopsLabel.setText(getString(R.string.total_stops_label, (int) value));
-                    }
-                });
-        binding.btnGenerateTemplate.setOnClickListener(onBtnGenerateTemplateClick(binding.sliderTotalStops, this));
     }
 
     private void configureOnboarding() {
@@ -164,28 +139,5 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return false;
-    }
-
-    private static View.OnClickListener onBtnGenerateTemplateClick(final Slider sliderTotalStops,
-                                                                   final Context context) {
-        return new View.OnClickListener() {
-
-            @Override
-            public void onClick(final View view) {
-                GoogleMapsNavigator.launchDirectionsUrl(
-                        createDirectionsUrlTemplate(getSliderTotalStops()),
-                        context);
-            }
-
-            private DirectionsUrl createDirectionsUrlTemplate(final int totalStops) {
-                return RouteDirectionsUrlConverter.getDirectionsUrl(
-                        RouteTemplateFactory.createRouteTemplate(
-                                totalStops));
-            }
-
-            private int getSliderTotalStops() {
-                return (int) sliderTotalStops.getValue();
-            }
-        };
     }
 }

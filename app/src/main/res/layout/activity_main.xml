@@ -139,7 +139,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <com.google.android.material.card.MaterialCardView
+        <de.knollfrank.extensionsformaps.feature.PlanRouteCard
             android:id="@+id/cardPlanning"
             style="?attr/materialCardViewFilledStyle"
             android:layout_width="match_parent"
@@ -147,111 +147,7 @@
             android:layout_marginTop="16dp"
             app:cardCornerRadius="24dp"
             app:layout_constraintTop_toBottomOf="@id/cardLicense"
-            app:strokeWidth="0dp">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="24dp">
-
-                <TextView
-                    android:id="@+id/tvTemplateTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/plan_route_title"
-                    android:textAppearance="?attr/textAppearanceTitleLarge"
-                    android:textColor="?attr/colorOnSurface"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/tvTotalStopsLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:textAppearance="?attr/textAppearanceBodyLarge"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvTemplateTitle"
-                    tools:text="Anzahl Stopps: 15" />
-
-                <com.google.android.material.slider.Slider
-                    android:id="@+id/sliderTotalStops"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:stepSize="1.0"
-                    android:value="15.0"
-                    android:valueFrom="11.0"
-                    android:valueTo="27.0"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvTotalStopsLabel"
-                    app:tickColor="@android:color/transparent" />
-
-                <TextView
-                    android:id="@+id/tvMinStops"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:alpha="0.7"
-                    android:text="@string/min_stops"
-                    android:textAppearance="?attr/textAppearanceLabelMedium"
-                    app:layout_constraintStart_toStartOf="@id/sliderTotalStops"
-                    app:layout_constraintTop_toBottomOf="@id/sliderTotalStops" />
-
-                <TextView
-                    android:id="@+id/tvMaxStops"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="12dp"
-                    android:alpha="0.7"
-                    android:text="@string/max_stops"
-                    android:textAppearance="?attr/textAppearanceLabelMedium"
-                    app:layout_constraintEnd_toEndOf="@id/sliderTotalStops"
-                    app:layout_constraintTop_toBottomOf="@id/sliderTotalStops" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnGenerateTemplate"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
-                    android:padding="16dp"
-                    android:text="@string/open_in_google_maps"
-                    app:cornerRadius="16dp"
-                    app:iconGravity="textStart"
-                    app:layout_constraintTop_toBottomOf="@id/tvMinStops" />
-
-                <LinearLayout
-                    android:id="@+id/llTipContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:background="?attr/colorSurfaceVariant"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="12dp"
-                    app:layout_constraintTop_toBottomOf="@id/btnGenerateTemplate">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:alpha="0.7"
-                        android:contentDescription="@string/info_icon_desc"
-                        android:src="@android:drawable/ic_dialog_info"
-                        app:tint="?attr/colorOnSurfaceVariant" />
-
-                    <TextView
-                        android:id="@+id/tvQuickTip"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:text="@string/instructions_tip"
-                        android:textAppearance="?attr/textAppearanceLabelMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-                </LinearLayout>
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.google.android.material.card.MaterialCardView>
+            app:strokeWidth="0dp" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardPermissions"
