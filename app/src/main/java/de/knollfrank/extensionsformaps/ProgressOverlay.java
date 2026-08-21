@@ -1,5 +1,6 @@
 package de.knollfrank.extensionsformaps;
 
+import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -41,16 +42,8 @@ public class ProgressOverlay {
             binding = DialogProgressBinding.inflate(LayoutInflater.from(themeContext));
             dialog = createAlertDialog(themeContext, onCancelListener, binding.getRoot());
             if (dialog.getWindow() != null) {
-                Context baseContext = context;
-                while (baseContext instanceof android.view.ContextThemeWrapper) {
-                    baseContext = ((android.view.ContextThemeWrapper) baseContext).getBaseContext();
-                }
-                int windowType = (baseContext instanceof android.accessibilityservice.AccessibilityService)
-                        ? WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
-                        : WindowManager.LayoutParams.TYPE_APPLICATION;
-                dialog.getWindow().setType(windowType);
+                dialog.getWindow().setType(getWindowType(context));
             }
-
             dialog.show();
         });
     }
@@ -99,5 +92,19 @@ public class ProgressOverlay {
         dialogBuilder.setNegativeButton(
                 R.string.cancel,
                 (dialog, which) -> onCancelListener.run());
+    }
+
+    private static int getWindowType(final Context context) {
+        return getBaseContext(context) instanceof AccessibilityService ?
+                WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY :
+                WindowManager.LayoutParams.TYPE_APPLICATION;
+    }
+
+    private static Context getBaseContext(final Context context) {
+        Context baseContext = context;
+        while (baseContext instanceof final ContextThemeWrapper contextThemeWrapper) {
+            baseContext = contextThemeWrapper.getBaseContext();
+        }
+        return baseContext;
     }
 }
