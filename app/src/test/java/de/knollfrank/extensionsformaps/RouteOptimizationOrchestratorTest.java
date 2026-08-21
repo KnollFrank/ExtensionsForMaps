@@ -62,7 +62,8 @@ public class RouteOptimizationOrchestratorTest {
         final RouteOptimizationOrchestrator orchestrator =
                 new RouteOptimizationOrchestrator(
                         ApplicationProvider.getApplicationContext(),
-                        createCallback(extractedRoute, extractionLatch, optimizedRoute, optimizationLatch),
+                        createExtractRouteCallback(extractedRoute, extractionLatch, optimizationLatch),
+                        createOptimizationCallback(extractionLatch, optimizedRoute, optimizationLatch),
                         new RouteOptimizer(new OsrmVehicleRoutingTransportCostsProvider(routingMatrixProvider)));
         orchestrator.extractRouteFromDirectionsUrl(directionsUrl);
         extractionLatch.await();
@@ -73,18 +74,35 @@ public class RouteOptimizationOrchestratorTest {
         return optimizedRoute.get();
     }
 
-    private static RouteOptimizationOrchestrator.Callback createCallback(final AtomicReference<Optional<Route>> extractedRoute, final CountDownLatch extractionLatch, final AtomicReference<Optional<Route>> optimizedRoute, final CountDownLatch optimizationLatch) {
-        return new RouteOptimizationOrchestrator.Callback() {
+    private static RouteOptimizationOrchestrator.ExtractRouteCallback createExtractRouteCallback(
+            final AtomicReference<Optional<Route>> extractedRoute,
+            final CountDownLatch extractionLatch,
+            final CountDownLatch optimizationLatch) {
+        return new RouteOptimizationOrchestrator.ExtractRouteCallback() {
 
             @Override
             public void onExtractRouteFromDirectionsUrlStarted() {
             }
 
             @Override
-            public void onExtractRouteFromDirectionsUrlSuccess(Route route) {
+            public void onExtractRouteFromDirectionsUrlSuccess(final Route route) {
                 extractedRoute.set(Optional.of(route));
                 extractionLatch.countDown();
             }
+
+            @Override
+            public void onError(final String message) {
+                extractionLatch.countDown();
+                optimizationLatch.countDown();
+            }
+        };
+    }
+
+    private static RouteOptimizationOrchestrator.OptimizationCallback createOptimizationCallback(
+            final CountDownLatch extractionLatch,
+            final AtomicReference<Optional<Route>> optimizedRoute,
+            final CountDownLatch optimizationLatch) {
+        return new RouteOptimizationOrchestrator.OptimizationCallback() {
 
             @Override
             public void onOptimizationStarted() {

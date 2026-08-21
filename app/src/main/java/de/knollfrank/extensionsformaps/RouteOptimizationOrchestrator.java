@@ -11,11 +11,7 @@ import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
 public class RouteOptimizationOrchestrator {
 
-    public interface Callback {
-
-        void onExtractRouteFromDirectionsUrlStarted();
-
-        void onExtractRouteFromDirectionsUrlSuccess(Route route);
+    public interface OptimizationCallback {
 
         void onOptimizationStarted();
 
@@ -26,42 +22,52 @@ public class RouteOptimizationOrchestrator {
         void onError(String message);
     }
 
+    public interface ExtractRouteCallback {
+
+        void onExtractRouteFromDirectionsUrlStarted();
+
+        void onExtractRouteFromDirectionsUrlSuccess(Route route);
+
+        void onError(String message);
+    }
+
     private final Context context;
-    private final Callback callback;
+    private final ExtractRouteCallback extractRouteCallback;
+    private final OptimizationCallback optimizationCallback;
     private final RouteOptimizer routeOptimizer;
     private final AtomicBoolean isOptimizationCanceled = new AtomicBoolean(false);
 
     public RouteOptimizationOrchestrator(final Context context,
-                                         final Callback callback,
+                                         final ExtractRouteCallback extractRouteCallback,
+                                         final OptimizationCallback optimizationCallback,
                                          final RouteOptimizer routeOptimizer) {
         this.context = context;
-        this.callback = callback;
+        this.extractRouteCallback = extractRouteCallback;
+        this.optimizationCallback = optimizationCallback;
         this.routeOptimizer = routeOptimizer;
     }
 
-    // FK-TODO: spezialisierten callback mit den Methoden onExtractRouteFromDirectionsUrlStarted(), onExtractRouteFromDirectionsUrlSuccess() und onError() direkt als Parameter übergeben oder als Continuation zurückgeben.
     public void extractRouteFromDirectionsUrl(final DirectionsUrl directionsUrl) {
-        callback.onExtractRouteFromDirectionsUrlStarted();
+        extractRouteCallback.onExtractRouteFromDirectionsUrlStarted();
         new Thread(() -> {
             try {
-                callback.onExtractRouteFromDirectionsUrlSuccess(RouteDirectionsUrlConverter.getRoute(directionsUrl));
+                extractRouteCallback.onExtractRouteFromDirectionsUrlSuccess(RouteDirectionsUrlConverter.getRoute(directionsUrl));
             } catch (final Exception e) {
-                callback.onError(context.getString(R.string.error_general, e.getMessage()));
+                extractRouteCallback.onError(context.getString(R.string.error_general, e.getMessage()));
             }
         }).start();
     }
 
-    // FK-TODO: spezialisierten callback mit den Methoden onOptimizationStarted(), onOptimizationSuccess() und onError() direkt als Parameter übergeben oder als Continuation zurückgeben.
     public void optimizeRoute(final Route route) {
         isOptimizationCanceled.set(false);
-        callback.onOptimizationStarted();
+        optimizationCallback.onOptimizationStarted();
         new Thread(() -> {
             try {
-                callback.onOptimizationSuccess(
+                optimizationCallback.onOptimizationSuccess(
                         routeOptimizer.optimize(
                                 route,
                                 SortConfig.getOptimizationType(context),
-                                callback::onOptimizationProgress,
+                                optimizationCallback::onOptimizationProgress,
                                 isOptimizationCanceled::get));
             } catch (final InterruptedException e) {
                 // Optimization was canceled, no error message needed
@@ -69,9 +75,9 @@ public class RouteOptimizationOrchestrator {
                 final String msg = e.getMessage();
                 // FK-TODO: für "UNASSIGNED_JOBS" brauchen wir einen neuen Exception. Siehe auch RouteOptimizer: "throw new IllegalStateException("UNASSIGNED_JOBS:" + solution.getUnassignedJobs());"
                 if (msg != null && msg.startsWith("UNASSIGNED_JOBS:")) {
-                    callback.onError(context.getString(R.string.error_unassigned_jobs, msg.substring(16)));
+                    optimizationCallback.onError(context.getString(R.string.error_unassigned_jobs, msg.substring(16)));
                 } else {
-                    callback.onError(context.getString(R.string.error_optimization, e.getMessage()));
+                    optimizationCallback.onError(context.getString(R.string.error_optimization, e.getMessage()));
                 }
             }
         }).start();

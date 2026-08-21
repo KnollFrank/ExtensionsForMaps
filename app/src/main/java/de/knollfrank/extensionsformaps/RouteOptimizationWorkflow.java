@@ -38,7 +38,8 @@ public class RouteOptimizationWorkflow {
         this.routeOptimizationOrchestrator =
                 new RouteOptimizationOrchestrator(
                         context,
-                        createCallback(context, progressOverlay),
+                        createExtractRouteCallback(context, progressOverlay),
+                        createOptimizationCallback(context, progressOverlay),
                         routeOptimizer);
         this.progressOverlay.setOnCancelListener(() -> {
             routeOptimizationOrchestrator.cancelOptimization();
@@ -61,9 +62,10 @@ public class RouteOptimizationWorkflow {
         this.progressOverlay = progressOverlay;
     }
 
-    private RouteOptimizationOrchestrator.Callback createCallback(final Context context,
-                                                                  final ProgressOverlay progressOverlay) {
-        return new RouteOptimizationOrchestrator.Callback() {
+    private RouteOptimizationOrchestrator.ExtractRouteCallback createExtractRouteCallback(
+            final Context context,
+            final ProgressOverlay progressOverlay) {
+        return new RouteOptimizationOrchestrator.ExtractRouteCallback() {
 
             @Override
             public void onExtractRouteFromDirectionsUrlStarted() {
@@ -91,8 +93,13 @@ public class RouteOptimizationWorkflow {
                 });
             }
 
+            @Override
+            public void onError(final String message) {
+                RouteOptimizationWorkflow.onError(message, progressOverlay, context);
+            }
+
             private void showOptimizationTypeDialog(final Route route, final Context context) {
-                String[] options = {
+                final String[] options = {
                         context.getString(R.string.settings_type_fixed_destination),
                         context.getString(R.string.settings_type_any_destination)
                 };
@@ -129,40 +136,6 @@ public class RouteOptimizationWorkflow {
                 } else {
                     routeOptimizationOrchestrator.optimizeRoute(route);
                 }
-            }
-
-            @Override
-            public void onOptimizationStarted() {
-                progressOverlay.show();
-                progressOverlay.updateStatus(context.getString(R.string.status_optimizing_route));
-            }
-
-            @Override
-            public void onOptimizationProgress(int progressPercentage) {
-                progressOverlay.updateProgress(progressPercentage);
-            }
-
-            @Override
-            public void onOptimizationSuccess(final Route optimizedRoute) {
-                progressOverlay.hide();
-                GoogleMapsNavigator.launchRouteOverview(optimizedRoute, context);
-                if (context instanceof final Activity activity) {
-                    activity.finish();
-                }
-            }
-
-            @Override
-            public void onError(final String message) {
-                progressOverlay.hide();
-                runOnUiThread(
-                        () -> {
-                            Toast
-                                    .makeText(context, message, Toast.LENGTH_LONG)
-                                    .show();
-                            if (context instanceof final Activity activity) {
-                                activity.finish();
-                            }
-                        });
             }
 
             private void showRoutePreviewDialog(final Route route, final Context context) {
@@ -205,14 +178,7 @@ public class RouteOptimizationWorkflow {
                                         })
                                 .create();
                 if (dialog.getWindow() != null) {
-                    Context baseContext = context;
-                    while (baseContext instanceof android.view.ContextThemeWrapper) {
-                        baseContext = ((android.view.ContextThemeWrapper) baseContext).getBaseContext();
-                    }
-                    int windowType = (baseContext instanceof android.accessibilityservice.AccessibilityService)
-                            ? WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
-                            : WindowManager.LayoutParams.TYPE_APPLICATION;
-                    dialog.getWindow().setType(windowType);
+                    dialog.getWindow().setType(ProgressOverlay.getWindowType(context));
                 }
                 dialog.show();
                 if (dialog.getWindow() != null) {
@@ -233,6 +199,51 @@ public class RouteOptimizationWorkflow {
                 return suburbsToAddressesAdder.addSuburbsToAddresses(route);
             }
         };
+    }
+
+    private static RouteOptimizationOrchestrator.OptimizationCallback createOptimizationCallback(
+            final Context context,
+            final ProgressOverlay progressOverlay) {
+        return new RouteOptimizationOrchestrator.OptimizationCallback() {
+
+            @Override
+            public void onOptimizationStarted() {
+                progressOverlay.show();
+                progressOverlay.updateStatus(context.getString(R.string.status_optimizing_route));
+            }
+
+            @Override
+            public void onOptimizationProgress(int progressPercentage) {
+                progressOverlay.updateProgress(progressPercentage);
+            }
+
+            @Override
+            public void onOptimizationSuccess(final Route optimizedRoute) {
+                progressOverlay.hide();
+                GoogleMapsNavigator.launchRouteOverview(optimizedRoute, context);
+                if (context instanceof final Activity activity) {
+                    activity.finish();
+                }
+            }
+
+            @Override
+            public void onError(final String message) {
+                RouteOptimizationWorkflow.onError(message, progressOverlay, context);
+            }
+        };
+    }
+
+    private static void onError(final String message, final ProgressOverlay progressOverlay, final Context context) {
+        progressOverlay.hide();
+        runOnUiThread(
+                () -> {
+                    Toast
+                            .makeText(context, message, Toast.LENGTH_LONG)
+                            .show();
+                    if (context instanceof final Activity activity) {
+                        activity.finish();
+                    }
+                });
     }
 
     public void optimizeThenShowRoute(final DirectionsUrl directionsUrl) {

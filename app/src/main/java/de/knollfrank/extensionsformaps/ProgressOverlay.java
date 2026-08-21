@@ -94,7 +94,7 @@ public class ProgressOverlay {
                 (dialog, which) -> onCancelListener.run());
     }
 
-    private static int getWindowType(final Context context) {
+    static int getWindowType(final Context context) {
         return getBaseContext(context) instanceof AccessibilityService ?
                 WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY :
                 WindowManager.LayoutParams.TYPE_APPLICATION;

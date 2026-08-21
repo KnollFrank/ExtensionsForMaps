@@ -18,6 +18,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.shadows.ShadowDialog;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -60,18 +61,18 @@ public class RouteOptimizationWorkflowLicenseTest {
 
         // When
         try {
-            java.lang.reflect.Method method = RouteOptimizationWorkflow.class.getDeclaredMethod("createCallback", android.content.Context.class, ProgressOverlay.class);
+            Method method = RouteOptimizationWorkflow.class.getDeclaredMethod("createExtractRouteCallback", android.content.Context.class, ProgressOverlay.class);
             method.setAccessible(true);
-            RouteOptimizationOrchestrator.Callback callback = (RouteOptimizationOrchestrator.Callback) method.invoke(workflow, context, mock(ProgressOverlay.class));
-            callback.onExtractRouteFromDirectionsUrlSuccess(route);
-        } catch (Exception e) {
+            final RouteOptimizationOrchestrator.ExtractRouteCallback extractRouteCallback = (RouteOptimizationOrchestrator.ExtractRouteCallback) method.invoke(workflow, context, mock(ProgressOverlay.class));
+            extractRouteCallback.onExtractRouteFromDirectionsUrlSuccess(route);
+        } catch (final Exception e) {
             throw new RuntimeException(e);
         }
 
         Shadows.shadowOf(Looper.getMainLooper()).idle();
 
         // Then
-        Dialog dialog = ShadowDialog.getLatestDialog();
+        final Dialog dialog = ShadowDialog.getLatestDialog();
         assertNotNull(dialog);
         assertTrue(dialog.isShowing());
     }
