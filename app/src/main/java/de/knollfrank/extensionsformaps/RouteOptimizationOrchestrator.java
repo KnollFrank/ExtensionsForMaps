@@ -67,6 +67,7 @@ public class RouteOptimizationOrchestrator {
                 // Optimization was canceled, no error message needed
             } catch (final Exception e) {
                 final String msg = e.getMessage();
+                // FK-TODO: für "UNASSIGNED_JOBS" brauchen wir einen neuen Exception. Siehe auch RouteOptimizer: "throw new IllegalStateException("UNASSIGNED_JOBS:" + solution.getUnassignedJobs());"
                 if (msg != null && msg.startsWith("UNASSIGNED_JOBS:")) {
                     callback.onError(context.getString(R.string.error_unassigned_jobs, msg.substring(16)));
                 } else {
