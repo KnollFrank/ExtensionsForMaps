@@ -2,25 +2,17 @@ package de.knollfrank.extensionsformaps;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.location.Geocoder;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.ContextThemeWrapper;
-import android.view.LayoutInflater;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.VisibleForTesting;
-import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicReference;
 
-import de.knollfrank.extensionsformaps.databinding.DialogRoutePreviewBinding;
+import de.knollfrank.extensionsformaps.feature.OptimizationTypeDialog;
+import de.knollfrank.extensionsformaps.feature.RoutePreviewDialog;
 import de.knollfrank.extensionsformaps.feature.UpgradeDialog;
 import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
 import de.knollfrank.extensionsformaps.optimize.NativeSuburbResolver;
@@ -105,99 +97,30 @@ public class RouteOptimizationWorkflow {
             }
 
             private void showOptimizationTypeDialog(final Route route, final Context context) {
-                final AtomicReference<OptimizationType> selectedType = new AtomicReference<>(SortConfig.getOptimizationType(context));
-                new MaterialAlertDialogBuilder(context)
-                        .setTitle(R.string.sort_dialog_title)
-                        .setSingleChoiceItems(
-                                new String[]{
-                                        context.getString(R.string.settings_type_fixed_destination),
-                                        context.getString(R.string.settings_type_any_destination)
-                                },
-                                selectedType.get() == OptimizationType.FIXED_DESTINATION ? 0 : 1,
-                                (dialog, which) ->
-                                        selectedType.set(
-                                                which == 0 ?
-                                                        OptimizationType.FIXED_DESTINATION :
-                                                        OptimizationType.ANY_DESTINATION))
-                        .setCancelable(false)
-                        .setPositiveButton(
-                                R.string.ok,
-                                (dialog, which) -> {
-                                    SortConfig.setOptimizationType(context, selectedType.get());
-                                    proceedWithRoute(route, context);
-                                })
-                        .setNegativeButton(
-                                R.string.cancel,
-                                (dialog, which) -> {
-                                    if (context instanceof final Activity activity) {
-                                        activity.finish();
-                                    }
-                                })
-                        .setOnCancelListener(
-                                dialog -> {
-                                    if (context instanceof final Activity activity) {
-                                        activity.finish();
-                                    }
-                                })
-                        .show();
+                OptimizationTypeDialog.show(
+                        context,
+                        new OptimizationTypeDialog.Callback() {
+
+                            @Override
+                            public void onOptimizationTypeSelected(OptimizationType selectedType) {
+                                proceedWithRoute(route, context);
+                            }
+
+                            @Override
+                            public void onCancel() {
+                                if (context instanceof final Activity activity) {
+                                    activity.finish();
+                                }
+                            }
+                        });
             }
 
             private void proceedWithRoute(final Route route, final Context context) {
                 if (SortConfig.shouldShowRoutePreview(context)) {
                     progressOverlay.hide();
-                    showRoutePreviewDialog(route, context);
+                    RoutePreviewDialog.show(context, route, routeOptimizationOrchestrator::optimizeRoute);
                 } else {
                     routeOptimizationOrchestrator.optimizeRoute(route);
-                }
-            }
-
-            private void showRoutePreviewDialog(final Route route, final Context context) {
-                showRoutePreviewDialog(route, new ContextThemeWrapper(context, R.style.Theme_ExtensionsForMaps_Dialog));
-            }
-
-            private void showRoutePreviewDialog(final Route route, final ContextThemeWrapper context) {
-                final DialogRoutePreviewBinding binding = DialogRoutePreviewBinding.inflate(LayoutInflater.from(context));
-                final StopsAdapter stopsAdapter = new StopsAdapter();
-                stopsAdapter.setRoute(route);
-                binding.recyclerViewStops.setLayoutManager(new LinearLayoutManager(context));
-                binding.recyclerViewStops.setAdapter(stopsAdapter);
-                final AlertDialog dialog =
-                        new MaterialAlertDialogBuilder(context)
-                                .setTitle(R.string.route_preview_title)
-                                .setCancelable(false)
-                                .setView(binding.getRoot())
-                                .setPositiveButton(
-                                        R.string.ok,
-                                        new DialogInterface.OnClickListener() {
-
-                                            @Override
-                                            public void onClick(final DialogInterface dialog, final int which) {
-                                                stopsAdapter
-                                                        .getRoute()
-                                                        .ifPresent(routeOptimizationOrchestrator::optimizeRoute);
-                                            }
-                                        })
-                                .setNegativeButton(
-                                        R.string.cancel,
-                                        new DialogInterface.OnClickListener() {
-
-                                            @Override
-                                            public void onClick(final DialogInterface dialog, final int which) {
-                                                dialog.dismiss();
-                                                if (context instanceof final Activity activity) {
-                                                    activity.finish();
-                                                }
-                                            }
-                                        })
-                                .create();
-                if (dialog.getWindow() != null) {
-                    dialog.getWindow().setType(ProgressOverlay.getWindowType(context));
-                }
-                dialog.show();
-                if (dialog.getWindow() != null) {
-                    dialog.getWindow().setLayout(
-                            WindowManager.LayoutParams.MATCH_PARENT,
-                            WindowManager.LayoutParams.MATCH_PARENT);
                 }
             }
 

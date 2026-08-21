@@ -9,8 +9,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
@@ -21,13 +19,11 @@ import de.knollfrank.extensionsformaps.GoogleMapsNavigator;
 import de.knollfrank.extensionsformaps.ProgressOverlay;
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.SortConfig;
-import de.knollfrank.extensionsformaps.databinding.DialogAddStopInstructionBinding;
 import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.RouteDirectionsUrlConverter;
 import de.knollfrank.extensionsformaps.route.Routes;
 import de.knollfrank.extensionsformaps.route.extract.GoogleMapsRouteExtractor;
-import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 
 public class AddStopActivity extends AppCompatActivity {
@@ -101,11 +97,24 @@ public class AddStopActivity extends AppCompatActivity {
     private void handleRoute(Route route) {
         int stopCount = route.stops().size();
         if (stopCount >= 27) {
-            showLimitReachedDialog();
+            AddStopLimitReachedDialog.show(this);
         } else if (stopCount >= 15 && !LicenseManagerProvider.getInstance(this).isPro()) {
             showUpgradeDialog(route);
         } else if (stopCount < 10) {
-            showSuggestMapsDialog(route);
+            SuggestMapsDialog.show(
+                    this,
+                    new SuggestMapsDialog.Callback() {
+
+                        @Override
+                        public void onYes() {
+                            addStopAndFinish(route);
+                        }
+
+                        @Override
+                        public void onCancel() {
+                            finish();
+                        }
+                    });
         } else {
             addStopAndFinish(route);
         }
@@ -113,26 +122,6 @@ public class AddStopActivity extends AppCompatActivity {
 
     private void showUpgradeDialog(Route route) {
         UpgradeDialog.showUpgradeDialog(this, () -> handleRoute(route));
-    }
-
-    private void showLimitReachedDialog() {
-        new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.add_stop_limit_reached_title)
-                .setMessage(R.string.add_stop_limit_reached_message)
-                .setPositiveButton(R.string.ok, (dialog, which) -> finish())
-                .setOnCancelListener(dialog -> finish())
-                .show();
-    }
-
-    private void showSuggestMapsDialog(Route route) {
-        new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.add_stop_suggest_maps_title)
-                .setMessage(R.string.add_stop_suggest_maps_message)
-                .setPositiveButton(R.string.add_stop_yes, (dialog, which) -> addStopAndFinish(route))
-                .setNegativeButton(R.string.cancel, (dialog, which) -> finish())
-                .setOnCancelListener(dialog -> finish())
-                .setCancelable(false)
-                .show();
     }
 
     private void addStopAndFinish(final Route route) {
@@ -148,7 +137,13 @@ public class AddStopActivity extends AppCompatActivity {
                                 finish();
                             } else {
                                 if (SortConfig.shouldShowAddStopInstruction(this)) {
-                                    showInstructionDialog(directionsUrl);
+                                    AddStopInstructionDialog.show(
+                                            this,
+                                            getLayoutInflater(),
+                                            () -> {
+                                                GoogleMapsNavigator.launchDirectionsUrl(directionsUrl, this.getApplicationContext());
+                                                finish();
+                                            });
                                 } else {
                                     GoogleMapsNavigator.launchDirectionsUrl(directionsUrl, getApplicationContext());
                                     finish();
@@ -157,25 +152,6 @@ public class AddStopActivity extends AppCompatActivity {
                             return null;
                         },
                         ContextCompat.getMainExecutor(this));
-    }
-
-    private void showInstructionDialog(final DirectionsUrl directionsUrl) {
-        final DialogAddStopInstructionBinding binding = DialogAddStopInstructionBinding.inflate(getLayoutInflater());
-
-        new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.add_stop_instruction_title)
-                .setView(binding.getRoot())
-                .setPositiveButton(
-                        R.string.ok,
-                        (dialog, which) -> {
-                            if (binding.cbDontShowAgain.isChecked()) {
-                                SortConfig.setShouldShowAddStopInstruction(this, false);
-                            }
-                            GoogleMapsNavigator.launchDirectionsUrl(directionsUrl, this.getApplicationContext());
-                            finish();
-                        })
-                .setCancelable(false)
-                .show();
     }
 
     @Nullable

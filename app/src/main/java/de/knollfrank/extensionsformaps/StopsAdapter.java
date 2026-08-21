@@ -18,7 +18,7 @@ import de.knollfrank.extensionsformaps.route.DeliveryGroup;
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.Stop;
 
-class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
+public class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     private Optional<Route> route = Optional.empty();
     private final List<Optional<DeliveryGroup>> deliveryGroups = new ArrayList<>();
