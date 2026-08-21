@@ -5,11 +5,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.WindowManager;
 
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.databinding.DialogProgressBinding;
 
@@ -19,14 +22,14 @@ public class ProgressOverlay {
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AlertDialog dialog;
     private DialogProgressBinding binding;
-    private Runnable onCancelListener;
+    private Optional<Runnable> onCancelListener = Optional.empty();
 
     public ProgressOverlay(final Context context) {
         this.context = context;
     }
 
-    public void setOnCancelListener(Runnable onCancelListener) {
-        this.onCancelListener = onCancelListener;
+    public void setOnCancelListener(final Runnable onCancelListener) {
+        this.onCancelListener = Optional.ofNullable(onCancelListener);
     }
 
     public void show() {
@@ -34,21 +37,9 @@ public class ProgressOverlay {
             if (dialog != null && dialog.isShowing()) {
                 return;
             }
-
             final ContextThemeWrapper themeContext = new ContextThemeWrapper(context, R.style.Theme_ExtensionsForMaps_Dialog);
             binding = DialogProgressBinding.inflate(LayoutInflater.from(themeContext));
-
-            MaterialAlertDialogBuilder builder =
-                    new MaterialAlertDialogBuilder(themeContext)
-                            .setView(binding.getRoot())
-                            .setCancelable(false);
-
-            if (onCancelListener != null) {
-                builder.setNegativeButton(R.string.cancel, (d, which) -> onCancelListener.run());
-            }
-
-            dialog = builder.create();
-
+            dialog = createAlertDialog(themeContext, onCancelListener, binding.getRoot());
             if (dialog.getWindow() != null) {
                 Context baseContext = context;
                 while (baseContext instanceof android.view.ContextThemeWrapper) {
@@ -90,5 +81,23 @@ public class ProgressOverlay {
                 binding = null;
             }
         });
+    }
+
+    private static AlertDialog createAlertDialog(final Context context,
+                                                 final Optional<Runnable> onCancelListener,
+                                                 final View root) {
+        final MaterialAlertDialogBuilder dialogBuilder =
+                new MaterialAlertDialogBuilder(context)
+                        .setView(root)
+                        .setCancelable(false);
+        onCancelListener.ifPresent(_onCancelListener -> configureNegativeButton(dialogBuilder, _onCancelListener));
+        return dialogBuilder.create();
+    }
+
+    private static void configureNegativeButton(final MaterialAlertDialogBuilder dialogBuilder,
+                                                final Runnable onCancelListener) {
+        dialogBuilder.setNegativeButton(
+                R.string.cancel,
+                (dialog, which) -> onCancelListener.run());
     }
 }
