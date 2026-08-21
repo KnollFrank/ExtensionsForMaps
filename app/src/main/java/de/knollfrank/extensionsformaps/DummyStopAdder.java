@@ -16,11 +16,12 @@ public class DummyStopAdder {
 
     private static final String TAG = DummyStopAdder.class.getSimpleName();
 
-    public static CompletableFuture<Void> addDummyStopToDirectionsUrlThenOpenInGoogleMaps(final DirectionsUrl directionsUrl,
-                                                                                          final Context context) {
+    public static CompletableFuture<Void> addDummyStopToDirectionsUrlThenOpenInGoogleMaps(
+            final DirectionsUrl directionsUrl,
+            final Context context) {
         return CompletableFuture
                 .supplyAsync(() -> addDummyStop(directionsUrl))
-                .handle((final DirectionsUrl directionsUrlWithDummyStop, final Throwable throwable) -> {
+                .handle((directionsUrlWithDummyStop, throwable) -> {
                     if (throwable != null) {
                         Log.e(TAG, "Error adding dummy stop to directions URL", throwable);
                         displayErrorProcessingRoute(context);
