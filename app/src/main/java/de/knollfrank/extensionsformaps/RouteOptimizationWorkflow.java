@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -52,14 +53,19 @@ public class RouteOptimizationWorkflow {
         });
     }
 
-    public void setShowOptimizationTypeDialog(boolean show) {
-        this.showOptimizationTypeDialog = show;
-    }
-
+    @VisibleForTesting
     RouteOptimizationWorkflow(final RouteOptimizationOrchestrator routeOptimizationOrchestrator,
                               final ProgressOverlay progressOverlay) {
         this.routeOptimizationOrchestrator = routeOptimizationOrchestrator;
         this.progressOverlay = progressOverlay;
+    }
+
+    public void optimizeThenShowRoute(final DirectionsUrl directionsUrl) {
+        routeOptimizationOrchestrator.extractRouteFromDirectionsUrl(directionsUrl);
+    }
+
+    public void setShowOptimizationTypeDialog(boolean show) {
+        this.showOptimizationTypeDialog = show;
     }
 
     private RouteOptimizationOrchestrator.ExtractRouteCallback createExtractRouteCallback(
@@ -84,7 +90,6 @@ public class RouteOptimizationWorkflow {
                         UpgradeDialog.showUpgradeDialog(context, () -> onExtractRouteFromDirectionsUrlSuccess(route));
                         return;
                     }
-
                     if (showOptimizationTypeDialog) {
                         showOptimizationTypeDialog(enrichedRoute, context);
                     } else {
@@ -99,33 +104,41 @@ public class RouteOptimizationWorkflow {
             }
 
             private void showOptimizationTypeDialog(final Route route, final Context context) {
-                final String[] options = {
-                        context.getString(R.string.settings_type_fixed_destination),
-                        context.getString(R.string.settings_type_any_destination)
-                };
+                // FK-TODO: refactor to AtomicReference instead of OptimizationType[]
                 final OptimizationType[] selectedType = {SortConfig.getOptimizationType(context)};
-                int checkedItem = (selectedType[0] == OptimizationType.FIXED_DESTINATION) ? 0 : 1;
-
                 new MaterialAlertDialogBuilder(context)
                         .setTitle(R.string.sort_dialog_title)
-                        .setSingleChoiceItems(options, checkedItem, (dialog, which) -> {
-                            selectedType[0] = (which == 0) ? OptimizationType.FIXED_DESTINATION : OptimizationType.ANY_DESTINATION;
-                        })
+                        .setSingleChoiceItems(
+                                new String[]{
+                                        context.getString(R.string.settings_type_fixed_destination),
+                                        context.getString(R.string.settings_type_any_destination)
+                                },
+                                (selectedType[0] == OptimizationType.FIXED_DESTINATION) ? 0 : 1,
+                                (dialog, which) ->
+                                        selectedType[0] =
+                                                which == 0 ?
+                                                        OptimizationType.FIXED_DESTINATION :
+                                                        OptimizationType.ANY_DESTINATION)
                         .setCancelable(false)
-                        .setPositiveButton(R.string.ok, (dialog, which) -> {
-                            SortConfig.setOptimizationType(context, selectedType[0]);
-                            proceedWithRoute(route, context);
-                        })
-                        .setNegativeButton(R.string.cancel, (dialog, which) -> {
-                            if (context instanceof final Activity activity) {
-                                activity.finish();
-                            }
-                        })
-                        .setOnCancelListener(dialog -> {
-                            if (context instanceof final Activity activity) {
-                                activity.finish();
-                            }
-                        })
+                        .setPositiveButton(
+                                R.string.ok,
+                                (dialog, which) -> {
+                                    SortConfig.setOptimizationType(context, selectedType[0]);
+                                    proceedWithRoute(route, context);
+                                })
+                        .setNegativeButton(
+                                R.string.cancel,
+                                (dialog, which) -> {
+                                    if (context instanceof final Activity activity) {
+                                        activity.finish();
+                                    }
+                                })
+                        .setOnCancelListener(
+                                dialog -> {
+                                    if (context instanceof final Activity activity) {
+                                        activity.finish();
+                                    }
+                                })
                         .show();
             }
 
@@ -244,10 +257,6 @@ public class RouteOptimizationWorkflow {
                         activity.finish();
                     }
                 });
-    }
-
-    public void optimizeThenShowRoute(final DirectionsUrl directionsUrl) {
-        routeOptimizationOrchestrator.extractRouteFromDirectionsUrl(directionsUrl);
     }
 
     // FK-TODO: die Methode runOnUiThread() gibt es mehrfach im Projekt. In eine neue common-Klasse auslagern.
