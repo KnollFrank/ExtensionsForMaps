@@ -8,19 +8,18 @@ import java.net.URL;
 
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.RouteDirectionsUrlConverter;
+import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
 public class GoogleMapsNavigator {
 
     public static void launchRouteOverview(final Route route, final Context context) {
-        launchUrl(
-                RouteDirectionsUrlConverter
-                        .getDirectionsUrl(route)
-                        .url(),
+        launchDirectionsUrl(
+                RouteDirectionsUrlConverter.getDirectionsUrl(route),
                 context);
     }
 
-    public static void launchUrl(final URL url, final Context context) {
-        context.startActivity(createMapIntent(url));
+    public static void launchDirectionsUrl(final DirectionsUrl directionsUrl, final Context context) {
+        context.startActivity(createMapIntent(directionsUrl.url()));
     }
 
     private static Intent createMapIntent(final URL url) {

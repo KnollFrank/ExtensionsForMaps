@@ -26,7 +26,7 @@ public class DummyStopAdder {
                         Log.e(TAG, "Error adding dummy stop to directions URL", throwable);
                         displayErrorProcessingRoute(context);
                     } else {
-                        GoogleMapsNavigator.launchUrl(directionsUrlWithDummyStop.url(), context);
+                        GoogleMapsNavigator.launchDirectionsUrl(directionsUrlWithDummyStop, context);
                     }
                     return null;
                 });

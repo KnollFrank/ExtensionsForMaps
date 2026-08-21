@@ -1,6 +1,5 @@
 package de.knollfrank.extensionsformaps.feature;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -151,7 +150,7 @@ public class AddStopActivity extends AppCompatActivity {
                                 if (SortConfig.shouldShowAddStopInstruction(this)) {
                                     showInstructionDialog(directionsUrl);
                                 } else {
-                                    GoogleMapsNavigator.launchUrl(directionsUrl.url(), getApplicationContext());
+                                    GoogleMapsNavigator.launchDirectionsUrl(directionsUrl, getApplicationContext());
                                     finish();
                                 }
                             }
@@ -172,7 +171,7 @@ public class AddStopActivity extends AppCompatActivity {
                             if (binding.cbDontShowAgain.isChecked()) {
                                 SortConfig.setShouldShowAddStopInstruction(this, false);
                             }
-                            GoogleMapsNavigator.launchUrl(directionsUrl.url(), this.getApplicationContext());
+                            GoogleMapsNavigator.launchDirectionsUrl(directionsUrl, this.getApplicationContext());
                             finish();
                         })
                 .setCancelable(false)

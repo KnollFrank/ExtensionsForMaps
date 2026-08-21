@@ -172,10 +172,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(final View view) {
-                GoogleMapsNavigator.launchUrl(
-                        this
-                                .createDirectionsUrlTemplate(getSliderTotalStops())
-                                .url(),
+                GoogleMapsNavigator.launchDirectionsUrl(
+                        createDirectionsUrlTemplate(getSliderTotalStops()),
                         context);
             }
 
