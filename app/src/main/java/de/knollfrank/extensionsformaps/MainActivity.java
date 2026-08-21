@@ -43,14 +43,6 @@ public class MainActivity extends AppCompatActivity {
         verifyLicenseInBackground();
     }
 
-    private void verifyLicenseInBackground() {
-        if (BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) return;
-        LicenseManagerProvider
-                .getInstance(this)
-                .verifyExistingLicense()
-                .thenRun(this::updateLicenseUI);
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -117,17 +109,6 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    private void updatePermissionButtonStates() {
-        if (BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
-            updatePermitAccessibilityButtonState();
-        }
-    }
-
-    private void updatePermitAccessibilityButtonState() {
-        final boolean accessibilityServiceEnabled = isAccessibilityServiceEnabled();
-        binding.btnPermitAccessibility.setText(accessibilityServiceEnabled ? R.string.permit_accessibility_done : R.string.permit_accessibility);
-    }
-
     private void configureLicenseUI() {
         if (BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
             binding.cardLicense.setVisibility(View.GONE);
@@ -140,6 +121,25 @@ public class MainActivity extends AppCompatActivity {
                                 this::updateLicenseUI,
                                 Runnables.empty()));
         binding.btnBuyLicense.setOnClickListener(view -> UpgradeDialog.openGumroadCheckout(this));
+    }
+
+    private void verifyLicenseInBackground() {
+        if (BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) return;
+        LicenseManagerProvider
+                .getInstance(this)
+                .verifyExistingLicense()
+                .thenRun(this::updateLicenseUI);
+    }
+
+    private void updatePermissionButtonStates() {
+        if (BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
+            updatePermitAccessibilityButtonState();
+        }
+    }
+
+    private void updatePermitAccessibilityButtonState() {
+        final boolean accessibilityServiceEnabled = isAccessibilityServiceEnabled();
+        binding.btnPermitAccessibility.setText(accessibilityServiceEnabled ? R.string.permit_accessibility_done : R.string.permit_accessibility);
     }
 
     private void updateLicenseUI() {
