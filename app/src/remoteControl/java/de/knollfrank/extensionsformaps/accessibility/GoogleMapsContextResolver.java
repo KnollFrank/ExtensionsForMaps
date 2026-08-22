@@ -33,20 +33,20 @@ public class GoogleMapsContextResolver {
                 getStopCountPattern(countStopsPatternStr));
     }
 
-    private static String getAddStopsText(final Resources resources) {
-        final int addStopsId = resources.getIdentifier(KEY_ADD_STOPS, "string", GOOGLE_MAPS_PACKAGE);
-        if (addStopsId == 0) {
-            throw new RuntimeException("Could not find resource ID for " + KEY_ADD_STOPS);
-        }
-        return resources.getString(addStopsId);
-    }
-
     private static String getCountStopsPatternStr(final Resources resources) {
         final int countStopsId = resources.getIdentifier(KEY_COUNT_STOPS, "plurals", GOOGLE_MAPS_PACKAGE);
         if (countStopsId == 0) {
             throw new RuntimeException("Could not find resource ID for " + KEY_COUNT_STOPS);
         }
         return resources.getQuantityString(countStopsId, 5);
+    }
+
+    private static String getAddStopsText(final Resources resources) {
+        final int addStopsId = resources.getIdentifier(KEY_ADD_STOPS, "string", GOOGLE_MAPS_PACKAGE);
+        if (addStopsId == 0) {
+            throw new RuntimeException("Could not find resource ID for " + KEY_ADD_STOPS);
+        }
+        return resources.getString(addStopsId);
     }
 
     private static String getStopsWord(final String countStopsPatternStr) {
