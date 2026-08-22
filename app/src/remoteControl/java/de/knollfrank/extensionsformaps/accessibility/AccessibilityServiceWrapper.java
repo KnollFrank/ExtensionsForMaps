@@ -13,7 +13,7 @@ public class AccessibilityServiceWrapper {
 
     private final AccessibilityService accessibilityService;
 
-    private AccessibilityServiceWrapper(final AccessibilityService accessibilityService) {
+    public AccessibilityServiceWrapper(final AccessibilityService accessibilityService) {
         this.accessibilityService = accessibilityService;
     }
 
@@ -26,7 +26,7 @@ public class AccessibilityServiceWrapper {
     }
 
     public boolean click(final AccessibilityNodeInfo node) {
-        return click(getBoundsInScreen(node));
+        return click(AccessibilityNodeInfoWrapper.of(node).getBoundsInScreen());
     }
 
     public boolean click(final Rect bounds) {
@@ -35,12 +35,6 @@ public class AccessibilityServiceWrapper {
                 .getCenter()
                 .map(this::click)
                 .orElse(false);
-    }
-
-    public static Rect getBoundsInScreen(final AccessibilityNodeInfo node) {
-        final Rect outBounds = new Rect();
-        node.getBoundsInScreen(outBounds);
-        return outBounds;
     }
 
     private boolean click(final Point point) {

@@ -9,6 +9,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.List;
 
+import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 import de.knollfrank.extensionsformaps.common.RectWrapper;
@@ -131,8 +132,8 @@ public class AddStopAutomation {
 
     private static boolean listContainsCenterOfItem(final AccessibilityNodeInfo list, final AccessibilityNodeInfo item) {
         return listContainsCenterOfItem(
-                AccessibilityServiceWrapper.getBoundsInScreen(list),
-                AccessibilityServiceWrapper.getBoundsInScreen(item));
+                AccessibilityNodeInfoWrapper.of(list).getBoundsInScreen(),
+                AccessibilityNodeInfoWrapper.of(item).getBoundsInScreen());
     }
 
     private static boolean listContainsCenterOfItem(final Rect list, final Rect item) {

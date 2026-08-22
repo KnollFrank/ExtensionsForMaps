@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import de.knollfrank.extensionsformaps.R;
+import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
@@ -122,7 +123,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
                             @Override
                             public void accept(final AccessibilityNodeInfo addStopsButton) {
-                                final Rect bounds = AccessibilityServiceWrapper.getBoundsInScreen(addStopsButton);
+                                final Rect bounds = AccessibilityNodeInfoWrapper.of(addStopsButton).getBoundsInScreen();
                                 if (highlightOverlay.isEmpty() || !lastOverlayBounds.equals(bounds)) {
                                     showHighlight(bounds);
                                 }

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 
 // FK-TODO: refactor
@@ -291,7 +292,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
             removeScanButton();
             return;
         }
-        final Rect b = AccessibilityServiceWrapper.getBoundsInScreen(nodes.get(0));
+        final Rect b = AccessibilityNodeInfoWrapper.of(nodes.get(0)).getBoundsInScreen();
         if (scanButtonOverlay == null) {
             showScanButton(b);
         } else if (!lastInputBounds.equals(b)) {
