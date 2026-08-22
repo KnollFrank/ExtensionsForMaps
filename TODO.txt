@@ -11,7 +11,6 @@ FK-TODO: - Multi-Stop Import (aus der Zwischenablage)
          - Audio/Video/Text Notizen (Notes-Plugin)
          - Wetter Plugin wie in OsmAnd
 FK-TODO: Routenoptimierung mit Hilfe von https://openrouteservice.org/ statt jsprit
-FK-TODO: Adresseingabefeld von Google Maps um Scanfunktion der Adresse erweitern
 FK-TODO: Fahrt-/Reiseoptionen (z.B. "keine Autobahn") von Google Maps berücksichtigen
          Das ist ein absolut kritischer Einwand für die Routenplanung! Wenn der Apotheken-Bote mit einem klapprigen 50ccm-Roller unterwegs ist oder absichtlich die verstopfte Stadtautobahn meiden möchte, wird deine jsprit-Optimierung komplett unbrauchbar, wenn sie ihn trotzdem über die Schnellstraße schickt.
          Die großartige Nachricht ist: Google Maps übergibt diese Routing-Optionen (Autobahnen vermeiden, Mautstraßen vermeiden, Fähren vermeiden) **vollständig innerhalb der URL**. Da du ohnehin schon unseren !data-Parser gebaut hast, musst du im Grunde nur drei neue Filtermuster hinzufügen.

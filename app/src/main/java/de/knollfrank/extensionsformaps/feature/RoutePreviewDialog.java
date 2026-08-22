@@ -29,7 +29,6 @@ public class RoutePreviewDialog {
         final ContextThemeWrapper themeContext = new ContextThemeWrapper(context, R.style.Theme_ExtensionsForMaps_Dialog);
         final DialogRoutePreviewBinding binding = DialogRoutePreviewBinding.inflate(LayoutInflater.from(themeContext));
         final StopsAdapter stopsAdapter = new StopsAdapter();
-        // FK-TODO: "SortConfig.getOptimizationType(context)" besser als Parameter von show() übergeben
         stopsAdapter.setRoute(route, optimizationType);
         binding.recyclerViewStops.setLayoutManager(new LinearLayoutManager(themeContext));
         binding.recyclerViewStops.setAdapter(stopsAdapter);
