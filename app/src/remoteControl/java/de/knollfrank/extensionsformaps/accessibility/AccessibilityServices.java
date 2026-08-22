@@ -7,6 +7,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.Optional;
 
+import de.knollfrank.extensionsformaps.common.RectWrapper;
+
 public class AccessibilityServices {
 
     private final AccessibilityService accessibilityService;
@@ -24,8 +26,9 @@ public class AccessibilityServices {
     }
 
     public boolean click(final Rect bounds) {
-        return AccessibilityServices
-                .getCenter(bounds)
+        return RectWrapper
+                .of(bounds)
+                .getCenter()
                 .map(this::click)
                 .orElse(false);
     }
@@ -34,16 +37,6 @@ public class AccessibilityServices {
         final Rect outBounds = new Rect();
         node.getBoundsInScreen(outBounds);
         return outBounds;
-    }
-
-    private static Optional<Point> getCenter(final Rect bounds) {
-        if (bounds.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(
-                new Point(
-                        bounds.centerX(),
-                        bounds.centerY()));
     }
 
     private boolean click(final Point point) {

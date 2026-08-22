@@ -11,6 +11,7 @@ import java.util.List;
 
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityServices;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
+import de.knollfrank.extensionsformaps.common.RectWrapper;
 
 public class AddStopAutomation {
 
@@ -110,9 +111,7 @@ public class AddStopAutomation {
         if (childCount > 0) {
             final AccessibilityNodeInfo lastChild = recyclerView.getChild(childCount - 1);
             if (lastChild != null) {
-                final Rect listBounds = AccessibilityServices.getBoundsInScreen(recyclerView);
-                final Rect itemBounds = AccessibilityServices.getBoundsInScreen(lastChild);
-                if (listBounds.contains(itemBounds.centerX(), itemBounds.centerY())) {
+                if (listContainsCenterOfItem(recyclerView, lastChild)) {
                     Log.d(TAG, "Step 2: Last waypoint is visible. Clicking...");
                     if (new AccessibilityServices(service).click(lastChild)) {
                         state = State.WAITING_FOR_CLEAR_CLICK;
@@ -128,6 +127,22 @@ public class AddStopAutomation {
             }
         }
         recyclerView.recycle();
+    }
+
+    private static boolean listContainsCenterOfItem(final AccessibilityNodeInfo list, final AccessibilityNodeInfo item) {
+        return listContainsCenterOfItem(
+                AccessibilityServices.getBoundsInScreen(list),
+                AccessibilityServices.getBoundsInScreen(item));
+    }
+
+    private static boolean listContainsCenterOfItem(final Rect list, final Rect item) {
+        return RectWrapper
+                .of(list)
+                .contains(
+                        RectWrapper
+                                .of(item)
+                                .getCenter()
+                                .orElseThrow());
     }
 
     private void handleWaitingForClearClick(final AccessibilityNodeInfo root) {
