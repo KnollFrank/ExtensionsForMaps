@@ -155,12 +155,6 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                 });
     }
 
-    private void handleGoogleAppEvent(final AccessibilityEvent event) {
-        new AccessibilityServices(this)
-                .getRootInActiveWindow()
-                .ifPresent(root -> compoundFeature.onGoogleAppEvent(event, root));
-    }
-
     private void handleGoogleMapsEvent(final AccessibilityEvent event) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             compoundFeature.reset();
@@ -173,5 +167,11 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                             stopCountDetector.detect(root);
                             compoundFeature.onGoogleMapsEvent(event, root);
                         });
+    }
+
+    private void handleGoogleAppEvent(final AccessibilityEvent event) {
+        new AccessibilityServices(this)
+                .getRootInActiveWindow()
+                .ifPresent(root -> compoundFeature.onGoogleAppEvent(event, root));
     }
 }
