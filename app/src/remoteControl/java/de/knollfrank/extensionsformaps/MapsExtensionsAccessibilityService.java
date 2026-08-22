@@ -34,8 +34,6 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     private StopCountDetector stopCountDetector;
     private RouteUrlRequester urlRequester;
     private ActiveServiceHighlightFeature activeServiceHighlightFeature;
-    // FK-TODO: Field can be converted to a local variable
-    private ScanAddressFeature scanAddressFeature;
 
     @Override
     protected void onServiceConnected() {
@@ -80,12 +78,16 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                             routeOptimizationWorkflow.optimizeThenShowRoute(directionsUrl);
                         });
         activeServiceHighlightFeature = new ActiveServiceHighlightFeature(this);
-        scanAddressFeature = new ScanAddressFeature(this);
         stopCountDetector =
                 new StopCountDetector(
                         googleMapsContext,
                         List.of(addStopFeature, sortFeature));
-        features = List.of(addStopFeature, sortFeature, activeServiceHighlightFeature, scanAddressFeature);
+        features =
+                List.of(
+                        addStopFeature,
+                        sortFeature,
+                        activeServiceHighlightFeature,
+                        new ScanAddressFeature(this));
         for (final AccessibilityFeature feature : features) {
             feature.onServiceConnected();
         }
