@@ -296,10 +296,12 @@ public class ScanAddressFeature implements AccessibilityFeature {
             removeScanButton();
             return;
         }
-        Rect b = new Rect();
-        nodes.get(0).getBoundsInScreen(b);
-        if (scanButtonOverlay == null) showScanButton(b);
-        else if (!lastInputBounds.equals(b)) updateScanButtonPosition(b);
+        final Rect b = AccessibilityServices.getBoundsInScreen(nodes.get(0));
+        if (scanButtonOverlay == null) {
+            showScanButton(b);
+        } else if (!lastInputBounds.equals(b)) {
+            updateScanButtonPosition(b);
+        }
     }
 
     private void showScanButton(Rect b) {
