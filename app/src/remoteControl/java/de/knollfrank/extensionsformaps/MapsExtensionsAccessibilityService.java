@@ -46,11 +46,11 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
         stopCountDetector =
                 new StopCountDetector(
                         googleMapsContext,
-                        List.of(addStopFeature, sortFeature));
+                        List.of(sortFeature, addStopFeature));
         features =
                 List.of(
-                        addStopFeature,
                         sortFeature,
+                        addStopFeature,
                         activeServiceHighlightFeature,
                         new ScanAddressFeature(this));
         for (final AccessibilityFeature feature : features) {
