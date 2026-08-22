@@ -30,7 +30,6 @@ public class AccessibilityServices {
                 .orElse(false);
     }
 
-    // FK-TODO: verwende diese Methode an analogen Stellen
     public static Rect getBoundsInScreen(final AccessibilityNodeInfo node) {
         final Rect outBounds = new Rect();
         node.getBoundsInScreen(outBounds);

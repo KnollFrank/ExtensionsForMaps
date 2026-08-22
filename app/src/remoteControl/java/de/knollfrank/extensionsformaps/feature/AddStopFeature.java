@@ -121,16 +121,10 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
                             @Override
                             public void accept(final AccessibilityNodeInfo addStopsButton) {
-                                final Rect bounds = getBounds(addStopsButton);
+                                final Rect bounds = AccessibilityServices.getBoundsInScreen(addStopsButton);
                                 if (highlightOverlay.isEmpty() || !lastOverlayBounds.equals(bounds)) {
                                     showHighlight(bounds);
                                 }
-                            }
-
-                            private static Rect getBounds(final AccessibilityNodeInfo accessibilityNodeInfo) {
-                                final Rect bounds = new Rect();
-                                accessibilityNodeInfo.getBoundsInScreen(bounds);
-                                return bounds;
                             }
                         },
                         this::removeHighlight);
