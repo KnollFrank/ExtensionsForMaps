@@ -125,6 +125,17 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                         });
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        features.forEach(AccessibilityFeature::onDestroy);
+    }
+
+    @Override
+    public void onInterrupt() {
+        Log.d(TAG, "Service interrupted.");
+    }
+
     private void handleGoogleAppEvent(final AccessibilityEvent event) {
         new AccessibilityServices(this)
                 .getRootInActiveWindow()
@@ -142,17 +153,6 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                 scanAddressFeatureInstance.reset();
             }
         }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        features.forEach(AccessibilityFeature::onDestroy);
-    }
-
-    @Override
-    public void onInterrupt() {
-        Log.d(TAG, "Service interrupted.");
     }
 
     private void handleGoogleMapsEvent(final AccessibilityEvent event) {
