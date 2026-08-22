@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import de.knollfrank.extensionsformaps.databinding.ItemStopBinding;
+import de.knollfrank.extensionsformaps.optimize.OptimizationType;
 import de.knollfrank.extensionsformaps.route.DeliveryGroup;
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.Stop;
@@ -21,10 +22,12 @@ import de.knollfrank.extensionsformaps.route.Stop;
 public class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     private Optional<Route> route = Optional.empty();
+    private Optional<OptimizationType> optimizationType = Optional.empty();
     private final List<Optional<DeliveryGroup>> deliveryGroups = new ArrayList<>();
 
-    public void setRoute(final Route route) {
+    public void setRoute(final Route route, final OptimizationType optimizationType) {
         this.route = Optional.of(route);
+        this.optimizationType = Optional.of(optimizationType);
         setDeliveryGroups(getDeliveryGroups(route));
         notifyDataSetChanged();
     }
@@ -35,7 +38,7 @@ public class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
                         new Route(
                                 _route.origin(),
                                 getWaypointsWithUiData(_route),
-                                _route.destination()));
+                                getDestinationWithUiData(_route)));
     }
 
     @NonNull
@@ -76,11 +79,14 @@ public class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
         if (isOriginOfRoute(position)) {
             holder.binding.viewOriginMarker.setVisibility(View.VISIBLE);
             holder.binding.spinnerDeliveryGroup.setVisibility(View.GONE);
-        } else if (isDestinationOfRoute(position)) {
+        } else if (isDestinationOfRoute(position) && optimizationType.orElseThrow() == OptimizationType.FIXED_DESTINATION) {
             holder.binding.ivDestinationMarker.setVisibility(View.VISIBLE);
             holder.binding.spinnerDeliveryGroup.setVisibility(View.GONE);
         } else {
             holder.binding.tvIndexLetter.setVisibility(View.VISIBLE);
+            if (isDestinationOfRoute(position)) {
+                holder.binding.ivDestinationMarker.setVisibility(View.VISIBLE);
+            }
             holder.setIndexLetterForPosition(position - 1);
             holder.binding.spinnerDeliveryGroup.setVisibility(View.VISIBLE);
             holder.binding.spinnerDeliveryGroup.setSelection(
@@ -94,6 +100,12 @@ public class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
         return route
                 .map(_route -> _route.stops().size())
                 .orElse(0);
+    }
+
+    private Stop getDestinationWithUiData(final Route route) {
+        return optimizationType.orElseThrow() == OptimizationType.ANY_DESTINATION ?
+                getStopWithUiData(route.stops(), route.stops().size() - 1) :
+                route.destination();
     }
 
     private List<Stop> getWaypointsWithUiData(final Route route) {

@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 
 import de.knollfrank.extensionsformaps.ProgressOverlay;
 import de.knollfrank.extensionsformaps.R;
+import de.knollfrank.extensionsformaps.SortConfig;
 import de.knollfrank.extensionsformaps.StopsAdapter;
 import de.knollfrank.extensionsformaps.databinding.DialogRoutePreviewBinding;
 import de.knollfrank.extensionsformaps.route.Route;
@@ -22,13 +23,11 @@ import de.knollfrank.extensionsformaps.route.Route;
 public class RoutePreviewDialog {
 
     public static void show(final Context context, final Route route, final Consumer<Route> onOk) {
-        show(route, new ContextThemeWrapper(context, R.style.Theme_ExtensionsForMaps_Dialog), onOk);
-    }
-
-    private static void show(final Route route, final ContextThemeWrapper themeContext, final Consumer<Route> onOk) {
+        final ContextThemeWrapper themeContext = new ContextThemeWrapper(context, R.style.Theme_ExtensionsForMaps_Dialog);
         final DialogRoutePreviewBinding binding = DialogRoutePreviewBinding.inflate(LayoutInflater.from(themeContext));
         final StopsAdapter stopsAdapter = new StopsAdapter();
-        stopsAdapter.setRoute(route);
+        // FK-TODO: "SortConfig.getOptimizationType(context)" besser als Parameter von show() übergeben
+        stopsAdapter.setRoute(route, SortConfig.getOptimizationType(context));
         binding.recyclerViewStops.setLayoutManager(new LinearLayoutManager(themeContext));
         binding.recyclerViewStops.setAdapter(stopsAdapter);
         final AlertDialog routePreviewDialog =
@@ -43,13 +42,13 @@ public class RoutePreviewDialog {
                                 R.string.cancel,
                                 (dialog, which) -> {
                                     dialog.dismiss();
-                                    if (themeContext.getBaseContext() instanceof final Activity activity) {
+                                    if (context instanceof final Activity activity) {
                                         activity.finish();
                                     }
                                 })
                         .create();
         if (routePreviewDialog.getWindow() != null) {
-            routePreviewDialog.getWindow().setType(ProgressOverlay.getWindowType(themeContext));
+            routePreviewDialog.getWindow().setType(ProgressOverlay.getWindowType(context));
         }
         routePreviewDialog.show();
         if (routePreviewDialog.getWindow() != null) {
