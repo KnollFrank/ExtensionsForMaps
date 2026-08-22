@@ -271,9 +271,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private void click(final AccessibilityNodeInfo node) {
-        AccessibilityServiceWrapper
-                .of(service)
-                .click(node);
+        new AccessibilityServiceWrapper(service).click(node);
     }
 
     @Override
@@ -292,7 +290,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
             removeScanButton();
             return;
         }
-        final Rect b = AccessibilityNodeInfoWrapper.of(nodes.get(0)).getBoundsInScreen();
+        final Rect b = new AccessibilityNodeInfoWrapper(nodes.get(0)).getBoundsInScreen();
         if (scanButtonOverlay == null) {
             showScanButton(b);
         } else if (!lastInputBounds.equals(b)) {

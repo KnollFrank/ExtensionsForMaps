@@ -5,6 +5,8 @@ import android.accessibilityservice.GestureDescription.StrokeDescription;
 import android.graphics.Path;
 import android.graphics.Point;
 
+import de.knollfrank.extensionsformaps.common.PathWrapper;
+
 class GestureDescriptions {
 
     public static GestureDescription getClickGesture(final Point point) {
@@ -20,7 +22,7 @@ class GestureDescriptions {
 
     private static Path getClickPath(final Point point) {
         final Path path = new Path();
-        path.moveTo(point.x, point.y);
+        new PathWrapper(path).moveTo(point);
         return path;
     }
 }

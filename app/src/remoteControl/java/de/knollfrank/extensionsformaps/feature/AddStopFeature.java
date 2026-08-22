@@ -72,8 +72,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     public void onStopCountUpdated(final int stopCount, final Rect stopCountBounds) {
         lastKnownStopCount = stopCount;
         automation.onStopCountUpdated(stopCountBounds);
-        AccessibilityServiceWrapper
-                .of(service)
+        new AccessibilityServiceWrapper(service)
                 .getRootInActiveWindow()
                 .ifPresent(this::updateHighlightOverlay);
     }
@@ -123,7 +122,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
                             @Override
                             public void accept(final AccessibilityNodeInfo addStopsButton) {
-                                final Rect bounds = AccessibilityNodeInfoWrapper.of(addStopsButton).getBoundsInScreen();
+                                final Rect bounds = new AccessibilityNodeInfoWrapper(addStopsButton).getBoundsInScreen();
                                 if (highlightOverlay.isEmpty() || !lastOverlayBounds.equals(bounds)) {
                                     showHighlight(bounds);
                                 }

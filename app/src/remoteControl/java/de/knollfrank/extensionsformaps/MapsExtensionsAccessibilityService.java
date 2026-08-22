@@ -160,8 +160,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
             compoundFeature.reset();
         }
         urlRequester.handleGoogleMapsEvent(event);
-        AccessibilityServiceWrapper
-                .of(this)
+        new AccessibilityServiceWrapper(this)
                 .getRootInActiveWindow()
                 .ifPresent(
                         root -> {
@@ -171,8 +170,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     }
 
     private void handleGoogleAppEvent(final AccessibilityEvent event) {
-        AccessibilityServiceWrapper
-                .of(this)
+        new AccessibilityServiceWrapper(this)
                 .getRootInActiveWindow()
                 .ifPresent(root -> compoundFeature.onGoogleAppEvent(event, root));
     }

@@ -50,7 +50,7 @@ public class AddStopAutomation {
     public void onStopCountUpdated(final Rect stopCountBounds) {
         if (state == State.WAITING_FOR_STOP_COUNT_CLICK && isCooldownOver()) {
             Log.d(TAG, "Step 1: Clicking stop count label via onStopCountUpdated at " + stopCountBounds);
-            if (AccessibilityServiceWrapper.of(service).click(stopCountBounds)) {
+            if (new AccessibilityServiceWrapper(service).click(stopCountBounds)) {
                 state = State.WAITING_FOR_LAST_STOP_CLICK;
                 markAction();
             }
@@ -79,7 +79,7 @@ public class AddStopAutomation {
         if (!nodes.isEmpty()) {
             final AccessibilityNodeInfo node = nodes.get(0);
             Log.d(TAG, "Step 1 (Backup): Found '" + googleMapsContext.stopsWord() + "' label. Clicking...");
-            if (AccessibilityServiceWrapper.of(service).click(node)) {
+            if (new AccessibilityServiceWrapper(service).click(node)) {
                 state = State.WAITING_FOR_LAST_STOP_CLICK;
                 markAction();
             }
@@ -96,7 +96,7 @@ public class AddStopAutomation {
                 if (!nodes.isEmpty()) {
                     final AccessibilityNodeInfo node = nodes.get(0);
                     Log.d(TAG, "Step 2: Re-clicking expansion label '" + googleMapsContext.stopsWord() + "'...");
-                    if (AccessibilityServiceWrapper.of(service).click(node)) {
+                    if (new AccessibilityServiceWrapper(service).click(node)) {
                         markAction();
                     }
                     node.recycle();
@@ -114,7 +114,7 @@ public class AddStopAutomation {
             if (lastChild != null) {
                 if (listContainsCenterOfItem(recyclerView, lastChild)) {
                     Log.d(TAG, "Step 2: Last waypoint is visible. Clicking...");
-                    if (AccessibilityServiceWrapper.of(service).click(lastChild)) {
+                    if (new AccessibilityServiceWrapper(service).click(lastChild)) {
                         state = State.WAITING_FOR_CLEAR_CLICK;
                         markAction();
                     }
@@ -132,18 +132,12 @@ public class AddStopAutomation {
 
     private static boolean listContainsCenterOfItem(final AccessibilityNodeInfo list, final AccessibilityNodeInfo item) {
         return listContainsCenterOfItem(
-                AccessibilityNodeInfoWrapper.of(list).getBoundsInScreen(),
-                AccessibilityNodeInfoWrapper.of(item).getBoundsInScreen());
+                new AccessibilityNodeInfoWrapper(list).getBoundsInScreen(),
+                new AccessibilityNodeInfoWrapper(item).getBoundsInScreen());
     }
 
     private static boolean listContainsCenterOfItem(final Rect list, final Rect item) {
-        return RectWrapper
-                .of(list)
-                .contains(
-                        RectWrapper
-                                .of(item)
-                                .getCenter()
-                                .orElseThrow());
+        return new RectWrapper(list).contains(new RectWrapper(item).getCenter().orElseThrow());
     }
 
     private void handleWaitingForClearClick(final AccessibilityNodeInfo root) {
@@ -181,7 +175,7 @@ public class AddStopAutomation {
         if (isCooldownOver()) {
             final AccessibilityNodeInfo clearButton = clearButtons.get(0);
             Log.d(TAG, "Step 3: Found clear button. Attempting to click...");
-            if (AccessibilityServiceWrapper.of(service).click(clearButton)) {
+            if (new AccessibilityServiceWrapper(service).click(clearButton)) {
                 markAction();
             }
             clearButton.recycle();
@@ -193,8 +187,7 @@ public class AddStopAutomation {
         watchdogHandler.postDelayed(() -> {
             if (state != State.IDLE) {
                 Log.v(TAG, "Watchdog triggered check for state: " + state);
-                AccessibilityServiceWrapper
-                        .of(service)
+                new AccessibilityServiceWrapper(service)
                         .getRootInActiveWindow()
                         .ifPresent(
                                 root -> {

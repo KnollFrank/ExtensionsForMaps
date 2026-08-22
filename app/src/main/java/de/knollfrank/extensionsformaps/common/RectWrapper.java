@@ -5,17 +5,7 @@ import android.graphics.Rect;
 
 import java.util.Optional;
 
-public class RectWrapper {
-
-    private final Rect rect;
-
-    private RectWrapper(final Rect rect) {
-        this.rect = rect;
-    }
-
-    public static RectWrapper of(final Rect rect) {
-        return new RectWrapper(rect);
-    }
+public record RectWrapper(Rect rect) {
 
     public Optional<Point> getCenter() {
         return rect.isEmpty() ?
