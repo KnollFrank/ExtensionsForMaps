@@ -31,7 +31,7 @@ public class AccessibilityServices {
     }
 
     // FK-TODO: verwende diese Methode an analogen Stellen
-    private static Rect getBoundsInScreen(final AccessibilityNodeInfo node) {
+    public static Rect getBoundsInScreen(final AccessibilityNodeInfo node) {
         final Rect outBounds = new Rect();
         node.getBoundsInScreen(outBounds);
         return outBounds;

@@ -110,11 +110,8 @@ public class AddStopAutomation {
         if (childCount > 0) {
             final AccessibilityNodeInfo lastChild = recyclerView.getChild(childCount - 1);
             if (lastChild != null) {
-                final Rect listBounds = new Rect();
-                recyclerView.getBoundsInScreen(listBounds);
-                final Rect itemBounds = new Rect();
-                lastChild.getBoundsInScreen(itemBounds);
-
+                final Rect listBounds = AccessibilityServices.getBoundsInScreen(recyclerView);
+                final Rect itemBounds = AccessibilityServices.getBoundsInScreen(lastChild);
                 if (listBounds.contains(itemBounds.centerX(), itemBounds.centerY())) {
                     Log.d(TAG, "Step 2: Last waypoint is visible. Clicking...");
                     if (new AccessibilityServices(service).click(lastChild)) {
