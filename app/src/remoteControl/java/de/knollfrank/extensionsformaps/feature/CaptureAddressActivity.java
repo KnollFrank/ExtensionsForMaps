@@ -19,7 +19,7 @@ import java.io.File;
 
 public class CaptureAddressActivity extends AppCompatActivity {
 
-    private static final String TAG = "CaptureAddressActivity";
+    private static final String TAG = CaptureAddressActivity.class.getSimpleName();
     private static final String GEMINI_PKG = "com.google.android.apps.bard";
 
     private Uri cameraImageUri;
@@ -35,7 +35,7 @@ public class CaptureAddressActivity extends AppCompatActivity {
                     finish();
                 }
             }
-    );
+                                                                                                      );
 
     private final ActivityResultLauncher<Intent> mediaLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -54,7 +54,7 @@ public class CaptureAddressActivity extends AppCompatActivity {
                     finish();
                 }
             }
-    );
+                                                                                          );
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
