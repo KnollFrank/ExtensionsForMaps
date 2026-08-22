@@ -118,7 +118,11 @@ public class RouteOptimizationWorkflow {
             private void proceedWithRoute(final Route route, final Context context) {
                 if (SortConfig.shouldShowRoutePreview(context)) {
                     progressOverlay.hide();
-                    RoutePreviewDialog.show(context, route, routeOptimizationOrchestrator::optimizeRoute);
+                    RoutePreviewDialog.show(
+                            route,
+                            SortConfig.getOptimizationType(context),
+                            routeOptimizationOrchestrator::optimizeRoute,
+                            context);
                 } else {
                     routeOptimizationOrchestrator.optimizeRoute(route);
                 }

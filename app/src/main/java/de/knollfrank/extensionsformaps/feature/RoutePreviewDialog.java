@@ -15,19 +15,22 @@ import java.util.function.Consumer;
 
 import de.knollfrank.extensionsformaps.ProgressOverlay;
 import de.knollfrank.extensionsformaps.R;
-import de.knollfrank.extensionsformaps.SortConfig;
 import de.knollfrank.extensionsformaps.StopsAdapter;
 import de.knollfrank.extensionsformaps.databinding.DialogRoutePreviewBinding;
+import de.knollfrank.extensionsformaps.optimize.OptimizationType;
 import de.knollfrank.extensionsformaps.route.Route;
 
 public class RoutePreviewDialog {
 
-    public static void show(final Context context, final Route route, final Consumer<Route> onOk) {
+    public static void show(final Route route,
+                            final OptimizationType optimizationType,
+                            final Consumer<Route> onOk,
+                            final Context context) {
         final ContextThemeWrapper themeContext = new ContextThemeWrapper(context, R.style.Theme_ExtensionsForMaps_Dialog);
         final DialogRoutePreviewBinding binding = DialogRoutePreviewBinding.inflate(LayoutInflater.from(themeContext));
         final StopsAdapter stopsAdapter = new StopsAdapter();
         // FK-TODO: "SortConfig.getOptimizationType(context)" besser als Parameter von show() übergeben
-        stopsAdapter.setRoute(route, SortConfig.getOptimizationType(context));
+        stopsAdapter.setRoute(route, optimizationType);
         binding.recyclerViewStops.setLayoutManager(new LinearLayoutManager(themeContext));
         binding.recyclerViewStops.setAdapter(stopsAdapter);
         final AlertDialog routePreviewDialog =
