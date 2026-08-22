@@ -1,15 +1,12 @@
 package de.knollfrank.extensionsformaps.feature;
 
 import android.accessibilityservice.AccessibilityService;
-import android.accessibilityservice.GestureDescription;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Path;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -28,7 +25,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityServices;
-import de.knollfrank.extensionsformaps.common.RectWrapper;
 
 // FK-TODO: refactor
 public class ScanAddressFeature implements AccessibilityFeature {
@@ -130,10 +126,10 @@ public class ScanAddressFeature implements AccessibilityFeature {
                 if (state == State.PROMPT_FILLED || state == State.SENDING_PROMPT) {
                     if (System.currentTimeMillis() - lastActionTime < 1000) return;
 
-                    AccessibilityNodeInfo sendButton = findSendButton(root);
+                    final AccessibilityNodeInfo sendButton = findSendButton(root);
                     if (sendButton != null && sendButton.isEnabled()) {
                         if (clickRetries < 5) {
-                            clickNodeWithGesture(sendButton);
+                            click(sendButton);
                             state = State.SENDING_PROMPT;
                             lastActionTime = System.currentTimeMillis();
                             clickRetries++;
@@ -273,32 +269,8 @@ public class ScanAddressFeature implements AccessibilityFeature {
         return null;
     }
 
-    private void clickNodeWithGesture(final AccessibilityNodeInfo node) {
-        service.dispatchGesture(getClickGestureDescription(node), null, null);
-    }
-
-    private static GestureDescription getClickGestureDescription(final AccessibilityNodeInfo node) {
-        return new GestureDescription
-                .Builder()
-                .addStroke(getClickStrokeDescription(node))
-                .build();
-    }
-
-    private static GestureDescription.StrokeDescription getClickStrokeDescription(final AccessibilityNodeInfo node) {
-        return new GestureDescription.StrokeDescription(
-                getPathStartingAt(
-                        RectWrapper
-                                .of(AccessibilityServices.getBoundsInScreen(node))
-                                .getCenter()
-                                .orElseThrow()),
-                0,
-                100);
-    }
-
-    private static Path getPathStartingAt(final Point point) {
-        final Path path = new Path();
-        path.moveTo(point.x, point.y);
-        return path;
+    private void click(final AccessibilityNodeInfo node) {
+        new AccessibilityServices(service).click(node);
     }
 
     @Override
