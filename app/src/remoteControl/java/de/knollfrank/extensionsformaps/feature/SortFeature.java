@@ -60,6 +60,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
         removeSortButton();
     }
 
+    @Override
     public void reset() {
         Log.d(TAG, "Full reset of SortFeature.");
         lastKnownStopCount = 0;
@@ -73,6 +74,10 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
 
     @Override
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
+    }
+
+    @Override
+    public void onGoogleAppEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
     }
 
     @Override

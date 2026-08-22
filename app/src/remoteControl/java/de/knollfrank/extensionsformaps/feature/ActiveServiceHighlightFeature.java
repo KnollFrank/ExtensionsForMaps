@@ -34,7 +34,16 @@ public class ActiveServiceHighlightFeature implements AccessibilityFeature {
     }
 
     @Override
+    public void onGoogleAppEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
+    }
+
+    @Override
     public void onDestroy() {
+        hide();
+    }
+
+    @Override
+    public void reset() {
         hide();
     }
 
@@ -59,7 +68,7 @@ public class ActiveServiceHighlightFeature implements AccessibilityFeature {
         windowManager.addView(highlightView, params);
     }
 
-    public void hide() {
+    private void hide() {
         if (highlightView != null) {
             windowManager.removeView(highlightView);
             highlightView = null;

@@ -271,6 +271,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
         service.dispatchGesture(builder.build(), null, null);
     }
 
+    @Override
     public void reset() {
         removeScanButton();
     }
@@ -321,7 +322,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
         btn.setOnClickListener(v -> {
             // WICHTIG: Button sofort entfernen, bevor die Kamera-Activity startet!
             removeScanButton();
-            
+
             state = State.IDLE;
             clickRetries = 0;
             lastActionTime = 0;

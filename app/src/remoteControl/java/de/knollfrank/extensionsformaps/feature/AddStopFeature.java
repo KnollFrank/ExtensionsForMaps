@@ -64,6 +64,10 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     }
 
     @Override
+    public void onGoogleAppEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
+    }
+
+    @Override
     public void onStopCountUpdated(final int stopCount, final Rect stopCountBounds) {
         lastKnownStopCount = stopCount;
         automation.onStopCountUpdated(stopCountBounds);
@@ -77,6 +81,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
         removeHighlight();
     }
 
+    @Override
     public void reset() {
         lastKnownStopCount = 0;
         removeHighlight();

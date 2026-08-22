@@ -13,9 +13,9 @@ import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContextResolver;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
 import de.knollfrank.extensionsformaps.accessibility.StopCountDetector;
-import de.knollfrank.extensionsformaps.feature.AccessibilityFeature;
 import de.knollfrank.extensionsformaps.feature.ActiveServiceHighlightFeature;
 import de.knollfrank.extensionsformaps.feature.AddStopFeature;
+import de.knollfrank.extensionsformaps.feature.CompoundFeature;
 import de.knollfrank.extensionsformaps.feature.ScanAddressFeature;
 import de.knollfrank.extensionsformaps.feature.SortFeature;
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizerFactory;
@@ -30,10 +30,9 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     private static final String GOOGLE_APP_PACKAGE = "com.google.android.googlequicksearchbox";
     private static final String GEMINI_APP_PACKAGE = "com.google.android.apps.bard";
 
-    private List<AccessibilityFeature> features = List.of();
+    private CompoundFeature compoundFeature;
     private StopCountDetector stopCountDetector;
     private RouteUrlRequester urlRequester;
-    private ActiveServiceHighlightFeature activeServiceHighlightFeature;
 
     @Override
     protected void onServiceConnected() {
@@ -42,20 +41,18 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
         final SortFeature sortFeature = createSortFeature(urlRequester, this);
         final GoogleMapsContext googleMapsContext = GoogleMapsContextResolver.resolve(this);
         final AddStopFeature addStopFeature = createAddStopFeature(googleMapsContext, urlRequester, this);
-        activeServiceHighlightFeature = new ActiveServiceHighlightFeature(this);
         stopCountDetector =
                 new StopCountDetector(
                         googleMapsContext,
                         List.of(sortFeature, addStopFeature));
-        features =
-                List.of(
-                        sortFeature,
-                        addStopFeature,
-                        activeServiceHighlightFeature,
-                        new ScanAddressFeature(this));
-        for (final AccessibilityFeature feature : features) {
-            feature.onServiceConnected();
-        }
+        compoundFeature =
+                new CompoundFeature(
+                        List.of(
+                                sortFeature,
+                                addStopFeature,
+                                new ActiveServiceHighlightFeature(this),
+                                new ScanAddressFeature(this)));
+        compoundFeature.onServiceConnected();
     }
 
     @Override
@@ -93,7 +90,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        features.forEach(AccessibilityFeature::onDestroy);
+        compoundFeature.onDestroy();
     }
 
     @Override
@@ -158,20 +155,11 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     private void handleGoogleAppEvent(final AccessibilityEvent event) {
         new AccessibilityServices(this)
                 .getRootInActiveWindow()
-                .ifPresent(root -> features.forEach(feature -> feature.onGoogleAppEvent(event, root)));
+                .ifPresent(root -> compoundFeature.onGoogleAppEvent(event, root));
     }
 
     private void resetFeatures() {
-        activeServiceHighlightFeature.hide();
-        for (final AccessibilityFeature feature : features) {
-            if (feature instanceof final AddStopFeature addStopFeature) {
-                addStopFeature.reset();
-            } else if (feature instanceof final SortFeature sortFeature) {
-                sortFeature.reset();
-            } else if (feature instanceof final ScanAddressFeature scanAddressFeatureInstance) {
-                scanAddressFeatureInstance.reset();
-            }
-        }
+        compoundFeature.reset();
     }
 
     private void handleGoogleMapsEvent(final AccessibilityEvent event) {
@@ -184,7 +172,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                 .ifPresent(
                         root -> {
                             stopCountDetector.detect(root);
-                            features.forEach(feature -> feature.onGoogleMapsEvent(event, root));
+                            compoundFeature.onGoogleMapsEvent(event, root);
                         });
     }
 
