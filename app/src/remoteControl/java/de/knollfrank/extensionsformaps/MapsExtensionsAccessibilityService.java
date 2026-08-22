@@ -40,31 +40,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
         super.onServiceConnected();
         urlRequester = new RouteUrlRequester(this);
         final GoogleMapsContext googleMapsContext = GoogleMapsContextResolver.resolve(this);
-
-        final AtomicReference<AddStopFeature> addStopFeatureRef = new AtomicReference<>();
-        addStopFeatureRef.set(
-                new AddStopFeature(
-                        this,
-                        googleMapsContext,
-                        urlRequester,
-                        new RouteUrlRequester.RouteUrlCallback() {
-
-                            @Override
-                            public void onRouteUrlExtracted(final DirectionsUrl directionsUrl) {
-                                final ProgressOverlay progressOverlay = new ProgressOverlay(MapsExtensionsAccessibilityService.this);
-                                progressOverlay.show();
-                                DummyStopAdder
-                                        .addDummyStopToDirectionsUrlThenOpenInGoogleMaps(
-                                                directionsUrl,
-                                                MapsExtensionsAccessibilityService.this)
-                                        .thenRun(() -> {
-                                            progressOverlay.hide();
-                                            addStopFeatureRef.get().startAutomation();
-                                        });
-                            }
-                        }));
-        final AddStopFeature addStopFeature = addStopFeatureRef.get();
-
+        final AddStopFeature addStopFeature = createAddStopFeature(googleMapsContext, urlRequester, this);
         final SortFeature sortFeature =
                 new SortFeature(
                         this,
@@ -134,6 +110,45 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     @Override
     public void onInterrupt() {
         Log.d(TAG, "Service interrupted.");
+    }
+
+    private static AddStopFeature createAddStopFeature(
+            final GoogleMapsContext googleMapsContext,
+            final RouteUrlRequester urlRequester,
+            final MapsExtensionsAccessibilityService service) {
+        final AtomicReference<AddStopFeature> addStopFeatureRef = new AtomicReference<>();
+        addStopFeatureRef.set(
+                new AddStopFeature(
+                        service,
+                        googleMapsContext,
+                        urlRequester,
+                        new RouteUrlRequester.RouteUrlCallback() {
+
+                            @Override
+                            public void onRouteUrlExtracted(final DirectionsUrl directionsUrl) {
+                                addDummyStopToDirectionsUrlThenOpenInGoogleMaps(
+                                        directionsUrl,
+                                        addStopFeatureRef.get(),
+                                        service);
+                            }
+                        }));
+        return addStopFeatureRef.get();
+    }
+
+    private static void addDummyStopToDirectionsUrlThenOpenInGoogleMaps(
+            final DirectionsUrl directionsUrl,
+            final AddStopFeature addStopFeature,
+            final MapsExtensionsAccessibilityService service) {
+        final ProgressOverlay progressOverlay = new ProgressOverlay(service);
+        progressOverlay.show();
+        DummyStopAdder
+                .addDummyStopToDirectionsUrlThenOpenInGoogleMaps(
+                        directionsUrl,
+                        service)
+                .thenRun(() -> {
+                    progressOverlay.hide();
+                    addStopFeature.startAutomation();
+                });
     }
 
     private void handleGoogleAppEvent(final AccessibilityEvent event) {
