@@ -6,6 +6,7 @@ import android.view.accessibility.AccessibilityEvent;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityServices;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
@@ -42,8 +43,8 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
         urlRequester = new RouteUrlRequester(this);
         final GoogleMapsContext googleMapsContext = GoogleMapsContextResolver.resolve(this);
 
-        final AddStopFeature[] addStopFeatureWrapper = new AddStopFeature[1];
-        addStopFeatureWrapper[0] =
+        final AtomicReference<AddStopFeature> addStopFeatureRef = new AtomicReference<>();
+        addStopFeatureRef.set(
                 new AddStopFeature(
                         this,
                         googleMapsContext,
@@ -60,11 +61,11 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                                                 MapsExtensionsAccessibilityService.this)
                                         .thenRun(() -> {
                                             progressOverlay.hide();
-                                            addStopFeatureWrapper[0].startAutomation();
+                                            addStopFeatureRef.get().startAutomation();
                                         });
                             }
-                        });
-        final AddStopFeature addStopFeature = addStopFeatureWrapper[0];
+                        }));
+        final AddStopFeature addStopFeature = addStopFeatureRef.get();
 
         final SortFeature sortFeature =
                 new SortFeature(
