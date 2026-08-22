@@ -12,6 +12,7 @@ import de.knollfrank.extensionsformaps.accessibility.AccessibilityServices;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContextResolver;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
+import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester.RouteUrlCallback;
 import de.knollfrank.extensionsformaps.accessibility.StopCountDetector;
 import de.knollfrank.extensionsformaps.feature.ActiveServiceHighlightFeature;
 import de.knollfrank.extensionsformaps.feature.AddStopFeature;
@@ -96,18 +97,22 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
         Log.d(TAG, "Service interrupted.");
     }
 
-    private static SortFeature createSortFeature(final RouteUrlRequester urlRequester1,
+    private static SortFeature createSortFeature(final RouteUrlRequester urlRequester,
                                                  final AccessibilityService service) {
         return new SortFeature(
                 service,
-                urlRequester1,
-                directionsUrl -> {
-                    Log.d(TAG, "Extracted route URL for SORT: " + directionsUrl);
-                    final RouteOptimizationWorkflow routeOptimizationWorkflow =
-                            new RouteOptimizationWorkflow(
-                                    RouteOptimizerFactory.createRouteOptimizer(service),
-                                    service);
-                    routeOptimizationWorkflow.optimizeThenShowRoute(directionsUrl);
+                urlRequester,
+                new RouteUrlCallback() {
+
+                    @Override
+                    public void onRouteUrlExtracted(final DirectionsUrl routeUrl) {
+                        Log.d(TAG, "Extracted route URL for SORT: " + routeUrl);
+                        final RouteOptimizationWorkflow routeOptimizationWorkflow =
+                                new RouteOptimizationWorkflow(
+                                        RouteOptimizerFactory.createRouteOptimizer(service),
+                                        service);
+                        routeOptimizationWorkflow.optimizeThenShowRoute(routeUrl);
+                    }
                 });
     }
 
@@ -124,9 +129,9 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                         new RouteUrlRequester.RouteUrlCallback() {
 
                             @Override
-                            public void onRouteUrlExtracted(final DirectionsUrl directionsUrl) {
+                            public void onRouteUrlExtracted(final DirectionsUrl routeUrl) {
                                 addDummyStopToDirectionsUrlThenOpenInGoogleMaps(
-                                        directionsUrl,
+                                        routeUrl,
                                         addStopFeatureRef.get(),
                                         service);
                             }

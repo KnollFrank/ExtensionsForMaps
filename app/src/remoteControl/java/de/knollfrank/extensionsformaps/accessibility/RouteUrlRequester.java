@@ -27,7 +27,7 @@ public class RouteUrlRequester {
     @FunctionalInterface
     public interface RouteUrlCallback {
 
-        void onRouteUrlExtracted(DirectionsUrl directionsUrl);
+        void onRouteUrlExtracted(DirectionsUrl routeUrl);
     }
 
     private final AccessibilityService service;
