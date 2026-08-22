@@ -39,20 +39,9 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     protected void onServiceConnected() {
         super.onServiceConnected();
         urlRequester = new RouteUrlRequester(this);
+        final SortFeature sortFeature = createSortFeature(urlRequester, this);
         final GoogleMapsContext googleMapsContext = GoogleMapsContextResolver.resolve(this);
         final AddStopFeature addStopFeature = createAddStopFeature(googleMapsContext, urlRequester, this);
-        final SortFeature sortFeature =
-                new SortFeature(
-                        this,
-                        urlRequester,
-                        directionsUrl -> {
-                            Log.d(TAG, "Extracted route URL for SORT: " + directionsUrl);
-                            final RouteOptimizationWorkflow routeOptimizationWorkflow =
-                                    new RouteOptimizationWorkflow(
-                                            RouteOptimizerFactory.createRouteOptimizer(this),
-                                            MapsExtensionsAccessibilityService.this);
-                            routeOptimizationWorkflow.optimizeThenShowRoute(directionsUrl);
-                        });
         activeServiceHighlightFeature = new ActiveServiceHighlightFeature(this);
         stopCountDetector =
                 new StopCountDetector(
@@ -112,10 +101,25 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
         Log.d(TAG, "Service interrupted.");
     }
 
+    private static SortFeature createSortFeature(final RouteUrlRequester urlRequester1,
+                                                 final AccessibilityService service) {
+        return new SortFeature(
+                service,
+                urlRequester1,
+                directionsUrl -> {
+                    Log.d(TAG, "Extracted route URL for SORT: " + directionsUrl);
+                    final RouteOptimizationWorkflow routeOptimizationWorkflow =
+                            new RouteOptimizationWorkflow(
+                                    RouteOptimizerFactory.createRouteOptimizer(service),
+                                    service);
+                    routeOptimizationWorkflow.optimizeThenShowRoute(directionsUrl);
+                });
+    }
+
     private static AddStopFeature createAddStopFeature(
             final GoogleMapsContext googleMapsContext,
             final RouteUrlRequester urlRequester,
-            final MapsExtensionsAccessibilityService service) {
+            final AccessibilityService service) {
         final AtomicReference<AddStopFeature> addStopFeatureRef = new AtomicReference<>();
         addStopFeatureRef.set(
                 new AddStopFeature(
@@ -138,7 +142,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     private static void addDummyStopToDirectionsUrlThenOpenInGoogleMaps(
             final DirectionsUrl directionsUrl,
             final AddStopFeature addStopFeature,
-            final MapsExtensionsAccessibilityService service) {
+            final AccessibilityService service) {
         final ProgressOverlay progressOverlay = new ProgressOverlay(service);
         progressOverlay.show();
         DummyStopAdder
