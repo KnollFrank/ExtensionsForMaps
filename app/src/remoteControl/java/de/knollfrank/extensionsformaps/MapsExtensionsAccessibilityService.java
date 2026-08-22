@@ -59,17 +59,15 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     public void onAccessibilityEvent(final AccessibilityEvent event) {
         Optional
                 .ofNullable(event.getPackageName())
+                .map(CharSequence::toString)
                 .ifPresent(
                         packageName -> {
-                            final String pkg = packageName.toString();
-
                             // WICHTIG: Wenn wir Google Maps verlassen, muessen Maps-Overlays sofort verschwinden.
                             // Das gilt auch, wenn wir zu Gemini oder in andere Systembereiche wechseln.
-                            if (!GOOGLE_MAPS_PACKAGE.equals(pkg)) {
-                                resetFeatures();
+                            if (!GOOGLE_MAPS_PACKAGE.equals(packageName)) {
+                                compoundFeature.reset();
                             }
-
-                            switch (pkg) {
+                            switch (packageName) {
                                 case GOOGLE_MAPS_PACKAGE:
                                     handleGoogleMapsEvent(event);
                                     break;
@@ -158,13 +156,9 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                 .ifPresent(root -> compoundFeature.onGoogleAppEvent(event, root));
     }
 
-    private void resetFeatures() {
-        compoundFeature.reset();
-    }
-
     private void handleGoogleMapsEvent(final AccessibilityEvent event) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            resetFeatures();
+            compoundFeature.reset();
         }
         urlRequester.handleGoogleMapsEvent(event);
         new AccessibilityServices(this)
