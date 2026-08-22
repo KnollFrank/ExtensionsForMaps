@@ -169,5 +169,4 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                             compoundFeature.onGoogleMapsEvent(event, root);
                         });
     }
-
 }
