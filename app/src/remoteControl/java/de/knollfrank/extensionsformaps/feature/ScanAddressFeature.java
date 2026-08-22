@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.knollfrank.extensionsformaps.accessibility.AccessibilityServices;
+
+// FK-TODO: refactor
 public class ScanAddressFeature implements AccessibilityFeature {
 
     private static final String TAG = ScanAddressFeature.class.getSimpleName();
@@ -170,7 +173,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
         if (fullText.contains(TOKEN_END)) {
             Pattern pattern = Pattern.compile("START_ADDR\\s*[*]*\\s*(.*?)\\s*[*]*\\s*END_ADDR",
-                    Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+                                              Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
             Matcher matcher = pattern.matcher(fullText);
 
             while (matcher.find()) {
@@ -234,36 +237,42 @@ public class ScanAddressFeature implements AccessibilityFeature {
         }
     }
 
-    private boolean setInputText(AccessibilityNodeInfo node, String text) {
-        if (node == null) return false;
-        Bundle args = new Bundle();
+    private boolean setInputText(final AccessibilityNodeInfo node, final String text) {
+        if (node == null) {
+            return false;
+        }
+        final Bundle args = new Bundle();
         args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text);
         if (node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)) return true;
 
         try {
-            ClipboardManager cb = (ClipboardManager) service.getSystemService(Context.CLIPBOARD_SERVICE);
+            final ClipboardManager cb = (ClipboardManager) service.getSystemService(Context.CLIPBOARD_SERVICE);
             cb.setPrimaryClip(ClipData.newPlainText("text", text));
             node.performAction(AccessibilityNodeInfo.ACTION_FOCUS);
             return node.performAction(AccessibilityNodeInfo.ACTION_PASTE);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return false;
         }
     }
 
-    private AccessibilityNodeInfo findNodeByHint(AccessibilityNodeInfo node, String hint) {
-        if (node == null) return null;
-        CharSequence h = node.getHintText();
-        if (h != null && h.toString().contains(hint)) return node;
+    // FK-TODO: refactor null -> Optional<AccessibilityNodeInfo>
+    private AccessibilityNodeInfo findNodeByHint(final AccessibilityNodeInfo node, final String hint) {
+        if (node == null) {
+            return null;
+        }
+        final CharSequence h = node.getHintText();
+        if (h != null && h.toString().contains(hint)) {
+            return node;
+        }
         for (int i = 0; i < node.getChildCount(); i++) {
-            AccessibilityNodeInfo res = findNodeByHint(node.getChild(i), hint);
+            final AccessibilityNodeInfo res = findNodeByHint(node.getChild(i), hint);
             if (res != null) return res;
         }
         return null;
     }
 
     private void clickNodeWithGesture(AccessibilityNodeInfo node) {
-        Rect b = new Rect();
-        node.getBoundsInScreen(b);
+        final Rect b = AccessibilityServices.getBoundsInScreen(node);
         Path p = new Path();
         p.moveTo(b.centerX(), b.centerY());
         GestureDescription.Builder builder = new GestureDescription.Builder();
