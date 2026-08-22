@@ -78,7 +78,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                                 case RESOLVER_PACKAGE:
                                 case SYSTEM_PACKAGE:
                                     if (urlRequester.isWaitingForUrl()) {
-                                        handleResolverEvent(event);
+                                        urlRequester.handleResolverEvent();
                                     }
                                     break;
                             }
@@ -170,7 +170,4 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                         });
     }
 
-    private void handleResolverEvent(final AccessibilityEvent event) {
-        urlRequester.handleResolverEvent();
-    }
 }
