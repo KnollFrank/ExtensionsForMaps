@@ -9,7 +9,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.List;
 
-import de.knollfrank.extensionsformaps.accessibility.AccessibilityServices;
+import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 import de.knollfrank.extensionsformaps.common.RectWrapper;
 
@@ -49,7 +49,7 @@ public class AddStopAutomation {
     public void onStopCountUpdated(final Rect stopCountBounds) {
         if (state == State.WAITING_FOR_STOP_COUNT_CLICK && isCooldownOver()) {
             Log.d(TAG, "Step 1: Clicking stop count label via onStopCountUpdated at " + stopCountBounds);
-            if (new AccessibilityServices(service).click(stopCountBounds)) {
+            if (AccessibilityServiceWrapper.of(service).click(stopCountBounds)) {
                 state = State.WAITING_FOR_LAST_STOP_CLICK;
                 markAction();
             }
@@ -78,7 +78,7 @@ public class AddStopAutomation {
         if (!nodes.isEmpty()) {
             final AccessibilityNodeInfo node = nodes.get(0);
             Log.d(TAG, "Step 1 (Backup): Found '" + googleMapsContext.stopsWord() + "' label. Clicking...");
-            if (new AccessibilityServices(service).click(node)) {
+            if (AccessibilityServiceWrapper.of(service).click(node)) {
                 state = State.WAITING_FOR_LAST_STOP_CLICK;
                 markAction();
             }
@@ -95,7 +95,7 @@ public class AddStopAutomation {
                 if (!nodes.isEmpty()) {
                     final AccessibilityNodeInfo node = nodes.get(0);
                     Log.d(TAG, "Step 2: Re-clicking expansion label '" + googleMapsContext.stopsWord() + "'...");
-                    if (new AccessibilityServices(service).click(node)) {
+                    if (AccessibilityServiceWrapper.of(service).click(node)) {
                         markAction();
                     }
                     node.recycle();
@@ -113,7 +113,7 @@ public class AddStopAutomation {
             if (lastChild != null) {
                 if (listContainsCenterOfItem(recyclerView, lastChild)) {
                     Log.d(TAG, "Step 2: Last waypoint is visible. Clicking...");
-                    if (new AccessibilityServices(service).click(lastChild)) {
+                    if (AccessibilityServiceWrapper.of(service).click(lastChild)) {
                         state = State.WAITING_FOR_CLEAR_CLICK;
                         markAction();
                     }
@@ -131,8 +131,8 @@ public class AddStopAutomation {
 
     private static boolean listContainsCenterOfItem(final AccessibilityNodeInfo list, final AccessibilityNodeInfo item) {
         return listContainsCenterOfItem(
-                AccessibilityServices.getBoundsInScreen(list),
-                AccessibilityServices.getBoundsInScreen(item));
+                AccessibilityServiceWrapper.getBoundsInScreen(list),
+                AccessibilityServiceWrapper.getBoundsInScreen(item));
     }
 
     private static boolean listContainsCenterOfItem(final Rect list, final Rect item) {
@@ -180,7 +180,7 @@ public class AddStopAutomation {
         if (isCooldownOver()) {
             final AccessibilityNodeInfo clearButton = clearButtons.get(0);
             Log.d(TAG, "Step 3: Found clear button. Attempting to click...");
-            if (new AccessibilityServices(service).click(clearButton)) {
+            if (AccessibilityServiceWrapper.of(service).click(clearButton)) {
                 markAction();
             }
             clearButton.recycle();
@@ -192,7 +192,8 @@ public class AddStopAutomation {
         watchdogHandler.postDelayed(() -> {
             if (state != State.IDLE) {
                 Log.v(TAG, "Watchdog triggered check for state: " + state);
-                new AccessibilityServices(service)
+                AccessibilityServiceWrapper
+                        .of(service)
                         .getRootInActiveWindow()
                         .ifPresent(
                                 root -> {

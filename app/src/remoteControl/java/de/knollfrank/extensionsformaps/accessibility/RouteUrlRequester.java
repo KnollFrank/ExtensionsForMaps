@@ -60,7 +60,9 @@ public class RouteUrlRequester {
     public void handleResolverEvent() {
         Optionals.ifPresentBoth(
                 routeUrlCallback,
-                new AccessibilityServices(service).getRootInActiveWindow(),
+                AccessibilityServiceWrapper
+                        .of(service)
+                        .getRootInActiveWindow(),
                 this::handleResolverEvent);
     }
 

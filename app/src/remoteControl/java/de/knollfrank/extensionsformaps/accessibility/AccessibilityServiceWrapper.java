@@ -9,12 +9,16 @@ import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.common.RectWrapper;
 
-public class AccessibilityServices {
+public class AccessibilityServiceWrapper {
 
     private final AccessibilityService accessibilityService;
 
-    public AccessibilityServices(final AccessibilityService accessibilityService) {
+    private AccessibilityServiceWrapper(final AccessibilityService accessibilityService) {
         this.accessibilityService = accessibilityService;
+    }
+
+    public static AccessibilityServiceWrapper of(final AccessibilityService accessibilityService) {
+        return new AccessibilityServiceWrapper(accessibilityService);
     }
 
     public Optional<AccessibilityNodeInfo> getRootInActiveWindow() {

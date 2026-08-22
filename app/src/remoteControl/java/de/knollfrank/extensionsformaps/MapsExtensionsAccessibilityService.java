@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import de.knollfrank.extensionsformaps.accessibility.AccessibilityServices;
+import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContextResolver;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
@@ -160,7 +160,8 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
             compoundFeature.reset();
         }
         urlRequester.handleGoogleMapsEvent(event);
-        new AccessibilityServices(this)
+        AccessibilityServiceWrapper
+                .of(this)
                 .getRootInActiveWindow()
                 .ifPresent(
                         root -> {
@@ -170,7 +171,8 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     }
 
     private void handleGoogleAppEvent(final AccessibilityEvent event) {
-        new AccessibilityServices(this)
+        AccessibilityServiceWrapper
+                .of(this)
                 .getRootInActiveWindow()
                 .ifPresent(root -> compoundFeature.onGoogleAppEvent(event, root));
     }
