@@ -14,15 +14,23 @@ public class StopCountParser {
     }
 
     public OptionalInt parseStopCount(final String text) {
+        return this
+                .parseStopCountAsStr(text)
+                .map(StopCountParser::parseInt)
+                .orElse(OptionalInt.empty());
+    }
+
+    private Optional<String> parseStopCountAsStr(final String text) {
         final Matcher matcher = stopCountPattern.matcher(text);
-        if (matcher.find()) {
-            try {
-                final Optional<String> group = Optional.ofNullable(matcher.group(1));
-                if (group.isPresent()) {
-                    return OptionalInt.of(Integer.parseInt(group.orElseThrow()));
-                }
-            } catch (final NumberFormatException ignored) {
-            }
+        return matcher.find() ?
+                Optional.ofNullable(matcher.group(1)) :
+                Optional.empty();
+    }
+
+    private static OptionalInt parseInt(final String str) {
+        try {
+            return OptionalInt.of(Integer.parseInt(str));
+        } catch (final NumberFormatException ignored) {
         }
         return OptionalInt.empty();
     }
