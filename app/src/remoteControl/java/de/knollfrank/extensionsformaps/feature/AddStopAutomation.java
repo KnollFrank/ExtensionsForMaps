@@ -75,10 +75,10 @@ public class AddStopAutomation {
     private void handleWaitingForStopCountClick(final AccessibilityNodeInfo root) {
         if (!isCooldownOver()) return;
 
-        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord());
+        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord);
         if (!nodes.isEmpty()) {
             final AccessibilityNodeInfo node = nodes.get(0);
-            Log.d(TAG, "Step 1 (Backup): Found '" + googleMapsContext.stopsWord() + "' label. Clicking...");
+            Log.d(TAG, "Step 1 (Backup): Found '" + googleMapsContext.stopsWord + "' label. Clicking...");
             if (new AccessibilityServiceWrapper(service).click(node)) {
                 state = State.WAITING_FOR_LAST_STOP_CLICK;
                 markAction();
@@ -92,10 +92,10 @@ public class AddStopAutomation {
         if (recyclerViews.isEmpty()) {
             if (isCooldownOver()) {
                 // Retry expansion click if the first one was ignored
-                final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord());
+                final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord);
                 if (!nodes.isEmpty()) {
                     final AccessibilityNodeInfo node = nodes.get(0);
-                    Log.d(TAG, "Step 2: Re-clicking expansion label '" + googleMapsContext.stopsWord() + "'...");
+                    Log.d(TAG, "Step 2: Re-clicking expansion label '" + googleMapsContext.stopsWord + "'...");
                     if (new AccessibilityServiceWrapper(service).click(node)) {
                         markAction();
                     }

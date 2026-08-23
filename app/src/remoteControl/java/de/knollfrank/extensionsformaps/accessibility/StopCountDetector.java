@@ -33,12 +33,12 @@ public class StopCountDetector {
         final Rect stopCountBounds = new Rect();
         int stopCount = -1;
 
-        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord());
+        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord);
         for (final AccessibilityNodeInfo node : nodes) {
             final Optional<String> textOpt = getTextOrElseGetContentDescription(node);
             if (textOpt.isPresent()) {
                 final String text = textOpt.get();
-                final OptionalInt stopCountOptional = googleMapsContext.getStopCount(text);
+                final OptionalInt stopCountOptional = googleMapsContext.parseStopCount(text);
                 if (stopCountOptional.isPresent()) {
                     stopCount = stopCountOptional.orElseThrow();
                     node.getBoundsInScreen(stopCountBounds);

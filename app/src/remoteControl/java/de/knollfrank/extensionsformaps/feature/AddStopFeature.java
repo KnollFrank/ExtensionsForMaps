@@ -133,7 +133,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
     private Optional<AccessibilityNodeInfo> findAddStopsButton(final AccessibilityNodeInfo root) {
         return root
-                .findAccessibilityNodeInfosByText(googleMapsContext.addStopsText())
+                .findAccessibilityNodeInfosByText(googleMapsContext.addStopsText)
                 .stream()
                 .findFirst();
     }
@@ -204,6 +204,6 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     // FK-TODO: refactor
     private boolean isAddStopsText(final String text) {
         if (text == null) return false;
-        return text.contains(googleMapsContext.addStopsText());
+        return text.contains(googleMapsContext.addStopsText);
     }
 }

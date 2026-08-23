@@ -30,7 +30,7 @@ public class GoogleMapsContextResolver {
         return new GoogleMapsContext(
                 getAddStopsText(resources),
                 getStopsWord(countStopsPatternStr),
-                getStopCountPattern(countStopsPatternStr));
+                new StopCountParser(getStopCountPattern(countStopsPatternStr)));
     }
 
     private static String getCountStopsPatternStr(final Resources resources) {

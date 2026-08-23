@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
+import de.knollfrank.extensionsformaps.accessibility.StopCountParser;
 
 @RunWith(RobolectricTestRunner.class)
 public class AddStopFeatureTest {
@@ -33,7 +34,7 @@ public class AddStopFeatureTest {
                 new GoogleMapsContext(
                         "Add stops",
                         "stops",
-                        Pattern.compile("(\\d+) stops"));
+                        new StopCountParser(Pattern.compile("(\\d+) stops")));
         feature = new AddStopFeature(service, googleMapsContext, urlRequester, callback);
     }
 
