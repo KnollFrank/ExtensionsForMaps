@@ -28,6 +28,7 @@ import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrappe
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 
 // FK-TODO: refactor
+// FK-TODO: Verwende die Google-App https://play.google.com/store/apps/details?id=com.google.android.googlequicksearchbox statt der Gemini-App für den Adressscanner.
 public class ScanAddressFeature implements AccessibilityFeature {
 
     private static final String TAG = ScanAddressFeature.class.getSimpleName();
