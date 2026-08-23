@@ -6,7 +6,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
+import java.util.OptionalInt;
 
 // FK-TODO: refactor
 public class StopCountDetector {
@@ -38,19 +38,15 @@ public class StopCountDetector {
             final Optional<String> textOpt = getTextOrElseGetContentDescription(node);
             if (textOpt.isPresent()) {
                 final String text = textOpt.get();
-                final Matcher matcher = googleMapsContext.stopCountPattern().matcher(text);
-                if (matcher.find()) {
-                    try {
-                        stopCount = Integer.parseInt(matcher.group(1));
-                        node.getBoundsInScreen(stopCountBounds);
-                        Log.d(TAG, String.format("Found stop count: '%s' at bounds: %s", text, stopCountBounds));
-                        break;
-                    } catch (final NumberFormatException ignored) {
-                    }
+                final OptionalInt stopCountOptional = googleMapsContext.getStopCount(text);
+                if (stopCountOptional.isPresent()) {
+                    stopCount = stopCountOptional.orElseThrow();
+                    node.getBoundsInScreen(stopCountBounds);
+                    Log.d(TAG, String.format("Found stop count: '%s' at bounds: %s", text, stopCountBounds));
+                    break;
                 }
             }
         }
-
         if (stopCount != -1) {
             for (final StopCountListener listener : listeners) {
                 listener.onStopCountUpdated(stopCount, stopCountBounds);
