@@ -8,9 +8,9 @@ public final class GoogleMapsContext {
     public final String stopsWord;
     private final StopCountParser stopCountParser;
 
-    public GoogleMapsContext(String addStopsText,
-                             String stopsWord,
-                             StopCountParser stopCountParser) {
+    public GoogleMapsContext(final String addStopsText,
+                             final String stopsWord,
+                             final StopCountParser stopCountParser) {
         this.addStopsText = addStopsText;
         this.stopsWord = stopsWord;
         this.stopCountParser = stopCountParser;

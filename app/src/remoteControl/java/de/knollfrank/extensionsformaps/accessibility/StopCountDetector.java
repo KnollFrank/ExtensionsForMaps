@@ -35,7 +35,7 @@ public class StopCountDetector {
 
         final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord);
         for (final AccessibilityNodeInfo node : nodes) {
-            final Optional<String> textOpt = getTextOrElseGetContentDescription(node);
+            final Optional<String> textOpt = getTextOrContentDescription(node);
             if (textOpt.isPresent()) {
                 final String text = textOpt.get();
                 final OptionalInt stopCountOptional = googleMapsContext.parseStopCount(text);
@@ -58,7 +58,7 @@ public class StopCountDetector {
         }
     }
 
-    private static Optional<String> getTextOrElseGetContentDescription(final AccessibilityNodeInfo node) {
+    private static Optional<String> getTextOrContentDescription(final AccessibilityNodeInfo node) {
         return Optional
                 .ofNullable(node.getText())
                 .or(() -> Optional.ofNullable(node.getContentDescription()))
