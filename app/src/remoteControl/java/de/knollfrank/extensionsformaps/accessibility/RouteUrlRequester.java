@@ -111,16 +111,13 @@ public class RouteUrlRequester {
                 .findFirst();
     }
 
-    // FK-TODO: refactor
+    // FK-TODO: refactor, i18n for "Share" and "Teilen" by using a key
     private Optional<AccessibilityNodeInfo> findShareButton(final AccessibilityNodeInfo rootNode) {
-        List<AccessibilityNodeInfo> nodes = rootNode.findAccessibilityNodeInfosByViewId(SHARE_ID);
-        if (nodes.isEmpty()) {
-            // FK-TODO: i8n for "Share" and "Teilen" by using a key
-            nodes = rootNode.findAccessibilityNodeInfosByText("Share");
-        }
-        if (nodes.isEmpty()) {
-            nodes = rootNode.findAccessibilityNodeInfosByText("Teilen");
-        }
-        return nodes.stream().findFirst();
+        return Optionals
+                .streamOfPresentElements(
+                        () -> rootNode.findAccessibilityNodeInfosByViewId(SHARE_ID).stream().findFirst(),
+                        () -> rootNode.findAccessibilityNodeInfosByText("Share").stream().findFirst(),
+                        () -> rootNode.findAccessibilityNodeInfosByText("Teilen").stream().findFirst())
+                .findFirst();
     }
 }
