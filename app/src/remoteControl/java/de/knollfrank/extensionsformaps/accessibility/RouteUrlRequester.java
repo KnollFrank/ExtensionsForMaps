@@ -75,7 +75,6 @@ public class RouteUrlRequester {
                         url -> {
                             Log.d(TAG, "Extracted URL: " + url);
                             deliverUrlToCallbackAndDismissShareSheet(url, routeUrlCallback);
-                            this.routeUrlCallback = Optional.empty();
                         });
     }
 
@@ -100,6 +99,7 @@ public class RouteUrlRequester {
 
     private void deliverUrlToCallbackAndDismissShareSheet(final URL url,
                                                           final RouteUrlCallback routeUrlCallback) {
+        this.routeUrlCallback = Optional.empty();
         DirectionsUrlFactory
                 .createDirectionsUrl(url)
                 .thenApply(Optional::orElseThrow)
