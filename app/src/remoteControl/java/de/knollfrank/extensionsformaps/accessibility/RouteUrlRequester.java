@@ -115,9 +115,13 @@ public class RouteUrlRequester {
     private Optional<AccessibilityNodeInfo> findShareButton(final AccessibilityNodeInfo rootNode) {
         return Optionals
                 .streamOfPresentElements(
-                        () -> rootNode.findAccessibilityNodeInfosByViewId(SHARE_ID).stream().findFirst(),
-                        () -> rootNode.findAccessibilityNodeInfosByText("Share").stream().findFirst(),
-                        () -> rootNode.findAccessibilityNodeInfosByText("Teilen").stream().findFirst())
+                        () -> findFirst(rootNode.findAccessibilityNodeInfosByViewId(SHARE_ID)),
+                        () -> findFirst(rootNode.findAccessibilityNodeInfosByText("Share")),
+                        () -> findFirst(rootNode.findAccessibilityNodeInfosByText("Teilen")))
                 .findFirst();
+    }
+
+    private static Optional<AccessibilityNodeInfo> findFirst(final List<AccessibilityNodeInfo> nodes) {
+        return nodes.stream().findFirst();
     }
 }
