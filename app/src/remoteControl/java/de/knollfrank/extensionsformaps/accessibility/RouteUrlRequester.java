@@ -4,7 +4,6 @@ import android.accessibilityservice.AccessibilityService;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityWindowInfo;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
@@ -103,19 +102,13 @@ public class RouteUrlRequester {
         return false;
     }
 
-    // FK-TODO: refactor to functional
     private Optional<AccessibilityNodeInfo> findShareButtonInAllWindows() {
-        final List<AccessibilityWindowInfo> windows = accessibilityService.getWindows();
-        for (final AccessibilityWindowInfo window : windows) {
-            final AccessibilityNodeInfo root = window.getRoot();
-            if (root != null) {
-                final Optional<AccessibilityNodeInfo> button = findShareButton(root);
-                if (button.isPresent()) {
-                    return button;
-                }
-            }
-        }
-        return Optional.empty();
+        return accessibilityService
+                .getWindows()
+                .stream()
+                .flatMap(window -> Optional.ofNullable(window.getRoot()).stream())
+                .flatMap(root -> findShareButton(root).stream())
+                .findFirst();
     }
 
     // FK-TODO: refactor
