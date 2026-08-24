@@ -78,9 +78,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                                     break;
                                 case RESOLVER_PACKAGE:
                                 case SYSTEM_PACKAGE:
-                                    if (urlRequester.isWaitingForUrl()) {
-                                        urlRequester.extractUrlFromShareSheetAndDeliverToCallback();
-                                    }
+                                    urlRequester.tryExtractUrlFromShareSheetAndDeliverToCallback();
                                     break;
                             }
                         });

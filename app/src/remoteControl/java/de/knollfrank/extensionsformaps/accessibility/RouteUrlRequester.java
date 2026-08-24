@@ -49,17 +49,13 @@ public class RouteUrlRequester {
         }
     }
 
-    public boolean isWaitingForUrl() {
-        return routeUrlCallback.isPresent();
-    }
-
     public void handleGoogleMapsEvent(final AccessibilityEvent event) {
         if (isWaitingToClickShareAfterBack && event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
             tryClickShareButton();
         }
     }
 
-    public void extractUrlFromShareSheetAndDeliverToCallback() {
+    public void tryExtractUrlFromShareSheetAndDeliverToCallback() {
         Optionals.ifPresentBoth(
                 Pair.create(
                         new AccessibilityServiceWrapper(accessibilityService).getRootInActiveWindow(),
