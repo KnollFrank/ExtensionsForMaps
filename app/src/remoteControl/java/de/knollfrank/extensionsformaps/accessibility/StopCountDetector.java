@@ -44,7 +44,10 @@ public class StopCountDetector {
                         text ->
                                 Optionals
                                         .asOptional(googleMapsContext.parseStopCount(text))
-                                        .map(count -> new DetectedStopCount(count, new AccessibilityNodeInfoWrapper(node).getBoundsInScreen())));
+                                        .map(count ->
+                                                     new DetectedStopCount(
+                                                             count,
+                                                             new AccessibilityNodeInfoWrapper(node).getBoundsInScreen())));
     }
 
     private static Optional<String> getTextOrContentDescription(final AccessibilityNodeInfo node) {
