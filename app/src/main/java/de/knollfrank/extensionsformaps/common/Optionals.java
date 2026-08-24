@@ -1,5 +1,7 @@
 package de.knollfrank.extensionsformaps.common;
 
+import androidx.core.util.Pair;
+
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -30,7 +32,7 @@ public class Optionals {
         return optionalInt.stream().boxed().findFirst();
     }
 
-    public static <A, B> void ifPresentBoth(final Optional<A> optA, final Optional<B> optB, BiConsumer<A, B> consumer) {
-        optA.ifPresent(a -> optB.ifPresent(b -> consumer.accept(a, b)));
+    public static <A, B> void ifPresentBoth(final Pair<Optional<A>, Optional<B>> optA_optB, final BiConsumer<A, B> consumer) {
+        optA_optB.first.ifPresent(a -> optA_optB.second.ifPresent(b -> consumer.accept(a, b)));
     }
 }

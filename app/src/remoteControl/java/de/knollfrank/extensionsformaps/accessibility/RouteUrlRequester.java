@@ -7,6 +7,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
 import androidx.core.content.ContextCompat;
+import androidx.core.util.Pair;
 
 import com.google.common.collect.ImmutableList;
 
@@ -59,8 +60,9 @@ public class RouteUrlRequester {
 
     public void handleResolverEvent() {
         Optionals.ifPresentBoth(
-                routeUrlCallback,
-                new AccessibilityServiceWrapper(accessibilityService).getRootInActiveWindow(),
+                Pair.create(
+                        routeUrlCallback,
+                        new AccessibilityServiceWrapper(accessibilityService).getRootInActiveWindow()),
                 this::handleResolverEvent);
     }
 
