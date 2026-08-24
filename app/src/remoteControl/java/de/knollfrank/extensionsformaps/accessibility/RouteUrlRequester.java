@@ -10,6 +10,7 @@ import androidx.core.util.Pair;
 
 import com.google.common.collect.ImmutableList;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -69,13 +70,7 @@ public class RouteUrlRequester {
     private void handleResolverEvent(final RouteUrlCallback routeUrlCallback,
                                      final AccessibilityNodeInfo rootNode) {
         RouteUrlRequester
-                .getUrlNodes(rootNode)
-                .stream()
-                .map(AccessibilityNodeInfo::getText)
-                .filter(Objects::nonNull)
-                .findFirst()
-                .map(CharSequence::toString)
-                .map(URLs::createUrl)
+                .getUrl(rootNode)
                 .ifPresent(
                         url -> {
                             Log.d(TAG, "Extracted URL: " + url);
@@ -90,6 +85,17 @@ public class RouteUrlRequester {
                                             ContextCompat.getMainExecutor(accessibilityService));
                             this.routeUrlCallback = Optional.empty();
                         });
+    }
+
+    private static Optional<URL> getUrl(final AccessibilityNodeInfo rootNode) {
+        return RouteUrlRequester
+                .getUrlNodes(rootNode)
+                .stream()
+                .map(AccessibilityNodeInfo::getText)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .map(CharSequence::toString)
+                .map(URLs::createUrl);
     }
 
     private static List<AccessibilityNodeInfo> getUrlNodes(final AccessibilityNodeInfo rootNode) {
