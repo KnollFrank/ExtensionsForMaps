@@ -1,14 +1,13 @@
 package de.knollfrank.extensionsformaps.accessibility;
 
 import android.graphics.Rect;
-import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 
-// FK-TODO: refactor
+import de.knollfrank.extensionsformaps.common.Optionals;
+
 public class StopCountDetector {
 
     private static final String TAG = StopCountDetector.class.getSimpleName();
@@ -30,32 +29,22 @@ public class StopCountDetector {
     }
 
     public void detect(final AccessibilityNodeInfo root) {
-        final Rect stopCountBounds = new Rect();
-        int stopCount = -1;
+        root
+                .findAccessibilityNodeInfosByText(googleMapsContext.stopsWord)
+                .stream()
+                .flatMap(node -> tryDetectStopCount(node).stream())
+                .findFirst()
+                .ifPresentOrElse(this::notifyStopCountUpdated, this::notifyStopCountLost);
+    }
 
-        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord);
-        for (final AccessibilityNodeInfo node : nodes) {
-            final Optional<String> textOpt = getTextOrContentDescription(node);
-            if (textOpt.isPresent()) {
-                final String text = textOpt.get();
-                final OptionalInt stopCountOptional = googleMapsContext.parseStopCount(text);
-                if (stopCountOptional.isPresent()) {
-                    stopCount = stopCountOptional.orElseThrow();
-                    node.getBoundsInScreen(stopCountBounds);
-                    Log.d(TAG, String.format("Found stop count: '%s' at bounds: %s", text, stopCountBounds));
-                    break;
-                }
-            }
-        }
-        if (stopCount != -1) {
-            for (final StopCountListener listener : listeners) {
-                listener.onStopCountUpdated(stopCount, stopCountBounds);
-            }
-        } else {
-            for (final StopCountListener listener : listeners) {
-                listener.onStopCountLost();
-            }
-        }
+    private Optional<DetectedStopCount> tryDetectStopCount(final AccessibilityNodeInfo node) {
+        return StopCountDetector
+                .getTextOrContentDescription(node)
+                .flatMap(
+                        text ->
+                                Optionals
+                                        .asOptional(googleMapsContext.parseStopCount(text))
+                                        .map(count -> new DetectedStopCount(count, new AccessibilityNodeInfoWrapper(node).getBoundsInScreen())));
     }
 
     private static Optional<String> getTextOrContentDescription(final AccessibilityNodeInfo node) {
@@ -63,5 +52,16 @@ public class StopCountDetector {
                 .ofNullable(node.getText())
                 .or(() -> Optional.ofNullable(node.getContentDescription()))
                 .map(CharSequence::toString);
+    }
+
+    private void notifyStopCountUpdated(final DetectedStopCount detectedStopCount) {
+        listeners.forEach(listener -> listener.onStopCountUpdated(detectedStopCount.count(), detectedStopCount.bounds()));
+    }
+
+    private void notifyStopCountLost() {
+        listeners.forEach(StopCountListener::onStopCountLost);
+    }
+
+    private record DetectedStopCount(int count, Rect bounds) {
     }
 }
