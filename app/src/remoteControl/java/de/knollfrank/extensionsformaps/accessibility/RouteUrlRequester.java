@@ -59,16 +59,16 @@ public class RouteUrlRequester {
         }
     }
 
-    public void handleResolverEvent() {
+    public void handleShareSheet() {
         Optionals.ifPresentBoth(
                 Pair.create(
                         routeUrlCallback,
                         new AccessibilityServiceWrapper(accessibilityService).getRootInActiveWindow()),
-                this::handleResolverEvent);
+                this::extractUrlFromShareSheet);
     }
 
-    private void handleResolverEvent(final RouteUrlCallback routeUrlCallback,
-                                     final AccessibilityNodeInfo rootNode) {
+    private void extractUrlFromShareSheet(final RouteUrlCallback routeUrlCallback,
+                                          final AccessibilityNodeInfo rootNode) {
         RouteUrlRequester
                 .getUrl(rootNode)
                 .ifPresent(
@@ -78,13 +78,16 @@ public class RouteUrlRequester {
                                     .createDirectionsUrl(url)
                                     .thenApply(Optional::orElseThrow)
                                     .thenAcceptAsync(
-                                            directionsUrl -> {
-                                                routeUrlCallback.onRouteUrlExtracted(directionsUrl);
-                                                accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
-                                            },
+                                            directionsUrl -> deliverUrlAndDismissShareSheet(directionsUrl, routeUrlCallback),
                                             ContextCompat.getMainExecutor(accessibilityService));
                             this.routeUrlCallback = Optional.empty();
                         });
+    }
+
+    private void deliverUrlAndDismissShareSheet(final DirectionsUrl directionsUrl,
+                                                final RouteUrlCallback routeUrlCallback) {
+        routeUrlCallback.onRouteUrlExtracted(directionsUrl);
+        accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
     }
 
     private static Optional<URL> getUrl(final AccessibilityNodeInfo rootNode) {
