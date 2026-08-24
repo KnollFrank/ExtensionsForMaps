@@ -28,7 +28,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
     private static final String TAG = AddStopFeature.class.getSimpleName();
 
-    private final AccessibilityService service;
+    private final AccessibilityService accessibilityService;
     private final WindowManager windowManager;
     private final GoogleMapsContext googleMapsContext;
     private final RouteUrlRequester routeUrlRequester;
@@ -39,16 +39,16 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     private final Rect lastOverlayBounds = new Rect();
     private int lastKnownStopCount = 0;
 
-    public AddStopFeature(final AccessibilityService service,
+    public AddStopFeature(final AccessibilityService accessibilityService,
                           final GoogleMapsContext googleMapsContext,
                           final RouteUrlRequester routeUrlRequester,
                           final RouteUrlRequester.RouteUrlCallback onRouteUrlExtracted) {
-        this.service = service;
-        this.windowManager = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
+        this.accessibilityService = accessibilityService;
+        this.windowManager = (WindowManager) accessibilityService.getSystemService(Context.WINDOW_SERVICE);
         this.googleMapsContext = googleMapsContext;
         this.routeUrlRequester = routeUrlRequester;
         this.onRouteUrlExtracted = onRouteUrlExtracted;
-        this.automation = new AddStopAutomation(service, googleMapsContext);
+        this.automation = new AddStopAutomation(accessibilityService, googleMapsContext);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     public void onStopCountUpdated(final int stopCount, final Rect stopCountBounds) {
         lastKnownStopCount = stopCount;
         automation.onStopCountUpdated(stopCountBounds);
-        new AccessibilityServiceWrapper(service)
+        new AccessibilityServiceWrapper(accessibilityService)
                 .getRootInActiveWindow()
                 .ifPresent(this::updateHighlightOverlay);
     }
@@ -154,7 +154,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     }
 
     private View createHighlightOverlay() {
-        final View highlightOverlay = new FrameLayout(service);
+        final View highlightOverlay = new FrameLayout(accessibilityService);
         highlightOverlay.setBackgroundResource(R.drawable.border_highlight);
         return highlightOverlay;
     }

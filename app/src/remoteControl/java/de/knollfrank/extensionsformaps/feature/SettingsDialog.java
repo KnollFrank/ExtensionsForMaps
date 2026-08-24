@@ -31,19 +31,19 @@ import de.knollfrank.extensionsformaps.optimize.ors.OpenRouteServiceRoutingMatri
 
 public class SettingsDialog {
 
-    private final AccessibilityService service;
+    private final AccessibilityService accessibilityService;
     private final ApiKeyRepository apiKeyRepository;
 
-    public SettingsDialog(final AccessibilityService service) {
-        this.service = service;
-        this.apiKeyRepository = new ApiKeyRepository(service);
+    public SettingsDialog(final AccessibilityService accessibilityService) {
+        this.accessibilityService = accessibilityService;
+        this.apiKeyRepository = new ApiKeyRepository(accessibilityService);
     }
 
     public void show() {
-        final Context themedContext = new ContextThemeWrapper(service, R.style.Theme_ExtensionsForMaps_Dialog);
+        final Context themedContext = new ContextThemeWrapper(accessibilityService, R.style.Theme_ExtensionsForMaps_Dialog);
         final DialogSettingsBinding binding = DialogSettingsBinding.inflate(LayoutInflater.from(themedContext));
 
-        binding.checkBoxShowPreview.setChecked(SortConfig.shouldShowRoutePreview(service));
+        binding.checkBoxShowPreview.setChecked(SortConfig.shouldShowRoutePreview(accessibilityService));
 
         List
                 .of(
@@ -95,7 +95,7 @@ public class SettingsDialog {
 
                     @Override
                     public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, @Nullable final String key) {
-                        ContextCompat.getMainExecutor(service).execute(updateOrsState);
+                        ContextCompat.getMainExecutor(accessibilityService).execute(updateOrsState);
                     }
                 };
 
@@ -110,14 +110,14 @@ public class SettingsDialog {
                         .setPositiveButton(
                                 R.string.ok,
                                 (dialog, which) -> {
-                                    SortConfig.setShouldShowRoutePreview(service, binding.checkBoxShowPreview.isChecked());
+                                    SortConfig.setShouldShowRoutePreview(accessibilityService, binding.checkBoxShowPreview.isChecked());
                                     SortConfig.setOptimizationMethod(
-                                            service,
+                                            accessibilityService,
                                             binding.rbOrs.isChecked() ?
                                                     SortConfig.OptimizationMethod.OPEN_ROUTE_SERVICE :
                                                     SortConfig.OptimizationMethod.HAVERSINE);
                                     SortConfig.setOptimizationType(
-                                            service,
+                                            accessibilityService,
                                             binding.rbAnyDest.isChecked() ?
                                                     OptimizationType.ANY_DESTINATION :
                                                     OptimizationType.FIXED_DESTINATION);
@@ -130,7 +130,7 @@ public class SettingsDialog {
 
         binding.btnConfigureOrs.setOnClickListener(view -> showApiKeyDialog(themedContext, settingsDialog));
 
-        if (SortConfig.getOptimizationMethod(service) == SortConfig.OptimizationMethod.HAVERSINE) {
+        if (SortConfig.getOptimizationMethod(accessibilityService) == SortConfig.OptimizationMethod.HAVERSINE) {
             binding.rbHaversine.setChecked(true);
             binding.rbOrs.setChecked(false);
         } else if (binding.rbOrs.isEnabled()) {
@@ -141,7 +141,7 @@ public class SettingsDialog {
             binding.rbOrs.setChecked(false);
         }
 
-        if (SortConfig.getOptimizationType(service) == OptimizationType.FIXED_DESTINATION) {
+        if (SortConfig.getOptimizationType(accessibilityService) == OptimizationType.FIXED_DESTINATION) {
             binding.rbFixedDest.setChecked(true);
             binding.rbAnyDest.setChecked(false);
         } else {
@@ -177,7 +177,7 @@ public class SettingsDialog {
                             Intent.ACTION_VIEW,
                             Uri.parse(binding.tvLink.getText().toString()));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            service.startActivity(intent);
+            accessibilityService.startActivity(intent);
             // Close both dialogs so they don't cover the browser
             apiKeyDialog.dismiss();
             parentDialog.dismiss();
@@ -198,7 +198,7 @@ public class SettingsDialog {
                                             binding.etApiKey.getText().toString().trim() :
                                             "";
                             if (apiKey.isEmpty()) {
-                                binding.etApiKey.setError(service.getString(R.string.api_key_error_empty));
+                                binding.etApiKey.setError(accessibilityService.getString(R.string.api_key_error_empty));
                                 return;
                             }
 
@@ -212,24 +212,24 @@ public class SettingsDialog {
                                 try {
                                     OpenRouteServiceRoutingMatrixProvider.validateApiKey(apiKey);
                                     ContextCompat
-                                            .getMainExecutor(service)
+                                            .getMainExecutor(accessibilityService)
                                             .execute(() -> {
                                                 apiKeyRepository.saveApiKey(apiKey);
                                                 Toast
-                                                        .makeText(service, R.string.api_key_success, Toast.LENGTH_SHORT)
+                                                        .makeText(accessibilityService, R.string.api_key_success, Toast.LENGTH_SHORT)
                                                         .show();
                                                 apiKeyDialog.dismiss();
                                             });
                                 } catch (final IOException e) {
                                     ContextCompat
-                                            .getMainExecutor(service)
+                                            .getMainExecutor(accessibilityService)
                                             .execute(() -> {
                                                 binding.progressBar.setVisibility(View.GONE);
                                                 apiKeyDialog
                                                         .getButton(AlertDialog.BUTTON_POSITIVE)
                                                         .setEnabled(true);
                                                 binding.etApiKey.setEnabled(true);
-                                                binding.etApiKey.setError(service.getString(R.string.api_key_error_invalid, e.getMessage()));
+                                                binding.etApiKey.setError(accessibilityService.getString(R.string.api_key_error_invalid, e.getMessage()));
                                             });
                                 }
                             }).start();

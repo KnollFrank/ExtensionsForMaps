@@ -51,7 +51,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
         AWAITING_RESPONSE
     }
 
-    private final AccessibilityService service;
+    private final AccessibilityService accessibilityService;
     private final WindowManager windowManager;
     private View scanButtonOverlay;
     private final Rect lastInputBounds = new Rect();
@@ -60,9 +60,9 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private long lastActionTime = 0;
     private int clickRetries = 0;
 
-    public ScanAddressFeature(final AccessibilityService service) {
-        this.service = service;
-        this.windowManager = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
+    public ScanAddressFeature(final AccessibilityService accessibilityService) {
+        this.accessibilityService = accessibilityService;
+        this.windowManager = (WindowManager) accessibilityService.getSystemService(Context.WINDOW_SERVICE);
     }
 
     @Override
@@ -183,7 +183,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
                     Log.i(TAG, "ERGEBNIS GEFUNDEN: " + pendingAddress);
                     lastActionTime = System.currentTimeMillis();
                     // Erster sanfter Versuch via BACK
-                    service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
+                    accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
                     return true;
                 }
             }
@@ -214,13 +214,13 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private void returnToMaps() {
         Log.d(TAG, "Hole Google Maps sanft in den Vordergrund...");
         // Wir nutzen einen Intent, der nur die existierende Instanz nach vorne holt
-        Intent intent = service.getPackageManager().getLaunchIntentForPackage(MAPS_PKG);
+        Intent intent = accessibilityService.getPackageManager().getLaunchIntentForPackage(MAPS_PKG);
         if (intent != null) {
             // WICHTIG: Wir loeschen den Reset-Flag, falls vorhanden
             intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
             // Wir fuegen REORDER_TO_FRONT hinzu, um nur die bestehende Task anzuzeigen
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            service.startActivity(intent);
+            accessibilityService.startActivity(intent);
         }
     }
 
@@ -246,7 +246,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
         if (node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)) return true;
 
         try {
-            final ClipboardManager cb = (ClipboardManager) service.getSystemService(Context.CLIPBOARD_SERVICE);
+            final ClipboardManager cb = (ClipboardManager) accessibilityService.getSystemService(Context.CLIPBOARD_SERVICE);
             cb.setPrimaryClip(ClipData.newPlainText("text", text));
             node.performAction(AccessibilityNodeInfo.ACTION_FOCUS);
             return node.performAction(AccessibilityNodeInfo.ACTION_PASTE);
@@ -272,7 +272,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private void click(final AccessibilityNodeInfo node) {
-        new AccessibilityServiceWrapper(service).click(node);
+        new AccessibilityServiceWrapper(accessibilityService).click(node);
     }
 
     @Override
@@ -301,7 +301,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     private void showScanButton(Rect b) {
         lastInputBounds.set(b);
-        FrameLayout l = new FrameLayout(service);
+        FrameLayout l = new FrameLayout(accessibilityService);
         Button btn = createButton();
         l.addView(btn, new FrameLayout.LayoutParams(dpToPx(40), dpToPx(40)));
         try {
@@ -321,7 +321,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private Button createButton() {
-        Button btn = new Button(service);
+        Button btn = new Button(accessibilityService);
         btn.setText("📷");
         btn.setPadding(0, 0, 0, 0);
         btn.setBackground(getButtonShape());
@@ -334,9 +334,9 @@ public class ScanAddressFeature implements AccessibilityFeature {
             lastActionTime = 0;
             pendingAddress = null;
             try {
-                Intent i = new Intent(service, CaptureAddressActivity.class);
+                Intent i = new Intent(accessibilityService, CaptureAddressActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                service.startActivity(i);
+                accessibilityService.startActivity(i);
             } catch (Exception e) {
                 Log.e(TAG, "Could not start CaptureAddressActivity", e);
             }
@@ -372,6 +372,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private int dpToPx(int dp) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, service.getResources().getDisplayMetrics());
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, accessibilityService.getResources().getDisplayMetrics());
     }
 }

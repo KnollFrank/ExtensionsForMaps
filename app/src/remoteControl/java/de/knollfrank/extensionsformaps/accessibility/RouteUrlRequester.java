@@ -30,19 +30,19 @@ public class RouteUrlRequester {
         void onRouteUrlExtracted(DirectionsUrl routeUrl);
     }
 
-    private final AccessibilityService service;
+    private final AccessibilityService accessibilityService;
     private Optional<RouteUrlCallback> routeUrlCallback = Optional.empty();
     private boolean isWaitingToClickShareAfterBack = false;
 
-    public RouteUrlRequester(final AccessibilityService service) {
-        this.service = service;
+    public RouteUrlRequester(final AccessibilityService accessibilityService) {
+        this.accessibilityService = accessibilityService;
     }
 
     public void requestRouteUrl(final RouteUrlCallback routeUrlCallback) {
         this.routeUrlCallback = Optional.of(routeUrlCallback);
         if (!tryClickShareButton()) {
             Log.d(TAG, "Share button not found. Dismissing overlay via BACK.");
-            service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
+            accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
             isWaitingToClickShareAfterBack = true;
         }
     }
@@ -60,7 +60,7 @@ public class RouteUrlRequester {
     public void handleResolverEvent() {
         Optionals.ifPresentBoth(
                 routeUrlCallback,
-                new AccessibilityServiceWrapper(service).getRootInActiveWindow(),
+                new AccessibilityServiceWrapper(accessibilityService).getRootInActiveWindow(),
                 this::handleResolverEvent);
     }
 
@@ -81,9 +81,9 @@ public class RouteUrlRequester {
                         .thenAcceptAsync(
                                 optionalDirectionsUrl -> {
                                     routeUrlCallback.onRouteUrlExtracted(optionalDirectionsUrl.orElseThrow());
-                                    service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
+                                    accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
                                 },
-                                ContextCompat.getMainExecutor(service));
+                                ContextCompat.getMainExecutor(accessibilityService));
                 this.routeUrlCallback = Optional.empty();
             }
         }
@@ -101,7 +101,7 @@ public class RouteUrlRequester {
     }
 
     private Optional<AccessibilityNodeInfo> findShareButtonInAllWindows() {
-        final List<AccessibilityWindowInfo> windows = service.getWindows();
+        final List<AccessibilityWindowInfo> windows = accessibilityService.getWindows();
         for (final AccessibilityWindowInfo window : windows) {
             final AccessibilityNodeInfo root = window.getRoot();
             if (root != null) {

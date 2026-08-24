@@ -27,7 +27,7 @@ public class AddStopFeatureTest {
 
     @Before
     public void setUp() {
-        final AccessibilityService service = mock(AccessibilityService.class);
+        final AccessibilityService accessibilityService = mock(AccessibilityService.class);
         urlRequester = mock(RouteUrlRequester.class);
         callback = mock(RouteUrlRequester.RouteUrlCallback.class);
         final GoogleMapsContext googleMapsContext =
@@ -35,7 +35,7 @@ public class AddStopFeatureTest {
                         "Add stops",
                         "stops",
                         new StopCountParser(Pattern.compile("(\\d+) stops")));
-        feature = new AddStopFeature(service, googleMapsContext, urlRequester, callback);
+        feature = new AddStopFeature(accessibilityService, googleMapsContext, urlRequester, callback);
     }
 
     @Test

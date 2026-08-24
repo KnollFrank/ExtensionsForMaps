@@ -26,10 +26,10 @@ public class SortFeatureTest {
 
     @Before
     public void setUp() {
-        final AccessibilityService service = Robolectric.setupService(MapsExtensionsAccessibilityService.class);
+        final AccessibilityService accessibilityService = Robolectric.setupService(MapsExtensionsAccessibilityService.class);
         urlRequester = mock(RouteUrlRequester.class);
         callback = mock(RouteUrlRequester.RouteUrlCallback.class);
-        feature = new SortFeature(service, urlRequester, callback);
+        feature = new SortFeature(accessibilityService, urlRequester, callback);
     }
 
     @Test

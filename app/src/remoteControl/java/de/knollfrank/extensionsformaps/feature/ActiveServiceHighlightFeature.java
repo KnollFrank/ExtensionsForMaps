@@ -13,13 +13,13 @@ import de.knollfrank.extensionsformaps.R;
 
 public class ActiveServiceHighlightFeature implements AccessibilityFeature {
 
-    private final AccessibilityService service;
+    private final AccessibilityService accessibilityService;
     private final WindowManager windowManager;
     private View highlightView;
 
-    public ActiveServiceHighlightFeature(final AccessibilityService service) {
-        this.service = service;
-        this.windowManager = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
+    public ActiveServiceHighlightFeature(final AccessibilityService accessibilityService) {
+        this.accessibilityService = accessibilityService;
+        this.windowManager = (WindowManager) accessibilityService.getSystemService(Context.WINDOW_SERVICE);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class ActiveServiceHighlightFeature implements AccessibilityFeature {
             return;
         }
 
-        highlightView = new FrameLayout(service);
+        highlightView = new FrameLayout(accessibilityService);
         highlightView.setBackgroundResource(R.drawable.border_screen);
 
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(

@@ -27,7 +27,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
 
     private static final String TAG = SortFeature.class.getSimpleName();
 
-    private final AccessibilityService service;
+    private final AccessibilityService accessibilityService;
     private final WindowManager windowManager;
     private final RouteUrlRequester routeUrlRequester;
     private final RouteUrlRequester.RouteUrlCallback onRouteUrlExtracted;
@@ -37,11 +37,11 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     private final Rect lastStopCountBounds = new Rect();
     private int lastKnownStopCount = 0;
 
-    public SortFeature(final AccessibilityService service,
+    public SortFeature(final AccessibilityService accessibilityService,
                        final RouteUrlRequester routeUrlRequester,
                        final RouteUrlRequester.RouteUrlCallback onRouteUrlExtracted) {
-        this.service = service;
-        this.windowManager = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
+        this.accessibilityService = accessibilityService;
+        this.windowManager = (WindowManager) accessibilityService.getSystemService(Context.WINDOW_SERVICE);
         this.routeUrlRequester = routeUrlRequester;
         this.onRouteUrlExtracted = onRouteUrlExtracted;
     }
@@ -101,7 +101,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     }
 
     private View createOverlayLayout() {
-        final LinearLayout layout = new LinearLayout(service);
+        final LinearLayout layout = new LinearLayout(accessibilityService);
         layout.setOrientation(LinearLayout.HORIZONTAL);
         layout.setGravity(Gravity.CENTER_VERTICAL);
         layout.addView(createSortButton());
@@ -110,8 +110,8 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     }
 
     private View createSortButton() {
-        final Button button = new Button(service);
-        button.setText(service.getString(R.string.sort_button_label));
+        final Button button = new Button(accessibilityService);
+        button.setText(accessibilityService.getString(R.string.sort_button_label));
         button.setTextColor(Color.parseColor("#8AB4F8"));
         button.setAllCaps(false);
         button.setGravity(Gravity.CENTER);
@@ -132,8 +132,8 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     }
 
     private View createSettingsButton() {
-        final Button button = new Button(service);
-        button.setText(service.getString(R.string.settings_configure_button_text));
+        final Button button = new Button(accessibilityService);
+        button.setText(accessibilityService.getString(R.string.settings_configure_button_text));
         button.setTextColor(Color.WHITE);
         button.setGravity(Gravity.CENTER);
         button.setPadding(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4));
@@ -148,7 +148,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
                         LinearLayout.LayoutParams.MATCH_PARENT);
         params.leftMargin = dpToPx(4);
         button.setLayoutParams(params);
-        button.setOnClickListener(view -> new SettingsDialog(service).show());
+        button.setOnClickListener(view -> new SettingsDialog(accessibilityService).show());
         return button;
     }
 
@@ -180,7 +180,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     }
 
     private int dpToPx(final int dp) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, service.getResources().getDisplayMetrics());
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, accessibilityService.getResources().getDisplayMetrics());
     }
 
     private void removeSortButton() {
