@@ -11,6 +11,7 @@ import androidx.core.util.Pair;
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.common.Optionals;
@@ -67,28 +68,36 @@ public class RouteUrlRequester {
 
     private void handleResolverEvent(final RouteUrlCallback routeUrlCallback,
                                      final AccessibilityNodeInfo rootNode) {
-        final List<AccessibilityNodeInfo> urlNodes =
-                ImmutableList
-                        .<AccessibilityNodeInfo>builder()
-                        .addAll(rootNode.findAccessibilityNodeInfosByViewId("android:id/content_preview_text"))
-                        .addAll(rootNode.findAccessibilityNodeInfosByViewId("com.android.intentresolver:id/sem_chooser_sub_title_details_view"))
-                        .build();
-        if (!urlNodes.isEmpty()) {
-            final CharSequence urlText = urlNodes.get(0).getText();
-            if (urlText != null) {
-                Log.d(TAG, "Extracted URL: " + urlText);
-                DirectionsUrlFactory
-                        .createDirectionsUrl(URLs.createUrl(urlText.toString()))
-                        .thenApply(Optional::orElseThrow)
-                        .thenAcceptAsync(
-                                directionsUrl -> {
-                                    routeUrlCallback.onRouteUrlExtracted(directionsUrl);
-                                    accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
-                                },
-                                ContextCompat.getMainExecutor(accessibilityService));
-                this.routeUrlCallback = Optional.empty();
-            }
-        }
+        RouteUrlRequester
+                .getUrlNodes(rootNode)
+                .stream()
+                .map(AccessibilityNodeInfo::getText)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .map(CharSequence::toString)
+                .map(URLs::createUrl)
+                .ifPresent(
+                        url -> {
+                            Log.d(TAG, "Extracted URL: " + url);
+                            DirectionsUrlFactory
+                                    .createDirectionsUrl(url)
+                                    .thenApply(Optional::orElseThrow)
+                                    .thenAcceptAsync(
+                                            directionsUrl -> {
+                                                routeUrlCallback.onRouteUrlExtracted(directionsUrl);
+                                                accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
+                                            },
+                                            ContextCompat.getMainExecutor(accessibilityService));
+                            this.routeUrlCallback = Optional.empty();
+                        });
+    }
+
+    private static List<AccessibilityNodeInfo> getUrlNodes(final AccessibilityNodeInfo rootNode) {
+        return ImmutableList
+                .<AccessibilityNodeInfo>builder()
+                .addAll(rootNode.findAccessibilityNodeInfosByViewId("android:id/content_preview_text"))
+                .addAll(rootNode.findAccessibilityNodeInfosByViewId("com.android.intentresolver:id/sem_chooser_sub_title_details_view"))
+                .build();
     }
 
     private boolean tryClickShareButton() {
