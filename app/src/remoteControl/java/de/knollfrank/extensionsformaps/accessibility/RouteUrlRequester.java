@@ -68,20 +68,25 @@ public class RouteUrlRequester {
     }
 
     private void extractUrlFromShareSheet(final RouteUrlCallback routeUrlCallback,
-                                          final AccessibilityNodeInfo rootNode) {
+                                          final AccessibilityNodeInfo shareSheet) {
         RouteUrlRequester
-                .getUrl(rootNode)
+                .getUrl(shareSheet)
                 .ifPresent(
                         url -> {
                             Log.d(TAG, "Extracted URL: " + url);
-                            DirectionsUrlFactory
-                                    .createDirectionsUrl(url)
-                                    .thenApply(Optional::orElseThrow)
-                                    .thenAcceptAsync(
-                                            directionsUrl -> deliverUrlAndDismissShareSheet(directionsUrl, routeUrlCallback),
-                                            ContextCompat.getMainExecutor(accessibilityService));
+                            deliverUrlAndDismissShareSheet(url, routeUrlCallback);
                             this.routeUrlCallback = Optional.empty();
                         });
+    }
+
+    private void deliverUrlAndDismissShareSheet(final URL url,
+                                                final RouteUrlCallback routeUrlCallback) {
+        DirectionsUrlFactory
+                .createDirectionsUrl(url)
+                .thenApply(Optional::orElseThrow)
+                .thenAcceptAsync(
+                        directionsUrl -> deliverUrlAndDismissShareSheet(directionsUrl, routeUrlCallback),
+                        ContextCompat.getMainExecutor(accessibilityService));
     }
 
     private void deliverUrlAndDismissShareSheet(final DirectionsUrl directionsUrl,
