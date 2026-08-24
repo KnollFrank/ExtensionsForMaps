@@ -78,9 +78,10 @@ public class RouteUrlRequester {
                 Log.d(TAG, "Extracted URL: " + urlText);
                 DirectionsUrlFactory
                         .createDirectionsUrl(URLs.createUrl(urlText.toString()))
+                        .thenApply(Optional::orElseThrow)
                         .thenAcceptAsync(
-                                optionalDirectionsUrl -> {
-                                    routeUrlCallback.onRouteUrlExtracted(optionalDirectionsUrl.orElseThrow());
+                                directionsUrl -> {
+                                    routeUrlCallback.onRouteUrlExtracted(directionsUrl);
                                     accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
                                 },
                                 ContextCompat.getMainExecutor(accessibilityService));
@@ -100,6 +101,7 @@ public class RouteUrlRequester {
         return false;
     }
 
+    // FK-TODO: refactor to functional
     private Optional<AccessibilityNodeInfo> findShareButtonInAllWindows() {
         final List<AccessibilityWindowInfo> windows = accessibilityService.getWindows();
         for (final AccessibilityWindowInfo window : windows) {
@@ -114,14 +116,16 @@ public class RouteUrlRequester {
         return Optional.empty();
     }
 
+    // FK-TODO: refactor
     private Optional<AccessibilityNodeInfo> findShareButton(final AccessibilityNodeInfo rootNode) {
         List<AccessibilityNodeInfo> nodes = rootNode.findAccessibilityNodeInfosByViewId(SHARE_ID);
         if (nodes.isEmpty()) {
+            // FK-TODO: i8n for "Share" and "Teilen" by using a key
             nodes = rootNode.findAccessibilityNodeInfosByText("Share");
         }
         if (nodes.isEmpty()) {
             nodes = rootNode.findAccessibilityNodeInfosByText("Teilen");
         }
-        return nodes.isEmpty() ? Optional.empty() : Optional.of(nodes.get(0));
+        return nodes.stream().findFirst();
     }
 }
