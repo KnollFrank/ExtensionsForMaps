@@ -20,7 +20,6 @@ import de.knollfrank.extensionsformaps.common.URLs;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 
-// FK-TODO: refactor
 public class RouteUrlRequester {
 
     private static final String TAG = RouteUrlRequester.class.getSimpleName();
