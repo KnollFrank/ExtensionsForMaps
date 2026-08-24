@@ -20,15 +20,15 @@ public class StopCountDetector {
     }
 
     private final GoogleMapsContext googleMapsContext;
-    private final List<StopCountListener> listeners;
+    private final List<StopCountListener> stopCountListeners;
 
     public StopCountDetector(final GoogleMapsContext googleMapsContext,
-                             final List<StopCountListener> listeners) {
+                             final List<StopCountListener> stopCountListeners) {
         this.googleMapsContext = googleMapsContext;
-        this.listeners = listeners;
+        this.stopCountListeners = stopCountListeners;
     }
 
-    public void detect(final AccessibilityNodeInfo root) {
+    public void detectStopCount(final AccessibilityNodeInfo root) {
         root
                 .findAccessibilityNodeInfosByText(googleMapsContext.stopsWord)
                 .stream()
@@ -58,11 +58,11 @@ public class StopCountDetector {
     }
 
     private void notifyStopCountUpdated(final DetectedStopCount detectedStopCount) {
-        listeners.forEach(listener -> listener.onStopCountUpdated(detectedStopCount.count(), detectedStopCount.bounds()));
+        stopCountListeners.forEach(stopCountListener -> stopCountListener.onStopCountUpdated(detectedStopCount.count(), detectedStopCount.bounds()));
     }
 
     private void notifyStopCountLost() {
-        listeners.forEach(StopCountListener::onStopCountLost);
+        stopCountListeners.forEach(StopCountListener::onStopCountLost);
     }
 
     private record DetectedStopCount(int count, Rect bounds) {

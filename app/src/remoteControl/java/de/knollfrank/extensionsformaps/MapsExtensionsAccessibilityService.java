@@ -162,7 +162,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                 .getRootInActiveWindow()
                 .ifPresent(
                         root -> {
-                            stopCountDetector.detect(root);
+                            stopCountDetector.detectStopCount(root);
                             compoundFeature.onGoogleMapsEvent(event, root);
                         });
     }

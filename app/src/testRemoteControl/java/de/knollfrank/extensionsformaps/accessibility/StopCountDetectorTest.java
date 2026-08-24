@@ -14,15 +14,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
 @RunWith(RobolectricTestRunner.class)
 public class StopCountDetectorTest {
 
-    private StopCountDetector detector;
-    private StopCountDetector.StopCountListener listener;
+    private StopCountDetector stopCountDetector;
+    private StopCountDetector.StopCountListener stopCountListener;
 
     @Before
     public void setUp() {
@@ -31,12 +30,12 @@ public class StopCountDetectorTest {
                         "Add stops",
                         "stops",
                         new StopCountParser(Pattern.compile("(\\d+) stops")));
-        listener = mock(StopCountDetector.StopCountListener.class);
-        detector = new StopCountDetector(googleMapsContext, List.of(listener));
+        stopCountListener = mock(StopCountDetector.StopCountListener.class);
+        stopCountDetector = new StopCountDetector(googleMapsContext, List.of(stopCountListener));
     }
 
     @Test
-    public void testDetect_Success() {
+    public void testDetectStopCount_Success() {
         // Given
         final AccessibilityNodeInfo root = mock(AccessibilityNodeInfo.class);
         final AccessibilityNodeInfo node = mock(AccessibilityNodeInfo.class);
@@ -44,22 +43,22 @@ public class StopCountDetectorTest {
         when(node.getText()).thenReturn("15 stops");
 
         // When
-        detector.detect(root);
+        stopCountDetector.detectStopCount(root);
 
         // Then
-        verify(listener).onStopCountUpdated(eq(15), any(Rect.class));
+        verify(stopCountListener).onStopCountUpdated(eq(15), any(Rect.class));
     }
 
     @Test
-    public void testDetect_Lost() {
+    public void testDetectStopCount_Lost() {
         // Given
         final AccessibilityNodeInfo root = mock(AccessibilityNodeInfo.class);
-        when(root.findAccessibilityNodeInfosByText("stops")).thenReturn(Collections.emptyList());
+        when(root.findAccessibilityNodeInfosByText("stops")).thenReturn(List.of());
 
         // When
-        detector.detect(root);
+        stopCountDetector.detectStopCount(root);
 
         // Then
-        verify(listener).onStopCountLost();
+        verify(stopCountListener).onStopCountLost();
     }
 }
