@@ -59,43 +59,27 @@ public class RouteUrlRequester {
         }
     }
 
-    public void handleShareSheet() {
+    public void extractUrlFromShareSheetAndDeliverToCallback() {
         Optionals.ifPresentBoth(
                 Pair.create(
-                        routeUrlCallback,
-                        new AccessibilityServiceWrapper(accessibilityService).getRootInActiveWindow()),
-                this::extractUrlFromShareSheet);
+                        new AccessibilityServiceWrapper(accessibilityService).getRootInActiveWindow(),
+                        routeUrlCallback),
+                this::extractUrlFromShareSheetAndDeliverToCallback);
     }
 
-    private void extractUrlFromShareSheet(final RouteUrlCallback routeUrlCallback,
-                                          final AccessibilityNodeInfo shareSheet) {
+    private void extractUrlFromShareSheetAndDeliverToCallback(final AccessibilityNodeInfo shareSheet,
+                                                              final RouteUrlCallback routeUrlCallback) {
         RouteUrlRequester
-                .getUrl(shareSheet)
+                .extractUrl(shareSheet)
                 .ifPresent(
                         url -> {
                             Log.d(TAG, "Extracted URL: " + url);
-                            deliverUrlAndDismissShareSheet(url, routeUrlCallback);
+                            deliverUrlToCallbackAndDismissShareSheet(url, routeUrlCallback);
                             this.routeUrlCallback = Optional.empty();
                         });
     }
 
-    private void deliverUrlAndDismissShareSheet(final URL url,
-                                                final RouteUrlCallback routeUrlCallback) {
-        DirectionsUrlFactory
-                .createDirectionsUrl(url)
-                .thenApply(Optional::orElseThrow)
-                .thenAcceptAsync(
-                        directionsUrl -> deliverUrlAndDismissShareSheet(directionsUrl, routeUrlCallback),
-                        ContextCompat.getMainExecutor(accessibilityService));
-    }
-
-    private void deliverUrlAndDismissShareSheet(final DirectionsUrl directionsUrl,
-                                                final RouteUrlCallback routeUrlCallback) {
-        routeUrlCallback.onRouteUrlExtracted(directionsUrl);
-        accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
-    }
-
-    private static Optional<URL> getUrl(final AccessibilityNodeInfo rootNode) {
+    private static Optional<URL> extractUrl(final AccessibilityNodeInfo rootNode) {
         return RouteUrlRequester
                 .getUrlNodes(rootNode)
                 .stream()
@@ -112,6 +96,22 @@ public class RouteUrlRequester {
                 .addAll(rootNode.findAccessibilityNodeInfosByViewId("android:id/content_preview_text"))
                 .addAll(rootNode.findAccessibilityNodeInfosByViewId("com.android.intentresolver:id/sem_chooser_sub_title_details_view"))
                 .build();
+    }
+
+    private void deliverUrlToCallbackAndDismissShareSheet(final URL url,
+                                                          final RouteUrlCallback routeUrlCallback) {
+        DirectionsUrlFactory
+                .createDirectionsUrl(url)
+                .thenApply(Optional::orElseThrow)
+                .thenAcceptAsync(
+                        directionsUrl -> deliverUrlToCallbackAndDismissShareSheet(directionsUrl, routeUrlCallback),
+                        ContextCompat.getMainExecutor(accessibilityService));
+    }
+
+    private void deliverUrlToCallbackAndDismissShareSheet(final DirectionsUrl directionsUrl,
+                                                          final RouteUrlCallback routeUrlCallback) {
+        routeUrlCallback.onRouteUrlExtracted(directionsUrl);
+        accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
     }
 
     private boolean tryClickShareButton() {
