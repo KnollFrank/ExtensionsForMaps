@@ -73,8 +73,9 @@ class AddStopAutomation {
     }
 
     private void handleWaitingForStopCountClick(final AccessibilityNodeInfo root) {
-        if (!isCooldownOver()) return;
-
+        if (!isCooldownOver()) {
+            return;
+        }
         final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord);
         if (!nodes.isEmpty()) {
             final AccessibilityNodeInfo node = nodes.get(0);
@@ -83,7 +84,6 @@ class AddStopAutomation {
                 state = State.WAITING_FOR_LAST_STOP_CLICK;
                 markAction();
             }
-            node.recycle();
         }
     }
 
@@ -99,7 +99,6 @@ class AddStopAutomation {
                     if (new AccessibilityServiceWrapper(accessibilityService).click(node)) {
                         markAction();
                     }
-                    node.recycle();
                 }
             }
             return;
@@ -124,10 +123,8 @@ class AddStopAutomation {
                         markAction();
                     }
                 }
-                lastChild.recycle();
             }
         }
-        recyclerView.recycle();
     }
 
     private static boolean listContainsCenterOfItem(final AccessibilityNodeInfo list, final AccessibilityNodeInfo item) {
@@ -154,7 +151,6 @@ class AddStopAutomation {
             // Success: EditText is present but the clear button is missing, meaning the field is "empty"
             Log.d(TAG, "Step 3: Clear button is gone. Automation completed successfully!");
             finishAutomation();
-            editText.recycle();
             return;
         }
 
@@ -167,18 +163,14 @@ class AddStopAutomation {
         if (!currentText.equals(textToClear)) {
             Log.d(TAG, "Step 3: Text has changed or was cleared. Stopping automation.");
             finishAutomation();
-            editText.recycle();
             return;
         }
-        editText.recycle();
-
         if (isCooldownOver()) {
             final AccessibilityNodeInfo clearButton = clearButtons.get(0);
             Log.d(TAG, "Step 3: Found clear button. Attempting to click...");
             if (new AccessibilityServiceWrapper(accessibilityService).click(clearButton)) {
                 markAction();
             }
-            clearButton.recycle();
         }
     }
 
@@ -189,11 +181,7 @@ class AddStopAutomation {
                 Log.v(TAG, "Watchdog triggered check for state: " + state);
                 new AccessibilityServiceWrapper(accessibilityService)
                         .getRootInActiveWindow()
-                        .ifPresent(
-                                root -> {
-                                    processState(root);
-                                    root.recycle();
-                                });
+                        .ifPresent(this::processState);
                 scheduleWatchdog();
             }
         }, WATCHDOG_DELAY_MS);
