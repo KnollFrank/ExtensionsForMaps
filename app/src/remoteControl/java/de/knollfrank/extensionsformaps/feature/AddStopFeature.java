@@ -16,7 +16,6 @@ import com.google.common.collect.Range;
 
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.function.Consumer;
 
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
@@ -134,14 +133,10 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
         this
                 .findAddStopsButton(root)
                 .ifPresentOrElse(
-                        new Consumer<>() {
-
-                            @Override
-                            public void accept(final AccessibilityNodeInfo addStopsButton) {
-                                final Rect bounds = new AccessibilityNodeInfoWrapper(addStopsButton).getBoundsInScreen();
-                                if (highlightOverlay.isEmpty() || !lastOverlayBounds.equals(bounds)) {
-                                    showHighlight(bounds);
-                                }
+                        addStopsButton -> {
+                            final Rect bounds = new AccessibilityNodeInfoWrapper(addStopsButton).getBoundsInScreen();
+                            if (highlightOverlay.isEmpty() || !lastOverlayBounds.equals(bounds)) {
+                                showHighlight(bounds);
                             }
                         },
                         this::removeHighlight);
