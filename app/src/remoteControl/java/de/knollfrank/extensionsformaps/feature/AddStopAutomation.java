@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.List;
+import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
@@ -32,6 +33,7 @@ class AddStopAutomation {
     private final Handler watchdogHandler = new Handler(Looper.getMainLooper());
     private State state = State.IDLE;
     private long lastActionTime = 0;
+    // FK-TODO: make Optional
     private String textToClear = null;
 
     public AddStopAutomation(final AccessibilityService accessibilityService, final GoogleMapsContext googleMapsContext) {
@@ -76,14 +78,21 @@ class AddStopAutomation {
         if (!isCooldownOver()) {
             return;
         }
-        final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord);
-        if (!nodes.isEmpty()) {
-            final AccessibilityNodeInfo node = nodes.get(0);
-            Log.d(TAG, "Step 1 (Backup): Found '" + googleMapsContext.stopsWord + "' label. Clicking...");
-            if (new AccessibilityServiceWrapper(accessibilityService).click(node)) {
-                state = State.WAITING_FOR_LAST_STOP_CLICK;
-                markAction();
-            }
+        findStopCountNode(root).ifPresent(this::performStopCountClick);
+    }
+
+    private Optional<AccessibilityNodeInfo> findStopCountNode(final AccessibilityNodeInfo root) {
+        return root
+                .findAccessibilityNodeInfosByText(googleMapsContext.stopsWord)
+                .stream()
+                .findFirst();
+    }
+
+    private void performStopCountClick(final AccessibilityNodeInfo stopCountNode) {
+        Log.d(TAG, "Step 1 (Backup): Found '" + googleMapsContext.stopsWord + "' label. Clicking...");
+        if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountNode)) {
+            state = State.WAITING_FOR_LAST_STOP_CLICK;
+            markAction();
         }
     }
 
@@ -92,14 +101,9 @@ class AddStopAutomation {
         if (recyclerViews.isEmpty()) {
             if (isCooldownOver()) {
                 // Retry expansion click if the first one was ignored
-                final List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByText(googleMapsContext.stopsWord);
-                if (!nodes.isEmpty()) {
-                    final AccessibilityNodeInfo node = nodes.get(0);
-                    Log.d(TAG, "Step 2: Re-clicking expansion label '" + googleMapsContext.stopsWord + "'...");
-                    if (new AccessibilityServiceWrapper(accessibilityService).click(node)) {
-                        markAction();
-                    }
-                }
+                this
+                        .findStopCountNode(root)
+                        .ifPresent(this::performLastStopClick);
             }
             return;
         }
@@ -124,6 +128,13 @@ class AddStopAutomation {
                     }
                 }
             }
+        }
+    }
+
+    private void performLastStopClick(final AccessibilityNodeInfo stopCountNode) {
+        Log.d(TAG, "Step 2: Re-clicking expansion label '" + googleMapsContext.stopsWord + "'...");
+        if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountNode)) {
+            markAction();
         }
     }
 
@@ -176,15 +187,17 @@ class AddStopAutomation {
 
     private void scheduleWatchdog() {
         watchdogHandler.removeCallbacksAndMessages(null);
-        watchdogHandler.postDelayed(() -> {
-            if (state != State.IDLE) {
-                Log.v(TAG, "Watchdog triggered check for state: " + state);
-                new AccessibilityServiceWrapper(accessibilityService)
-                        .getRootInActiveWindow()
-                        .ifPresent(this::processState);
-                scheduleWatchdog();
-            }
-        }, WATCHDOG_DELAY_MS);
+        watchdogHandler.postDelayed(
+                () -> {
+                    if (state != State.IDLE) {
+                        Log.v(TAG, "Watchdog triggered check for state: " + state);
+                        new AccessibilityServiceWrapper(accessibilityService)
+                                .getRootInActiveWindow()
+                                .ifPresent(this::processState);
+                        scheduleWatchdog();
+                    }
+                },
+                WATCHDOG_DELAY_MS);
     }
 
     private boolean isCooldownOver() {
