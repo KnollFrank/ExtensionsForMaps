@@ -7,12 +7,15 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import androidx.core.util.Pair;
+
 import java.util.List;
 import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
+import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.common.RectWrapper;
 
 class AddStopAutomation {
@@ -78,7 +81,7 @@ class AddStopAutomation {
         if (!isCooldownOver()) {
             return;
         }
-        findStopCountNode(root).ifPresent(this::performStopCountClick);
+        findStopCountNode(root).ifPresent(this::clickStopCountNode);
     }
 
     private Optional<AccessibilityNodeInfo> findStopCountNode(final AccessibilityNodeInfo root) {
@@ -88,7 +91,7 @@ class AddStopAutomation {
                 .findFirst();
     }
 
-    private void performStopCountClick(final AccessibilityNodeInfo stopCountNode) {
+    private void clickStopCountNode(final AccessibilityNodeInfo stopCountNode) {
         Log.d(TAG, "Step 1 (Backup): Found '" + googleMapsContext.stopsWord + "' label. Clicking...");
         if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountNode)) {
             state = State.WAITING_FOR_LAST_STOP_CLICK;
@@ -97,41 +100,58 @@ class AddStopAutomation {
     }
 
     private void handleWaitingForLastStopClick(final AccessibilityNodeInfo root) {
-        final List<AccessibilityNodeInfo> recyclerViews = root.findAccessibilityNodeInfosByViewId("com.google.android.apps.maps:id/edit_waypoints_list");
-        if (recyclerViews.isEmpty()) {
-            if (isCooldownOver()) {
-                // Retry expansion click if the first one was ignored
-                this
-                        .findStopCountNode(root)
-                        .ifPresent(this::performLastStopClick);
-            }
-            return;
-        }
+        AddStopAutomation
+                .findEditStopsList(root)
+                .ifPresentOrElse(
+                        editStopsList -> {
+                            if (!isCooldownOver()) {
+                                return;
+                            }
+                            Optionals.ifPresentBoth(
+                                    Pair.create(
+                                            Optional.of(editStopsList),
+                                            new AccessibilityNodeInfoWrapper(editStopsList).getLastChild()),
+                                    this::clickLastStopOrScrollToLastStop);
+                        },
+                        () -> {
+                            if (isCooldownOver()) {
+                                // Retry expansion click if the first one was ignored
+                                findStopCountNode(root).ifPresent(this::reclickStopCountNode);
+                            }
+                        });
+    }
 
-        if (!isCooldownOver()) return;
-
-        final AccessibilityNodeInfo recyclerView = recyclerViews.get(0);
-        final int childCount = recyclerView.getChildCount();
-        if (childCount > 0) {
-            final AccessibilityNodeInfo lastChild = recyclerView.getChild(childCount - 1);
-            if (lastChild != null) {
-                if (listContainsCenterOfItem(recyclerView, lastChild)) {
-                    Log.d(TAG, "Step 2: Last waypoint is visible. Clicking...");
-                    if (new AccessibilityServiceWrapper(accessibilityService).click(lastChild)) {
-                        state = State.WAITING_FOR_CLEAR_CLICK;
-                        markAction();
-                    }
-                } else {
-                    Log.d(TAG, "Step 2: Last waypoint is off-screen. Scrolling...");
-                    if (recyclerView.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) {
-                        markAction();
-                    }
-                }
-            }
+    private void clickLastStopOrScrollToLastStop(final AccessibilityNodeInfo editStopsList, final AccessibilityNodeInfo lastStop) {
+        if (listContainsCenterOfItem(editStopsList, lastStop)) {
+            clickLastStop(lastStop);
+        } else {
+            scrollToLastStop(editStopsList);
         }
     }
 
-    private void performLastStopClick(final AccessibilityNodeInfo stopCountNode) {
+    private void clickLastStop(final AccessibilityNodeInfo lastStop) {
+        Log.d(TAG, "Step 2: Last waypoint is visible. Clicking...");
+        if (new AccessibilityServiceWrapper(accessibilityService).click(lastStop)) {
+            state = State.WAITING_FOR_CLEAR_CLICK;
+            markAction();
+        }
+    }
+
+    private void scrollToLastStop(final AccessibilityNodeInfo editStopsList) {
+        Log.d(TAG, "Step 2: Last waypoint is off-screen. Scrolling...");
+        if (editStopsList.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) {
+            markAction();
+        }
+    }
+
+    private static Optional<AccessibilityNodeInfo> findEditStopsList(final AccessibilityNodeInfo root) {
+        return root
+                .findAccessibilityNodeInfosByViewId("com.google.android.apps.maps:id/edit_waypoints_list")
+                .stream()
+                .findFirst();
+    }
+
+    private void reclickStopCountNode(final AccessibilityNodeInfo stopCountNode) {
         Log.d(TAG, "Step 2: Re-clicking expansion label '" + googleMapsContext.stopsWord + "'...");
         if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountNode)) {
             markAction();
