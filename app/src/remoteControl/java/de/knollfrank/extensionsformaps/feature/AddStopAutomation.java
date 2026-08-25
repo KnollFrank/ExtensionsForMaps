@@ -14,7 +14,7 @@ import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 import de.knollfrank.extensionsformaps.common.RectWrapper;
 
-public class AddStopAutomation {
+class AddStopAutomation {
 
     private static final String TAG = AddStopAutomation.class.getSimpleName();
     private static final long COOLDOWN_MS = 1000;

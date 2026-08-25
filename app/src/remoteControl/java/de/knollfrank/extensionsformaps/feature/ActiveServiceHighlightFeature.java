@@ -9,13 +9,15 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 
+import java.util.Optional;
+
 import de.knollfrank.extensionsformaps.R;
 
 public class ActiveServiceHighlightFeature implements AccessibilityFeature {
 
     private final AccessibilityService accessibilityService;
     private final WindowManager windowManager;
-    private View highlightView;
+    private Optional<View> highlightView = Optional.empty();
 
     public ActiveServiceHighlightFeature(final AccessibilityService accessibilityService) {
         this.accessibilityService = accessibilityService;
@@ -28,7 +30,7 @@ public class ActiveServiceHighlightFeature implements AccessibilityFeature {
 
     @Override
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
-        if (highlightView == null) {
+        if (highlightView.isEmpty()) {
             show();
         }
     }
@@ -48,14 +50,17 @@ public class ActiveServiceHighlightFeature implements AccessibilityFeature {
     }
 
     public void show() {
-        if (highlightView != null) {
+        if (highlightView.isPresent()) {
             return;
         }
-
-        highlightView = new FrameLayout(accessibilityService);
+        final View highlightView = new FrameLayout(accessibilityService);
+        this.highlightView = Optional.of(highlightView);
         highlightView.setBackgroundResource(R.drawable.border_screen);
+        windowManager.addView(highlightView, createLayoutParams());
+    }
 
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+    private static WindowManager.LayoutParams createLayoutParams() {
+        return new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
@@ -64,14 +69,13 @@ public class ActiveServiceHighlightFeature implements AccessibilityFeature {
                         WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
                         WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
-
-        windowManager.addView(highlightView, params);
     }
 
     private void hide() {
-        if (highlightView != null) {
-            windowManager.removeView(highlightView);
-            highlightView = null;
-        }
+        highlightView.ifPresent(
+                _highlightView -> {
+                    windowManager.removeView(_highlightView);
+                    highlightView = Optional.empty();
+                });
     }
 }
