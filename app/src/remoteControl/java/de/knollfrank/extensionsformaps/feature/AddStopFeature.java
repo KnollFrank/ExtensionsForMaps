@@ -99,7 +99,10 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     }
 
     private boolean enableEnhancedAddStopButton() {
-        return Range.closedOpen(8, 25).contains(lastKnownStopCount);
+        // FK-TODO: no magic numbers like 8 and 25, DRY with other parts
+        return Range
+                .closedOpen(8, 25)
+                .contains(lastKnownStopCount);
     }
 
     private boolean isAddStopsButtonClick(final AccessibilityEvent event) {
@@ -108,6 +111,10 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
     private boolean isAddStopsButton(final AccessibilityEvent event) {
         return isAddStopsText(getEventText(event));
+    }
+
+    private boolean isAddStopsText(final String text) {
+        return text.contains(googleMapsContext.addStopsText);
     }
 
     private void updateHighlightOverlay(final AccessibilityNodeInfo root) {
@@ -199,11 +206,5 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
             }
         }
         return sb.toString();
-    }
-
-    // FK-TODO: refactor
-    private boolean isAddStopsText(final String text) {
-        if (text == null) return false;
-        return text.contains(googleMapsContext.addStopsText);
     }
 }
