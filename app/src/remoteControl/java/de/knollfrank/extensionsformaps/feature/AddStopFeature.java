@@ -153,9 +153,9 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
         lastOverlayBounds.set(bounds);
         highlightOverlay.ifPresentOrElse(
                 highlightOverlay -> {
-                    final WindowManager.LayoutParams params = (WindowManager.LayoutParams) highlightOverlay.getLayoutParams();
-                    updateLayoutParams(params, bounds);
-                    windowManager.updateViewLayout(highlightOverlay, params);
+                    final WindowManager.LayoutParams layoutParams = (WindowManager.LayoutParams) highlightOverlay.getLayoutParams();
+                    updateLayoutParams(layoutParams, bounds);
+                    windowManager.updateViewLayout(highlightOverlay, layoutParams);
                 },
                 () -> {
                     final View highlightOverlay = createHighlightOverlay();
