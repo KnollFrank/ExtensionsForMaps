@@ -60,7 +60,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     @Override
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
         automation.onGoogleMapsEvent(root);
-        if (isAddStopsButtonClick(event) && enableEnhancedAddStopButton()) {
+        if (isAddStopsButtonClick(event) && shallEnableEnhancedAddStopButton()) {
             Log.d(TAG, "Stop limit reached. Requesting route URL.");
             routeUrlRequester.requestRouteUrl(onRouteUrlExtracted);
         }
@@ -100,14 +100,14 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
         automation.start();
     }
 
-    private boolean enableEnhancedAddStopButton() {
+    private boolean shallEnableEnhancedAddStopButton() {
         return Optionals
                 .asOptional(lastKnownStopCount)
-                .map(AddStopFeature::enableEnhancedAddStopButton)
+                .map(AddStopFeature::shallEnableEnhancedAddStopButton)
                 .orElse(false);
     }
 
-    private static boolean enableEnhancedAddStopButton(final int stopCount) {
+    private static boolean shallEnableEnhancedAddStopButton(final int stopCount) {
         // FK-TODO: no magic numbers like 8 and 25, DRY with other parts
         return Range
                 .closedOpen(8, 25)
@@ -127,7 +127,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     }
 
     private void updateHighlightOverlay(final AccessibilityNodeInfo root) {
-        if (!enableEnhancedAddStopButton()) {
+        if (!shallEnableEnhancedAddStopButton()) {
             removeHighlight();
             return;
         }
