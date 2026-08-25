@@ -15,6 +15,7 @@ import android.widget.FrameLayout;
 import com.google.common.collect.Range;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.Consumer;
 
 import de.knollfrank.extensionsformaps.R;
@@ -23,6 +24,7 @@ import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
 import de.knollfrank.extensionsformaps.accessibility.StopCountDetector;
+import de.knollfrank.extensionsformaps.common.Optionals;
 
 public class AddStopFeature implements AccessibilityFeature, StopCountDetector.StopCountListener {
 
@@ -37,7 +39,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
     private Optional<View> highlightOverlay = Optional.empty();
     private final Rect lastOverlayBounds = new Rect();
-    private int lastKnownStopCount = 0;
+    private OptionalInt lastKnownStopCount = OptionalInt.empty();
 
     public AddStopFeature(final AccessibilityService accessibilityService,
                           final GoogleMapsContext googleMapsContext,
@@ -70,7 +72,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
     @Override
     public void onStopCountUpdated(final int stopCount, final Rect stopCountBounds) {
-        lastKnownStopCount = stopCount;
+        lastKnownStopCount = OptionalInt.of(stopCount);
         automation.onStopCountUpdated(stopCountBounds);
         new AccessibilityServiceWrapper(accessibilityService)
                 .getRootInActiveWindow()
@@ -84,7 +86,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
 
     @Override
     public void reset() {
-        lastKnownStopCount = 0;
+        lastKnownStopCount = OptionalInt.empty();
         removeHighlight();
     }
 
@@ -99,10 +101,17 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     }
 
     private boolean enableEnhancedAddStopButton() {
+        return Optionals
+                .asOptional(lastKnownStopCount)
+                .map(AddStopFeature::enableEnhancedAddStopButton)
+                .orElse(false);
+    }
+
+    private static boolean enableEnhancedAddStopButton(final int stopCount) {
         // FK-TODO: no magic numbers like 8 and 25, DRY with other parts
         return Range
                 .closedOpen(8, 25)
-                .contains(lastKnownStopCount);
+                .contains(stopCount);
     }
 
     private boolean isAddStopsButtonClick(final AccessibilityEvent event) {
