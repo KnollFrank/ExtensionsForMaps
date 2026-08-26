@@ -69,149 +69,167 @@ class AddStopAutomation {
 
     private void processState(final AccessibilityNodeInfo root) {
         switch (state) {
-            case WAITING_FOR_STOP_COUNT_CLICK -> handleWaitingForStopCountClick(root);
-            case WAITING_FOR_LAST_STOP_CLICK -> handleWaitingForLastStopClick(root);
-            case WAITING_FOR_CLEAR_CLICK -> handleWaitingForClearClick(root);
+            case WAITING_FOR_STOP_COUNT_CLICK ->
+                    new WaitingForStopCountClickHandler().handleWaitingForStopCountClick(root);
+            case WAITING_FOR_LAST_STOP_CLICK ->
+                    new WaitingForLastStopClickHandler().handleWaitingForLastStopClick(root);
+            case WAITING_FOR_CLEAR_CLICK ->
+                    new WaitingForClearClickHandler().handleWaitingForClearClick(root);
         }
     }
 
-    private void handleWaitingForStopCountClick(final AccessibilityNodeInfo root) {
-        if (!isCooldownOver()) {
-            return;
+    private class WaitingForStopCountClickHandler {
+
+        public void handleWaitingForStopCountClick(final AccessibilityNodeInfo root) {
+            if (!isCooldownOver()) {
+                return;
+            }
+            WaitingForStopCountClickHandler
+                    .findStopCountNode(root, googleMapsContext)
+                    .ifPresent(this::clickStopCountNode);
         }
-        findStopCountNode(root).ifPresent(this::clickStopCountNode);
-    }
 
-    private Optional<AccessibilityNodeInfo> findStopCountNode(final AccessibilityNodeInfo root) {
-        return new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByText(googleMapsContext.stopsWord);
-    }
-
-    private void clickStopCountNode(final AccessibilityNodeInfo stopCountNode) {
-        Log.d(TAG, "Step 1 (Backup): Found '" + googleMapsContext.stopsWord + "' label. Clicking...");
-        if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountNode)) {
-            state = State.WAITING_FOR_LAST_STOP_CLICK;
-            markAction();
+        public static Optional<AccessibilityNodeInfo> findStopCountNode(final AccessibilityNodeInfo root,
+                                                                        final GoogleMapsContext googleMapsContext1) {
+            return new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByText(googleMapsContext1.stopsWord);
         }
-    }
 
-    private void handleWaitingForLastStopClick(final AccessibilityNodeInfo root) {
-        AddStopAutomation
-                .findEditStopsList(root)
-                .ifPresentOrElse(
-                        editStopsList -> {
-                            if (!isCooldownOver()) {
-                                return;
-                            }
-                            Optionals.ifPresentBoth(
-                                    Pair.create(
-                                            Optional.of(editStopsList),
-                                            new AccessibilityNodeInfoWrapper(editStopsList).getLastChild()),
-                                    this::clickLastStopOrScrollToLastStop);
-                        },
-                        () -> {
-                            if (isCooldownOver()) {
-                                // Retry expansion click if the first one was ignored
-                                findStopCountNode(root).ifPresent(this::reclickStopCountNode);
-                            }
-                        });
-    }
-
-    private void clickLastStopOrScrollToLastStop(final AccessibilityNodeInfo editStopsList, final AccessibilityNodeInfo lastStop) {
-        if (listContainsCenterOfItem(editStopsList, lastStop)) {
-            clickLastStop(lastStop);
-        } else {
-            scrollToLastStop(editStopsList);
+        private void clickStopCountNode(final AccessibilityNodeInfo stopCountNode) {
+            Log.d(TAG, "Step 1 (Backup): Found '" + googleMapsContext.stopsWord + "' label. Clicking...");
+            if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountNode)) {
+                state = State.WAITING_FOR_LAST_STOP_CLICK;
+                markAction();
+            }
         }
     }
 
-    private void clickLastStop(final AccessibilityNodeInfo lastStop) {
-        Log.d(TAG, "Step 2: Last waypoint is visible. Clicking...");
-        if (new AccessibilityServiceWrapper(accessibilityService).click(lastStop)) {
-            state = State.WAITING_FOR_CLEAR_CLICK;
-            markAction();
+    private class WaitingForLastStopClickHandler {
+
+        public void handleWaitingForLastStopClick(final AccessibilityNodeInfo root) {
+            WaitingForLastStopClickHandler
+                    .findEditStopsList(root)
+                    .ifPresentOrElse(
+                            editStopsList -> {
+                                if (!isCooldownOver()) {
+                                    return;
+                                }
+                                Optionals.ifPresentBoth(
+                                        Pair.create(
+                                                Optional.of(editStopsList),
+                                                new AccessibilityNodeInfoWrapper(editStopsList).getLastChild()),
+                                        this::clickLastStopOrScrollToLastStop);
+                            },
+                            () -> {
+                                if (isCooldownOver()) {
+                                    // Retry expansion click if the first one was ignored
+                                    WaitingForStopCountClickHandler
+                                            .findStopCountNode(root, googleMapsContext)
+                                            .ifPresent(this::reclickStopCountNode);
+                                }
+                            });
+        }
+
+        private void clickLastStopOrScrollToLastStop(final AccessibilityNodeInfo editStopsList,
+                                                     final AccessibilityNodeInfo lastStop) {
+            if (listContainsCenterOfItem(editStopsList, lastStop)) {
+                clickLastStop(lastStop);
+            } else {
+                scrollToLastStop(editStopsList);
+            }
+        }
+
+        private void clickLastStop(final AccessibilityNodeInfo lastStop) {
+            Log.d(TAG, "Step 2: Last waypoint is visible. Clicking...");
+            if (new AccessibilityServiceWrapper(accessibilityService).click(lastStop)) {
+                state = State.WAITING_FOR_CLEAR_CLICK;
+                markAction();
+            }
+        }
+
+        private void scrollToLastStop(final AccessibilityNodeInfo editStopsList) {
+            Log.d(TAG, "Step 2: Last waypoint is off-screen. Scrolling...");
+            if (editStopsList.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) {
+                markAction();
+            }
+        }
+
+        private static Optional<AccessibilityNodeInfo> findEditStopsList(final AccessibilityNodeInfo root) {
+            return new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/edit_waypoints_list");
+        }
+
+        private void reclickStopCountNode(final AccessibilityNodeInfo stopCountNode) {
+            Log.d(TAG, "Step 2: Re-clicking expansion label '" + googleMapsContext.stopsWord + "'...");
+            if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountNode)) {
+                markAction();
+            }
+        }
+
+        private static boolean listContainsCenterOfItem(final AccessibilityNodeInfo list, final AccessibilityNodeInfo item) {
+            return listContainsCenterOfItem(
+                    new AccessibilityNodeInfoWrapper(list).getBoundsInScreen(),
+                    new AccessibilityNodeInfoWrapper(item).getBoundsInScreen());
+        }
+
+        private static boolean listContainsCenterOfItem(final Rect list, final Rect item) {
+            return new RectWrapper(list).contains(new RectWrapper(item).getCenter().orElseThrow());
         }
     }
 
-    private void scrollToLastStop(final AccessibilityNodeInfo editStopsList) {
-        Log.d(TAG, "Step 2: Last waypoint is off-screen. Scrolling...");
-        if (editStopsList.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) {
-            markAction();
-        }
-    }
+    private class WaitingForClearClickHandler {
 
-    private static Optional<AccessibilityNodeInfo> findEditStopsList(final AccessibilityNodeInfo root) {
-        return new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/edit_waypoints_list");
-    }
-
-    private void reclickStopCountNode(final AccessibilityNodeInfo stopCountNode) {
-        Log.d(TAG, "Step 2: Re-clicking expansion label '" + googleMapsContext.stopsWord + "'...");
-        if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountNode)) {
-            markAction();
-        }
-    }
-
-    private static boolean listContainsCenterOfItem(final AccessibilityNodeInfo list, final AccessibilityNodeInfo item) {
-        return listContainsCenterOfItem(
-                new AccessibilityNodeInfoWrapper(list).getBoundsInScreen(),
-                new AccessibilityNodeInfoWrapper(item).getBoundsInScreen());
-    }
-
-    private static boolean listContainsCenterOfItem(final Rect list, final Rect item) {
-        return new RectWrapper(list).contains(new RectWrapper(item).getCenter().orElseThrow());
-    }
-
-    private void handleWaitingForClearClick(final AccessibilityNodeInfo root) {
-        final AccessibilityNodeInfoWrapper rootWrapper = new AccessibilityNodeInfoWrapper(root);
-        AddStopAutomation
-                .findEditText(rootWrapper)
-                .ifPresentOrElse(
-                        editText ->
-                                AddStopAutomation
-                                        .findClearButton(rootWrapper)
-                                        .ifPresentOrElse(
-                                                clearButton -> {
-                                                    final String currentText = getText(editText);
-                                                    if (textToClear.isEmpty()) {
-                                                        textToClear = Optional.of(currentText);
-                                                        Log.d(TAG, "Step 3: Dummy stop text identified: '" + currentText + "'");
-                                                    }
-                                                    if (!currentText.equals(textToClear.orElseThrow())) {
-                                                        Log.d(TAG, "Step 3: Text has changed or was cleared. Stopping automation.");
+        public void handleWaitingForClearClick(final AccessibilityNodeInfo root) {
+            final AccessibilityNodeInfoWrapper rootWrapper = new AccessibilityNodeInfoWrapper(root);
+            WaitingForClearClickHandler
+                    .findEditText(rootWrapper)
+                    .ifPresentOrElse(
+                            editText ->
+                                    WaitingForClearClickHandler
+                                            .findClearButton(rootWrapper)
+                                            .ifPresentOrElse(
+                                                    clearButton -> {
+                                                        final String currentText = getText(editText);
+                                                        if (textToClear.isEmpty()) {
+                                                            textToClear = Optional.of(currentText);
+                                                            Log.d(TAG, "Step 3: Dummy stop text identified: '" + currentText + "'");
+                                                        }
+                                                        if (!currentText.equals(textToClear.orElseThrow())) {
+                                                            Log.d(TAG, "Step 3: Text has changed or was cleared. Stopping automation.");
+                                                            finishAutomation();
+                                                            return;
+                                                        }
+                                                        if (isCooldownOver()) {
+                                                            clickClearButton(clearButton);
+                                                        }
+                                                    },
+                                                    () -> {
+                                                        // Success: EditText is present but the clear button is missing, meaning the field is "empty"
+                                                        Log.d(TAG, "Step 3: Clear button is gone. Automation completed successfully!");
                                                         finishAutomation();
-                                                        return;
-                                                    }
-                                                    if (isCooldownOver()) {
-                                                        clickClearButton(clearButton);
-                                                    }
-                                                },
-                                                () -> {
-                                                    // Success: EditText is present but the clear button is missing, meaning the field is "empty"
-                                                    Log.d(TAG, "Step 3: Clear button is gone. Automation completed successfully!");
-                                                    finishAutomation();
-                                                }),
-                        () -> Log.d(TAG, "Step 3: Search bar not found yet. Waiting for transition..."));
-    }
-
-    private void clickClearButton(final AccessibilityNodeInfo clearButton) {
-        Log.d(TAG, "Step 3: Found clear button. Attempting to click...");
-        if (new AccessibilityServiceWrapper(accessibilityService).click(clearButton)) {
-            markAction();
+                                                    }),
+                            () -> Log.d(TAG, "Step 3: Search bar not found yet. Waiting for transition..."));
         }
-    }
 
-    private static String getText(final AccessibilityNodeInfo node) {
-        return new AccessibilityNodeInfoWrapper(node)
-                .getText()
-                .map(CharSequence::toString)
-                .orElse("");
-    }
+        private void clickClearButton(final AccessibilityNodeInfo clearButton) {
+            Log.d(TAG, "Step 3: Found clear button. Attempting to click...");
+            if (new AccessibilityServiceWrapper(accessibilityService).click(clearButton)) {
+                markAction();
+            }
+        }
 
-    private static Optional<AccessibilityNodeInfo> findEditText(final AccessibilityNodeInfoWrapper rootWrapper) {
-        return rootWrapper.findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/search_omnibox_edit_text");
-    }
+        private static String getText(final AccessibilityNodeInfo node) {
+            return new AccessibilityNodeInfoWrapper(node)
+                    .getText()
+                    .map(CharSequence::toString)
+                    .orElse("");
+        }
 
-    private static Optional<AccessibilityNodeInfo> findClearButton(final AccessibilityNodeInfoWrapper rootWrapper) {
-        return rootWrapper.findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/search_omnibox_text_clear");
+        private static Optional<AccessibilityNodeInfo> findEditText(final AccessibilityNodeInfoWrapper rootWrapper) {
+            return rootWrapper.findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/search_omnibox_edit_text");
+        }
+
+        private static Optional<AccessibilityNodeInfo> findClearButton(final AccessibilityNodeInfoWrapper rootWrapper) {
+            return rootWrapper.findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/search_omnibox_text_clear");
+        }
     }
 
     private void scheduleWatchdog() {
