@@ -44,7 +44,7 @@ class WaitingForStopCountClickHandler {
     private void clickStopCountNode(final AccessibilityNodeInfo stopCountNode) {
         Log.d(AddStopAutomation.TAG, "Step 1 (Backup): Found '" + googleMapsContext.stopsWord + "' label. Clicking...");
         if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountNode)) {
-            stateHandler.state = StateHandler.State.WAITING_FOR_LAST_STOP_CLICK;
+            stateHandler.state = State.WAITING_FOR_LAST_STOP_CLICK;
             cooldown.startCooldown();
         }
     }

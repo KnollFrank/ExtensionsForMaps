@@ -37,24 +37,24 @@ class AddStopAutomation {
 
     public void start() {
         Log.d(TAG, "Automation started: WAITING_FOR_STOP_COUNT_CLICK");
-        stateHandler.state = StateHandler.State.WAITING_FOR_STOP_COUNT_CLICK;
+        stateHandler.state = State.WAITING_FOR_STOP_COUNT_CLICK;
         cooldown.resetCooldown();
         textToClear = Optional.empty();
         scheduleWatchdog();
     }
 
     public void onStopCountUpdated(final Rect stopCountBounds) {
-        if (stateHandler.state == StateHandler.State.WAITING_FOR_STOP_COUNT_CLICK && cooldown.isCooldownOver()) {
+        if (stateHandler.state == State.WAITING_FOR_STOP_COUNT_CLICK && cooldown.isCooldownOver()) {
             Log.d(TAG, "Step 1: Clicking stop count label via onStopCountUpdated at " + stopCountBounds);
             if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountBounds)) {
-                stateHandler.state = StateHandler.State.WAITING_FOR_LAST_STOP_CLICK;
+                stateHandler.state = State.WAITING_FOR_LAST_STOP_CLICK;
                 cooldown.startCooldown();
             }
         }
     }
 
     public void onGoogleMapsEvent(final AccessibilityNodeInfo root) {
-        if (stateHandler.state == StateHandler.State.IDLE) {
+        if (stateHandler.state == State.IDLE) {
             return;
         }
         processState(root);
@@ -115,7 +115,7 @@ class AddStopAutomation {
         private void clickLastStop(final AccessibilityNodeInfo lastStop) {
             Log.d(TAG, "Step 2: Last waypoint is visible. Clicking...");
             if (new AccessibilityServiceWrapper(accessibilityService).click(lastStop)) {
-                stateHandler.state = StateHandler.State.WAITING_FOR_CLEAR_CLICK;
+                stateHandler.state = State.WAITING_FOR_CLEAR_CLICK;
                 cooldown.startCooldown();
             }
         }
@@ -216,7 +216,7 @@ class AddStopAutomation {
         watchdogHandler.removeCallbacksAndMessages(null);
         watchdogHandler.postDelayed(
                 () -> {
-                    if (stateHandler.state != StateHandler.State.IDLE) {
+                    if (stateHandler.state != State.IDLE) {
                         Log.v(TAG, "Watchdog triggered check for state: " + stateHandler.state);
                         new AccessibilityServiceWrapper(accessibilityService)
                                 .getRootInActiveWindow()
@@ -228,13 +228,13 @@ class AddStopAutomation {
     }
 
     private void finishAutomation() {
-        stateHandler.state = StateHandler.State.IDLE;
+        stateHandler.state = State.IDLE;
         watchdogHandler.removeCallbacksAndMessages(null);
         textToClear = Optional.empty();
     }
 
     public void reset() {
-        if (stateHandler.state != StateHandler.State.IDLE) {
+        if (stateHandler.state != State.IDLE) {
             Log.d(TAG, "Automation reset from state: " + stateHandler.state);
             finishAutomation();
         }
