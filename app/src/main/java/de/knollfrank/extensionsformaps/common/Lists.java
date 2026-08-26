@@ -119,4 +119,8 @@ public class Lists {
                 .boxed()
                 .toList();
     }
+
+    public static <T> Optional<T> findFirst(final List<T> ts) {
+        return ts.stream().findFirst();
+    }
 }

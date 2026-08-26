@@ -143,10 +143,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
     }
 
     private Optional<AccessibilityNodeInfo> findAddStopsButton(final AccessibilityNodeInfo root) {
-        return root
-                .findAccessibilityNodeInfosByText(googleMapsContext.addStopsText)
-                .stream()
-                .findFirst();
+        return new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByText(googleMapsContext.addStopsText);
     }
 
     private void showHighlight(final Rect bounds) {

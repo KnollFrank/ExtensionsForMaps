@@ -5,13 +5,16 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.Optional;
 
+import de.knollfrank.extensionsformaps.common.Lists;
+
 public record AccessibilityNodeInfoWrapper(AccessibilityNodeInfo node) {
 
     public Optional<AccessibilityNodeInfo> findFirstAccessibilityNodeInfoByViewId(final String viewId) {
-        return node
-                .findAccessibilityNodeInfosByViewId(viewId)
-                .stream()
-                .findFirst();
+        return Lists.findFirst(node.findAccessibilityNodeInfosByViewId(viewId));
+    }
+
+    public Optional<AccessibilityNodeInfo> findFirstAccessibilityNodeInfoByText(final String text) {
+        return Lists.findFirst(node.findAccessibilityNodeInfosByText(text));
     }
 
     public Rect getBoundsInScreen() {

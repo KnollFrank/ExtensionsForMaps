@@ -131,15 +131,12 @@ public class RouteUrlRequester {
 
     // FK-TODO: refactor, i18n for "Share" and "Teilen" by using a key
     private Optional<AccessibilityNodeInfo> findShareButton(final AccessibilityNodeInfo rootNode) {
+        final AccessibilityNodeInfoWrapper rootNodeWrapper = new AccessibilityNodeInfoWrapper(rootNode);
         return Optionals
                 .streamOfPresentElements(
-                        () -> new AccessibilityNodeInfoWrapper(rootNode).findFirstAccessibilityNodeInfoByViewId(SHARE_ID),
-                        () -> findFirst(rootNode.findAccessibilityNodeInfosByText("Share")),
-                        () -> findFirst(rootNode.findAccessibilityNodeInfosByText("Teilen")))
+                        () -> rootNodeWrapper.findFirstAccessibilityNodeInfoByViewId(SHARE_ID),
+                        () -> rootNodeWrapper.findFirstAccessibilityNodeInfoByText("Share"),
+                        () -> rootNodeWrapper.findFirstAccessibilityNodeInfoByText("Teilen"))
                 .findFirst();
-    }
-
-    private static Optional<AccessibilityNodeInfo> findFirst(final List<AccessibilityNodeInfo> nodes) {
-        return nodes.stream().findFirst();
     }
 }

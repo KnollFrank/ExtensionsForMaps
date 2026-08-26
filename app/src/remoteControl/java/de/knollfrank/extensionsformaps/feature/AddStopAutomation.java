@@ -83,10 +83,7 @@ class AddStopAutomation {
     }
 
     private Optional<AccessibilityNodeInfo> findStopCountNode(final AccessibilityNodeInfo root) {
-        return root
-                .findAccessibilityNodeInfosByText(googleMapsContext.stopsWord)
-                .stream()
-                .findFirst();
+        return new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByText(googleMapsContext.stopsWord);
     }
 
     private void clickStopCountNode(final AccessibilityNodeInfo stopCountNode) {
