@@ -7,15 +7,11 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import androidx.core.util.Pair;
-
 import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
-import de.knollfrank.extensionsformaps.common.Optionals;
-import de.knollfrank.extensionsformaps.common.RectWrapper;
 
 class AddStopAutomation {
 
@@ -65,87 +61,9 @@ class AddStopAutomation {
             case WAITING_FOR_STOP_COUNT_CLICK ->
                     new WaitingForStopCountClickHandler(accessibilityService, googleMapsContext, cooldown, stateHandler).handleWaitingForStopCountClick(root);
             case WAITING_FOR_LAST_STOP_CLICK ->
-                    new WaitingForLastStopClickHandler(cooldown).handleWaitingForLastStopClick(root);
+                    new WaitingForLastStopClickHandler(accessibilityService, googleMapsContext, cooldown, stateHandler).handleWaitingForLastStopClick(root);
             case WAITING_FOR_CLEAR_CLICK ->
                     new WaitingForClearClickHandler(cooldown).handleWaitingForClearClick(root);
-        }
-    }
-
-    private class WaitingForLastStopClickHandler {
-
-        private final Cooldown cooldown;
-
-        public WaitingForLastStopClickHandler(final Cooldown cooldown) {
-            this.cooldown = cooldown;
-        }
-
-        public void handleWaitingForLastStopClick(final AccessibilityNodeInfo root) {
-            WaitingForLastStopClickHandler
-                    .findEditStopsList(root)
-                    .ifPresentOrElse(
-                            editStopsList -> {
-                                if (!cooldown.isCooldownOver()) {
-                                    return;
-                                }
-                                Optionals.ifPresentBoth(
-                                        Pair.create(
-                                                Optional.of(editStopsList),
-                                                new AccessibilityNodeInfoWrapper(editStopsList).getLastChild()),
-                                        this::clickLastStopOrScrollToLastStop);
-                            },
-                            () -> {
-                                if (cooldown.isCooldownOver()) {
-                                    // Retry expansion click if the first one was ignored
-                                    WaitingForStopCountClickHandler
-                                            .findStopCountNode(root, googleMapsContext)
-                                            .ifPresent(this::reclickStopCountNode);
-                                }
-                            });
-        }
-
-        private void clickLastStopOrScrollToLastStop(final AccessibilityNodeInfo editStopsList,
-                                                     final AccessibilityNodeInfo lastStop) {
-            if (listContainsCenterOfItem(editStopsList, lastStop)) {
-                clickLastStop(lastStop);
-            } else {
-                scrollToLastStop(editStopsList);
-            }
-        }
-
-        private void clickLastStop(final AccessibilityNodeInfo lastStop) {
-            Log.d(TAG, "Step 2: Last waypoint is visible. Clicking...");
-            if (new AccessibilityServiceWrapper(accessibilityService).click(lastStop)) {
-                stateHandler.state = State.WAITING_FOR_CLEAR_CLICK;
-                cooldown.startCooldown();
-            }
-        }
-
-        private void scrollToLastStop(final AccessibilityNodeInfo editStopsList) {
-            Log.d(TAG, "Step 2: Last waypoint is off-screen. Scrolling...");
-            if (editStopsList.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) {
-                cooldown.startCooldown();
-            }
-        }
-
-        private static Optional<AccessibilityNodeInfo> findEditStopsList(final AccessibilityNodeInfo root) {
-            return new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/edit_waypoints_list");
-        }
-
-        private void reclickStopCountNode(final AccessibilityNodeInfo stopCountNode) {
-            Log.d(TAG, "Step 2: Re-clicking expansion label '" + googleMapsContext.stopsWord + "'...");
-            if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountNode)) {
-                cooldown.startCooldown();
-            }
-        }
-
-        private static boolean listContainsCenterOfItem(final AccessibilityNodeInfo list, final AccessibilityNodeInfo item) {
-            return listContainsCenterOfItem(
-                    new AccessibilityNodeInfoWrapper(list).getBoundsInScreen(),
-                    new AccessibilityNodeInfoWrapper(item).getBoundsInScreen());
-        }
-
-        private static boolean listContainsCenterOfItem(final Rect list, final Rect item) {
-            return new RectWrapper(list).contains(new RectWrapper(item).getCenter().orElseThrow());
         }
     }
 
