@@ -35,8 +35,7 @@ class AddStopAutomation {
     private final Handler watchdogHandler = new Handler(Looper.getMainLooper());
     private State state = State.IDLE;
     private long lastActionTime = 0;
-    // FK-TODO: make Optional
-    private String textToClear = null;
+    private Optional<String> textToClear = Optional.empty();
 
     public AddStopAutomation(final AccessibilityService accessibilityService, final GoogleMapsContext googleMapsContext) {
         this.accessibilityService = accessibilityService;
@@ -47,7 +46,7 @@ class AddStopAutomation {
         Log.d(TAG, "Automation started: WAITING_FOR_STOP_COUNT_CLICK");
         state = State.WAITING_FOR_STOP_COUNT_CLICK;
         lastActionTime = 0;
-        textToClear = null;
+        textToClear = Optional.empty();
         scheduleWatchdog();
     }
 
@@ -175,11 +174,11 @@ class AddStopAutomation {
                                         .ifPresentOrElse(
                                                 clearButton -> {
                                                     final String currentText = getText(editText);
-                                                    if (textToClear == null) {
-                                                        textToClear = currentText;
-                                                        Log.d(TAG, "Step 3: Dummy stop text identified: '" + textToClear + "'");
+                                                    if (textToClear.isEmpty()) {
+                                                        textToClear = Optional.of(currentText);
+                                                        Log.d(TAG, "Step 3: Dummy stop text identified: '" + currentText + "'");
                                                     }
-                                                    if (!currentText.equals(textToClear)) {
+                                                    if (!currentText.equals(textToClear.orElseThrow())) {
                                                         Log.d(TAG, "Step 3: Text has changed or was cleared. Stopping automation.");
                                                         finishAutomation();
                                                         return;
@@ -244,7 +243,7 @@ class AddStopAutomation {
     private void finishAutomation() {
         state = State.IDLE;
         watchdogHandler.removeCallbacksAndMessages(null);
-        textToClear = null;
+        textToClear = Optional.empty();
     }
 
     public void reset() {
