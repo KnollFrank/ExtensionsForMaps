@@ -70,15 +70,21 @@ class AddStopAutomation {
     private void processState(final AccessibilityNodeInfo root) {
         switch (state) {
             case WAITING_FOR_STOP_COUNT_CLICK ->
-                    new WaitingForStopCountClickHandler().handleWaitingForStopCountClick(root);
+                    new WaitingForStopCountClickHandler(cooldown).handleWaitingForStopCountClick(root);
             case WAITING_FOR_LAST_STOP_CLICK ->
-                    new WaitingForLastStopClickHandler().handleWaitingForLastStopClick(root);
+                    new WaitingForLastStopClickHandler(cooldown).handleWaitingForLastStopClick(root);
             case WAITING_FOR_CLEAR_CLICK ->
-                    new WaitingForClearClickHandler().handleWaitingForClearClick(root);
+                    new WaitingForClearClickHandler(cooldown).handleWaitingForClearClick(root);
         }
     }
 
     private class WaitingForStopCountClickHandler {
+
+        private final Cooldown cooldown;
+
+        public WaitingForStopCountClickHandler(final Cooldown cooldown) {
+            this.cooldown = cooldown;
+        }
 
         public void handleWaitingForStopCountClick(final AccessibilityNodeInfo root) {
             if (!cooldown.isCooldownOver()) {
@@ -104,6 +110,12 @@ class AddStopAutomation {
     }
 
     private class WaitingForLastStopClickHandler {
+
+        private final Cooldown cooldown;
+
+        public WaitingForLastStopClickHandler(final Cooldown cooldown) {
+            this.cooldown = cooldown;
+        }
 
         public void handleWaitingForLastStopClick(final AccessibilityNodeInfo root) {
             WaitingForLastStopClickHandler
@@ -176,6 +188,12 @@ class AddStopAutomation {
     }
 
     private class WaitingForClearClickHandler {
+
+        private final Cooldown cooldown;
+
+        public WaitingForClearClickHandler(final Cooldown cooldown) {
+            this.cooldown = cooldown;
+        }
 
         public void handleWaitingForClearClick(final AccessibilityNodeInfo root) {
             final AccessibilityNodeInfoWrapper rootWrapper = new AccessibilityNodeInfoWrapper(root);
