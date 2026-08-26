@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.feature;
+package de.knollfrank.extensionsformaps.feature.addstop;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

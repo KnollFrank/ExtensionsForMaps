@@ -15,10 +15,10 @@ import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester.RouteUrlCallback;
 import de.knollfrank.extensionsformaps.accessibility.StopCountDetector;
 import de.knollfrank.extensionsformaps.feature.ActiveServiceHighlightFeature;
-import de.knollfrank.extensionsformaps.feature.AddStopFeature;
 import de.knollfrank.extensionsformaps.feature.CompoundFeature;
 import de.knollfrank.extensionsformaps.feature.ScanAddressFeature;
 import de.knollfrank.extensionsformaps.feature.SortFeature;
+import de.knollfrank.extensionsformaps.feature.addstop.AddStopFeature;
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizerFactory;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 

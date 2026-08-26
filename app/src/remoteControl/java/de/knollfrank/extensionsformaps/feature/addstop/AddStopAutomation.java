@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.feature;
+package de.knollfrank.extensionsformaps.feature.addstop;
 
 import android.accessibilityservice.AccessibilityService;
 import android.graphics.Rect;

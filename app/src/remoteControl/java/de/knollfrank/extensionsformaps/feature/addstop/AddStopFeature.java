@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.feature;
+package de.knollfrank.extensionsformaps.feature.addstop;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
@@ -24,6 +24,7 @@ import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
 import de.knollfrank.extensionsformaps.accessibility.StopCountDetector;
 import de.knollfrank.extensionsformaps.common.Optionals;
+import de.knollfrank.extensionsformaps.feature.AccessibilityFeature;
 
 public class AddStopFeature implements AccessibilityFeature, StopCountDetector.StopCountListener {
 
