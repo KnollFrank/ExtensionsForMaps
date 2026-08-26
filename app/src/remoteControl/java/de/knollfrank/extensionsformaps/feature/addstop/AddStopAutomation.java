@@ -34,8 +34,8 @@ class AddStopAutomation {
     private final GoogleMapsContext googleMapsContext;
     private final Handler watchdogHandler = new Handler(Looper.getMainLooper());
     private State state = State.IDLE;
-    private long lastActionTime = 0;
     private Optional<String> textToClear = Optional.empty();
+    private final Cooldown cooldown = new Cooldown(COOLDOWN_MS);
 
     public AddStopAutomation(final AccessibilityService accessibilityService, final GoogleMapsContext googleMapsContext) {
         this.accessibilityService = accessibilityService;
@@ -45,17 +45,17 @@ class AddStopAutomation {
     public void start() {
         Log.d(TAG, "Automation started: WAITING_FOR_STOP_COUNT_CLICK");
         state = State.WAITING_FOR_STOP_COUNT_CLICK;
-        lastActionTime = 0;
+        cooldown.resetCooldown();
         textToClear = Optional.empty();
         scheduleWatchdog();
     }
 
     public void onStopCountUpdated(final Rect stopCountBounds) {
-        if (state == State.WAITING_FOR_STOP_COUNT_CLICK && isCooldownOver()) {
+        if (state == State.WAITING_FOR_STOP_COUNT_CLICK && cooldown.isCooldownOver()) {
             Log.d(TAG, "Step 1: Clicking stop count label via onStopCountUpdated at " + stopCountBounds);
             if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountBounds)) {
                 state = State.WAITING_FOR_LAST_STOP_CLICK;
-                markAction();
+                cooldown.startCooldown();
             }
         }
     }
@@ -81,7 +81,7 @@ class AddStopAutomation {
     private class WaitingForStopCountClickHandler {
 
         public void handleWaitingForStopCountClick(final AccessibilityNodeInfo root) {
-            if (!isCooldownOver()) {
+            if (!cooldown.isCooldownOver()) {
                 return;
             }
             WaitingForStopCountClickHandler
@@ -98,7 +98,7 @@ class AddStopAutomation {
             Log.d(TAG, "Step 1 (Backup): Found '" + googleMapsContext.stopsWord + "' label. Clicking...");
             if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountNode)) {
                 state = State.WAITING_FOR_LAST_STOP_CLICK;
-                markAction();
+                cooldown.startCooldown();
             }
         }
     }
@@ -110,7 +110,7 @@ class AddStopAutomation {
                     .findEditStopsList(root)
                     .ifPresentOrElse(
                             editStopsList -> {
-                                if (!isCooldownOver()) {
+                                if (!cooldown.isCooldownOver()) {
                                     return;
                                 }
                                 Optionals.ifPresentBoth(
@@ -120,7 +120,7 @@ class AddStopAutomation {
                                         this::clickLastStopOrScrollToLastStop);
                             },
                             () -> {
-                                if (isCooldownOver()) {
+                                if (cooldown.isCooldownOver()) {
                                     // Retry expansion click if the first one was ignored
                                     WaitingForStopCountClickHandler
                                             .findStopCountNode(root, googleMapsContext)
@@ -142,14 +142,14 @@ class AddStopAutomation {
             Log.d(TAG, "Step 2: Last waypoint is visible. Clicking...");
             if (new AccessibilityServiceWrapper(accessibilityService).click(lastStop)) {
                 state = State.WAITING_FOR_CLEAR_CLICK;
-                markAction();
+                cooldown.startCooldown();
             }
         }
 
         private void scrollToLastStop(final AccessibilityNodeInfo editStopsList) {
             Log.d(TAG, "Step 2: Last waypoint is off-screen. Scrolling...");
             if (editStopsList.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) {
-                markAction();
+                cooldown.startCooldown();
             }
         }
 
@@ -160,7 +160,7 @@ class AddStopAutomation {
         private void reclickStopCountNode(final AccessibilityNodeInfo stopCountNode) {
             Log.d(TAG, "Step 2: Re-clicking expansion label '" + googleMapsContext.stopsWord + "'...");
             if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountNode)) {
-                markAction();
+                cooldown.startCooldown();
             }
         }
 
@@ -197,7 +197,7 @@ class AddStopAutomation {
                                                             finishAutomation();
                                                             return;
                                                         }
-                                                        if (isCooldownOver()) {
+                                                        if (cooldown.isCooldownOver()) {
                                                             clickClearButton(clearButton);
                                                         }
                                                     },
@@ -212,7 +212,7 @@ class AddStopAutomation {
         private void clickClearButton(final AccessibilityNodeInfo clearButton) {
             Log.d(TAG, "Step 3: Found clear button. Attempting to click...");
             if (new AccessibilityServiceWrapper(accessibilityService).click(clearButton)) {
-                markAction();
+                cooldown.startCooldown();
             }
         }
 
@@ -245,14 +245,6 @@ class AddStopAutomation {
                     }
                 },
                 WATCHDOG_DELAY_MS);
-    }
-
-    private boolean isCooldownOver() {
-        return System.currentTimeMillis() - lastActionTime >= COOLDOWN_MS;
-    }
-
-    private void markAction() {
-        lastActionTime = System.currentTimeMillis();
     }
 
     private void finishAutomation() {
