@@ -7,6 +7,13 @@ import java.util.Optional;
 
 public record AccessibilityNodeInfoWrapper(AccessibilityNodeInfo node) {
 
+    public Optional<AccessibilityNodeInfo> findFirstAccessibilityNodeInfoByViewId(final String viewId) {
+        return node
+                .findAccessibilityNodeInfosByViewId(viewId)
+                .stream()
+                .findFirst();
+    }
+
     public Rect getBoundsInScreen() {
         final Rect outBounds = new Rect();
         node.getBoundsInScreen(outBounds);
@@ -18,5 +25,9 @@ public record AccessibilityNodeInfoWrapper(AccessibilityNodeInfo node) {
         return childCount > 0 ?
                 Optional.ofNullable(node.getChild(childCount - 1)) :
                 Optional.empty();
+    }
+
+    public Optional<CharSequence> getText() {
+        return Optional.ofNullable(node.getText());
     }
 }

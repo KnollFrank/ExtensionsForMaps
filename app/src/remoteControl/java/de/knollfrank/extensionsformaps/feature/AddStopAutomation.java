@@ -9,7 +9,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.core.util.Pair;
 
-import java.util.List;
 import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
@@ -145,10 +144,7 @@ class AddStopAutomation {
     }
 
     private static Optional<AccessibilityNodeInfo> findEditStopsList(final AccessibilityNodeInfo root) {
-        return root
-                .findAccessibilityNodeInfosByViewId("com.google.android.apps.maps:id/edit_waypoints_list")
-                .stream()
-                .findFirst();
+        return new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/edit_waypoints_list");
     }
 
     private void reclickStopCountNode(final AccessibilityNodeInfo stopCountNode) {
@@ -169,40 +165,57 @@ class AddStopAutomation {
     }
 
     private void handleWaitingForClearClick(final AccessibilityNodeInfo root) {
-        final List<AccessibilityNodeInfo> editTexts = root.findAccessibilityNodeInfosByViewId("com.google.android.apps.maps:id/search_omnibox_edit_text");
-        if (editTexts.isEmpty()) {
-            Log.d(TAG, "Step 3: Search bar not found yet. Waiting for transition...");
-            return;
-        }
+        final AccessibilityNodeInfoWrapper rootWrapper = new AccessibilityNodeInfoWrapper(root);
+        AddStopAutomation
+                .findEditText(rootWrapper)
+                .ifPresentOrElse(
+                        editText ->
+                                AddStopAutomation
+                                        .findClearButton(rootWrapper)
+                                        .ifPresentOrElse(
+                                                clearButton -> {
+                                                    final String currentText = getText(editText);
+                                                    if (textToClear == null) {
+                                                        textToClear = currentText;
+                                                        Log.d(TAG, "Step 3: Dummy stop text identified: '" + textToClear + "'");
+                                                    }
+                                                    if (!currentText.equals(textToClear)) {
+                                                        Log.d(TAG, "Step 3: Text has changed or was cleared. Stopping automation.");
+                                                        finishAutomation();
+                                                        return;
+                                                    }
+                                                    if (isCooldownOver()) {
+                                                        clickClearButton(clearButton);
+                                                    }
+                                                },
+                                                () -> {
+                                                    // Success: EditText is present but the clear button is missing, meaning the field is "empty"
+                                                    Log.d(TAG, "Step 3: Clear button is gone. Automation completed successfully!");
+                                                    finishAutomation();
+                                                }),
+                        () -> Log.d(TAG, "Step 3: Search bar not found yet. Waiting for transition..."));
+    }
 
-        final AccessibilityNodeInfo editText = editTexts.get(0);
-        final List<AccessibilityNodeInfo> clearButtons = root.findAccessibilityNodeInfosByViewId("com.google.android.apps.maps:id/search_omnibox_text_clear");
+    private void clickClearButton(final AccessibilityNodeInfo clearButton) {
+        Log.d(TAG, "Step 3: Found clear button. Attempting to click...");
+        if (new AccessibilityServiceWrapper(accessibilityService).click(clearButton)) {
+            markAction();
+        }
+    }
 
-        if (clearButtons.isEmpty()) {
-            // Success: EditText is present but the clear button is missing, meaning the field is "empty"
-            Log.d(TAG, "Step 3: Clear button is gone. Automation completed successfully!");
-            finishAutomation();
-            return;
-        }
+    private static String getText(final AccessibilityNodeInfo node) {
+        return new AccessibilityNodeInfoWrapper(node)
+                .getText()
+                .map(CharSequence::toString)
+                .orElse("");
+    }
 
-        final String currentText = editText.getText() != null ? editText.getText().toString() : "";
-        if (textToClear == null) {
-            textToClear = currentText;
-            Log.d(TAG, "Step 3: Dummy stop text identified: '" + textToClear + "'");
-        }
+    private static Optional<AccessibilityNodeInfo> findEditText(final AccessibilityNodeInfoWrapper rootWrapper) {
+        return rootWrapper.findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/search_omnibox_edit_text");
+    }
 
-        if (!currentText.equals(textToClear)) {
-            Log.d(TAG, "Step 3: Text has changed or was cleared. Stopping automation.");
-            finishAutomation();
-            return;
-        }
-        if (isCooldownOver()) {
-            final AccessibilityNodeInfo clearButton = clearButtons.get(0);
-            Log.d(TAG, "Step 3: Found clear button. Attempting to click...");
-            if (new AccessibilityServiceWrapper(accessibilityService).click(clearButton)) {
-                markAction();
-            }
-        }
+    private static Optional<AccessibilityNodeInfo> findClearButton(final AccessibilityNodeInfoWrapper rootWrapper) {
+        return rootWrapper.findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/search_omnibox_text_clear");
     }
 
     private void scheduleWatchdog() {
