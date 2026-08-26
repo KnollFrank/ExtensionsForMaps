@@ -133,7 +133,7 @@ public class RouteUrlRequester {
     private Optional<AccessibilityNodeInfo> findShareButton(final AccessibilityNodeInfo rootNode) {
         return Optionals
                 .streamOfPresentElements(
-                        () -> findFirst(rootNode.findAccessibilityNodeInfosByViewId(SHARE_ID)),
+                        () -> new AccessibilityNodeInfoWrapper(rootNode).findFirstAccessibilityNodeInfoByViewId(SHARE_ID),
                         () -> findFirst(rootNode.findAccessibilityNodeInfosByText("Share")),
                         () -> findFirst(rootNode.findAccessibilityNodeInfosByText("Teilen")))
                 .findFirst();
