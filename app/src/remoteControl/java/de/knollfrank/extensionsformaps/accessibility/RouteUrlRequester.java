@@ -23,7 +23,7 @@ import de.knollfrank.extensionsformaps.route.url.DirectionsUrlFactory;
 public class RouteUrlRequester {
 
     private static final String TAG = RouteUrlRequester.class.getSimpleName();
-    private static final String SHARE_ID = "com.google.android.apps.maps:id/directions_header_share_action_button";
+    private static final ResourceName SHARE_ID = ResourceNameFactory.createGoogleMapsResourceName("directions_header_share_action_button");
 
     @FunctionalInterface
     public interface RouteUrlCallback {

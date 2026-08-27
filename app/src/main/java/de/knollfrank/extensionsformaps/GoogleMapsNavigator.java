@@ -6,6 +6,7 @@ import android.net.Uri;
 
 import java.net.URL;
 
+import de.knollfrank.extensionsformaps.accessibility.PackageNames;
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.RouteDirectionsUrlConverter;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
@@ -24,7 +25,7 @@ public class GoogleMapsNavigator {
 
     private static Intent createMapIntent(final URL url) {
         final Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url.toString()));
-        mapIntent.setPackage("com.google.android.apps.maps");
+        mapIntent.setPackage(PackageNames.GOOGLE_MAPS_PACKAGE);
         mapIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return mapIntent;
     }

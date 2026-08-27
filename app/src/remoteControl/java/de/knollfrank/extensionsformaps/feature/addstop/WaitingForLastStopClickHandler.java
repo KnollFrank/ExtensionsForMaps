@@ -12,6 +12,7 @@ import java.util.Optional;
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
+import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
 import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.common.RectWrapper;
 
@@ -57,7 +58,8 @@ class WaitingForLastStopClickHandler {
     }
 
     private static Optional<AccessibilityNodeInfo> findEditStopsList(final AccessibilityNodeInfo root) {
-        return new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/edit_waypoints_list");
+        return new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByViewId(
+                ResourceNameFactory.createGoogleMapsResourceName("edit_waypoints_list"));
     }
 
     private void clickLastStopOrScrollToLastStop(final AccessibilityNodeInfo editStopsList,

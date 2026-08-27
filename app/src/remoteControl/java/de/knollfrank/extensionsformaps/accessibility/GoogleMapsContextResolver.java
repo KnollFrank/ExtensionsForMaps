@@ -1,5 +1,7 @@
 package de.knollfrank.extensionsformaps.accessibility;
 
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_MAPS_PACKAGE;
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -8,7 +10,6 @@ import java.util.regex.Pattern;
 
 public class GoogleMapsContextResolver {
 
-    private static final String GOOGLE_MAPS_PACKAGE = "com.google.android.apps.maps";
     private static final String KEY_ADD_STOPS = "ADD_STOPS_ENTRYPOINT_LABEL";
     private static final String KEY_COUNT_STOPS = "DIRECTIONS_COUNT_STOPS";
 

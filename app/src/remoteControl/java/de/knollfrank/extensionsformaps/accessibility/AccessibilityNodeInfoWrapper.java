@@ -3,14 +3,19 @@ package de.knollfrank.extensionsformaps.accessibility;
 import android.graphics.Rect;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import java.util.List;
 import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.common.Lists;
 
 public record AccessibilityNodeInfoWrapper(AccessibilityNodeInfo node) {
 
-    public Optional<AccessibilityNodeInfo> findFirstAccessibilityNodeInfoByViewId(final String viewId) {
-        return Lists.findFirst(node.findAccessibilityNodeInfosByViewId(viewId));
+    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(final ResourceName viewId) {
+        return node.findAccessibilityNodeInfosByViewId(viewId.getFullyQualifiedName());
+    }
+
+    public Optional<AccessibilityNodeInfo> findFirstAccessibilityNodeInfoByViewId(final ResourceName viewId) {
+        return Lists.findFirst(findAccessibilityNodeInfosByViewId(viewId));
     }
 
     public Optional<AccessibilityNodeInfo> findFirstAccessibilityNodeInfoByText(final String text) {

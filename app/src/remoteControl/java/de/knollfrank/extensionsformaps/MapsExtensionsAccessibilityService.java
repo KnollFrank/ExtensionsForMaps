@@ -1,5 +1,11 @@
 package de.knollfrank.extensionsformaps;
 
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GEMINI_APP_PACKAGE;
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_APP_PACKAGE;
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_MAPS_PACKAGE;
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.RESOLVER_PACKAGE;
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.SYSTEM_PACKAGE;
+
 import android.accessibilityservice.AccessibilityService;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
@@ -25,11 +31,6 @@ import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 public class MapsExtensionsAccessibilityService extends AccessibilityService {
 
     private static final String TAG = MapsExtensionsAccessibilityService.class.getSimpleName();
-    private static final String GOOGLE_MAPS_PACKAGE = "com.google.android.apps.maps";
-    private static final String RESOLVER_PACKAGE = "com.android.intentresolver";
-    private static final String SYSTEM_PACKAGE = "android";
-    private static final String GOOGLE_APP_PACKAGE = "com.google.android.googlequicksearchbox";
-    private static final String GEMINI_APP_PACKAGE = "com.google.android.apps.bard";
 
     private CompoundFeature compoundFeature;
     private StopCountDetector stopCountDetector;

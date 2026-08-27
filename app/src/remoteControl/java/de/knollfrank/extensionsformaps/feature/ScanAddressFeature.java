@@ -1,5 +1,7 @@
 package de.knollfrank.extensionsformaps.feature;
 
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_MAPS_PACKAGE;
+
 import android.accessibilityservice.AccessibilityService;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -26,6 +28,8 @@ import java.util.regex.Pattern;
 
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
+import de.knollfrank.extensionsformaps.accessibility.ResourceName;
+import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
 
 // FK-TODO: refactor
 // FK-TODO: Verwende die Google-App https://play.google.com/store/apps/details?id=com.google.android.googlequicksearchbox statt der Gemini-App für den Adressscanner.
@@ -34,8 +38,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private static final String TAG = ScanAddressFeature.class.getSimpleName();
     private static final String GOOGLE_PKG = "com.google.android.googlequicksearchbox";
     private static final String GEMINI_PKG = "com.google.android.apps.bard";
-    private static final String MAPS_PKG = "com.google.android.apps.maps";
-    private static final String SEARCH_EDIT_TEXT_ID = "com.google.android.apps.maps:id/search_omnibox_edit_text";
+    private static final ResourceName SEARCH_EDIT_TEXT_ID = ResourceNameFactory.createGoogleMapsResourceName("search_omnibox_edit_text");
 
     private static final String GEMINI_SEND_ID = "com.google.android.googlequicksearchbox:id/assistant_robin_input_send_button_compose";
 
@@ -74,7 +77,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     @Override
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            if (MAPS_PKG.equals(String.valueOf(event.getPackageName()))) {
+            if (GOOGLE_MAPS_PACKAGE.equals(String.valueOf(event.getPackageName()))) {
                 if (state != State.IDLE && pendingAddress == null) {
                     state = State.IDLE;
                 }
@@ -216,7 +219,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private void returnToMaps() {
         Log.d(TAG, "Hole Google Maps sanft in den Vordergrund...");
         // Wir nutzen einen Intent, der nur die existierende Instanz nach vorne holt
-        Intent intent = accessibilityService.getPackageManager().getLaunchIntentForPackage(MAPS_PKG);
+        Intent intent = accessibilityService.getPackageManager().getLaunchIntentForPackage(GOOGLE_MAPS_PACKAGE);
         if (intent != null) {
             // WICHTIG: Wir loeschen den Reset-Flag, falls vorhanden
             intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
@@ -227,7 +230,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private void pasteAddress(final AccessibilityNodeInfo root) {
-        List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByViewId(SEARCH_EDIT_TEXT_ID);
+        List<AccessibilityNodeInfo> nodes = new AccessibilityNodeInfoWrapper(root).findAccessibilityNodeInfosByViewId(SEARCH_EDIT_TEXT_ID);
         if (!nodes.isEmpty()) {
             AccessibilityNodeInfo et = nodes.get(0);
             Bundle args = new Bundle();
@@ -288,7 +291,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private void updateScanButton(final AccessibilityNodeInfo root) {
-        List<AccessibilityNodeInfo> nodes = root.findAccessibilityNodeInfosByViewId(SEARCH_EDIT_TEXT_ID);
+        List<AccessibilityNodeInfo> nodes = new AccessibilityNodeInfoWrapper(root).findAccessibilityNodeInfosByViewId(SEARCH_EDIT_TEXT_ID);
         if (nodes.isEmpty()) {
             removeScanButton();
             return;

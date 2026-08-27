@@ -1,5 +1,7 @@
 package de.knollfrank.extensionsformaps.feature.addstop;
 
+import static de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory.createGoogleMapsResourceName;
+
 import android.accessibilityservice.AccessibilityService;
 import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -75,10 +77,10 @@ class WaitingForClearClickHandler {
     }
 
     private static Optional<AccessibilityNodeInfo> findEditText(final AccessibilityNodeInfoWrapper rootWrapper) {
-        return rootWrapper.findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/search_omnibox_edit_text");
+        return rootWrapper.findFirstAccessibilityNodeInfoByViewId(createGoogleMapsResourceName("search_omnibox_edit_text"));
     }
 
     private static Optional<AccessibilityNodeInfo> findClearButton(final AccessibilityNodeInfoWrapper rootWrapper) {
-        return rootWrapper.findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/search_omnibox_text_clear");
+        return rootWrapper.findFirstAccessibilityNodeInfoByViewId(createGoogleMapsResourceName("search_omnibox_text_clear"));
     }
 }
