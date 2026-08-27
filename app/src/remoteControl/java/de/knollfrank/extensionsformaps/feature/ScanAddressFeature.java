@@ -1,5 +1,7 @@
 package de.knollfrank.extensionsformaps.feature;
 
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GEMINI_APP_PACKAGE;
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_APP_PACKAGE;
 import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_MAPS_PACKAGE;
 
 import android.accessibilityservice.AccessibilityService;
@@ -36,11 +38,9 @@ import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
 public class ScanAddressFeature implements AccessibilityFeature {
 
     private static final String TAG = ScanAddressFeature.class.getSimpleName();
-    private static final String GOOGLE_PKG = "com.google.android.googlequicksearchbox";
-    private static final String GEMINI_PKG = "com.google.android.apps.bard";
     private static final ResourceName SEARCH_EDIT_TEXT_ID = ResourceNameFactory.createGoogleMapsResourceName("search_omnibox_edit_text");
 
-    private static final String GEMINI_SEND_ID = "com.google.android.googlequicksearchbox:id/assistant_robin_input_send_button_compose";
+    private static final ResourceName GEMINI_SEND_ID = new ResourceName(GOOGLE_APP_PACKAGE, "assistant_robin_input_send_button_compose");
 
     public static final String TOKEN_START = "START_ADDR";
     public static final String TOKEN_END = "END_ADDR";
@@ -91,8 +91,8 @@ public class ScanAddressFeature implements AccessibilityFeature {
     @Override
     public void onGoogleAppEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
         if (root == null) return;
-        String pkg = String.valueOf(root.getPackageName());
-        if (!GOOGLE_PKG.equals(pkg) && !GEMINI_PKG.equals(pkg)) return;
+        final String pkg = String.valueOf(root.getPackageName());
+        if (!GOOGLE_APP_PACKAGE.equals(pkg) && !GEMINI_APP_PACKAGE.equals(pkg)) return;
 
         if (pendingAddress != null) {
             // Wir haben die Adresse. Jetzt bringen wir Maps sanft nach vorne.
@@ -152,7 +152,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private AccessibilityNodeInfo findSendButton(AccessibilityNodeInfo root) {
         List<AccessibilityNodeInfo> list = root.findAccessibilityNodeInfosByText("Senden");
         if (list.isEmpty()) {
-            list = root.findAccessibilityNodeInfosByViewId(GEMINI_SEND_ID);
+            list = new AccessibilityNodeInfoWrapper(root).findAccessibilityNodeInfosByViewId(GEMINI_SEND_ID);
         }
         for (AccessibilityNodeInfo n : list) {
             if (n.isVisibleToUser()) return n;

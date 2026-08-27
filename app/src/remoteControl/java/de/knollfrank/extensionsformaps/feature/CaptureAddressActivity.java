@@ -1,5 +1,7 @@
 package de.knollfrank.extensionsformaps.feature;
 
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GEMINI_APP_PACKAGE;
+
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -20,7 +22,6 @@ import java.io.File;
 public class CaptureAddressActivity extends AppCompatActivity {
 
     private static final String TAG = CaptureAddressActivity.class.getSimpleName();
-    private static final String GEMINI_PKG = "com.google.android.apps.bard";
 
     private Uri cameraImageUri;
     private Uri finalImageUri;
@@ -115,7 +116,7 @@ public class CaptureAddressActivity extends AppCompatActivity {
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         // Target Gemini specifically
-        shareIntent.setPackage(GEMINI_PKG);
+        shareIntent.setPackage(GEMINI_APP_PACKAGE);
 
         try {
             startActivity(shareIntent);

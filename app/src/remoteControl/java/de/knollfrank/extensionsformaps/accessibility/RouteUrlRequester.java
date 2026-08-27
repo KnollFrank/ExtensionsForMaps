@@ -1,5 +1,8 @@
 package de.knollfrank.extensionsformaps.accessibility;
 
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.RESOLVER_PACKAGE;
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.SYSTEM_PACKAGE;
+
 import android.accessibilityservice.AccessibilityService;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
@@ -85,10 +88,14 @@ public class RouteUrlRequester {
     }
 
     private static List<AccessibilityNodeInfo> getUrlNodes(final AccessibilityNodeInfo rootNode) {
+        return getUrlNodes(new AccessibilityNodeInfoWrapper(rootNode));
+    }
+
+    private static ImmutableList<AccessibilityNodeInfo> getUrlNodes(final AccessibilityNodeInfoWrapper rootNode) {
         return ImmutableList
                 .<AccessibilityNodeInfo>builder()
-                .addAll(rootNode.findAccessibilityNodeInfosByViewId("android:id/content_preview_text"))
-                .addAll(rootNode.findAccessibilityNodeInfosByViewId("com.android.intentresolver:id/sem_chooser_sub_title_details_view"))
+                .addAll(rootNode.findAccessibilityNodeInfosByViewId(new ResourceName(SYSTEM_PACKAGE, "content_preview_text")))
+                .addAll(rootNode.findAccessibilityNodeInfosByViewId(new ResourceName(RESOLVER_PACKAGE, "sem_chooser_sub_title_details_view")))
                 .build();
     }
 
