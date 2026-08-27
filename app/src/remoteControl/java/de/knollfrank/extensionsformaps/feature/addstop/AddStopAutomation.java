@@ -7,19 +7,20 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import java.time.Duration;
+
 import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 
 class AddStopAutomation {
 
     public static final String TAG = AddStopAutomation.class.getSimpleName();
-    private static final long COOLDOWN_MS = 1000;
     private static final long WATCHDOG_DELAY_MS = 1200;
 
     private final AccessibilityService accessibilityService;
     private final Handler watchdogHandler = new Handler(Looper.getMainLooper());
     private final StateHandler stateHandler = new StateHandler();
-    private final Cooldown cooldown = new Cooldown(COOLDOWN_MS);
+    private final Cooldown cooldown = new Cooldown(Duration.ofSeconds(1));
     private final WaitingForStopCountClickHandler waitingForStopCountClickHandler;
     private final WaitingForLastStopClickHandler waitingForLastStopClickHandler;
     private final WaitingForClearClickHandler waitingForClearClickHandler;

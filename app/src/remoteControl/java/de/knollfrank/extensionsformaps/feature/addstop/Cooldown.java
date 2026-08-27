@@ -1,24 +1,28 @@
 package de.knollfrank.extensionsformaps.feature.addstop;
 
+import java.time.Duration;
+import java.time.Instant;
+
 class Cooldown {
 
-    // FK-TODO: use java.time
-    private final long thresholdMillis;
-    private long startCooldownTimeMillis = 0;
+    private final Duration threshold;
+    private Instant startCooldown = Instant.EPOCH;
 
-    public Cooldown(final long thresholdMillis) {
-        this.thresholdMillis = thresholdMillis;
+    public Cooldown(final Duration threshold) {
+        this.threshold = threshold;
     }
 
     public void startCooldown() {
-        startCooldownTimeMillis = System.currentTimeMillis();
+        startCooldown = Instant.now();
     }
 
     public boolean isCooldownOver() {
-        return System.currentTimeMillis() - startCooldownTimeMillis >= thresholdMillis;
+        return Duration
+                .between(startCooldown, Instant.now())
+                .compareTo(threshold) >= 0;
     }
 
     public void resetCooldown() {
-        startCooldownTimeMillis = 0;
+        startCooldown = Instant.EPOCH;
     }
 }
