@@ -15,7 +15,7 @@ import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 class AddStopAutomation {
 
     public static final String TAG = AddStopAutomation.class.getSimpleName();
-    private static final long WATCHDOG_DELAY_MS = 1200;
+    private static final Duration WATCHDOG_DELAY = Duration.ofMillis(1200);
 
     private final AccessibilityService accessibilityService;
     private final Handler watchdogHandler = new Handler(Looper.getMainLooper());
@@ -95,7 +95,7 @@ class AddStopAutomation {
                         scheduleWatchdog();
                     }
                 },
-                WATCHDOG_DELAY_MS);
+                WATCHDOG_DELAY.toMillis());
     }
 
     private void finishAutomation() {
