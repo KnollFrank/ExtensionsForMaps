@@ -44,6 +44,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     public static final String AI_PROMPT = "Analysiere das Bild und extrahiere nur die Adresse (ohne Namen). Antwort-Format: " + TOKEN_START + " [gefundene Adresse hier einsetzen] " + TOKEN_END;
 
     private enum State {
+
         IDLE,
         FILLING_PROMPT,
         PROMPT_FILLED,
@@ -55,6 +56,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private final WindowManager windowManager;
     private View scanButtonOverlay;
     private final Rect lastInputBounds = new Rect();
+    // FK-TODO: make pendingAddress Optional
     private String pendingAddress = null;
     private State state = State.IDLE;
     private long lastActionTime = 0;
