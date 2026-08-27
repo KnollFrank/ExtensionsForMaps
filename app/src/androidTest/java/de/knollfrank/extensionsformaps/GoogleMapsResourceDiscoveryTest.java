@@ -1,5 +1,7 @@
 package de.knollfrank.extensionsformaps;
 
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_MAPS_PACKAGE;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
@@ -16,14 +18,13 @@ import java.util.stream.Stream;
 public class GoogleMapsResourceDiscoveryTest {
 
     private static final String TAG = GoogleMapsResourceDiscoveryTest.class.getSimpleName();
-    private static final String MAPS_PACKAGE = "com.google.android.apps.maps";
 
     @Test
     public void discoverMapsResources() {
         Log.d(TAG, "Starting wide-range resource scan for Google Maps...");
         try {
             final Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-            final Resources mapsRes = context.getPackageManager().getResourcesForApplication(MAPS_PACKAGE);
+            final Resources mapsRes = context.getPackageManager().getResourcesForApplication(GOOGLE_MAPS_PACKAGE);
 
             // Large scan range to cover strings and plurals in large APKs
             // Package 0x7f, types 0x01-0x20

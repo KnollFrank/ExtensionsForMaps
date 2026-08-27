@@ -3,6 +3,8 @@ package de.knollfrank.extensionsformaps;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_MAPS_PACKAGE;
+
 import android.app.Application;
 import android.content.Intent;
 
@@ -68,7 +70,7 @@ public class GoogleMapsNavigatorTest {
         assertNotNull("Es wurde kein Intent gestartet", nextStartedActivity);
 
         assertEquals(Intent.ACTION_VIEW, nextStartedActivity.getAction());
-        assertEquals("com.google.android.apps.maps", nextStartedActivity.getPackage());
+        assertEquals(GOOGLE_MAPS_PACKAGE, nextStartedActivity.getPackage());
 
         // Prüfen, ob die URL exakt nach der offiziellen Maps Directions API gebaut wurde
         final String expectedUrl =
