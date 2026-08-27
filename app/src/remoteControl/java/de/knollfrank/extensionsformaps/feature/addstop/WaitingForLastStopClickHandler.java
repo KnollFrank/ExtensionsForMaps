@@ -56,6 +56,10 @@ class WaitingForLastStopClickHandler {
                         });
     }
 
+    private static Optional<AccessibilityNodeInfo> findEditStopsList(final AccessibilityNodeInfo root) {
+        return new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/edit_waypoints_list");
+    }
+
     private void clickLastStopOrScrollToLastStop(final AccessibilityNodeInfo editStopsList,
                                                  final AccessibilityNodeInfo lastStop) {
         if (listContainsCenterOfItem(editStopsList, lastStop)) {
@@ -63,6 +67,16 @@ class WaitingForLastStopClickHandler {
         } else {
             scrollToLastStop(editStopsList);
         }
+    }
+
+    private static boolean listContainsCenterOfItem(final AccessibilityNodeInfo list, final AccessibilityNodeInfo item) {
+        return listContainsCenterOfItem(
+                new AccessibilityNodeInfoWrapper(list).getBoundsInScreen(),
+                new AccessibilityNodeInfoWrapper(item).getBoundsInScreen());
+    }
+
+    private static boolean listContainsCenterOfItem(final Rect list, final Rect item) {
+        return new RectWrapper(list).contains(new RectWrapper(item).getCenter().orElseThrow());
     }
 
     private void clickLastStop(final AccessibilityNodeInfo lastStop) {
@@ -80,24 +94,10 @@ class WaitingForLastStopClickHandler {
         }
     }
 
-    private static Optional<AccessibilityNodeInfo> findEditStopsList(final AccessibilityNodeInfo root) {
-        return new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByViewId("com.google.android.apps.maps:id/edit_waypoints_list");
-    }
-
     private void reclickStopCountNode(final AccessibilityNodeInfo stopCountNode) {
         Log.d(AddStopAutomation.TAG, "Step 2: Re-clicking expansion label '" + googleMapsContext.stopsWord + "'...");
         if (new AccessibilityServiceWrapper(accessibilityService).click(stopCountNode)) {
             cooldown.startCooldown();
         }
-    }
-
-    private static boolean listContainsCenterOfItem(final AccessibilityNodeInfo list, final AccessibilityNodeInfo item) {
-        return listContainsCenterOfItem(
-                new AccessibilityNodeInfoWrapper(list).getBoundsInScreen(),
-                new AccessibilityNodeInfoWrapper(item).getBoundsInScreen());
-    }
-
-    private static boolean listContainsCenterOfItem(final Rect list, final Rect item) {
-        return new RectWrapper(list).contains(new RectWrapper(item).getCenter().orElseThrow());
     }
 }
