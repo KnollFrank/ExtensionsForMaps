@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.accessibility;
+package de.knollfrank.extensionsformaps.accessibility.wrapper;
 
 import android.graphics.Rect;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -6,6 +6,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import java.util.List;
 import java.util.Optional;
 
+import de.knollfrank.extensionsformaps.accessibility.ResourceName;
 import de.knollfrank.extensionsformaps.common.Lists;
 
 public record AccessibilityNodeInfoWrapper(AccessibilityNodeInfo node) {
@@ -35,7 +36,15 @@ public record AccessibilityNodeInfoWrapper(AccessibilityNodeInfo node) {
                 Optional.empty();
     }
 
-    public Optional<CharSequence> getText() {
-        return Optional.ofNullable(node.getText());
+    public Optional<String> getText() {
+        return Optional
+                .ofNullable(node.getText())
+                .map(CharSequence::toString);
+    }
+
+    public Optional<String> getPackageName() {
+        return Optional
+                .ofNullable(node.getPackageName())
+                .map(CharSequence::toString);
     }
 }

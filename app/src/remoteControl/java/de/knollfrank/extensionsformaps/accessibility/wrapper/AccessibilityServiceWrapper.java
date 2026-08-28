@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.accessibility;
+package de.knollfrank.extensionsformaps.accessibility.wrapper;
 
 import android.accessibilityservice.AccessibilityService;
 import android.graphics.Point;

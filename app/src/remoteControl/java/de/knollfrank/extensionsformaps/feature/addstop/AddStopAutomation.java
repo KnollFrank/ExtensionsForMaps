@@ -9,8 +9,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.time.Duration;
 
-import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 
 class AddStopAutomation {
 

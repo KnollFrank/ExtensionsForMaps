@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -180,7 +181,11 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     }
 
     private int dpToPx(final int dp) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, accessibilityService.getResources().getDisplayMetrics());
+        return getAnInt(dp, accessibilityService.getResources().getDisplayMetrics());
+    }
+
+    public static int getAnInt(final int dp, final DisplayMetrics displayMetrics) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, displayMetrics);
     }
 
     private void removeSortButton() {

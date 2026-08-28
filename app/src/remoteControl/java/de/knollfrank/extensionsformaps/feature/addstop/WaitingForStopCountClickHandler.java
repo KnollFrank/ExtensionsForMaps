@@ -6,9 +6,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.Optional;
 
-import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
-import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 
 class WaitingForStopCountClickHandler {
 

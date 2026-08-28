@@ -8,8 +8,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.Optional;
 
-import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
-import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 
 class WaitingForClearClickHandler {
 
@@ -72,7 +72,6 @@ class WaitingForClearClickHandler {
     private static String getText(final AccessibilityNodeInfo node) {
         return new AccessibilityNodeInfoWrapper(node)
                 .getText()
-                .map(CharSequence::toString)
                 .orElse("");
     }
 

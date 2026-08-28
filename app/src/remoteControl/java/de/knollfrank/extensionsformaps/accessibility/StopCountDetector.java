@@ -6,11 +6,10 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import java.util.List;
 import java.util.Optional;
 
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.common.Optionals;
 
 public class StopCountDetector {
-
-    private static final String TAG = StopCountDetector.class.getSimpleName();
 
     public interface StopCountListener {
 

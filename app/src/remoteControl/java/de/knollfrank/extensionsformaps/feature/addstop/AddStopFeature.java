@@ -18,11 +18,11 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import de.knollfrank.extensionsformaps.R;
-import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
-import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
 import de.knollfrank.extensionsformaps.accessibility.StopCountDetector;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.feature.AccessibilityFeature;
 

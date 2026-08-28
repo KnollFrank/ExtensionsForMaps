@@ -15,7 +15,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -28,10 +27,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
-import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.accessibility.ResourceName;
 import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityEventWrapper;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 
 // FK-TODO: refactor
 // FK-TODO: Verwende die Google-App https://play.google.com/store/apps/details?id=com.google.android.googlequicksearchbox statt der Gemini-App für den Adressscanner.
@@ -39,10 +39,10 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     private static final String TAG = ScanAddressFeature.class.getSimpleName();
     private static final ResourceName SEARCH_EDIT_TEXT_ID = ResourceNameFactory.createGoogleMapsResourceName("search_omnibox_edit_text");
-
     private static final ResourceName GEMINI_SEND_ID = new ResourceName(GOOGLE_APP_PACKAGE, "assistant_robin_input_send_button_compose");
 
-    public static final String TOKEN_START = "START_ADDR";
+    // FK-TODO: use TOKEN_START instead of "START_ADDR" throughout this class
+    private static final String TOKEN_START = "START_ADDR";
     public static final String TOKEN_END = "END_ADDR";
     public static final String AI_PROMPT = "Analysiere das Bild und extrahiere nur die Adresse (ohne Namen). Antwort-Format: " + TOKEN_START + " [gefundene Adresse hier einsetzen] " + TOKEN_END;
 
@@ -77,22 +77,24 @@ public class ScanAddressFeature implements AccessibilityFeature {
     @Override
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            if (GOOGLE_MAPS_PACKAGE.equals(String.valueOf(event.getPackageName()))) {
+            if (isGoogleApp(event)) {
                 if (state != State.IDLE && pendingAddress == null) {
                     state = State.IDLE;
                 }
             }
         }
         // Hier greift die originale Einsetz-Logik
-        if (pendingAddress != null) pasteAddress(root);
+        if (pendingAddress != null) {
+            pasteAddress(root);
+        }
         updateScanButton(root);
     }
 
     @Override
     public void onGoogleAppEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
-        if (root == null) return;
-        final String pkg = String.valueOf(root.getPackageName());
-        if (!GOOGLE_APP_PACKAGE.equals(pkg) && !GEMINI_APP_PACKAGE.equals(pkg)) return;
+        if (isNotGoogleAppAndNotGeminiApp(root)) {
+            return;
+        }
 
         if (pendingAddress != null) {
             // Wir haben die Adresse. Jetzt bringen wir Maps sanft nach vorne.
@@ -102,15 +104,45 @@ public class ScanAddressFeature implements AccessibilityFeature {
             }
             return;
         }
-
-        if (tryExtractAIResponse(root)) return;
-
+        if (tryExtractAIResponse(root)) {
+            return;
+        }
         automateGemini(root);
     }
 
-    private void automateGemini(AccessibilityNodeInfo root) {
+    @Override
+    public void onDestroy() {
+        removeScanButton();
+    }
+
+    @Override
+    public void reset() {
+        removeScanButton();
+    }
+
+    private static Boolean isGoogleApp(final AccessibilityEvent event) {
+        return new AccessibilityEventWrapper(event)
+                .getPackageName()
+                .map(GOOGLE_MAPS_PACKAGE::equals)
+                .orElse(false);
+    }
+
+    private static boolean isNotGoogleAppAndNotGeminiApp(final AccessibilityNodeInfo root) {
+        return new AccessibilityNodeInfoWrapper(root)
+                .getPackageName()
+                .map(ScanAddressFeature::isNotGoogleAppAndNotGeminiApp)
+                .orElse(true);
+    }
+
+    private static boolean isNotGoogleAppAndNotGeminiApp(final String packageName) {
+        return !GOOGLE_APP_PACKAGE.equals(packageName) && !GEMINI_APP_PACKAGE.equals(packageName);
+    }
+
+    private void automateGemini(final AccessibilityNodeInfo root) {
         AccessibilityNodeInfo inputField = findNodeByHint(root, "Frag Gemini");
-        if (inputField == null) inputField = findEditText(root);
+        if (inputField == null) {
+            inputField = findEditText(root);
+        }
 
         if (inputField != null) {
             String currentText = String.valueOf(inputField.getText());
@@ -160,7 +192,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
         return null;
     }
 
-    private AccessibilityNodeInfo findEditText(AccessibilityNodeInfo node) {
+    private AccessibilityNodeInfo findEditText(final AccessibilityNodeInfo node) {
         if (node == null) return null;
         if (node.getClassName() != null && node.getClassName().toString().contains("EditText"))
             return node;
@@ -171,7 +203,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
         return null;
     }
 
-    private boolean tryExtractAIResponse(AccessibilityNodeInfo root) {
+    private boolean tryExtractAIResponse(final AccessibilityNodeInfo root) {
         StringBuilder sb = new StringBuilder();
         collectVisibleResponseText(root, sb);
         String fullText = sb.toString();
@@ -280,16 +312,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
         new AccessibilityServiceWrapper(accessibilityService).click(node);
     }
 
-    @Override
-    public void reset() {
-        removeScanButton();
-    }
-
-    @Override
-    public void onDestroy() {
-        removeScanButton();
-    }
-
     private void updateScanButton(final AccessibilityNodeInfo root) {
         List<AccessibilityNodeInfo> nodes = new AccessibilityNodeInfoWrapper(root).findAccessibilityNodeInfosByViewId(SEARCH_EDIT_TEXT_ID);
         if (nodes.isEmpty()) {
@@ -370,13 +392,13 @@ public class ScanAddressFeature implements AccessibilityFeature {
         if (scanButtonOverlay != null) {
             try {
                 windowManager.removeView(scanButtonOverlay);
-            } catch (Exception ignored) {
+            } catch (final Exception ignored) {
             }
             scanButtonOverlay = null;
         }
     }
 
-    private int dpToPx(int dp) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, accessibilityService.getResources().getDisplayMetrics());
+    private int dpToPx(final int dp) {
+        return SortFeature.getAnInt(dp, accessibilityService.getResources().getDisplayMetrics());
     }
 }

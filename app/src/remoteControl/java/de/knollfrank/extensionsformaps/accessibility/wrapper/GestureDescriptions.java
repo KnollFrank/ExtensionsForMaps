@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.accessibility;
+package de.knollfrank.extensionsformaps.accessibility.wrapper;
 
 import android.accessibilityservice.GestureDescription;
 import android.accessibilityservice.GestureDescription.StrokeDescription;

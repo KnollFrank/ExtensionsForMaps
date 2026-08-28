@@ -9,10 +9,10 @@ import androidx.core.util.Pair;
 
 import java.util.Optional;
 
-import de.knollfrank.extensionsformaps.accessibility.AccessibilityNodeInfoWrapper;
-import de.knollfrank.extensionsformaps.accessibility.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.common.RectWrapper;
 
