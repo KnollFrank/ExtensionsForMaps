@@ -3,6 +3,8 @@ package de.knollfrank.extensionsformaps.accessibility.wrapper;
 import android.graphics.Rect;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.google.common.base.Supplier;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -37,14 +39,24 @@ public record AccessibilityNodeInfoWrapper(AccessibilityNodeInfo node) {
     }
 
     public Optional<String> getText() {
-        return Optional
-                .ofNullable(node.getText())
-                .map(CharSequence::toString);
+        return getString(node::getText);
     }
 
     public Optional<String> getPackageName() {
+        return getString(node::getPackageName);
+    }
+
+    public Optional<String> getHintText() {
+        return getString(node::getHintText);
+    }
+
+    public Optional<String> getClassName() {
+        return getString(node::getClassName);
+    }
+
+    private static Optional<String> getString(final Supplier<CharSequence> supplier) {
         return Optional
-                .ofNullable(node.getPackageName())
+                .ofNullable(supplier.get())
                 .map(CharSequence::toString);
     }
 }
