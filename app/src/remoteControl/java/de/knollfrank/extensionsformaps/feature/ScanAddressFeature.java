@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +33,7 @@ import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityEventWrapper;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
+import de.knollfrank.extensionsformaps.common.Optionals;
 
 // FK-TODO: refactor
 // FK-TODO: Verwende die Google-App https://play.google.com/store/apps/details?id=com.google.android.googlequicksearchbox statt der Gemini-App für den Adressscanner.
@@ -139,68 +141,98 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private void automateGemini(final AccessibilityNodeInfo root) {
-        AccessibilityNodeInfo inputField = findNodeByHint(root, "Frag Gemini");
-        if (inputField == null) {
-            inputField = findEditText(root);
-        }
+        ScanAddressFeature
+                .findInputField(root)
+                .ifPresent(inputField -> automateGemini_setInputTextOrClickSendButton(root, inputField));
+    }
 
-        if (inputField != null) {
-            String currentText = String.valueOf(inputField.getText());
-
-            if (state == State.IDLE && !currentText.contains("Analysiere")) {
-                if (setInputText(inputField, AI_PROMPT)) {
-                    state = State.FILLING_PROMPT;
-                    lastActionTime = System.currentTimeMillis();
-                }
-                return;
+    private void automateGemini_setInputTextOrClickSendButton(final AccessibilityNodeInfo root, final AccessibilityNodeInfo inputField) {
+        final boolean textContainsAnalysiere = textOfNodeContainsNeedle(inputField, "Analysiere");
+        if (state == State.IDLE && !textContainsAnalysiere) {
+            if (setInputText(inputField, AI_PROMPT)) {
+                state = State.FILLING_PROMPT;
+                lastActionTime = System.currentTimeMillis();
             }
-
-            if (currentText.contains("Analysiere")) {
-                if (state == State.FILLING_PROMPT || state == State.IDLE) {
-                    state = State.PROMPT_FILLED;
-                    lastActionTime = System.currentTimeMillis();
-                    clickRetries = 0;
+        } else if (textContainsAnalysiere) {
+            if (state == State.FILLING_PROMPT || state == State.IDLE) {
+                state = State.PROMPT_FILLED;
+                lastActionTime = System.currentTimeMillis();
+                clickRetries = 0;
+            }
+            if (state == State.PROMPT_FILLED || state == State.SENDING_PROMPT) {
+                if (System.currentTimeMillis() - lastActionTime < 1000) {
+                    return;
                 }
-
-                if (state == State.PROMPT_FILLED || state == State.SENDING_PROMPT) {
-                    if (System.currentTimeMillis() - lastActionTime < 1000) return;
-
-                    final AccessibilityNodeInfo sendButton = findSendButton(root);
-                    if (sendButton != null && sendButton.isEnabled()) {
-                        if (clickRetries < 5) {
-                            click(sendButton);
-                            state = State.SENDING_PROMPT;
-                            lastActionTime = System.currentTimeMillis();
-                            clickRetries++;
-                        } else {
-                            state = State.AWAITING_RESPONSE;
-                        }
-                    }
-                }
+                ScanAddressFeature
+                        .findSendButton(root)
+                        .ifPresent(this::clickSendButton);
             }
         }
     }
 
-    private AccessibilityNodeInfo findSendButton(AccessibilityNodeInfo root) {
-        List<AccessibilityNodeInfo> list = root.findAccessibilityNodeInfosByText("Senden");
-        if (list.isEmpty()) {
-            list = new AccessibilityNodeInfoWrapper(root).findAccessibilityNodeInfosByViewId(GEMINI_SEND_ID);
+    private void clickSendButton(final AccessibilityNodeInfo sendButton) {
+        if (clickRetries < 5) {
+            new AccessibilityServiceWrapper(accessibilityService).click(sendButton);
+            state = State.SENDING_PROMPT;
+            lastActionTime = System.currentTimeMillis();
+            clickRetries++;
+        } else {
+            state = State.AWAITING_RESPONSE;
         }
-        for (AccessibilityNodeInfo n : list) {
-            if (n.isVisibleToUser()) return n;
-        }
-        return null;
     }
 
-    private AccessibilityNodeInfo findEditText(final AccessibilityNodeInfo node) {
-        if (node == null) return null;
-        if (node.getClassName() != null && node.getClassName().toString().contains("EditText"))
-            return node;
+    private static Optional<AccessibilityNodeInfo> findInputField(final AccessibilityNodeInfo root) {
+        return Optionals
+                .streamOfPresentElements(
+                        () -> findNodeByHint(root, "Frag Gemini"),
+                        () -> findEditText(root))
+                .findFirst();
+    }
+
+    private static boolean textOfNodeContainsNeedle(final AccessibilityNodeInfo node, final String needle) {
+        return new AccessibilityNodeInfoWrapper(node)
+                .getText()
+                .map(text -> text.contains(needle))
+                .orElse(false);
+    }
+
+    private static Optional<AccessibilityNodeInfo> findSendButton(final AccessibilityNodeInfo root) {
+        return findFirstIsVisibleToUser(findSendButtonCandidates(root));
+    }
+
+    private static List<AccessibilityNodeInfo> findSendButtonCandidates(final AccessibilityNodeInfo root) {
+        // FK-TODO: all die deutschen Bezeichnungen sind über keys zu i18n.
+        List<AccessibilityNodeInfo> sendButtonCandidates = root.findAccessibilityNodeInfosByText("Senden");
+        return !sendButtonCandidates.isEmpty() ?
+                sendButtonCandidates :
+                new AccessibilityNodeInfoWrapper(root).findAccessibilityNodeInfosByViewId(GEMINI_SEND_ID);
+    }
+
+    private static Optional<AccessibilityNodeInfo> findFirstIsVisibleToUser(final List<AccessibilityNodeInfo> nodes) {
+        return nodes
+                .stream()
+                .filter(AccessibilityNodeInfo::isVisibleToUser)
+                .findFirst();
+    }
+
+    private static Optional<AccessibilityNodeInfo> findEditText(final AccessibilityNodeInfo node) {
+        if (classNameContainsEditText(node)) {
+            return Optional.of(node);
+        }
         for (int i = 0; i < node.getChildCount(); i++) {
-            AccessibilityNodeInfo res = findEditText(node.getChild(i));
-            if (res != null) return res;
+            final Optional<AccessibilityNodeInfo> result = findEditText(node.getChild(i));
+            if (result.isPresent()) {
+                return result;
+            }
         }
-        return null;
+        return Optional.empty();
+    }
+
+    private static boolean classNameContainsEditText(final AccessibilityNodeInfo node) {
+        return new AccessibilityNodeInfoWrapper(node)
+                .getClassName()
+                .map(className -> className.contains("EditText"))
+                .orElse(false);
     }
 
     private boolean tryExtractAIResponse(final AccessibilityNodeInfo root) {
@@ -275,16 +307,17 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private boolean setInputText(final AccessibilityNodeInfo node, final String text) {
-        if (node == null) {
-            return false;
-        }
-        final Bundle args = new Bundle();
-        args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text);
-        if (node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)) return true;
+        return performSetText(node, text) || performCopyPaste(node, text);
+    }
 
+    private static boolean performSetText(final AccessibilityNodeInfo node, final String text) {
+        return node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, getBundleForSettingText(text));
+    }
+
+    private boolean performCopyPaste(final AccessibilityNodeInfo node, final String text) {
         try {
-            final ClipboardManager cb = (ClipboardManager) accessibilityService.getSystemService(Context.CLIPBOARD_SERVICE);
-            cb.setPrimaryClip(ClipData.newPlainText("text", text));
+            final ClipboardManager clipboardManager = (ClipboardManager) accessibilityService.getSystemService(Context.CLIPBOARD_SERVICE);
+            clipboardManager.setPrimaryClip(ClipData.newPlainText("text", text));
             node.performAction(AccessibilityNodeInfo.ACTION_FOCUS);
             return node.performAction(AccessibilityNodeInfo.ACTION_PASTE);
         } catch (final Exception e) {
@@ -292,24 +325,31 @@ public class ScanAddressFeature implements AccessibilityFeature {
         }
     }
 
-    // FK-TODO: refactor null -> Optional<AccessibilityNodeInfo>
-    private AccessibilityNodeInfo findNodeByHint(final AccessibilityNodeInfo node, final String hint) {
-        if (node == null) {
-            return null;
-        }
-        final CharSequence h = node.getHintText();
-        if (h != null && h.toString().contains(hint)) {
-            return node;
-        }
-        for (int i = 0; i < node.getChildCount(); i++) {
-            final AccessibilityNodeInfo res = findNodeByHint(node.getChild(i), hint);
-            if (res != null) return res;
-        }
-        return null;
+    private static Bundle getBundleForSettingText(final String text) {
+        final Bundle bundle = new Bundle();
+        bundle.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text);
+        return bundle;
     }
 
-    private void click(final AccessibilityNodeInfo node) {
-        new AccessibilityServiceWrapper(accessibilityService).click(node);
+    // FK-TODO: dieses Muster kommt öfter vor
+    private static Optional<AccessibilityNodeInfo> findNodeByHint(final AccessibilityNodeInfo node, final String hint) {
+        if (nodeContainsHint(node, hint)) {
+            return Optional.of(node);
+        }
+        for (int i = 0; i < node.getChildCount(); i++) {
+            final Optional<AccessibilityNodeInfo> result = findNodeByHint(node.getChild(i), hint);
+            if (result.isPresent()) {
+                return result;
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static Boolean nodeContainsHint(final AccessibilityNodeInfo node, final String hint) {
+        return new AccessibilityNodeInfoWrapper(node)
+                .getHintText()
+                .map(hintText -> hintText.contains(hint))
+                .orElse(false);
     }
 
     private void updateScanButton(final AccessibilityNodeInfo root) {
