@@ -36,7 +36,6 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     // FK-TODO: make Optional<View>
     private View sortButtonOverlay;
     private final Rect lastStopCountBounds = new Rect();
-    private int lastKnownStopCount = 0;
 
     public SortFeature(final AccessibilityService accessibilityService,
                        final RouteUrlRequester routeUrlRequester,
@@ -49,14 +48,12 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
 
     @Override
     public void onStopCountUpdated(final int stopCount, final Rect stopCountBounds) {
-        this.lastKnownStopCount = stopCount;
         this.lastStopCountBounds.set(stopCountBounds);
         updateSortButtonPosition();
     }
 
     @Override
     public void onStopCountLost() {
-        Log.d(TAG, "Stop count label not found. Hiding sort button, but keeping count: " + lastKnownStopCount);
         this.lastStopCountBounds.setEmpty();
         removeSortButton();
     }
@@ -64,7 +61,6 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     @Override
     public void reset() {
         Log.d(TAG, "Full reset of SortFeature.");
-        lastKnownStopCount = 0;
         this.lastStopCountBounds.setEmpty();
         removeSortButton();
     }
@@ -126,7 +122,6 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
                         LinearLayout.LayoutParams.MATCH_PARENT);
         button.setLayoutParams(params);
         button.setOnClickListener(view -> {
-            Log.d(TAG, "Sort button clicked for " + lastKnownStopCount + " stops");
             routeUrlRequester.requestRouteUrl(onRouteUrlExtracted);
         });
         return button;
