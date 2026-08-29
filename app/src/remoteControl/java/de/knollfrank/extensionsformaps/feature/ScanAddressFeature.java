@@ -50,7 +50,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     private final AccessibilityService accessibilityService;
     private final WindowManager windowManager;
-    private Optional<View> scanButtonOverlay;
+    private Optional<View> scanButtonOverlay = Optional.empty();
     private final Rect lastEditTextFieldBounds = new Rect();
     private Optional<String> address = Optional.empty();
     private State state = State.IDLE;
