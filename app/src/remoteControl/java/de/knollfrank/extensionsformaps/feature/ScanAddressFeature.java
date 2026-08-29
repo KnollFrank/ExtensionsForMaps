@@ -303,14 +303,25 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private void returnToMaps() {
         Log.d(TAG, "Hole Google Maps sanft in den Vordergrund...");
         // Wir nutzen einen Intent, der nur die existierende Instanz nach vorne holt
-        Intent intent = accessibilityService.getPackageManager().getLaunchIntentForPackage(GOOGLE_MAPS_PACKAGE);
-        if (intent != null) {
-            // WICHTIG: Wir loeschen den Reset-Flag, falls vorhanden
-            intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-            // Wir fuegen REORDER_TO_FRONT hinzu, um nur die bestehende Task anzuzeigen
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            accessibilityService.startActivity(intent);
-        }
+        Optional
+                .ofNullable(accessibilityService.getPackageManager().getLaunchIntentForPackage(GOOGLE_MAPS_PACKAGE))
+                .ifPresent(
+                        intent -> {
+                            intent
+                                    // WICHTIG: Wir löschen den Reset-Flag, falls vorhanden
+                                    .setFlags(removeResetFlag(intent))
+                                    // Wir fügen REORDER_TO_FRONT hinzu, um nur den bestehenden Task anzuzeigen
+                                    .addFlags(reorderToFront());
+                            accessibilityService.startActivity(intent);
+                        });
+    }
+
+    private static int removeResetFlag(final Intent intent) {
+        return intent.getFlags() & ~Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
+    }
+
+    private static int reorderToFront() {
+        return Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
     }
 
     private void pasteAddress(final AccessibilityNodeInfo root) {
