@@ -35,7 +35,6 @@ import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeIn
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.common.Optionals;
 
-// FK-TODO: refactor
 // FK-TODO: Verwende die Google-App https://play.google.com/store/apps/details?id=com.google.android.googlequicksearchbox statt der Gemini-App für den Adressscanner.
 public class ScanAddressFeature implements AccessibilityFeature {
 
@@ -455,7 +454,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private WindowManager.LayoutParams getScanButtonLayoutParams(final Rect rect) {
-        WindowManager.LayoutParams scanButtonLayoutParams = new WindowManager.LayoutParams(dpToPx(40), dpToPx(40), WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, PixelFormat.TRANSLUCENT);
+        final WindowManager.LayoutParams scanButtonLayoutParams = new WindowManager.LayoutParams(dpToPx(40), dpToPx(40), WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, PixelFormat.TRANSLUCENT);
         scanButtonLayoutParams.gravity = Gravity.TOP | Gravity.START;
         scanButtonLayoutParams.x = rect.right - dpToPx(44);
         scanButtonLayoutParams.y = rect.centerY() - dpToPx(20);
