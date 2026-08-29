@@ -54,6 +54,10 @@ public record AccessibilityNodeInfoWrapper(AccessibilityNodeInfo node) {
         return getString(node::getClassName);
     }
 
+    public Optional<String> getContentDescription() {
+        return getString(node::getContentDescription);
+    }
+
     private static Optional<String> getString(final Supplier<CharSequence> supplier) {
         return Optional
                 .ofNullable(supplier.get())

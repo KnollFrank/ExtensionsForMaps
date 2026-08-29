@@ -234,17 +234,16 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private boolean tryExtractAIResponse(final AccessibilityNodeInfo root) {
-        StringBuilder sb = new StringBuilder();
-        collectVisibleResponseText(root, sb);
-        String fullText = sb.toString();
-
+        final String fullText = collectVisibleResponseText(root);
         if (fullText.contains(TOKEN_END)) {
-            Pattern pattern = Pattern.compile("START_ADDR\\s*[*]*\\s*(.*?)\\s*[*]*\\s*END_ADDR",
-                    Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-            Matcher matcher = pattern.matcher(fullText);
-
+            final Matcher matcher =
+                    Pattern
+                            .compile(
+                                    "START_ADDR\\s*[*]*\\s*(.*?)\\s*[*]*\\s*END_ADDR",
+                                    Pattern.DOTALL | Pattern.CASE_INSENSITIVE)
+                            .matcher(fullText);
             while (matcher.find()) {
-                String candidate = matcher.group(1).trim();
+                final String candidate = matcher.group(1).trim();
                 if (isValidAddress(candidate)) {
                     final String _pendingAddress =
                             candidate
@@ -263,17 +262,26 @@ public class ScanAddressFeature implements AccessibilityFeature {
         return false;
     }
 
-    private void collectVisibleResponseText(AccessibilityNodeInfo node, StringBuilder sb) {
-        if (node == null) return;
-        String className = String.valueOf(node.getClassName());
-        if (!className.contains("EditText")) {
-            CharSequence txt = node.getText();
-            if (txt != null && txt.length() > 0) sb.append(txt).append(" ");
-            CharSequence desc = node.getContentDescription();
-            if (desc != null && desc.length() > 0) sb.append(desc).append(" ");
+    private String collectVisibleResponseText(final AccessibilityNodeInfo root) {
+        final StringBuilder visibleResponseTextOut = new StringBuilder();
+        collectVisibleResponseText(root, visibleResponseTextOut);
+        return visibleResponseTextOut.toString();
+    }
+
+    private void collectVisibleResponseText(final AccessibilityNodeInfo node, final StringBuilder visibleResponseTextOut) {
+        if (!classNameContainsEditText(node)) {
+            final AccessibilityNodeInfoWrapper accessibilityNodeInfoWrapper = new AccessibilityNodeInfoWrapper(node);
+            accessibilityNodeInfoWrapper
+                    .getText()
+                    .filter(text -> !text.isEmpty())
+                    .ifPresent(text -> visibleResponseTextOut.append(text).append(" "));
+            accessibilityNodeInfoWrapper
+                    .getContentDescription()
+                    .filter(contentDescription -> !contentDescription.isEmpty())
+                    .ifPresent(contentDescription -> visibleResponseTextOut.append(contentDescription).append(" "));
         }
         for (int i = 0; i < node.getChildCount(); i++) {
-            collectVisibleResponseText(node.getChild(i), sb);
+            collectVisibleResponseText(node.getChild(i), visibleResponseTextOut);
         }
     }
 
