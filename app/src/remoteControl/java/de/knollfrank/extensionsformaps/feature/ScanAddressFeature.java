@@ -61,8 +61,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private final WindowManager windowManager;
     private View scanButtonOverlay;
     private final Rect lastInputBounds = new Rect();
-    // FK-TODO: make pendingAddress Optional
-    private String pendingAddress = null;
+    private Optional<String> pendingAddress = Optional.empty();
     private State state = State.IDLE;
     private long lastActionTime = 0;
     private int clickRetries = 0;
@@ -80,13 +79,13 @@ public class ScanAddressFeature implements AccessibilityFeature {
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             if (isGoogleApp(event)) {
-                if (state != State.IDLE && pendingAddress == null) {
+                if (state != State.IDLE && pendingAddress.isEmpty()) {
                     state = State.IDLE;
                 }
             }
         }
         // Hier greift die originale Einsetz-Logik
-        if (pendingAddress != null) {
+        if (pendingAddress.isPresent()) {
             pasteAddress(root);
         }
         updateScanButton(root);
@@ -98,7 +97,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
             return;
         }
 
-        if (pendingAddress != null) {
+        if (pendingAddress.isPresent()) {
             // Wir haben die Adresse. Jetzt bringen wir Maps sanft nach vorne.
             if (System.currentTimeMillis() - lastActionTime > 1000) {
                 returnToMaps();
@@ -242,14 +241,19 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
         if (fullText.contains(TOKEN_END)) {
             Pattern pattern = Pattern.compile("START_ADDR\\s*[*]*\\s*(.*?)\\s*[*]*\\s*END_ADDR",
-                                              Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+                    Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
             Matcher matcher = pattern.matcher(fullText);
 
             while (matcher.find()) {
                 String candidate = matcher.group(1).trim();
                 if (isValidAddress(candidate)) {
-                    pendingAddress = candidate.replaceAll("[\\r\\n]+", " ").replaceAll("\\s{2,}", " ").trim();
-                    Log.i(TAG, "ERGEBNIS GEFUNDEN: " + pendingAddress);
+                    final String _pendingAddress =
+                            candidate
+                                    .replaceAll("[\\r\\n]+", " ")
+                                    .replaceAll("\\s{2,}", " ")
+                                    .trim();
+                    pendingAddress = Optional.of(_pendingAddress);
+                    Log.i(TAG, "ERGEBNIS GEFUNDEN: " + _pendingAddress);
                     lastActionTime = System.currentTimeMillis();
                     // Erster sanfter Versuch via BACK
                     accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
@@ -275,8 +279,10 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private boolean isValidAddress(String text) {
-        if (text.length() < 5) return false;
-        String lower = text.toLowerCase();
+        if (text.length() < 5) {
+            return false;
+        }
+        final String lower = text.toLowerCase();
         return !lower.contains("gefundene adresse") && !lower.contains("extrahiere") && text.matches(".*\\d+.*");
     }
 
@@ -298,10 +304,10 @@ public class ScanAddressFeature implements AccessibilityFeature {
         if (!nodes.isEmpty()) {
             AccessibilityNodeInfo et = nodes.get(0);
             Bundle args = new Bundle();
-            args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, pendingAddress);
+            args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, pendingAddress.orElse(null));
             if (et.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)) {
                 Log.d(TAG, "Adresse in Maps eingefügt.");
-                pendingAddress = null;
+                pendingAddress = Optional.empty();
             }
         }
     }
@@ -399,7 +405,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
             state = State.IDLE;
             clickRetries = 0;
             lastActionTime = 0;
-            pendingAddress = null;
+            pendingAddress = Optional.empty();
             try {
                 Intent i = new Intent(accessibilityService, CaptureAddressActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
