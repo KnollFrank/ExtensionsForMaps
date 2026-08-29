@@ -143,7 +143,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private void automateGemini_setInputTextOrClickSendButton(final AccessibilityNodeInfo root, final AccessibilityNodeInfo inputField) {
         final boolean textContainsAnalysiere = textOfNodeContainsNeedle(inputField, "Analysiere");
         if (state == State.IDLE && !textContainsAnalysiere) {
-            if (setInputText(inputField, AiPrompt.aiPrompt)) {
+            if (setInputText(inputField, AIPrompt.getAIPrompt())) {
                 state = State.FILLING_PROMPT;
                 lastActionTime = System.currentTimeMillis();
             }
@@ -243,7 +243,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private Optional<String> getAddress(final AccessibilityNodeInfo root) {
-        return AiPrompt.extractAddressFromAIResponse(collectVisibleResponseText(root));
+        return AIPrompt.extractAddressFromAIResponse(collectVisibleResponseText(root));
     }
 
     private String collectVisibleResponseText(final AccessibilityNodeInfo root) {
