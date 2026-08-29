@@ -28,7 +28,6 @@ import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.accessibility.ResourceName;
 import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
-import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityEventWrapper;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.common.Optionals;
@@ -70,10 +69,8 @@ public class ScanAddressFeature implements AccessibilityFeature {
     @Override
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            if (isGoogleApp(event)) {
-                if (state != State.IDLE && address.isEmpty()) {
-                    state = State.IDLE;
-                }
+            if (state != State.IDLE && address.isEmpty()) {
+                state = State.IDLE;
             }
         }
         // Hier greift die originale Einsetz-Logik
@@ -114,13 +111,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
     @Override
     public void reset() {
         removeScanButton();
-    }
-
-    private static Boolean isGoogleApp(final AccessibilityEvent event) {
-        return new AccessibilityEventWrapper(event)
-                .getPackageName()
-                .map(GOOGLE_MAPS_PACKAGE::equals)
-                .orElse(false);
     }
 
     private static boolean isNotGoogleAppAndNotGeminiApp(final AccessibilityNodeInfo root) {

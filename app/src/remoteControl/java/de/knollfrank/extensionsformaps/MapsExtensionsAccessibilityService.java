@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
@@ -19,6 +18,7 @@ import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContextResolver;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester.RouteUrlCallback;
 import de.knollfrank.extensionsformaps.accessibility.StopCountDetector;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityEventWrapper;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.feature.ActiveServiceHighlightFeature;
 import de.knollfrank.extensionsformaps.feature.CompoundFeature;
@@ -59,9 +59,8 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(final AccessibilityEvent event) {
-        Optional
-                .ofNullable(event.getPackageName())
-                .map(CharSequence::toString)
+        new AccessibilityEventWrapper(event)
+                .getPackageName()
                 .ifPresent(
                         packageName -> {
                             // WICHTIG: Wenn wir Google Maps verlassen, muessen Maps-Overlays sofort verschwinden.
