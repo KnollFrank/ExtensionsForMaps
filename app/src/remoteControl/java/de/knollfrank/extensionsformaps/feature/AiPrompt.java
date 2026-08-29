@@ -9,13 +9,13 @@ class AiPrompt {
     private static final String tokenStart = "START_ADDR";
     private static final String tokenEnd = "END_ADDR";
     public static final String aiPrompt = "Analysiere das Bild und extrahiere nur die Adresse (ohne Namen). Antwort-Format: " + tokenStart + " [gefundene Adresse hier einsetzen] " + tokenEnd;
-    private static final Pattern aiAnswerPattern =
+    private static final Pattern aiResponsePattern =
             Pattern.compile(
                     tokenStart + "\\s*[*]*\\s*(.*?)\\s*[*]*\\s*" + tokenEnd,
                     Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
-    public static Optional<String> getAddress(final String aiAnswer) {
-        final Matcher matcher = aiAnswerPattern.matcher(aiAnswer);
+    public static Optional<String> extractAddressFromAIResponse(final String aiResponse) {
+        final Matcher matcher = aiResponsePattern.matcher(aiResponse);
         while (matcher.find()) {
             final String candidate = matcher.group(1).trim();
             if (isValidAddress(candidate)) {

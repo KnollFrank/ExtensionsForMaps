@@ -243,7 +243,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private Optional<String> getAddress(final AccessibilityNodeInfo root) {
-        return AiPrompt.getAddress(collectVisibleResponseText(root));
+        return AiPrompt.extractAddressFromAIResponse(collectVisibleResponseText(root));
     }
 
     private String collectVisibleResponseText(final AccessibilityNodeInfo root) {
