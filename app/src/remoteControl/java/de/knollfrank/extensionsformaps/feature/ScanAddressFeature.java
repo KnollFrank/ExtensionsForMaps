@@ -61,7 +61,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private final WindowManager windowManager;
     private Optional<View> scanButtonOverlay;
     private final Rect lastEditTextFieldBounds = new Rect();
-    private Optional<String> pendingAddress = Optional.empty();
+    private Optional<String> address = Optional.empty();
     private State state = State.IDLE;
     private long lastActionTime = 0;
     private int clickRetries = 0;
@@ -79,13 +79,13 @@ public class ScanAddressFeature implements AccessibilityFeature {
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             if (isGoogleApp(event)) {
-                if (state != State.IDLE && pendingAddress.isEmpty()) {
+                if (state != State.IDLE && address.isEmpty()) {
                     state = State.IDLE;
                 }
             }
         }
         // Hier greift die originale Einsetz-Logik
-        if (pendingAddress.isPresent()) {
+        if (address.isPresent()) {
             pasteAddress(root);
         }
         updateScanButton(root);
@@ -96,7 +96,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
         if (isNotGoogleAppAndNotGeminiApp(root)) {
             return;
         }
-        if (pendingAddress.isPresent()) {
+        if (address.isPresent()) {
             // Wir haben die Adresse. Jetzt bringen wir Maps sanft nach vorne.
             if (System.currentTimeMillis() - lastActionTime > 1000) {
                 returnToMaps();
@@ -234,6 +234,19 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private boolean tryExtractAIResponse(final AccessibilityNodeInfo root) {
+        final Optional<String> address = getAddress(root);
+        address.ifPresent(
+                _address -> {
+                    this.address = Optional.of(_address);
+                    Log.i(TAG, "ERGEBNIS GEFUNDEN: " + _address);
+                    lastActionTime = System.currentTimeMillis();
+                    // Erster sanfter Versuch via BACK
+                    accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
+                });
+        return address.isPresent();
+    }
+
+    private Optional<String> getAddress(final AccessibilityNodeInfo root) {
         final String fullText = collectVisibleResponseText(root);
         if (fullText.contains(TOKEN_END)) {
             final Matcher matcher =
@@ -245,21 +258,15 @@ public class ScanAddressFeature implements AccessibilityFeature {
             while (matcher.find()) {
                 final String candidate = matcher.group(1).trim();
                 if (isValidAddress(candidate)) {
-                    final String _pendingAddress =
+                    return Optional.of(
                             candidate
                                     .replaceAll("[\\r\\n]+", " ")
                                     .replaceAll("\\s{2,}", " ")
-                                    .trim();
-                    pendingAddress = Optional.of(_pendingAddress);
-                    Log.i(TAG, "ERGEBNIS GEFUNDEN: " + _pendingAddress);
-                    lastActionTime = System.currentTimeMillis();
-                    // Erster sanfter Versuch via BACK
-                    accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
-                    return true;
+                                    .trim());
                 }
             }
         }
-        return false;
+        return Optional.empty();
     }
 
     private String collectVisibleResponseText(final AccessibilityNodeInfo root) {
@@ -311,10 +318,10 @@ public class ScanAddressFeature implements AccessibilityFeature {
         if (!nodes.isEmpty()) {
             AccessibilityNodeInfo et = nodes.get(0);
             Bundle args = new Bundle();
-            args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, pendingAddress.orElse(null));
+            args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, address.orElse(null));
             if (et.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)) {
                 Log.d(TAG, "Adresse in Maps eingefügt.");
-                pendingAddress = Optional.empty();
+                address = Optional.empty();
             }
         }
     }
@@ -419,7 +426,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
                     state = State.IDLE;
                     clickRetries = 0;
                     lastActionTime = 0;
-                    pendingAddress = Optional.empty();
+                    address = Optional.empty();
                     try {
                         final Intent intent = new Intent(accessibilityService, CaptureAddressActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
