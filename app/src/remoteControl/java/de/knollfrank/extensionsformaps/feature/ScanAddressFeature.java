@@ -59,8 +59,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     private final AccessibilityService accessibilityService;
     private final WindowManager windowManager;
-    // FK-TODO: make Optional
-    private View scanButtonOverlay;
+    private Optional<View> scanButtonOverlay;
     private final Rect lastEditTextFieldBounds = new Rect();
     private Optional<String> pendingAddress = Optional.empty();
     private State state = State.IDLE;
@@ -364,7 +363,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
                 .ifPresentOrElse(
                         editTextField -> {
                             final Rect editTextFieldBounds = new AccessibilityNodeInfoWrapper(editTextField).getBoundsInScreen();
-                            if (scanButtonOverlay == null) {
+                            if (scanButtonOverlay.isEmpty()) {
                                 showScanButton(editTextFieldBounds);
                             } else if (!lastEditTextFieldBounds.equals(editTextFieldBounds)) {
                                 updateScanButtonPosition(editTextFieldBounds);
@@ -383,20 +382,21 @@ public class ScanAddressFeature implements AccessibilityFeature {
         _scanButtonOverlay.addView(createScanButton(), new FrameLayout.LayoutParams(dpToPx(40), dpToPx(40)));
         try {
             windowManager.addView(_scanButtonOverlay, getScanButtonLayoutParams(editTextFieldBounds));
-            scanButtonOverlay = _scanButtonOverlay;
+            scanButtonOverlay = Optional.of(_scanButtonOverlay);
         } catch (final Exception ignored) {
         }
     }
 
     private void updateScanButtonPosition(final Rect editTextFieldBounds) {
         lastEditTextFieldBounds.set(editTextFieldBounds);
-        if (scanButtonOverlay != null) {
-            try {
-                windowManager.updateViewLayout(scanButtonOverlay, getScanButtonLayoutParams(editTextFieldBounds));
-            } catch (Exception e) {
-                scanButtonOverlay = null;
-            }
-        }
+        scanButtonOverlay.ifPresent(
+                _scanButtonOverlay -> {
+                    try {
+                        windowManager.updateViewLayout(_scanButtonOverlay, getScanButtonLayoutParams(editTextFieldBounds));
+                    } catch (final Exception exception) {
+                        scanButtonOverlay = Optional.empty();
+                    }
+                });
     }
 
     private Button createScanButton() {
@@ -441,13 +441,14 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private void removeScanButton() {
-        if (scanButtonOverlay != null) {
-            try {
-                windowManager.removeView(scanButtonOverlay);
-            } catch (final Exception ignored) {
-            }
-            scanButtonOverlay = null;
-        }
+        scanButtonOverlay.ifPresent(
+                _scanButtonOverlay -> {
+                    try {
+                        windowManager.removeView(_scanButtonOverlay);
+                    } catch (final Exception ignored) {
+                    }
+                    scanButtonOverlay = Optional.empty();
+                });
     }
 
     private int dpToPx(final int dp) {
