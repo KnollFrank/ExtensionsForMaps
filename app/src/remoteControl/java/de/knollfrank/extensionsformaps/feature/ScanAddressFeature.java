@@ -329,17 +329,8 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private boolean pasteAddress(final AccessibilityNodeInfo root, final String address) {
-        List<AccessibilityNodeInfo> nodes = new AccessibilityNodeInfoWrapper(root).findAccessibilityNodeInfosByViewId(SEARCH_EDIT_TEXT_ID);
-        if (!nodes.isEmpty()) {
-            AccessibilityNodeInfo et = nodes.get(0);
-            Bundle args = new Bundle();
-            args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, address);
-            if (et.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)) {
-                Log.d(TAG, "Adresse in Maps eingefügt.");
-                return true;
-            }
-        }
-        return false;
+        final Optional<AccessibilityNodeInfo> node = new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByViewId(SEARCH_EDIT_TEXT_ID);
+        return node.isPresent() && performSetText(node.orElseThrow(), address);
     }
 
     private boolean setInputText(final AccessibilityNodeInfo node, final String text) {
