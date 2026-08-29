@@ -25,6 +25,7 @@ import android.widget.FrameLayout;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import de.knollfrank.extensionsformaps.accessibility.ResourceName;
 import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
@@ -231,25 +232,22 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private String collectVisibleResponseText(final AccessibilityNodeInfo root) {
-        final StringBuilder visibleResponseTextOut = new StringBuilder();
-        new AccessibilityNodeInfoWrapper(root)
+        return new AccessibilityNodeInfoWrapper(root)
                 .streamPreOrder()
                 .filter(node -> !classNameContainsEditText(node))
-                // FK-TODO: verwende collect(Joining....)
-                .forEach(node -> appendTextAndContentDescription(node, visibleResponseTextOut));
-        return visibleResponseTextOut.toString();
+                .map(ScanAddressFeature::getConcatenatedTextAndContentDescription)
+                .filter(text -> !text.isEmpty())
+                .collect(Collectors.joining(" "));
     }
 
-    private static void appendTextAndContentDescription(final AccessibilityNodeInfo node, final StringBuilder visibleResponseTextOut) {
+    private static String getConcatenatedTextAndContentDescription(final AccessibilityNodeInfo node) {
         final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
-        nodeWrapper
-                .getText()
+        return Optionals
+                .streamOfPresentElements(
+                        nodeWrapper::getText,
+                        nodeWrapper::getContentDescription)
                 .filter(text -> !text.isEmpty())
-                .ifPresent(text -> visibleResponseTextOut.append(text).append(" "));
-        nodeWrapper
-                .getContentDescription()
-                .filter(contentDescription -> !contentDescription.isEmpty())
-                .ifPresent(contentDescription -> visibleResponseTextOut.append(contentDescription).append(" "));
+                .collect(Collectors.joining(" "));
     }
 
     private void returnToMaps() {
