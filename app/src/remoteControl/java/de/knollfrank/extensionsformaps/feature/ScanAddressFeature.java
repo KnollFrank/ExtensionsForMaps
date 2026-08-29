@@ -200,20 +200,10 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private static Optional<AccessibilityNodeInfo> findEditText(final AccessibilityNodeInfo node) {
-        final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
-        if (classNameContainsEditText(node)) {
-            return Optional.of(node);
-        }
-        for (int i = 0; i < node.getChildCount(); i++) {
-            final Optional<AccessibilityNodeInfo> result =
-                    nodeWrapper
-                            .getChild(i)
-                            .flatMap(ScanAddressFeature::findEditText);
-            if (result.isPresent()) {
-                return result;
-            }
-        }
-        return Optional.empty();
+        return new AccessibilityNodeInfoWrapper(node)
+                .streamPreOrder()
+                .filter(ScanAddressFeature::classNameContainsEditText)
+                .findFirst();
     }
 
     private static boolean classNameContainsEditText(final AccessibilityNodeInfo node) {
@@ -242,31 +232,24 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     private String collectVisibleResponseText(final AccessibilityNodeInfo root) {
         final StringBuilder visibleResponseTextOut = new StringBuilder();
-        collectVisibleResponseText(root, visibleResponseTextOut);
+        new AccessibilityNodeInfoWrapper(root)
+                .streamPreOrder()
+                .filter(node -> !classNameContainsEditText(node))
+                // FK-TODO: verwende collect(Joining....)
+                .forEach(node -> appendTextAndContentDescription(node, visibleResponseTextOut));
         return visibleResponseTextOut.toString();
     }
 
-    private void collectVisibleResponseText(final AccessibilityNodeInfo node, final StringBuilder visibleResponseTextOut) {
+    private static void appendTextAndContentDescription(final AccessibilityNodeInfo node, final StringBuilder visibleResponseTextOut) {
         final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
-        if (!classNameContainsEditText(node)) {
-            nodeWrapper
-                    .getText()
-                    .filter(text -> !text.isEmpty())
-                    .ifPresent(text -> visibleResponseTextOut.append(text).append(" "));
-            nodeWrapper
-                    .getContentDescription()
-                    .filter(contentDescription -> !contentDescription.isEmpty())
-                    .ifPresent(contentDescription -> visibleResponseTextOut.append(contentDescription).append(" "));
-        }
-        for (int i = 0; i < node.getChildCount(); i++) {
-            nodeWrapper
-                    .getChild(i)
-                    .ifPresent(
-                            child ->
-                                    collectVisibleResponseText(
-                                            child,
-                                            visibleResponseTextOut));
-        }
+        nodeWrapper
+                .getText()
+                .filter(text -> !text.isEmpty())
+                .ifPresent(text -> visibleResponseTextOut.append(text).append(" "));
+        nodeWrapper
+                .getContentDescription()
+                .filter(contentDescription -> !contentDescription.isEmpty())
+                .ifPresent(contentDescription -> visibleResponseTextOut.append(contentDescription).append(" "));
     }
 
     private void returnToMaps() {
@@ -325,20 +308,10 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     // FK-TODO: dieses Muster kommt öfter vor
     private static Optional<AccessibilityNodeInfo> findNodeByHint(final AccessibilityNodeInfo node, final String hint) {
-        if (nodeContainsHint(node, hint)) {
-            return Optional.of(node);
-        }
-        final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
-        for (int i = 0; i < node.getChildCount(); i++) {
-            final Optional<AccessibilityNodeInfo> result =
-                    nodeWrapper
-                            .getChild(i)
-                            .flatMap(child -> findNodeByHint(child, hint));
-            if (result.isPresent()) {
-                return result;
-            }
-        }
-        return Optional.empty();
+        return new AccessibilityNodeInfoWrapper(node)
+                .streamPreOrder()
+                .filter(_node -> nodeContainsHint(_node, hint))
+                .findFirst();
     }
 
     private static Boolean nodeContainsHint(final AccessibilityNodeInfo node, final String hint) {

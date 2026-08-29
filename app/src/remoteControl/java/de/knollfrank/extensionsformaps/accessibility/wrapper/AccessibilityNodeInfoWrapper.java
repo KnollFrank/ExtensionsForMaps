@@ -7,6 +7,8 @@ import com.google.common.base.Supplier;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import de.knollfrank.extensionsformaps.accessibility.ResourceName;
 import de.knollfrank.extensionsformaps.common.Lists;
@@ -60,6 +62,22 @@ public record AccessibilityNodeInfoWrapper(AccessibilityNodeInfo node) {
 
     public Optional<String> getContentDescription() {
         return getString(node::getContentDescription);
+    }
+
+    public Stream<AccessibilityNodeInfo> streamPreOrder() {
+        return Stream.concat(
+                Stream.of(node),
+                this
+                        .getImmediatePresentChildren()
+                        .map(AccessibilityNodeInfoWrapper::new)
+                        .flatMap(AccessibilityNodeInfoWrapper::streamPreOrder));
+    }
+
+    private Stream<AccessibilityNodeInfo> getImmediatePresentChildren() {
+        return IntStream
+                .range(0, node.getChildCount())
+                .mapToObj(this::getChild)
+                .flatMap(Optional::stream);
     }
 
     private static Optional<String> getString(final Supplier<CharSequence> supplier) {
