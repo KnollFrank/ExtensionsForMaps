@@ -25,8 +25,6 @@ import android.widget.FrameLayout;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import de.knollfrank.extensionsformaps.accessibility.ResourceName;
 import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
@@ -41,11 +39,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private static final String TAG = ScanAddressFeature.class.getSimpleName();
     private static final ResourceName SEARCH_EDIT_TEXT_ID = ResourceNameFactory.createGoogleMapsResourceName("search_omnibox_edit_text");
     private static final ResourceName GEMINI_SEND_ID = new ResourceName(GOOGLE_APP_PACKAGE, "assistant_robin_input_send_button_compose");
-
-    // FK-TODO: use TOKEN_START instead of "START_ADDR" throughout this class
-    private static final String TOKEN_START = "START_ADDR";
-    public static final String TOKEN_END = "END_ADDR";
-    public static final String AI_PROMPT = "Analysiere das Bild und extrahiere nur die Adresse (ohne Namen). Antwort-Format: " + TOKEN_START + " [gefundene Adresse hier einsetzen] " + TOKEN_END;
 
     private enum State {
 
@@ -150,7 +143,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private void automateGemini_setInputTextOrClickSendButton(final AccessibilityNodeInfo root, final AccessibilityNodeInfo inputField) {
         final boolean textContainsAnalysiere = textOfNodeContainsNeedle(inputField, "Analysiere");
         if (state == State.IDLE && !textContainsAnalysiere) {
-            if (setInputText(inputField, AI_PROMPT)) {
+            if (setInputText(inputField, AiPrompt.aiPrompt)) {
                 state = State.FILLING_PROMPT;
                 lastActionTime = System.currentTimeMillis();
             }
@@ -250,26 +243,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private Optional<String> getAddress(final AccessibilityNodeInfo root) {
-        final String fullText = collectVisibleResponseText(root);
-        if (fullText.contains(TOKEN_END)) {
-            final Matcher matcher =
-                    Pattern
-                            .compile(
-                                    "START_ADDR\\s*[*]*\\s*(.*?)\\s*[*]*\\s*END_ADDR",
-                                    Pattern.DOTALL | Pattern.CASE_INSENSITIVE)
-                            .matcher(fullText);
-            while (matcher.find()) {
-                final String candidate = matcher.group(1).trim();
-                if (isValidAddress(candidate)) {
-                    return Optional.of(
-                            candidate
-                                    .replaceAll("[\\r\\n]+", " ")
-                                    .replaceAll("\\s{2,}", " ")
-                                    .trim());
-                }
-            }
-        }
-        return Optional.empty();
+        return AiPrompt.getAddress(collectVisibleResponseText(root));
     }
 
     private String collectVisibleResponseText(final AccessibilityNodeInfo root) {
@@ -293,14 +267,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
         for (int i = 0; i < node.getChildCount(); i++) {
             collectVisibleResponseText(node.getChild(i), visibleResponseTextOut);
         }
-    }
-
-    private boolean isValidAddress(String text) {
-        if (text.length() < 5) {
-            return false;
-        }
-        final String lower = text.toLowerCase();
-        return !lower.contains("gefundene adresse") && !lower.contains("extrahiere") && text.matches(".*\\d+.*");
     }
 
     private void returnToMaps() {

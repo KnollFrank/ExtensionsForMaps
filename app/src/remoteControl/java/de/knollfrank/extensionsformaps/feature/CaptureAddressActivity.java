@@ -112,7 +112,7 @@ public class CaptureAddressActivity extends AppCompatActivity {
         shareIntent.putExtra(Intent.EXTRA_STREAM, finalImageUri);
 
         // Put the prompt in BOTH common text fields to increase compatibility
-        shareIntent.putExtra(Intent.EXTRA_TEXT, ScanAddressFeature.AI_PROMPT);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, AiPrompt.aiPrompt);
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Address Extraction");
 
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
