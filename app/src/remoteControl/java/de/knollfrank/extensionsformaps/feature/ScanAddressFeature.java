@@ -200,11 +200,15 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private static Optional<AccessibilityNodeInfo> findEditText(final AccessibilityNodeInfo node) {
+        final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
         if (classNameContainsEditText(node)) {
             return Optional.of(node);
         }
         for (int i = 0; i < node.getChildCount(); i++) {
-            final Optional<AccessibilityNodeInfo> result = findEditText(node.getChild(i));
+            final Optional<AccessibilityNodeInfo> result =
+                    nodeWrapper
+                            .getChild(i)
+                            .flatMap(ScanAddressFeature::findEditText);
             if (result.isPresent()) {
                 return result;
             }
@@ -243,19 +247,25 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private void collectVisibleResponseText(final AccessibilityNodeInfo node, final StringBuilder visibleResponseTextOut) {
+        final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
         if (!classNameContainsEditText(node)) {
-            final AccessibilityNodeInfoWrapper accessibilityNodeInfoWrapper = new AccessibilityNodeInfoWrapper(node);
-            accessibilityNodeInfoWrapper
+            nodeWrapper
                     .getText()
                     .filter(text -> !text.isEmpty())
                     .ifPresent(text -> visibleResponseTextOut.append(text).append(" "));
-            accessibilityNodeInfoWrapper
+            nodeWrapper
                     .getContentDescription()
                     .filter(contentDescription -> !contentDescription.isEmpty())
                     .ifPresent(contentDescription -> visibleResponseTextOut.append(contentDescription).append(" "));
         }
         for (int i = 0; i < node.getChildCount(); i++) {
-            collectVisibleResponseText(node.getChild(i), visibleResponseTextOut);
+            nodeWrapper
+                    .getChild(i)
+                    .ifPresent(
+                            child ->
+                                    collectVisibleResponseText(
+                                            child,
+                                            visibleResponseTextOut));
         }
     }
 
@@ -318,8 +328,12 @@ public class ScanAddressFeature implements AccessibilityFeature {
         if (nodeContainsHint(node, hint)) {
             return Optional.of(node);
         }
+        final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
         for (int i = 0; i < node.getChildCount(); i++) {
-            final Optional<AccessibilityNodeInfo> result = findNodeByHint(node.getChild(i), hint);
+            final Optional<AccessibilityNodeInfo> result =
+                    nodeWrapper
+                            .getChild(i)
+                            .flatMap(child -> findNodeByHint(child, hint));
             if (result.isPresent()) {
                 return result;
             }

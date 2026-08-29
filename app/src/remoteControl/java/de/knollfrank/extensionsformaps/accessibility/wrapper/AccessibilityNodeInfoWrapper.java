@@ -34,8 +34,12 @@ public record AccessibilityNodeInfoWrapper(AccessibilityNodeInfo node) {
     public Optional<AccessibilityNodeInfo> getLastChild() {
         final int childCount = node.getChildCount();
         return childCount > 0 ?
-                Optional.ofNullable(node.getChild(childCount - 1)) :
+                getChild(childCount - 1) :
                 Optional.empty();
+    }
+
+    public Optional<AccessibilityNodeInfo> getChild(final int index) {
+        return Optional.ofNullable(node.getChild(index));
     }
 
     public Optional<String> getText() {
