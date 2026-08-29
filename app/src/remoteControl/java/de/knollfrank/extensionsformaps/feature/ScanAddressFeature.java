@@ -85,9 +85,13 @@ public class ScanAddressFeature implements AccessibilityFeature {
             }
         }
         // Hier greift die originale Einsetz-Logik
-        if (address.isPresent()) {
-            pasteAddress(root);
-        }
+        address.ifPresent(
+                _address -> {
+                    final boolean success = pasteAddress(root, _address);
+                    if (success) {
+                        address = Optional.empty();
+                    }
+                });
         updateScanButton(root);
     }
 
@@ -324,17 +328,18 @@ public class ScanAddressFeature implements AccessibilityFeature {
         return Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
     }
 
-    private void pasteAddress(final AccessibilityNodeInfo root) {
+    private boolean pasteAddress(final AccessibilityNodeInfo root, final String address) {
         List<AccessibilityNodeInfo> nodes = new AccessibilityNodeInfoWrapper(root).findAccessibilityNodeInfosByViewId(SEARCH_EDIT_TEXT_ID);
         if (!nodes.isEmpty()) {
             AccessibilityNodeInfo et = nodes.get(0);
             Bundle args = new Bundle();
-            args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, address.orElse(null));
+            args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, address);
             if (et.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)) {
                 Log.d(TAG, "Adresse in Maps eingefügt.");
-                address = Optional.empty();
+                return true;
             }
         }
+        return false;
     }
 
     private boolean setInputText(final AccessibilityNodeInfo node, final String text) {
