@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.feature;
+package de.knollfrank.extensionsformaps.feature.scanaddress;
 
 import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GEMINI_APP_PACKAGE;
 import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_APP_PACKAGE;
@@ -33,6 +33,7 @@ import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeIn
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.common.DisplayUtils;
 import de.knollfrank.extensionsformaps.common.Optionals;
+import de.knollfrank.extensionsformaps.feature.AccessibilityFeature;
 
 // FK-TODO: Verwende die Google-App https://play.google.com/store/apps/details?id=com.google.android.googlequicksearchbox statt der Gemini-App für den Adressscanner.
 public class ScanAddressFeature implements AccessibilityFeature {

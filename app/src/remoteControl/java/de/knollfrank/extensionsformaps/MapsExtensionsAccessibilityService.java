@@ -22,8 +22,8 @@ import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityEventW
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.feature.ActiveServiceHighlightFeature;
 import de.knollfrank.extensionsformaps.feature.CompoundFeature;
-import de.knollfrank.extensionsformaps.feature.ScanAddressFeature;
 import de.knollfrank.extensionsformaps.feature.addstop.AddStopFeature;
+import de.knollfrank.extensionsformaps.feature.scanaddress.ScanAddressFeature;
 import de.knollfrank.extensionsformaps.feature.sort.SortFeature;
 import de.knollfrank.extensionsformaps.feature.sort.SortFeatureFactory;
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizerFactory;

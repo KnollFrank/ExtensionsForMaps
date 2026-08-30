@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.feature;
+package de.knollfrank.extensionsformaps.feature.scanaddress;
 
 import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GEMINI_APP_PACKAGE;
 

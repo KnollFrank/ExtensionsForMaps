@@ -10,7 +10,7 @@
 
     <application>
         <activity
-            android:name=".feature.CaptureAddressActivity"
+            android:name=".feature.scanaddress.CaptureAddressActivity"
             android:theme="@style/Theme.ExtensionsForMaps.Transparent"
             android:exported="false" />
 

@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.feature;
+package de.knollfrank.extensionsformaps.feature.scanaddress;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
