@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Space;
 
 import java.util.Optional;
 
@@ -75,8 +76,18 @@ class Buttons {
         buttons.setOrientation(LinearLayout.HORIZONTAL);
         buttons.setGravity(Gravity.CENTER_VERTICAL);
         buttons.addView(createSortButton());
+        buttons.addView(createSpace(dipToPx(4)));
         buttons.addView(createSettingsButton());
         return buttons;
+    }
+
+    private View createSpace(final int widthPx) {
+        final Space space = new Space(context);
+        space.setLayoutParams(
+                new LinearLayout.LayoutParams(
+                        widthPx,
+                        LinearLayout.LayoutParams.MATCH_PARENT));
+        return space;
     }
 
     private View createSortButton() {
@@ -108,13 +119,10 @@ class Buttons {
         settingsButton.setMinWidth(0);
         settingsButton.setMinHeight(0);
         settingsButton.setBackground(getButtonShape());
-        // FK-TODO: der Settingsbutton sollte hier nur so dargestellt werden, wie er selbst aussehen soll. Dass ein Zwischenraum zum Sortbutton existieren soll, MUISS im LinearLayout in createButtons() implementiert werden.
-        final LinearLayout.LayoutParams params =
+        settingsButton.setLayoutParams(
                 new LinearLayout.LayoutParams(
                         dipToPx(34),
-                        LinearLayout.LayoutParams.MATCH_PARENT);
-        params.leftMargin = dipToPx(4);
-        settingsButton.setLayoutParams(params);
+                        LinearLayout.LayoutParams.MATCH_PARENT));
         settingsButton.setOnClickListener(onClickListeners.settingsButtonListener());
         return settingsButton;
     }
