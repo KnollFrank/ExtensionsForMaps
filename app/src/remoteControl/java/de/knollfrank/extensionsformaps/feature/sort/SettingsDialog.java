@@ -1,6 +1,5 @@
-package de.knollfrank.extensionsformaps.feature;
+package de.knollfrank.extensionsformaps.feature.sort;
 
-import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,21 +28,21 @@ import de.knollfrank.extensionsformaps.databinding.DialogSettingsBinding;
 import de.knollfrank.extensionsformaps.optimize.OptimizationType;
 import de.knollfrank.extensionsformaps.optimize.ors.OpenRouteServiceRoutingMatrixProvider;
 
-public class SettingsDialog {
+class SettingsDialog {
 
-    private final AccessibilityService accessibilityService;
+    private final Context context;
     private final ApiKeyRepository apiKeyRepository;
 
-    public SettingsDialog(final AccessibilityService accessibilityService) {
-        this.accessibilityService = accessibilityService;
-        this.apiKeyRepository = new ApiKeyRepository(accessibilityService);
+    public SettingsDialog(final Context context) {
+        this.context = context;
+        this.apiKeyRepository = new ApiKeyRepository(context);
     }
 
     public void show() {
-        final Context themedContext = new ContextThemeWrapper(accessibilityService, R.style.Theme_ExtensionsForMaps_Dialog);
+        final Context themedContext = new ContextThemeWrapper(context, R.style.Theme_ExtensionsForMaps_Dialog);
         final DialogSettingsBinding binding = DialogSettingsBinding.inflate(LayoutInflater.from(themedContext));
 
-        binding.checkBoxShowPreview.setChecked(SortConfig.shouldShowRoutePreview(accessibilityService));
+        binding.checkBoxShowPreview.setChecked(SortConfig.shouldShowRoutePreview(context));
 
         List
                 .of(
@@ -95,7 +94,7 @@ public class SettingsDialog {
 
                     @Override
                     public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, @Nullable final String key) {
-                        ContextCompat.getMainExecutor(accessibilityService).execute(updateOrsState);
+                        ContextCompat.getMainExecutor(context).execute(updateOrsState);
                     }
                 };
 
@@ -110,14 +109,14 @@ public class SettingsDialog {
                         .setPositiveButton(
                                 R.string.ok,
                                 (dialog, which) -> {
-                                    SortConfig.setShouldShowRoutePreview(accessibilityService, binding.checkBoxShowPreview.isChecked());
+                                    SortConfig.setShouldShowRoutePreview(context, binding.checkBoxShowPreview.isChecked());
                                     SortConfig.setOptimizationMethod(
-                                            accessibilityService,
+                                            context,
                                             binding.rbOrs.isChecked() ?
                                                     SortConfig.OptimizationMethod.OPEN_ROUTE_SERVICE :
                                                     SortConfig.OptimizationMethod.HAVERSINE);
                                     SortConfig.setOptimizationType(
-                                            accessibilityService,
+                                            context,
                                             binding.rbAnyDest.isChecked() ?
                                                     OptimizationType.ANY_DESTINATION :
                                                     OptimizationType.FIXED_DESTINATION);
@@ -130,7 +129,7 @@ public class SettingsDialog {
 
         binding.btnConfigureOrs.setOnClickListener(view -> showApiKeyDialog(themedContext, settingsDialog));
 
-        if (SortConfig.getOptimizationMethod(accessibilityService) == SortConfig.OptimizationMethod.HAVERSINE) {
+        if (SortConfig.getOptimizationMethod(context) == SortConfig.OptimizationMethod.HAVERSINE) {
             binding.rbHaversine.setChecked(true);
             binding.rbOrs.setChecked(false);
         } else if (binding.rbOrs.isEnabled()) {
@@ -141,7 +140,7 @@ public class SettingsDialog {
             binding.rbOrs.setChecked(false);
         }
 
-        if (SortConfig.getOptimizationType(accessibilityService) == OptimizationType.FIXED_DESTINATION) {
+        if (SortConfig.getOptimizationType(context) == OptimizationType.FIXED_DESTINATION) {
             binding.rbFixedDest.setChecked(true);
             binding.rbAnyDest.setChecked(false);
         } else {
@@ -177,7 +176,7 @@ public class SettingsDialog {
                             Intent.ACTION_VIEW,
                             Uri.parse(binding.tvLink.getText().toString()));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            accessibilityService.startActivity(intent);
+            this.context.startActivity(intent);
             // Close both dialogs so they don't cover the browser
             apiKeyDialog.dismiss();
             parentDialog.dismiss();
@@ -198,7 +197,7 @@ public class SettingsDialog {
                                             binding.etApiKey.getText().toString().trim() :
                                             "";
                             if (apiKey.isEmpty()) {
-                                binding.etApiKey.setError(accessibilityService.getString(R.string.api_key_error_empty));
+                                binding.etApiKey.setError(this.context.getString(R.string.api_key_error_empty));
                                 return;
                             }
 
@@ -212,24 +211,24 @@ public class SettingsDialog {
                                 try {
                                     OpenRouteServiceRoutingMatrixProvider.validateApiKey(apiKey);
                                     ContextCompat
-                                            .getMainExecutor(accessibilityService)
+                                            .getMainExecutor(this.context)
                                             .execute(() -> {
                                                 apiKeyRepository.saveApiKey(apiKey);
                                                 Toast
-                                                        .makeText(accessibilityService, R.string.api_key_success, Toast.LENGTH_SHORT)
+                                                        .makeText(this.context, R.string.api_key_success, Toast.LENGTH_SHORT)
                                                         .show();
                                                 apiKeyDialog.dismiss();
                                             });
                                 } catch (final IOException e) {
                                     ContextCompat
-                                            .getMainExecutor(accessibilityService)
+                                            .getMainExecutor(this.context)
                                             .execute(() -> {
                                                 binding.progressBar.setVisibility(View.GONE);
                                                 apiKeyDialog
                                                         .getButton(AlertDialog.BUTTON_POSITIVE)
                                                         .setEnabled(true);
                                                 binding.etApiKey.setEnabled(true);
-                                                binding.etApiKey.setError(accessibilityService.getString(R.string.api_key_error_invalid, e.getMessage()));
+                                                binding.etApiKey.setError(this.context.getString(R.string.api_key_error_invalid, e.getMessage()));
                                             });
                                 }
                             }).start();

@@ -31,6 +31,7 @@ import de.knollfrank.extensionsformaps.accessibility.ResourceName;
 import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
+import de.knollfrank.extensionsformaps.common.DisplayUtils;
 import de.knollfrank.extensionsformaps.common.Optionals;
 
 // FK-TODO: Verwende die Google-App https://play.google.com/store/apps/details?id=com.google.android.googlequicksearchbox statt der Gemini-App für den Adressscanner.
@@ -341,7 +342,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private void showScanButton(final Rect editTextFieldBounds) {
         lastEditTextFieldBounds.set(editTextFieldBounds);
         final FrameLayout _scanButtonOverlay = new FrameLayout(accessibilityService);
-        _scanButtonOverlay.addView(createScanButton(), new FrameLayout.LayoutParams(dpToPx(40), dpToPx(40)));
+        _scanButtonOverlay.addView(createScanButton(), new FrameLayout.LayoutParams(dipToPx(40), dipToPx(40)));
         try {
             windowManager.addView(_scanButtonOverlay, getScanButtonLayoutParams(editTextFieldBounds));
             scanButtonOverlay = Optional.of(_scanButtonOverlay);
@@ -388,17 +389,17 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private GradientDrawable getScanButtonShape() {
         final GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.RECTANGLE);
-        shape.setCornerRadius(dpToPx(20)); // Half of 40dp for a circular button
+        shape.setCornerRadius(dipToPx(20)); // Half of 40dp for a circular button
         shape.setColor(Color.parseColor("#3C4043"));
-        shape.setStroke(dpToPx(2), Color.parseColor("#D4AF37")); // Gold border
+        shape.setStroke(dipToPx(2), Color.parseColor("#D4AF37")); // Gold border
         return shape;
     }
 
     private WindowManager.LayoutParams getScanButtonLayoutParams(final Rect rect) {
-        final WindowManager.LayoutParams scanButtonLayoutParams = new WindowManager.LayoutParams(dpToPx(40), dpToPx(40), WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, PixelFormat.TRANSLUCENT);
+        final WindowManager.LayoutParams scanButtonLayoutParams = new WindowManager.LayoutParams(dipToPx(40), dipToPx(40), WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, PixelFormat.TRANSLUCENT);
         scanButtonLayoutParams.gravity = Gravity.TOP | Gravity.START;
-        scanButtonLayoutParams.x = rect.right - dpToPx(44);
-        scanButtonLayoutParams.y = rect.centerY() - dpToPx(20);
+        scanButtonLayoutParams.x = rect.right - dipToPx(44);
+        scanButtonLayoutParams.y = rect.centerY() - dipToPx(20);
         return scanButtonLayoutParams;
     }
 
@@ -413,7 +414,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
                 });
     }
 
-    private int dpToPx(final int dp) {
-        return SortFeature.dpToPx(dp, accessibilityService.getResources().getDisplayMetrics());
+    private int dipToPx(final int dp) {
+        return DisplayUtils.dipToPx(dp, accessibilityService.getResources().getDisplayMetrics());
     }
 }

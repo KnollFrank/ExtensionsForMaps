@@ -1,4 +1,4 @@
-package de.knollfrank.extensionsformaps.feature;
+package de.knollfrank.extensionsformaps.feature.sort;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -29,14 +29,14 @@ public class SortFeatureTest {
         final AccessibilityService accessibilityService = Robolectric.setupService(MapsExtensionsAccessibilityService.class);
         urlRequester = mock(RouteUrlRequester.class);
         callback = mock(RouteUrlRequester.RouteUrlCallback.class);
-        feature = new SortFeature(accessibilityService, urlRequester, callback);
+        feature = SortFeatureFactory.createSortFeature(urlRequester, callback, accessibilityService);
     }
 
     @Test
     public void testSortButtonClick_requestsRouteUrl() {
         // Given
         feature.onStopCountUpdated(15, new Rect(0, 0, 100, 50));
-        final LinearLayout container = (LinearLayout) feature.getButtons().orElseThrow();
+        final LinearLayout container = (LinearLayout) feature.getButtonContainer().orElseThrow();
         final Button sortButton = (Button) container.getChildAt(0);
 
         // When

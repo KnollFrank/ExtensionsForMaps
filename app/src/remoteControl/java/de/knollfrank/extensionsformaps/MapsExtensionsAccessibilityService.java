@@ -23,8 +23,9 @@ import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServic
 import de.knollfrank.extensionsformaps.feature.ActiveServiceHighlightFeature;
 import de.knollfrank.extensionsformaps.feature.CompoundFeature;
 import de.knollfrank.extensionsformaps.feature.ScanAddressFeature;
-import de.knollfrank.extensionsformaps.feature.SortFeature;
 import de.knollfrank.extensionsformaps.feature.addstop.AddStopFeature;
+import de.knollfrank.extensionsformaps.feature.sort.SortFeature;
+import de.knollfrank.extensionsformaps.feature.sort.SortFeatureFactory;
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizerFactory;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
@@ -97,8 +98,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
 
     private static SortFeature createSortFeature(final RouteUrlRequester urlRequester,
                                                  final AccessibilityService accessibilityService) {
-        return new SortFeature(
-                accessibilityService,
+        return SortFeatureFactory.createSortFeature(
                 urlRequester,
                 new RouteUrlCallback() {
 
@@ -111,7 +111,8 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                                         accessibilityService);
                         routeOptimizationWorkflow.optimizeThenShowRoute(routeUrl);
                     }
-                });
+                },
+                accessibilityService);
     }
 
     private static AddStopFeature createAddStopFeature(
