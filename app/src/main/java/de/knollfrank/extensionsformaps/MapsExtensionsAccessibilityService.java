@@ -42,9 +42,9 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
-        urlRequester = new RouteUrlRequester(this);
-        final SortFeature sortFeature = createSortFeature(urlRequester, this);
         final GoogleMapsContext googleMapsContext = GoogleMapsContextResolver.resolve(this);
+        urlRequester = new RouteUrlRequester(this, googleMapsContext);
+        final SortFeature sortFeature = createSortFeature(urlRequester, this);
         final AddStopFeature addStopFeature = createAddStopFeature(googleMapsContext, urlRequester, this);
         stopCountDetector =
                 new StopCountDetector(

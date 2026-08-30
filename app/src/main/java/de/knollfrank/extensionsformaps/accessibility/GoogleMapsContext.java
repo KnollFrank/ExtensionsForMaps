@@ -6,13 +6,16 @@ public final class GoogleMapsContext {
 
     public final String addStopsText;
     public final String stopsWord;
+    public final String shareText;
     private final StopCountParser stopCountParser;
 
     public GoogleMapsContext(final String addStopsText,
                              final String stopsWord,
+                             final String shareText,
                              final StopCountParser stopCountParser) {
         this.addStopsText = addStopsText;
         this.stopsWord = stopsWord;
+        this.shareText = shareText;
         this.stopCountParser = stopCountParser;
     }
 

@@ -29,6 +29,7 @@ public class StopCountDetectorTest {
                 new GoogleMapsContext(
                         "Add stops",
                         "stops",
+                        "Share",
                         new StopCountParser(Pattern.compile("(\\d+) stops")));
         stopCountListener = mock(StopCountDetector.StopCountListener.class);
         stopCountDetector = new StopCountDetector(googleMapsContext, List.of(stopCountListener));

@@ -37,11 +37,14 @@ public class RouteUrlRequester {
     }
 
     private final AccessibilityService accessibilityService;
+    private final GoogleMapsContext googleMapsContext;
     private Optional<RouteUrlCallback> routeUrlCallback = Optional.empty();
     private boolean isWaitingToClickShareAfterBack = false;
 
-    public RouteUrlRequester(final AccessibilityService accessibilityService) {
+    public RouteUrlRequester(final AccessibilityService accessibilityService,
+                             final GoogleMapsContext googleMapsContext) {
         this.accessibilityService = accessibilityService;
+        this.googleMapsContext = googleMapsContext;
     }
 
     public void requestRouteUrl(final RouteUrlCallback routeUrlCallback) {
@@ -138,14 +141,12 @@ public class RouteUrlRequester {
                 .findFirst();
     }
 
-    // FK-TODO: refactor, i18n for "Share" and "Teilen" by using a key
     private Optional<AccessibilityNodeInfo> findShareButton(final AccessibilityNodeInfo rootNode) {
         final AccessibilityNodeInfoWrapper rootNodeWrapper = new AccessibilityNodeInfoWrapper(rootNode);
         return Optionals
                 .streamOfPresentElements(
                         () -> rootNodeWrapper.findFirstAccessibilityNodeInfoByViewId(SHARE_ID),
-                        () -> rootNodeWrapper.findFirstAccessibilityNodeInfoByText("Share"),
-                        () -> rootNodeWrapper.findFirstAccessibilityNodeInfoByText("Teilen"))
+                        () -> rootNodeWrapper.findFirstAccessibilityNodeInfoByText(googleMapsContext.shareText))
                 .findFirst();
     }
 }

@@ -35,6 +35,7 @@ public class AddStopFeatureTest {
                         new GoogleMapsContext(
                                 "Add stops",
                                 "stops",
+                                "Share",
                                 new StopCountParser(Pattern.compile("(\\d+) stops"))),
                         routeUrlRequester,
                         routeUrlCallback);

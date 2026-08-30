@@ -52,7 +52,7 @@ public class GoogleMapsResourceDiscoveryTest {
 
     private void checkAndLog(final String name, final String value) {
         if (isCandidateName(name) || isCandidateValue(value)) {
-            Log.d(TAG, String.format("Found: [%s] -> %s", name, value));
+            Log.d(TAG, String.format("Found: [%s] -> [%s]", name, value));
         }
     }
 

@@ -10,9 +10,6 @@ import java.util.regex.Pattern;
 
 public class GoogleMapsContextResolver {
 
-    private static final String KEY_ADD_STOPS = "ADD_STOPS_ENTRYPOINT_LABEL";
-    private static final String KEY_COUNT_STOPS = "DIRECTIONS_COUNT_STOPS";
-
     public static GoogleMapsContext resolve(final Context context) {
         try {
             return _resolve(getGoogleMapsContext(context));
@@ -31,21 +28,37 @@ public class GoogleMapsContextResolver {
         return new GoogleMapsContext(
                 getAddStopsText(resources),
                 getStopsWord(countStopsPatternStr),
+                getShareText(resources),
                 new StopCountParser(getStopCountPattern(countStopsPatternStr)));
     }
 
+    private static String getShareText(final Resources resources) {
+        final String keyShareButton = "ACCESSIBILITY_SHARE_BUTTON";
+        final String keyShareFallback = "SHARE";
+        int shareId = resources.getIdentifier(keyShareButton, "string", GOOGLE_MAPS_PACKAGE);
+        if (shareId == 0) {
+            shareId = resources.getIdentifier(keyShareFallback, "string", GOOGLE_MAPS_PACKAGE);
+        }
+        if (shareId == 0) {
+            throw new RuntimeException("Could not find resource ID for share button in Google Maps");
+        }
+        return resources.getString(shareId);
+    }
+
     private static String getCountStopsPatternStr(final Resources resources) {
-        final int countStopsId = resources.getIdentifier(KEY_COUNT_STOPS, "plurals", GOOGLE_MAPS_PACKAGE);
+        final String keyCountStops = "DIRECTIONS_COUNT_STOPS";
+        final int countStopsId = resources.getIdentifier(keyCountStops, "plurals", GOOGLE_MAPS_PACKAGE);
         if (countStopsId == 0) {
-            throw new RuntimeException("Could not find resource ID for " + KEY_COUNT_STOPS);
+            throw new RuntimeException("Could not find resource ID for " + keyCountStops);
         }
         return resources.getQuantityString(countStopsId, 5);
     }
 
     private static String getAddStopsText(final Resources resources) {
-        final int addStopsId = resources.getIdentifier(KEY_ADD_STOPS, "string", GOOGLE_MAPS_PACKAGE);
+        final String keyAddStops = "ADD_STOPS_ENTRYPOINT_LABEL";
+        final int addStopsId = resources.getIdentifier(keyAddStops, "string", GOOGLE_MAPS_PACKAGE);
         if (addStopsId == 0) {
-            throw new RuntimeException("Could not find resource ID for " + KEY_ADD_STOPS);
+            throw new RuntimeException("Could not find resource ID for " + keyAddStops);
         }
         return resources.getString(addStopsId);
     }
