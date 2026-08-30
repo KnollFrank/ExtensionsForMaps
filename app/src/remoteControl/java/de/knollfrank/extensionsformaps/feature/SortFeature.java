@@ -36,8 +36,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     private final RouteUrlRequester.RouteUrlCallback onRouteUrlExtracted;
 
     private Optional<View> buttons = Optional.empty();
-    // FK-TODO: make Optional<Rect>
-    private final Rect lastStopCountBounds = new Rect();
+    private Optional<Rect> lastStopCountBounds = Optional.empty();
 
     public SortFeature(final AccessibilityService accessibilityService,
                        final RouteUrlRequester routeUrlRequester,
@@ -50,20 +49,20 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
 
     @Override
     public void onStopCountUpdated(final int stopCount, final Rect stopCountBounds) {
-        this.lastStopCountBounds.set(stopCountBounds);
+        lastStopCountBounds = Optional.of(stopCountBounds);
         updateButtonPositions();
     }
 
     @Override
     public void onStopCountLost() {
-        this.lastStopCountBounds.setEmpty();
+        lastStopCountBounds = Optional.empty();
         removeButtons();
     }
 
     @Override
     public void reset() {
         Log.d(TAG, "Full reset of SortFeature.");
-        this.lastStopCountBounds.setEmpty();
+        lastStopCountBounds = Optional.empty();
         removeButtons();
     }
 
@@ -85,21 +84,20 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     }
 
     private void updateButtonPositions() {
-        if (lastStopCountBounds.isEmpty()) {
-            removeButtons();
-            return;
-        }
-        buttons.ifPresentOrElse(
-                buttons -> {
-                    final WindowManager.LayoutParams params = (WindowManager.LayoutParams) buttons.getLayoutParams();
-                    updateLayoutParams(params, lastStopCountBounds);
-                    windowManager.updateViewLayout(buttons, params);
-                },
-                () -> {
-                    final View buttons = createButtons();
-                    windowManager.addView(buttons, getButtonsLayoutParams(lastStopCountBounds));
-                    this.buttons = Optional.of(buttons);
-                });
+        lastStopCountBounds.ifPresentOrElse(
+                lastStopCountBounds ->
+                        buttons.ifPresentOrElse(
+                                buttons -> {
+                                    final WindowManager.LayoutParams params = (WindowManager.LayoutParams) buttons.getLayoutParams();
+                                    updateLayoutParams(params, lastStopCountBounds);
+                                    windowManager.updateViewLayout(buttons, params);
+                                },
+                                () -> {
+                                    final View buttons = createButtons();
+                                    windowManager.addView(buttons, getButtonsLayoutParams(lastStopCountBounds));
+                                    this.buttons = Optional.of(buttons);
+                                }),
+                this::removeButtons);
     }
 
     private View createButtons() {
