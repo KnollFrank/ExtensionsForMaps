@@ -305,7 +305,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
         return bundle;
     }
 
-    // FK-TODO: dieses Muster kommt öfter vor
     private static Optional<AccessibilityNodeInfo> findNodeByHint(final AccessibilityNodeInfo node, final String hint) {
         return new AccessibilityNodeInfoWrapper(node)
                 .streamPreOrder()
