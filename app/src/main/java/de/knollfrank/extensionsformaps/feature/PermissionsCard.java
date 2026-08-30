@@ -16,7 +16,6 @@ import com.google.android.material.card.MaterialCardView;
 
 import java.util.List;
 
-import de.knollfrank.extensionsformaps.BuildConfig;
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.databinding.ViewPermissionsBinding;
 
@@ -43,14 +42,10 @@ public class PermissionsCard extends MaterialCardView {
     }
 
     public void onResume() {
-        updatePermissionButtonStates();
+        updatePermitAccessibilityButtonState();
     }
 
     private void configurePermissionButtons() {
-        if (!BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
-            setVisibility(View.GONE);
-            return;
-        }
         binding.btnPermitAccessibility.setOnClickListener(
                 new View.OnClickListener() {
 
@@ -59,12 +54,6 @@ public class PermissionsCard extends MaterialCardView {
                         getContext().startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
                     }
                 });
-    }
-
-    private void updatePermissionButtonStates() {
-        if (BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
-            updatePermitAccessibilityButtonState();
-        }
     }
 
     private void updatePermitAccessibilityButtonState() {

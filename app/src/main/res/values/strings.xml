@@ -85,8 +85,6 @@
     <string name="scan_error_permission">Camera permission required</string>
     <string name="scan_error_no_detection">No address detected yet</string>
 
-    <!-- License -->
-    <string name="license_title">License Status</string>
     <string name="min_stops">11</string>
     <string name="max_stops">27</string>
     <string name="onboarding_title">How it works</string>
@@ -98,19 +96,6 @@
     <string name="onboarding_step3">Choose \"Route: Add stop\" or \"Route: Sort\".</string>
     <string name="onboarding_step3_hint">(Note: \"Add stop\" is primarily useful from the 10th stop onwards, as Google Maps allows up to 10 stops by default.)</string>
     <string name="onboarding_limit_hint">Note: With the free version, you can create and sort routes with up to 15 stops. From the 16th stop, the Pro version is required. Google Maps itself supports a maximum of 27 stops per route.</string>
-
-    <string name="license_status_free">Free Version (Limit: 15 Stops per Route)</string>
-    <string name="license_status_pro">Pro Version (Up to 27 Stops per Route)</string>
-    <string name="license_enter_key">Enter License Key</string>
-    <string name="license_activate">Activate</string>
-    <string name="license_key_hint">Enter your key</string>
-    <string name="license_error_invalid">Invalid license key.</string>
-    <string name="license_success">Pro Features activated! Thank you for your support.</string>
-
-    <string name="upgrade_pro_title">Upgrade to Pro</string>
-    <string name="upgrade_pro_message">You have reached the free limit of 15 stops. Upgrade to Pro to add more stops and sort routes with up to 27 stops.</string>
-    <string name="upgrade_pro_button">Buy Pro License</string>
-    <string name="upgrade_pro_checkout_button">Buy on Gumroad</string>
 
     <!-- Add Stop Instruction -->
     <string name="add_stop_instruction_title">Stop Added</string>

@@ -86,8 +86,6 @@
     <string name="scan_error_permission">Kameraberechtigung erforderlich</string>
     <string name="scan_error_no_detection">Noch keine Adresse erkannt</string>
 
-    <!-- License -->
-    <string name="license_title">Lizenzstatus</string>
     <string name="min_stops">11</string>
     <string name="max_stops">27</string>
     <string name="onboarding_title">So funktioniert\'s</string>
@@ -99,19 +97,6 @@
     <string name="onboarding_step3">Wählen Sie \"Route: Stopp hinzufügen\" oder \"Route: Sortieren\".</string>
     <string name="onboarding_step3_hint">(Hinweis: \"Stopp hinzufügen\" ist erst ab dem 10. Stopp sinnvoll, da Google Maps bis dahin eigene Zwischenstopps erlaubt.)</string>
     <string name="onboarding_limit_hint">Hinweis: Mit der kostenlosen Version können Sie Routen mit bis zu 15 Stopps erzeugen und sortieren. Ab dem 16. Stopp ist die Pro-Version erforderlich. Google Maps selbst unterstützt maximal 27 Stopps pro Route.</string>
-
-    <string name="license_status_free">Kostenlose Version (Limit: 15 Stopps pro Route)</string>
-    <string name="license_status_pro">Pro-Version (Bis zu 27 Stopps pro Route)</string>
-    <string name="license_enter_key">Lizenzschlüssel eingeben</string>
-    <string name="license_activate">Aktivieren</string>
-    <string name="license_key_hint">Schlüssel hier eingeben</string>
-    <string name="license_error_invalid">Ungültiger Lizenzschlüssel.</string>
-    <string name="license_success">Pro-Features aktiviert! Vielen Dank für Ihre Unterstützung.</string>
-
-    <string name="upgrade_pro_title">Upgrade auf Pro</string>
-    <string name="upgrade_pro_message">Sie haben das kostenlose Limit von 15 Stopps erreicht. Holen Sie sich die Pro-Version, um mehr Stopps hinzuzufügen und Routen mit bis zu 27 Stopps zu sortieren.</string>
-    <string name="upgrade_pro_button">Pro-Lizenz kaufen</string>
-    <string name="upgrade_pro_checkout_button">Auf Gumroad kaufen</string>
 
     <!-- Add Stop Instruction -->
     <string name="add_stop_instruction_title">Stopp hinzugefügt</string>

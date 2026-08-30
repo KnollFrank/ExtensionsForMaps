@@ -13,8 +13,6 @@ import java.util.Locale;
 
 import de.knollfrank.extensionsformaps.feature.OptimizationTypeDialog;
 import de.knollfrank.extensionsformaps.feature.RoutePreviewDialog;
-import de.knollfrank.extensionsformaps.feature.UpgradeDialog;
-import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
 import de.knollfrank.extensionsformaps.optimize.NativeSuburbResolver;
 import de.knollfrank.extensionsformaps.optimize.OptimizationType;
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizer;
@@ -76,13 +74,6 @@ public class RouteOptimizationWorkflow {
             public void onExtractRouteFromDirectionsUrlSuccess(final Route route) {
                 final Route enrichedRoute = addSuburbsToAddresses(route, context);
                 runOnUiThread(() -> {
-                    if (!BuildConfig.SHOW_ACCESSIBILITY_SETTINGS &&
-                            LicenseManagerProvider.getInstance(context).isProFeatureRequired(enrichedRoute.stops().size()) &&
-                            !LicenseManagerProvider.getInstance(context).isPro()) {
-                        progressOverlay.hide();
-                        UpgradeDialog.showUpgradeDialog(context, () -> onExtractRouteFromDirectionsUrlSuccess(route));
-                        return;
-                    }
                     if (showOptimizationTypeDialog) {
                         showOptimizationTypeDialog(enrichedRoute, context);
                     } else {

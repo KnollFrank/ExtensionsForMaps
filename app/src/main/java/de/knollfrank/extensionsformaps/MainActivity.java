@@ -3,7 +3,6 @@ package de.knollfrank.extensionsformaps;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         binding.cardPermissions.onResume();
-        binding.cardLicense.onResume();
     }
 
     @Override
@@ -37,10 +35,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void configureCoffeeButton() {
-        if (!BuildConfig.SHOW_ACCESSIBILITY_SETTINGS) {
-            binding.btnCoffee.setVisibility(View.GONE);
-            return;
-        }
         binding.btnCoffee.setOnClickListener(
                 view ->
                         startActivity(

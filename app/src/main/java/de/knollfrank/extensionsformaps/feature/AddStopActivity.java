@@ -19,7 +19,6 @@ import de.knollfrank.extensionsformaps.GoogleMapsNavigator;
 import de.knollfrank.extensionsformaps.ProgressOverlay;
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.SortConfig;
-import de.knollfrank.extensionsformaps.license.LicenseManagerProvider;
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.RouteDirectionsUrlConverter;
 import de.knollfrank.extensionsformaps.route.Routes;
@@ -98,8 +97,6 @@ public class AddStopActivity extends AppCompatActivity {
         int stopCount = route.stops().size();
         if (stopCount >= 27) {
             AddStopLimitReachedDialog.show(this);
-        } else if (stopCount >= 15 && !LicenseManagerProvider.getInstance(this).isPro()) {
-            showUpgradeDialog(route);
         } else if (stopCount < 10) {
             SuggestMapsDialog.show(
                     this,
@@ -118,10 +115,6 @@ public class AddStopActivity extends AppCompatActivity {
         } else {
             addStopAndFinish(route);
         }
-    }
-
-    private void showUpgradeDialog(Route route) {
-        UpgradeDialog.showUpgradeDialog(this, () -> handleRoute(route));
     }
 
     private void addStopAndFinish(final Route route) {
