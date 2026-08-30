@@ -15,7 +15,7 @@ public class SortFeatureFactory {
                 new Buttons(
                         (WindowManager) accessibilityService.getSystemService(Context.WINDOW_SERVICE),
                         accessibilityService,
-                        Buttons.OnClickListeners.fromSortButtonListenerAndSettingsButtonListener(
+                        OnClickListeners.fromSortButtonListenerAndSettingsButtonListener(
                                 view -> routeUrlRequester.requestRouteUrl(onRouteUrlExtracted),
                                 view -> new SettingsDialog(accessibilityService).show())));
 

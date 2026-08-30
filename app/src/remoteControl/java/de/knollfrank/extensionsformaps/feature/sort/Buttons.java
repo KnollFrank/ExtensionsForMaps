@@ -24,15 +24,6 @@ class Buttons {
     private final Context context;
     private final OnClickListeners onClickListeners;
 
-    public record OnClickListeners(View.OnClickListener sortButtonListener,
-                                   View.OnClickListener settingsButtonListener) {
-
-        public static OnClickListeners fromSortButtonListenerAndSettingsButtonListener(final View.OnClickListener sortButtonListener,
-                                                                                       final View.OnClickListener settingsButtonListener) {
-            return new OnClickListeners(sortButtonListener, settingsButtonListener);
-        }
-    }
-
     public Buttons(final WindowManager windowManager,
                    final Context context,
                    final OnClickListeners onClickListeners) {
