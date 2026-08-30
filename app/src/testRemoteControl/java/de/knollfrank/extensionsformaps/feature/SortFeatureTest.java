@@ -36,7 +36,7 @@ public class SortFeatureTest {
     public void testSortButtonClick_requestsRouteUrl() {
         // Given
         feature.onStopCountUpdated(15, new Rect(0, 0, 100, 50));
-        final LinearLayout container = (LinearLayout) feature.getSortButtonOverlay();
+        final LinearLayout container = (LinearLayout) feature.getButtons();
         final Button sortButton = (Button) container.getChildAt(0);
 
         // When

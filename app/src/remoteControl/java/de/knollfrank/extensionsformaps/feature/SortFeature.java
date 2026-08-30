@@ -34,7 +34,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     private final RouteUrlRequester.RouteUrlCallback onRouteUrlExtracted;
 
     // FK-TODO: make Optional<View>
-    private View sortButtonOverlay;
+    private View buttons;
     private final Rect lastStopCountBounds = new Rect();
 
     public SortFeature(final AccessibilityService accessibilityService,
@@ -55,14 +55,14 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     @Override
     public void onStopCountLost() {
         this.lastStopCountBounds.setEmpty();
-        removeSortButton();
+        removeButtons();
     }
 
     @Override
     public void reset() {
         Log.d(TAG, "Full reset of SortFeature.");
         this.lastStopCountBounds.setEmpty();
-        removeSortButton();
+        removeButtons();
     }
 
     @Override
@@ -79,31 +79,31 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
 
     @Override
     public void onDestroy() {
-        removeSortButton();
+        removeButtons();
     }
 
     private void updateSortButtonPosition() {
         if (lastStopCountBounds.isEmpty()) {
-            removeSortButton();
+            removeButtons();
             return;
         }
-        if (sortButtonOverlay == null) {
-            sortButtonOverlay = createOverlayLayout();
-            windowManager.addView(sortButtonOverlay, getSortButtonLayoutParams(lastStopCountBounds));
+        if (buttons == null) {
+            buttons = createButtons();
+            windowManager.addView(buttons, getButtonsLayoutParams(lastStopCountBounds));
         } else {
-            final WindowManager.LayoutParams params = (WindowManager.LayoutParams) sortButtonOverlay.getLayoutParams();
+            final WindowManager.LayoutParams params = (WindowManager.LayoutParams) buttons.getLayoutParams();
             updateLayoutParams(params, lastStopCountBounds);
-            windowManager.updateViewLayout(sortButtonOverlay, params);
+            windowManager.updateViewLayout(buttons, params);
         }
     }
 
-    private View createOverlayLayout() {
-        final LinearLayout layout = new LinearLayout(accessibilityService);
-        layout.setOrientation(LinearLayout.HORIZONTAL);
-        layout.setGravity(Gravity.CENTER_VERTICAL);
-        layout.addView(createSortButton());
-        layout.addView(createSettingsButton());
-        return layout;
+    private View createButtons() {
+        final LinearLayout buttons = new LinearLayout(accessibilityService);
+        buttons.setOrientation(LinearLayout.HORIZONTAL);
+        buttons.setGravity(Gravity.CENTER_VERTICAL);
+        buttons.addView(createSortButton());
+        buttons.addView(createSettingsButton());
+        return buttons;
     }
 
     private View createSortButton() {
@@ -157,7 +157,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
         return shape;
     }
 
-    private WindowManager.LayoutParams getSortButtonLayoutParams(final Rect targetRect) {
+    private WindowManager.LayoutParams getButtonsLayoutParams(final Rect targetRect) {
         final WindowManager.LayoutParams params =
                 new WindowManager.LayoutParams(
                         WindowManager.LayoutParams.WRAP_CONTENT,
@@ -183,15 +183,15 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, displayMetrics);
     }
 
-    private void removeSortButton() {
-        if (sortButtonOverlay != null) {
-            windowManager.removeView(sortButtonOverlay);
-            sortButtonOverlay = null;
+    private void removeButtons() {
+        if (buttons != null) {
+            windowManager.removeView(buttons);
+            buttons = null;
         }
     }
 
     @VisibleForTesting
-    View getSortButtonOverlay() {
-        return sortButtonOverlay;
+    View getButtons() {
+        return buttons;
     }
 }
