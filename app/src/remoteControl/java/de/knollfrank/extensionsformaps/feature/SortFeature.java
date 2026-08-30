@@ -35,6 +35,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
 
     // FK-TODO: make Optional<View>
     private View buttons;
+    // FK-TODO: make Optional<Rect>
     private final Rect lastStopCountBounds = new Rect();
 
     public SortFeature(final AccessibilityService accessibilityService,
@@ -49,7 +50,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     @Override
     public void onStopCountUpdated(final int stopCount, final Rect stopCountBounds) {
         this.lastStopCountBounds.set(stopCountBounds);
-        updateSortButtonPosition();
+        updateButtonPositions();
     }
 
     @Override
@@ -82,7 +83,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
         removeButtons();
     }
 
-    private void updateSortButtonPosition() {
+    private void updateButtonPositions() {
         if (lastStopCountBounds.isEmpty()) {
             removeButtons();
             return;
@@ -107,48 +108,46 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     }
 
     private View createSortButton() {
-        final Button button = new Button(accessibilityService);
-        button.setText(accessibilityService.getString(R.string.sort_button_label));
-        button.setTextColor(Color.parseColor("#8AB4F8"));
-        button.setAllCaps(false);
-        button.setGravity(Gravity.CENTER);
-        button.setPadding(dpToPx(12), dpToPx(6), dpToPx(12), dpToPx(6));
-        button.setMinimumHeight(0);
-        button.setMinimumWidth(0);
-        button.setBackground(getShape());
-        final LinearLayout.LayoutParams params =
+        final Button sortButton = new Button(accessibilityService);
+        sortButton.setText(accessibilityService.getString(R.string.sort_button_label));
+        sortButton.setTextColor(Color.parseColor("#8AB4F8"));
+        sortButton.setAllCaps(false);
+        sortButton.setGravity(Gravity.CENTER);
+        sortButton.setPadding(dpToPx(12), dpToPx(6), dpToPx(12), dpToPx(6));
+        sortButton.setMinimumHeight(0);
+        sortButton.setMinimumWidth(0);
+        sortButton.setBackground(getButtonShape());
+        sortButton.setLayoutParams(
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.MATCH_PARENT);
-        button.setLayoutParams(params);
-        button.setOnClickListener(view -> {
-            routeUrlRequester.requestRouteUrl(onRouteUrlExtracted);
-        });
-        return button;
+                        LinearLayout.LayoutParams.MATCH_PARENT));
+        sortButton.setOnClickListener(view -> routeUrlRequester.requestRouteUrl(onRouteUrlExtracted));
+        return sortButton;
     }
 
     private View createSettingsButton() {
-        final Button button = new Button(accessibilityService);
-        button.setText(accessibilityService.getString(R.string.settings_configure_button_text));
-        button.setTextColor(Color.WHITE);
-        button.setGravity(Gravity.CENTER);
-        button.setPadding(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4));
-        button.setMinimumHeight(0);
-        button.setMinimumWidth(0);
-        button.setMinWidth(0);
-        button.setMinHeight(0);
-        button.setBackground(getShape());
+        final Button settingsButton = new Button(accessibilityService);
+        settingsButton.setText(accessibilityService.getString(R.string.settings_configure_button_text));
+        settingsButton.setTextColor(Color.WHITE);
+        settingsButton.setGravity(Gravity.CENTER);
+        settingsButton.setPadding(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4));
+        settingsButton.setMinimumHeight(0);
+        settingsButton.setMinimumWidth(0);
+        settingsButton.setMinWidth(0);
+        settingsButton.setMinHeight(0);
+        settingsButton.setBackground(getButtonShape());
+        // FK-TODO: der Settingsbutton sollte hier nur so dargestellt werden, wie er selbst aussehen soll. Dass ein Zwischenraum zum Sortbutton existieren soll, MUISS im LinearLayout in createButtons() implementiert werden.
         final LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
                         dpToPx(34),
                         LinearLayout.LayoutParams.MATCH_PARENT);
         params.leftMargin = dpToPx(4);
-        button.setLayoutParams(params);
-        button.setOnClickListener(view -> new SettingsDialog(accessibilityService).show());
-        return button;
+        settingsButton.setLayoutParams(params);
+        settingsButton.setOnClickListener(view -> new SettingsDialog(accessibilityService).show());
+        return settingsButton;
     }
 
-    private GradientDrawable getShape() {
+    private GradientDrawable getButtonShape() {
         final GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.RECTANGLE);
         shape.setCornerRadius(dpToPx(17));
@@ -176,10 +175,10 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     }
 
     private int dpToPx(final int dp) {
-        return getAnInt(dp, accessibilityService.getResources().getDisplayMetrics());
+        return dpToPx(dp, accessibilityService.getResources().getDisplayMetrics());
     }
 
-    public static int getAnInt(final int dp, final DisplayMetrics displayMetrics) {
+    public static int dpToPx(final int dp, final DisplayMetrics displayMetrics) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, displayMetrics);
     }
 

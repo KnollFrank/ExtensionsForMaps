@@ -414,6 +414,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private int dpToPx(final int dp) {
-        return SortFeature.getAnInt(dp, accessibilityService.getResources().getDisplayMetrics());
+        return SortFeature.dpToPx(dp, accessibilityService.getResources().getDisplayMetrics());
     }
 }
