@@ -9,7 +9,7 @@
     <string name="thanks_title">Thank You</string>
     <string name="close">Close</string>
     <string name="info_icon_desc">Information icon</string>
-    <string name="accessibility_service_label">Extensions for Maps Service</string>
+    <string name="accessibility_service_label">Extensions for Maps</string>
     <string name="accessibility_service_description">Automatically detects when Google Maps reaches the 10-stop limit and helps to expand the route.</string>
     <string name="coffee_button">Buy me a coffee</string>
     <string name="permissions_title">Setup Automation</string>

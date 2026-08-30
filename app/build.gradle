@@ -19,6 +19,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "boolean", "SHOW_PLANNING_CARD", "false"
+        buildConfigField "boolean", "FEATURE_SCAN_ADDRESS_ENABLED", "false"
     }
 
     buildFeatures {
@@ -29,8 +30,10 @@ android {
     buildTypes {
         debug {
             buildConfigField "boolean", "SHOW_PLANNING_CARD", "true"
+            buildConfigField "boolean", "FEATURE_SCAN_ADDRESS_ENABLED", "true"
         }
         release {
+            buildConfigField "boolean", "FEATURE_SCAN_ADDRESS_ENABLED", "false"
             optimization {
                 enable false
             }

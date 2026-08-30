@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
@@ -20,10 +21,11 @@ import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester.RouteUrlC
 import de.knollfrank.extensionsformaps.accessibility.StopCountDetector;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityEventWrapper;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
+import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.feature.ActiveServiceHighlightFeature;
 import de.knollfrank.extensionsformaps.feature.CompoundFeature;
 import de.knollfrank.extensionsformaps.feature.addstop.AddStopFeature;
-import de.knollfrank.extensionsformaps.feature.scanaddress.ScanAddressFeature;
+import de.knollfrank.extensionsformaps.feature.scanaddress.ScanAddressFeatureFactory;
 import de.knollfrank.extensionsformaps.feature.sort.SortFeature;
 import de.knollfrank.extensionsformaps.feature.sort.SortFeatureFactory;
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizerFactory;
@@ -50,11 +52,13 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                         List.of(sortFeature, addStopFeature));
         compoundFeature =
                 new CompoundFeature(
-                        List.of(
-                                sortFeature,
-                                addStopFeature,
-                                new ActiveServiceHighlightFeature(this),
-                                new ScanAddressFeature(this)));
+                        Optionals
+                                .streamOfPresentElements(
+                                        () -> Optional.of(sortFeature),
+                                        () -> Optional.of(addStopFeature),
+                                        () -> Optional.of(new ActiveServiceHighlightFeature(this)),
+                                        () -> ScanAddressFeatureFactory.createScanAddressFeature(this))
+                                .toList());
         compoundFeature.onServiceConnected();
     }
 
