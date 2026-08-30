@@ -7,6 +7,9 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+import de.knollfrank.extensionsformaps.common.ResourcesWrapper;
 
 public class GoogleMapsContextResolver {
 
@@ -32,35 +35,13 @@ public class GoogleMapsContextResolver {
                 new StopCountParser(getStopCountPattern(countStopsPatternStr)));
     }
 
-    private static String getShareText(final Resources resources) {
-        final String keyShareButton = "ACCESSIBILITY_SHARE_BUTTON";
-        final String keyShareFallback = "SHARE";
-        int shareId = resources.getIdentifier(keyShareButton, "string", GOOGLE_MAPS_PACKAGE);
-        if (shareId == 0) {
-            shareId = resources.getIdentifier(keyShareFallback, "string", GOOGLE_MAPS_PACKAGE);
-        }
-        if (shareId == 0) {
-            throw new RuntimeException("Could not find resource ID for share button in Google Maps");
-        }
-        return resources.getString(shareId);
-    }
-
-    private static String getCountStopsPatternStr(final Resources resources) {
-        final String keyCountStops = "DIRECTIONS_COUNT_STOPS";
-        final int countStopsId = resources.getIdentifier(keyCountStops, "plurals", GOOGLE_MAPS_PACKAGE);
-        if (countStopsId == 0) {
-            throw new RuntimeException("Could not find resource ID for " + keyCountStops);
-        }
-        return resources.getQuantityString(countStopsId, 5);
-    }
-
     private static String getAddStopsText(final Resources resources) {
-        final String keyAddStops = "ADD_STOPS_ENTRYPOINT_LABEL";
-        final int addStopsId = resources.getIdentifier(keyAddStops, "string", GOOGLE_MAPS_PACKAGE);
-        if (addStopsId == 0) {
-            throw new RuntimeException("Could not find resource ID for " + keyAddStops);
-        }
-        return resources.getString(addStopsId);
+        return resources.getString(
+                new ResourcesWrapper(resources)
+                        .getValidIdentifierOrElseThrow(
+                                "ADD_STOPS_ENTRYPOINT_LABEL",
+                                "string",
+                                GOOGLE_MAPS_PACKAGE));
     }
 
     private static String getStopsWord(final String countStopsPatternStr) {
@@ -68,6 +49,28 @@ public class GoogleMapsContextResolver {
                 .replace("%d", "")
                 .replace("%1$d", "")
                 .replaceAll("\\s+", "");
+    }
+
+    private static String getShareText(final Resources resources) {
+        final String keyShareButton = "ACCESSIBILITY_SHARE_BUTTON";
+        final String keyShareFallback = "SHARE";
+        return resources.getString(
+                Stream
+                        .of(keyShareButton, keyShareFallback)
+                        .map(key -> new ResourcesWrapper(resources).getIdentifier(key, "string", PackageNames.GOOGLE_MAPS_PACKAGE))
+                        .flatMap(optionalIdentifier -> optionalIdentifier.stream().boxed())
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Could not find resource ID for share button in Google Maps")));
+    }
+
+    private static String getCountStopsPatternStr(final Resources resources) {
+        return resources.getQuantityString(
+                new ResourcesWrapper(resources)
+                        .getValidIdentifierOrElseThrow(
+                                "DIRECTIONS_COUNT_STOPS",
+                                "plurals",
+                                GOOGLE_MAPS_PACKAGE),
+                5);
     }
 
     private static Pattern getStopCountPattern(final String countStopsPatternStr) {
