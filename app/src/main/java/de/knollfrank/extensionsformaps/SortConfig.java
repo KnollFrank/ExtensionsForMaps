@@ -20,9 +20,6 @@ public class SortConfig {
     private static final String KEY_SHOW_ADD_STOP_INSTRUCTION = "show_add_stop_instruction";
 
     public static boolean shouldShowRoutePreview(final Context context) {
-        if (!BuildConfig.FEATURE_ROUTE_PREVIEW_VISIBLE) {
-            return false;
-        }
         return getPrefs(context).getBoolean(KEY_SHOW_ROUTE_PREVIEW, true);
     }
 

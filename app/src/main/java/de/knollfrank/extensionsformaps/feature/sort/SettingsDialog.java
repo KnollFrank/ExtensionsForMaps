@@ -17,10 +17,8 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.IOException;
-import java.util.List;
 
 import de.knollfrank.extensionsformaps.ApiKeyRepository;
-import de.knollfrank.extensionsformaps.BuildConfig;
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.SortConfig;
 import de.knollfrank.extensionsformaps.databinding.DialogApiKeyBinding;
@@ -43,12 +41,6 @@ class SettingsDialog {
         final DialogSettingsBinding binding = DialogSettingsBinding.inflate(LayoutInflater.from(themedContext));
 
         binding.checkBoxShowPreview.setChecked(SortConfig.shouldShowRoutePreview(context));
-
-        List
-                .of(
-                        binding.checkBoxShowPreview,
-                        binding.tvGeneralLabel)
-                .forEach(view -> view.setVisibility(BuildConfig.FEATURE_ROUTE_PREVIEW_VISIBLE ? View.VISIBLE : View.GONE));
 
         binding.layoutHaversine.setOnClickListener(
                 view -> {
