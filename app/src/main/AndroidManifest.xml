@@ -2,12 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <queries>
         <package android:name="com.google.android.apps.maps" />
         <package android:name="com.google.android.googlequicksearchbox" />
         <package android:name="com.google.android.apps.bard" />
         <package android:name="com.google.ar.lens" />
+        <package android:name="com.google.android.apps.bard" />
     </queries>
 
     <application
@@ -32,5 +38,63 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".feature.scanaddress.CaptureAddressActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ExtensionsForMaps.Transparent" />
+
+        <activity
+            android:name=".feature.AddStopActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:icon="@drawable/ic_feature_add_stop"
+            android:label="@string/label_add_stop"
+            android:taskAffinity=".addstop"
+            android:theme="@style/Theme.ExtensionsForMaps.Transparent">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".feature.SortActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:icon="@drawable/ic_feature_sort"
+            android:label="@string/label_sort"
+            android:taskAffinity=".sort"
+            android:theme="@style/Theme.ExtensionsForMaps.Transparent">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <service
+            android:name=".MapsExtensionsAccessibilityService"
+            android:description="@string/accessibility_service_description"
+            android:exported="false"
+            android:label="@string/accessibility_service_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
     </application>
 </manifest>

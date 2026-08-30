@@ -11,7 +11,6 @@ import androidx.core.content.ContextCompat;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
