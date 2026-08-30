@@ -19,6 +19,8 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.VisibleForTesting;
 
+import java.util.Optional;
+
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
 import de.knollfrank.extensionsformaps.accessibility.StopCountDetector;
@@ -33,8 +35,7 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     private final RouteUrlRequester routeUrlRequester;
     private final RouteUrlRequester.RouteUrlCallback onRouteUrlExtracted;
 
-    // FK-TODO: make Optional<View>
-    private View buttons;
+    private Optional<View> buttons = Optional.empty();
     // FK-TODO: make Optional<Rect>
     private final Rect lastStopCountBounds = new Rect();
 
@@ -88,14 +89,17 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
             removeButtons();
             return;
         }
-        if (buttons == null) {
-            buttons = createButtons();
-            windowManager.addView(buttons, getButtonsLayoutParams(lastStopCountBounds));
-        } else {
-            final WindowManager.LayoutParams params = (WindowManager.LayoutParams) buttons.getLayoutParams();
-            updateLayoutParams(params, lastStopCountBounds);
-            windowManager.updateViewLayout(buttons, params);
-        }
+        buttons.ifPresentOrElse(
+                buttons -> {
+                    final WindowManager.LayoutParams params = (WindowManager.LayoutParams) buttons.getLayoutParams();
+                    updateLayoutParams(params, lastStopCountBounds);
+                    windowManager.updateViewLayout(buttons, params);
+                },
+                () -> {
+                    final View buttons = createButtons();
+                    windowManager.addView(buttons, getButtonsLayoutParams(lastStopCountBounds));
+                    this.buttons = Optional.of(buttons);
+                });
     }
 
     private View createButtons() {
@@ -183,14 +187,15 @@ public class SortFeature implements AccessibilityFeature, StopCountDetector.Stop
     }
 
     private void removeButtons() {
-        if (buttons != null) {
-            windowManager.removeView(buttons);
-            buttons = null;
-        }
+        buttons.ifPresent(
+                buttons -> {
+                    windowManager.removeView(buttons);
+                    this.buttons = Optional.empty();
+                });
     }
 
     @VisibleForTesting
-    View getButtons() {
+    Optional<View> getButtons() {
         return buttons;
     }
 }
