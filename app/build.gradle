@@ -34,9 +34,9 @@ android {
         }
         release {
             buildConfigField "boolean", "FEATURE_SCAN_ADDRESS_ENABLED", "false"
-            optimization {
-                enable false
-            }
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
