@@ -3,10 +3,9 @@ package de.knollfrank.extensionsformaps.accessibility.wrapper;
 import android.graphics.Rect;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import com.google.common.base.Supplier;
-
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
