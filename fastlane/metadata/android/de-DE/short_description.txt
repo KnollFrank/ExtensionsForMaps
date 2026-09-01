@@ -1,0 +1,1 @@
+Automatische Routen-Erweiterung und Stopps-Sortierung für Google Maps.
