@@ -1,0 +1,4 @@
+First official release v1.0:
+- Automatic route extension for Google Maps
+- Route optimization via road network or straight line
+- 100% Open Source and free

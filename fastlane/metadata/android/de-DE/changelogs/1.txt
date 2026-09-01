@@ -1,0 +1,4 @@
+Erstes offizielles Release v1.0:
+- Automatische Stopps-Erweiterung für Google Maps
+- Routenoptimierung über das Straßennetz oder Luftlinie
+- 100 % Open Source und frei
