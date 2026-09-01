@@ -1,6 +1,5 @@
 package de.knollfrank.extensionsformaps;
 
-import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GEMINI_APP_PACKAGE;
 import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_APP_PACKAGE;
 import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_MAPS_PACKAGE;
 import static de.knollfrank.extensionsformaps.accessibility.PackageNames.RESOLVER_PACKAGE;
@@ -78,7 +77,6 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                                     handleGoogleMapsEvent(event);
                                     break;
                                 case GOOGLE_APP_PACKAGE:
-                                case GEMINI_APP_PACKAGE:
                                     handleGoogleAppEvent(event);
                                     break;
                                 case RESOLVER_PACKAGE:

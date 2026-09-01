@@ -1,6 +1,5 @@
 package de.knollfrank.extensionsformaps.feature.scanaddress;
 
-import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GEMINI_APP_PACKAGE;
 import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_APP_PACKAGE;
 import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_MAPS_PACKAGE;
 
@@ -23,7 +22,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -35,16 +33,22 @@ import de.knollfrank.extensionsformaps.common.DisplayUtils;
 import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.feature.AccessibilityFeature;
 
-// FK-TODO: Verwende die Google-App https://play.google.com/store/apps/details?id=com.google.android.googlequicksearchbox statt der Gemini-App für den Adressscanner.
+// FK-TODO: refactor
 public class ScanAddressFeature implements AccessibilityFeature {
 
     private static final String TAG = ScanAddressFeature.class.getSimpleName();
     private static final ResourceName SEARCH_EDIT_TEXT_ID = ResourceNameFactory.createGoogleMapsResourceName("search_omnibox_edit_text");
-    private static final ResourceName GEMINI_SEND_ID = new ResourceName(GOOGLE_APP_PACKAGE, "assistant_robin_input_send_button_compose");
+    private static final ResourceName AI_MODE_CHIP_ID = ResourceNameFactory.createGoogleAppResourceName("googleapp_sbn_aim_chip");
+    private static final ResourceName AIM_CAMERA_ID = ResourceNameFactory.createGoogleAppResourceName("searchbox_aim_camera");
+    private static final ResourceName AIM_INPUT_TEXT_ID = ResourceNameFactory.createGoogleAppResourceName("searchbox_aim_autocomplete_text_input");
+    private static final ResourceName AIM_SEND_BUTTON_ID = ResourceNameFactory.createGoogleAppResourceName("searchbox_aim_enter_button");
 
     private enum State {
-
         IDLE,
+        AWAITING_AI_MODE_CLICK,
+        AI_MODE_CLICKED,
+        AWAITING_CAMERA_BUTTON_CLICK,
+        CAMERA_BUTTON_CLICKED,
         FILLING_PROMPT,
         PROMPT_FILLED,
         SENDING_PROMPT,
@@ -72,16 +76,26 @@ public class ScanAddressFeature implements AccessibilityFeature {
     @Override
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            if (state != State.IDLE && address.isEmpty()) {
+            if (state != State.IDLE
+                    && state != State.AWAITING_AI_MODE_CLICK
+                    && state != State.AI_MODE_CLICKED
+                    && state != State.AWAITING_CAMERA_BUTTON_CLICK
+                    && state != State.CAMERA_BUTTON_CLICKED
+                    && state != State.FILLING_PROMPT
+                    && state != State.PROMPT_FILLED
+                    && state != State.SENDING_PROMPT
+                    && state != State.AWAITING_RESPONSE
+                    && address.isEmpty()) {
+                Log.d(TAG, "Resetting state to IDLE on Maps TYPE_WINDOW_STATE_CHANGED");
                 state = State.IDLE;
             }
         }
-        // Hier greift die originale Einsetz-Logik
         address.ifPresent(
                 _address -> {
                     final boolean success = pasteAddress(root, _address);
                     if (success) {
                         address = Optional.empty();
+                        state = State.IDLE;
                     }
                 });
         updateScanButton(root);
@@ -89,11 +103,11 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     @Override
     public void onGoogleAppEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
-        if (isNotGoogleAppAndNotGeminiApp(root)) {
+        if (isNotGoogleApp(root)) {
             return;
         }
+        Log.d(TAG, "onGoogleAppEvent called in state: " + state);
         if (address.isPresent()) {
-            // Wir haben die Adresse. Jetzt bringen wir Maps sanft nach vorne.
             if (System.currentTimeMillis() - lastActionTime > 1000) {
                 returnToMaps();
                 lastActionTime = System.currentTimeMillis();
@@ -103,7 +117,17 @@ public class ScanAddressFeature implements AccessibilityFeature {
         if (tryExtractAIResponse(root)) {
             return;
         }
-        automateGemini(root);
+        if (state == State.AWAITING_AI_MODE_CLICK) {
+            clickAIModeButtonIfFound(root);
+            return;
+        }
+        if (state == State.AI_MODE_CLICKED || state == State.AWAITING_CAMERA_BUTTON_CLICK) {
+            clickCameraButtonIfFound(root);
+            return;
+        }
+        if (state == State.CAMERA_BUTTON_CLICKED || state == State.FILLING_PROMPT || state == State.PROMPT_FILLED || state == State.SENDING_PROMPT) {
+            automateGoogleAppPromptAndSend(root);
+        }
     }
 
     @Override
@@ -116,104 +140,12 @@ public class ScanAddressFeature implements AccessibilityFeature {
         removeScanButton();
     }
 
-    private static boolean isNotGoogleAppAndNotGeminiApp(final AccessibilityNodeInfo root) {
-        return new AccessibilityNodeInfoWrapper(root)
-                .getPackageName()
-                .map(ScanAddressFeature::isNotGoogleAppAndNotGeminiApp)
-                .orElse(true);
-    }
-
-    private static boolean isNotGoogleAppAndNotGeminiApp(final String packageName) {
-        return !GOOGLE_APP_PACKAGE.equals(packageName) && !GEMINI_APP_PACKAGE.equals(packageName);
-    }
-
-    private void automateGemini(final AccessibilityNodeInfo root) {
-        ScanAddressFeature
-                .findInputField(root)
-                .ifPresent(inputField -> automateGemini_setInputTextOrClickSendButton(root, inputField));
-    }
-
-    private void automateGemini_setInputTextOrClickSendButton(final AccessibilityNodeInfo root, final AccessibilityNodeInfo inputField) {
-        final boolean textContainsAnalysiere = textOfNodeContainsNeedle(inputField, "Analysiere");
-        if (state == State.IDLE && !textContainsAnalysiere) {
-            if (setInputText(inputField, AIPrompt.getAIPrompt())) {
-                state = State.FILLING_PROMPT;
-                lastActionTime = System.currentTimeMillis();
-            }
-        } else if (textContainsAnalysiere) {
-            if (state == State.FILLING_PROMPT || state == State.IDLE) {
-                state = State.PROMPT_FILLED;
-                lastActionTime = System.currentTimeMillis();
-                clickRetries = 0;
-            }
-            if (state == State.PROMPT_FILLED || state == State.SENDING_PROMPT) {
-                if (System.currentTimeMillis() - lastActionTime < 1000) {
-                    return;
-                }
-                ScanAddressFeature
-                        .findSendButton(root)
-                        .ifPresent(this::clickSendButton);
-            }
+    private static boolean isNotGoogleApp(final AccessibilityNodeInfo root) {
+        final Optional<String> packageName = new AccessibilityNodeInfoWrapper(root).getPackageName();
+        if (packageName.isEmpty()) {
+            return false;
         }
-    }
-
-    private void clickSendButton(final AccessibilityNodeInfo sendButton) {
-        if (clickRetries < 5) {
-            new AccessibilityServiceWrapper(accessibilityService).click(sendButton);
-            state = State.SENDING_PROMPT;
-            lastActionTime = System.currentTimeMillis();
-            clickRetries++;
-        } else {
-            state = State.AWAITING_RESPONSE;
-        }
-    }
-
-    private static Optional<AccessibilityNodeInfo> findInputField(final AccessibilityNodeInfo root) {
-        return Optionals
-                .streamOfPresentElements(
-                        () -> findNodeByHint(root, "Frag Gemini"),
-                        () -> findEditText(root))
-                .findFirst();
-    }
-
-    private static boolean textOfNodeContainsNeedle(final AccessibilityNodeInfo node, final String needle) {
-        return new AccessibilityNodeInfoWrapper(node)
-                .getText()
-                .map(text -> text.contains(needle))
-                .orElse(false);
-    }
-
-    private static Optional<AccessibilityNodeInfo> findSendButton(final AccessibilityNodeInfo root) {
-        return findFirstIsVisibleToUser(findSendButtonCandidates(root));
-    }
-
-    private static List<AccessibilityNodeInfo> findSendButtonCandidates(final AccessibilityNodeInfo root) {
-        // FK-TODO: all die deutschen Bezeichnungen sind über keys zu i18n.
-        List<AccessibilityNodeInfo> sendButtonCandidates = root.findAccessibilityNodeInfosByText("Senden");
-        return !sendButtonCandidates.isEmpty() ?
-                sendButtonCandidates :
-                new AccessibilityNodeInfoWrapper(root).findAccessibilityNodeInfosByViewId(GEMINI_SEND_ID);
-    }
-
-    private static Optional<AccessibilityNodeInfo> findFirstIsVisibleToUser(final List<AccessibilityNodeInfo> nodes) {
-        return nodes
-                .stream()
-                .filter(AccessibilityNodeInfo::isVisibleToUser)
-                .findFirst();
-    }
-
-    private static Optional<AccessibilityNodeInfo> findEditText(final AccessibilityNodeInfo node) {
-        return new AccessibilityNodeInfoWrapper(node)
-                .streamPreOrder()
-                .filter(ScanAddressFeature::classNameContainsEditText)
-                .findFirst();
-    }
-
-    private static boolean classNameContainsEditText(final AccessibilityNodeInfo node) {
-        return new AccessibilityNodeInfoWrapper(node)
-                .getClassName()
-                .map(className -> className.contains("EditText"))
-                .orElse(false);
+        return !GOOGLE_APP_PACKAGE.equals(packageName.get());
     }
 
     private boolean tryExtractAIResponse(final AccessibilityNodeInfo root) {
@@ -223,7 +155,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
                     this.address = Optional.of(_address);
                     Log.i(TAG, "ERGEBNIS GEFUNDEN: " + _address);
                     lastActionTime = System.currentTimeMillis();
-                    // Erster sanfter Versuch via BACK
                     accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
                 });
         return address.isPresent();
@@ -252,17 +183,242 @@ public class ScanAddressFeature implements AccessibilityFeature {
                 .collect(Collectors.joining(" "));
     }
 
+    private void clickAIModeButtonIfFound(final AccessibilityNodeInfo root) {
+        findAIModeButton(root).ifPresent(aiModeButton -> {
+            Log.d(TAG, "Found AI Mode button candidate: " + aiModeButton);
+            final AccessibilityNodeInfo clickableNode = findClickableAncestor(aiModeButton).orElse(aiModeButton);
+
+            boolean clicked = clickableNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+            if (!clicked) {
+                clicked = new AccessibilityServiceWrapper(accessibilityService).click(clickableNode);
+            }
+            if (!clicked) {
+                clicked = new AccessibilityServiceWrapper(accessibilityService).click(aiModeButton);
+            }
+
+            if (clicked) {
+                Log.i(TAG, "AI Mode Button clicked successfully!");
+                state = State.AWAITING_CAMERA_BUTTON_CLICK;
+                lastActionTime = System.currentTimeMillis();
+            } else {
+                Log.w(TAG, "Failed to click AI Mode button candidate");
+            }
+        });
+    }
+
+    private void clickCameraButtonIfFound(final AccessibilityNodeInfo root) {
+        findCameraButton(root).ifPresent(cameraButton -> {
+            Log.d(TAG, "Found Camera button candidate: " + cameraButton);
+            final AccessibilityNodeInfo clickableNode = findClickableAncestor(cameraButton).orElse(cameraButton);
+
+            boolean clicked = clickableNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+            if (!clicked) {
+                clicked = new AccessibilityServiceWrapper(accessibilityService).click(clickableNode);
+            }
+            if (!clicked) {
+                clicked = new AccessibilityServiceWrapper(accessibilityService).click(cameraButton);
+            }
+
+            if (clicked) {
+                Log.i(TAG, "Camera Button ('Take a photo') clicked successfully!");
+                state = State.CAMERA_BUTTON_CLICKED;
+                lastActionTime = System.currentTimeMillis();
+            } else {
+                Log.w(TAG, "Failed to click Camera button candidate");
+            }
+        });
+    }
+
+    private void automateGoogleAppPromptAndSend(final AccessibilityNodeInfo root) {
+        if (state == State.CAMERA_BUTTON_CLICKED || state == State.FILLING_PROMPT) {
+            findInputField(root).ifPresent(inputField -> {
+                Log.d(TAG, "Input field found, setting AIPrompt text...");
+                if (setInputText(inputField, AIPrompt.getAIPrompt())) {
+                    state = State.PROMPT_FILLED;
+                    lastActionTime = System.currentTimeMillis();
+                    clickRetries = 0;
+                    Log.i(TAG, "AIPrompt text set successfully!");
+                }
+            });
+        }
+
+        if (state == State.PROMPT_FILLED || state == State.SENDING_PROMPT) {
+            if (System.currentTimeMillis() - lastActionTime < 300) {
+                return;
+            }
+            findSendButton(root).ifPresent(this::clickSendButton);
+        }
+    }
+
+    private void clickSendButton(final AccessibilityNodeInfo sendButton) {
+        if (clickRetries < 5) {
+            Log.d(TAG, "Clicking Send button (retry " + clickRetries + ")...");
+            final AccessibilityNodeInfo clickableNode = findClickableAncestor(sendButton).orElse(sendButton);
+            boolean clicked = clickableNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+            if (!clicked) {
+                clicked = new AccessibilityServiceWrapper(accessibilityService).click(clickableNode);
+            }
+            if (!clicked) {
+                clicked = new AccessibilityServiceWrapper(accessibilityService).click(sendButton);
+            }
+
+            if (clicked) {
+                Log.i(TAG, "Send Button clicked successfully!");
+                state = State.SENDING_PROMPT;
+                lastActionTime = System.currentTimeMillis();
+                clickRetries++;
+            }
+        } else {
+            state = State.AWAITING_RESPONSE;
+        }
+    }
+
+    private static Optional<AccessibilityNodeInfo> findInputField(final AccessibilityNodeInfo root) {
+        final AccessibilityNodeInfoWrapper wrapper = new AccessibilityNodeInfoWrapper(root);
+        final Optional<AccessibilityNodeInfo> byId = wrapper.findFirstAccessibilityNodeInfoByViewId(AIM_INPUT_TEXT_ID);
+        if (byId.isPresent()) {
+            return byId;
+        }
+        return Optionals
+                .streamOfPresentElements(
+                        // FK-TODO: keine fest kodierten Strings, verwende stattdessen die Keys der Google-App
+                        () -> findNodeByHintOrText(root, "Ask anything"),
+                        () -> findNodeByHintOrText(root, "Frag irgendwas"),
+                        () -> findEditText(root))
+                .findFirst();
+    }
+
+    private static Optional<AccessibilityNodeInfo> findNodeByHintOrText(final AccessibilityNodeInfo root, final String needle) {
+        return new AccessibilityNodeInfoWrapper(root)
+                .streamPreOrder()
+                .filter(node -> {
+                    final AccessibilityNodeInfoWrapper wrapper = new AccessibilityNodeInfoWrapper(node);
+                    return wrapper.getHintText().map(h -> h.contains(needle)).orElse(false)
+                            || wrapper.getText().map(t -> t.contains(needle)).orElse(false);
+                })
+                .findFirst();
+    }
+
+    private static Optional<AccessibilityNodeInfo> findEditText(final AccessibilityNodeInfo node) {
+        return new AccessibilityNodeInfoWrapper(node)
+                .streamPreOrder()
+                .filter(ScanAddressFeature::classNameContainsEditText)
+                .findFirst();
+    }
+
+    private static boolean classNameContainsEditText(final AccessibilityNodeInfo node) {
+        return new AccessibilityNodeInfoWrapper(node)
+                .getClassName()
+                .map(className -> className.contains("EditText"))
+                .orElse(false);
+    }
+
+    private static Optional<AccessibilityNodeInfo> findSendButton(final AccessibilityNodeInfo root) {
+        final AccessibilityNodeInfoWrapper wrapper = new AccessibilityNodeInfoWrapper(root);
+
+        // 1. Primäre Suche nach Resource-ID
+        final Optional<AccessibilityNodeInfo> byId = wrapper.findFirstAccessibilityNodeInfoByViewId(AIM_SEND_BUTTON_ID);
+        if (byId.isPresent() && byId.get().isEnabled()) {
+            return byId;
+        }
+
+        // 2. Sekundäre Suche nach Content-Description "Send" / "Senden"
+        return wrapper
+                .streamPreOrder()
+                .filter(node -> {
+                    final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
+                    final String contentDesc = nodeWrapper.getContentDescription().orElse("");
+                    final String text = nodeWrapper.getText().orElse("");
+                    final String viewId = node.getViewIdResourceName();
+                    final boolean matches = (viewId != null && viewId.contains("aim_enter_button"))
+                            // FK-TODO: keine fest kodierten Strings, verwende stattdessen die Keys der Google-App
+                            || contentDesc.equalsIgnoreCase("Send")
+                            || contentDesc.equalsIgnoreCase("Senden")
+                            || text.equalsIgnoreCase("Send")
+                            || text.equalsIgnoreCase("Senden");
+                    return matches && node.isEnabled();
+                })
+                .findFirst();
+    }
+
+    private static Optional<AccessibilityNodeInfo> findClickableAncestor(final AccessibilityNodeInfo node) {
+        AccessibilityNodeInfo current = node;
+        while (current != null) {
+            if (current.isClickable()) {
+                return Optional.of(current);
+            }
+            current = current.getParent();
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<AccessibilityNodeInfo> findAIModeButton(final AccessibilityNodeInfo root) {
+        final AccessibilityNodeInfoWrapper wrapper = new AccessibilityNodeInfoWrapper(root);
+
+        // 1. Primäre Suche nach Resource-ID
+        final Optional<AccessibilityNodeInfo> byId = wrapper.findFirstAccessibilityNodeInfoByViewId(AI_MODE_CHIP_ID);
+        if (byId.isPresent()) {
+            return byId;
+        }
+
+        // 2. Sekundäre Suche nach View-ID-Teilstring oder Text/Content-Description
+        return wrapper
+                .streamPreOrder()
+                .filter(node -> {
+                    final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
+                    final String viewId = node.getViewIdResourceName();
+                    if (viewId != null && viewId.contains("aim_chip")) {
+                        return true;
+                    }
+                    final String text = nodeWrapper.getText().orElse("");
+                    final String contentDesc = nodeWrapper.getContentDescription().orElse("");
+                    // FK-TODO: keine fest kodierten Strings, verwende stattdessen die Keys der Google-App
+                    return text.equalsIgnoreCase("AI Mode")
+                            || text.equalsIgnoreCase("AI-Modus")
+                            || contentDesc.equalsIgnoreCase("AI Mode")
+                            || contentDesc.equalsIgnoreCase("AI-Modus");
+                })
+                .findFirst();
+    }
+
+    private static Optional<AccessibilityNodeInfo> findCameraButton(final AccessibilityNodeInfo root) {
+        final AccessibilityNodeInfoWrapper wrapper = new AccessibilityNodeInfoWrapper(root);
+
+        // 1. Primäre Suche nach Resource-ID (searchbox_aim_camera)
+        final Optional<AccessibilityNodeInfo> byId = wrapper.findFirstAccessibilityNodeInfoByViewId(AIM_CAMERA_ID);
+        if (byId.isPresent()) {
+            return byId;
+        }
+
+        // 2. Sekundäre Suche nach View-ID-Teilstring oder Content-Description / Text
+        return wrapper
+                .streamPreOrder()
+                .filter(node -> {
+                    final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
+                    final String viewId = node.getViewIdResourceName();
+                    if (viewId != null && viewId.contains("aim_camera")) {
+                        return true;
+                    }
+                    final String contentDesc = nodeWrapper.getContentDescription().orElse("");
+                    // FK-TODO: keine fest kodierten Strings, verwende stattdessen die Keys der Google-App
+                    final String text = nodeWrapper.getText().orElse("");
+                    return contentDesc.equalsIgnoreCase("Take a photo")
+                            || contentDesc.equalsIgnoreCase("Foto aufnehmen")
+                            || contentDesc.equalsIgnoreCase("Kamera")
+                            || text.equalsIgnoreCase("Take a photo")
+                            || text.equalsIgnoreCase("Foto aufnehmen");
+                })
+                .findFirst();
+    }
+
     private void returnToMaps() {
         Log.d(TAG, "Hole Google Maps sanft in den Vordergrund...");
-        // Wir nutzen einen Intent, der nur die existierende Instanz nach vorne holt
         Optional
                 .ofNullable(accessibilityService.getPackageManager().getLaunchIntentForPackage(GOOGLE_MAPS_PACKAGE))
                 .ifPresent(
                         intent -> {
                             intent
-                                    // WICHTIG: Wir löschen den Reset-Flag, falls vorhanden
                                     .setFlags(removeResetFlag(intent))
-                                    // Wir fügen REORDER_TO_FRONT hinzu, um nur den bestehenden Task anzuzeigen
                                     .addFlags(reorderToFront());
                             accessibilityService.startActivity(intent);
                         });
@@ -292,32 +448,21 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private boolean performCopyPaste(final AccessibilityNodeInfo node, final String text) {
         try {
             final ClipboardManager clipboardManager = (ClipboardManager) accessibilityService.getSystemService(Context.CLIPBOARD_SERVICE);
-            clipboardManager.setPrimaryClip(ClipData.newPlainText("text", text));
-            node.performAction(AccessibilityNodeInfo.ACTION_FOCUS);
-            return node.performAction(AccessibilityNodeInfo.ACTION_PASTE);
+            if (clipboardManager != null) {
+                clipboardManager.setPrimaryClip(ClipData.newPlainText("text", text));
+                node.performAction(AccessibilityNodeInfo.ACTION_FOCUS);
+                return node.performAction(AccessibilityNodeInfo.ACTION_PASTE);
+            }
         } catch (final Exception e) {
-            return false;
+            Log.e(TAG, "Error performing copy/paste", e);
         }
+        return false;
     }
 
     private static Bundle getBundleForSettingText(final String text) {
         final Bundle bundle = new Bundle();
         bundle.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text);
         return bundle;
-    }
-
-    private static Optional<AccessibilityNodeInfo> findNodeByHint(final AccessibilityNodeInfo node, final String hint) {
-        return new AccessibilityNodeInfoWrapper(node)
-                .streamPreOrder()
-                .filter(_node -> nodeContainsHint(_node, hint))
-                .findFirst();
-    }
-
-    private static Boolean nodeContainsHint(final AccessibilityNodeInfo node, final String hint) {
-        return new AccessibilityNodeInfoWrapper(node)
-                .getHintText()
-                .map(hintText -> hintText.contains(hint))
-                .orElse(false);
     }
 
     private void updateScanButton(final AccessibilityNodeInfo root) {
@@ -369,18 +514,22 @@ public class ScanAddressFeature implements AccessibilityFeature {
         button.setBackground(getScanButtonShape());
         button.setOnClickListener(
                 view -> {
-                    // WICHTIG: Button sofort entfernen, bevor die Kamera-Activity startet!
                     removeScanButton();
-                    state = State.IDLE;
+                    state = State.AWAITING_AI_MODE_CLICK;
                     clickRetries = 0;
-                    lastActionTime = 0;
+                    lastActionTime = System.currentTimeMillis();
                     address = Optional.empty();
+                    Log.d(TAG, "Scan button clicked -> set state to AWAITING_AI_MODE_CLICK and launching Google App");
                     try {
-                        final Intent intent = new Intent(accessibilityService, CaptureAddressActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        accessibilityService.startActivity(intent);
+                        final Intent intent = accessibilityService.getPackageManager().getLaunchIntentForPackage(GOOGLE_APP_PACKAGE);
+                        if (intent != null) {
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            accessibilityService.startActivity(intent);
+                        } else {
+                            Log.e(TAG, "Google App launch intent is null");
+                        }
                     } catch (final Exception e) {
-                        Log.e(TAG, "Could not start CaptureAddressActivity", e);
+                        Log.e(TAG, "Could not start Google App", e);
                     }
                 });
         return button;

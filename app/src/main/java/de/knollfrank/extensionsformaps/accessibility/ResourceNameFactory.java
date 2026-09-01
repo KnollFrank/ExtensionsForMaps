@@ -1,10 +1,15 @@
 package de.knollfrank.extensionsformaps.accessibility;
 
+import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_APP_PACKAGE;
 import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_MAPS_PACKAGE;
 
 public class ResourceNameFactory {
 
     public static ResourceName createGoogleMapsResourceName(final String name) {
         return new ResourceName(GOOGLE_MAPS_PACKAGE, name);
+    }
+
+    public static ResourceName createGoogleAppResourceName(final String name) {
+        return new ResourceName(GOOGLE_APP_PACKAGE, name);
     }
 }

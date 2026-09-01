@@ -2,18 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CAMERA" />
-
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false" />
 
     <queries>
         <package android:name="com.google.android.apps.maps" />
         <package android:name="com.google.android.googlequicksearchbox" />
-        <package android:name="com.google.android.apps.bard" />
         <package android:name="com.google.ar.lens" />
-        <package android:name="com.google.android.apps.bard" />
     </queries>
 
     <application
@@ -37,11 +30,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".feature.scanaddress.CaptureAddressActivity"
-            android:exported="false"
-            android:theme="@style/Theme.ExtensionsForMaps.Transparent" />
 
         <activity
             android:name=".feature.AddStopActivity"
@@ -72,16 +60,6 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
 
         <service
             android:name=".MapsExtensionsAccessibilityService"
