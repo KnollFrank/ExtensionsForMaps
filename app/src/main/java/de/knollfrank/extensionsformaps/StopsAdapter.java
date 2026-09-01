@@ -11,8 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
+import de.knollfrank.extensionsformaps.common.Lists;
 import de.knollfrank.extensionsformaps.databinding.ItemStopBinding;
 import de.knollfrank.extensionsformaps.optimize.OptimizationType;
 import de.knollfrank.extensionsformaps.route.DeliveryGroup;
@@ -34,11 +34,13 @@ public class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     public Optional<Route> getRoute() {
         return route.map(
-                _route ->
-                        new Route(
-                                _route.origin(),
-                                getWaypointsWithUiData(_route),
-                                getDestinationWithUiData(_route)));
+                route -> {
+                    final var uiData = RouteTemplate.of(deliveryGroups);
+                    return new Route(
+                            route.origin(),
+                            getWaypointsWithUiData(route, uiData),
+                            getDestinationWithUiData(route, uiData, optimizationType.orElseThrow()));
+                });
     }
 
     @NonNull
@@ -102,28 +104,36 @@ public class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
                 .orElse(0);
     }
 
-    private Stop getDestinationWithUiData(final Route route) {
-        return optimizationType.orElseThrow() == OptimizationType.ANY_DESTINATION ?
-                getStopWithUiData(route.stops(), route.stops().size() - 1) :
-                route.destination();
+    private static Stop getDestinationWithUiData(final Route route,
+                                                 final RouteTemplate<Optional<DeliveryGroup>> uiData,
+                                                 final OptimizationType optimizationType) {
+        return getStopWithUiData(
+                route.destination(),
+                optimizationType == OptimizationType.ANY_DESTINATION ?
+                        uiData.destination() :
+                        route.destination().deliveryGroup());
     }
 
-    private List<Stop> getWaypointsWithUiData(final Route route) {
-        return IntStream
-                .range(1, route.waypoints().size() + 1)
-                .mapToObj(index -> getStopWithUiData(route.stops(), index))
+    private static List<Stop> getWaypointsWithUiData(final Route route,
+                                                     final RouteTemplate<Optional<DeliveryGroup>> uiData) {
+        return getStopsWithUiData(route.waypoints(), uiData.waypoints());
+    }
+
+    private static List<Stop> getStopsWithUiData(final List<Stop> stops, final List<Optional<DeliveryGroup>> uiDataList) {
+        return Lists
+                .zip(stops, uiDataList)
+                .stream()
+                .map(stop_uiData -> getStopWithUiData(stop_uiData.first, stop_uiData.second))
                 .toList();
     }
 
-    // FK-TODO: verwende Lists.zip(stops, deliveryGroups)
-    private Stop getStopWithUiData(final List<Stop> stops, int index) {
-        final Stop stop = stops.get(index);
+    private static Stop getStopWithUiData(final Stop stop, final Optional<DeliveryGroup> uiData) {
         return new Stop(
                 stop.id(),
                 stop.address(),
                 stop.officialPlaceId(),
                 stop.geodetic(),
-                deliveryGroups.get(index));
+                uiData);
     }
 
     private static boolean isOriginOfRoute(final int position) {
@@ -145,5 +155,15 @@ public class StopsAdapter extends RecyclerView.Adapter<ViewHolder> {
                 .stream()
                 .map(Stop::deliveryGroup)
                 .toList();
+    }
+
+    private record RouteTemplate<T>(T origin, List<T> waypoints, T destination) {
+
+        public static <T> RouteTemplate<T> of(final List<T> stops) {
+            return new RouteTemplate<>(
+                    stops.get(0),
+                    stops.subList(1, stops.size() - 1),
+                    stops.get(stops.size() - 1));
+        }
     }
 }
