@@ -80,10 +80,10 @@ public class ScanAddressFeature implements AccessibilityFeature {
     @Override
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
         address.ifPresent(
-                _address -> {
-                    final boolean success = pasteAddress(root, _address);
+                address -> {
+                    final boolean success = pasteAddress(root, address);
                     if (success) {
-                        address = Optional.empty();
+                        this.address = Optional.empty();
                         state = State.IDLE;
                     }
                 });
