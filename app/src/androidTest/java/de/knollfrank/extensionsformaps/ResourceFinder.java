@@ -1,30 +1,33 @@
 package de.knollfrank.extensionsformaps;
 
-import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_MAPS_PACKAGE;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.List;
 
-import java.util.stream.Stream;
+class ResourceFinder {
 
-@RunWith(AndroidJUnit4.class)
-public class GoogleMapsResourceDiscoveryTest {
+    private static final String TAG = ResourceFinder.class.getSimpleName();
 
-    private static final String TAG = GoogleMapsResourceDiscoveryTest.class.getSimpleName();
+    private final String packageName;
+    private final Candidates candidates;
 
-    @Test
-    public void discoverMapsResources() {
-        Log.d(TAG, "Starting wide-range resource scan for Google Maps...");
+    public record Candidates(List<String> names, List<String> values) {
+    }
+
+    public ResourceFinder(final String packageName, final Candidates candidates) {
+        this.packageName = packageName;
+        this.candidates = candidates;
+    }
+
+    public void findAndLogResources() {
+        Log.d(TAG, "Starting wide-range resource scan for " + packageName + "...");
         try {
             final Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-            final Resources mapsRes = context.getPackageManager().getResourcesForApplication(GOOGLE_MAPS_PACKAGE);
+            final Resources mapsRes = context.getPackageManager().getResourcesForApplication(packageName);
 
             // Large scan range to cover strings and plurals in large APKs
             // Package 0x7f, types 0x01-0x20
@@ -56,26 +59,18 @@ public class GoogleMapsResourceDiscoveryTest {
         }
     }
 
-    private static boolean isCandidateName(final String name) {
-        return Stream
-                .of(
-                        "stop",
-                        "waypoint",
-                        "add")
-                .map(String::toLowerCase)
-                .anyMatch(name.toLowerCase()::contains);
+    private boolean isCandidateName(final String name) {
+        return contains(name, candidates.names());
     }
 
-    private static boolean isCandidateValue(final String value) {
-        return Stream
-                .of(
-                        "stopp",
-                        "halt",
-                        "zwischen",
-                        "add stop",
-                        "share",
-                        "teilen")
+    private boolean isCandidateValue(final String value) {
+        return contains(value, candidates.values());
+    }
+
+    private static boolean contains(final String haystack, final List<String> needles) {
+        return needles
+                .stream()
                 .map(String::toLowerCase)
-                .anyMatch(value.toLowerCase()::contains);
+                .anyMatch(haystack.toLowerCase()::contains);
     }
 }
