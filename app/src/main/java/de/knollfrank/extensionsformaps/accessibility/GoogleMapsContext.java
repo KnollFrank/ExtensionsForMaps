@@ -2,7 +2,7 @@ package de.knollfrank.extensionsformaps.accessibility;
 
 import java.util.OptionalInt;
 
-public final class GoogleMapsContext {
+public class GoogleMapsContext {
 
     public final String addStopsText;
     public final String stopsWord;
