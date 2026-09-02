@@ -95,7 +95,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
         Log.d(TAG, "onGoogleAppEvent called in state: " + state);
         if (address.isPresent()) {
             if (System.currentTimeMillis() - lastActionTime > 1000) {
-                returnToMaps();
+                returnToGoogleMaps();
                 lastActionTime = System.currentTimeMillis();
             }
             return;
@@ -103,16 +103,11 @@ public class ScanAddressFeature implements AccessibilityFeature {
         if (tryExtractAIResponse(root)) {
             return;
         }
-        if (state == State.AWAITING_AI_MODE_CLICK) {
-            clickAIModeButtonIfFound(root);
-            return;
-        }
-        if (state == State.AI_MODE_CLICKED || state == State.AWAITING_CAMERA_BUTTON_CLICK) {
-            clickCameraButtonIfFound(root);
-            return;
-        }
-        if (state == State.CAMERA_BUTTON_CLICKED || state == State.FILLING_PROMPT || state == State.PROMPT_FILLED || state == State.SENDING_PROMPT) {
-            automateGoogleAppPromptAndSend(root);
+        switch (state) {
+            case AWAITING_AI_MODE_CLICK -> clickAIModeButtonIfFound(root);
+            case AI_MODE_CLICKED, AWAITING_CAMERA_BUTTON_CLICK -> clickCameraButtonIfFound(root);
+            case CAMERA_BUTTON_CLICKED, FILLING_PROMPT, PROMPT_FILLED, SENDING_PROMPT ->
+                    automateGoogleAppPromptAndSend(root);
         }
     }
 
@@ -377,7 +372,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
                 .findFirst();
     }
 
-    private void returnToMaps() {
+    private void returnToGoogleMaps() {
         Log.d(TAG, "Hole Google Maps sanft in den Vordergrund...");
         Optional
                 .ofNullable(accessibilityService.getPackageManager().getLaunchIntentForPackage(GOOGLE_MAPS_PACKAGE))
