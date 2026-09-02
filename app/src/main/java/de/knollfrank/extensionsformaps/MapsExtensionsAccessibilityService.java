@@ -166,7 +166,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
         urlRequester.handleGoogleMapsEvent(event);
         new AccessibilityServiceWrapper(this)
                 .getRootInActiveWindow()
-                .filter(root -> hasPackageName(root, GOOGLE_MAPS_PACKAGE))
+                .filter(root -> nodeHasPackageName(root, GOOGLE_MAPS_PACKAGE))
                 .ifPresent(
                         root -> {
                             stopCountDetector.detectStopCount(root);
@@ -177,11 +177,11 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     private void handleGoogleAppEvent(final AccessibilityEvent event) {
         new AccessibilityServiceWrapper(this)
                 .getRootInActiveWindow()
-                .filter(root -> hasPackageName(root, GOOGLE_APP_PACKAGE))
+                .filter(root -> nodeHasPackageName(root, GOOGLE_APP_PACKAGE))
                 .ifPresent(root -> compoundFeature.onGoogleAppEvent(event, root));
     }
 
-    private static boolean hasPackageName(final AccessibilityNodeInfo node, final String packageName) {
+    private static boolean nodeHasPackageName(final AccessibilityNodeInfo node, final String packageName) {
         return new AccessibilityNodeInfoWrapper(node)
                 .getPackageName()
                 .map(packageName::equals)
