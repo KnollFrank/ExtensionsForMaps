@@ -25,6 +25,7 @@ import android.widget.FrameLayout;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import de.knollfrank.extensionsformaps.accessibility.GoogleAppContext;
 import de.knollfrank.extensionsformaps.accessibility.ResourceName;
 import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
@@ -57,6 +58,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     private final AccessibilityService accessibilityService;
     private final WindowManager windowManager;
+    private final GoogleAppContext googleAppContext;
     private Optional<View> scanButtonOverlay = Optional.empty();
     private final Rect lastEditTextFieldBounds = new Rect();
     private Optional<String> address = Optional.empty();
@@ -64,9 +66,11 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private long lastActionTime = 0;
     private int clickRetries = 0;
 
-    public ScanAddressFeature(final AccessibilityService accessibilityService) {
+    public ScanAddressFeature(final AccessibilityService accessibilityService,
+                              final GoogleAppContext googleAppContext) {
         this.accessibilityService = accessibilityService;
         this.windowManager = (WindowManager) accessibilityService.getSystemService(Context.WINDOW_SERVICE);
+        this.googleAppContext = googleAppContext;
     }
 
     @Override
@@ -273,7 +277,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
         }
     }
 
-    private static Optional<AccessibilityNodeInfo> findInputField(final AccessibilityNodeInfo root) {
+    private Optional<AccessibilityNodeInfo> findInputField(final AccessibilityNodeInfo root) {
         final AccessibilityNodeInfoWrapper wrapper = new AccessibilityNodeInfoWrapper(root);
         final Optional<AccessibilityNodeInfo> byId = wrapper.findFirstAccessibilityNodeInfoByViewId(AIM_INPUT_TEXT_ID);
         if (byId.isPresent()) {
@@ -281,9 +285,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
         }
         return Optionals
                 .streamOfPresentElements(
-                        // FK-TODO: keine fest kodierten Strings, verwende stattdessen die Keys der Google-App
-                        () -> findNodeByHintOrText(root, "Ask anything"),
-                        () -> findNodeByHintOrText(root, "Frag irgendwas"),
+                        () -> findNodeByHintOrText(root, googleAppContext.askAnythingText),
                         () -> findEditText(root))
                 .findFirst();
     }
@@ -313,7 +315,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
                 .orElse(false);
     }
 
-    private static Optional<AccessibilityNodeInfo> findSendButton(final AccessibilityNodeInfo root) {
+    private Optional<AccessibilityNodeInfo> findSendButton(final AccessibilityNodeInfo root) {
         final AccessibilityNodeInfoWrapper wrapper = new AccessibilityNodeInfoWrapper(root);
 
         // 1. Primäre Suche nach Resource-ID
@@ -322,7 +324,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
             return byId;
         }
 
-        // 2. Sekundäre Suche nach Content-Description "Send" / "Senden"
+        // 2. Sekundäre Suche nach Content-Description / Text der Google App ("Send")
         return wrapper
                 .streamPreOrder()
                 .filter(node -> {
@@ -331,11 +333,8 @@ public class ScanAddressFeature implements AccessibilityFeature {
                     final String text = nodeWrapper.getText().orElse("");
                     final String viewId = node.getViewIdResourceName();
                     final boolean matches = (viewId != null && viewId.contains("aim_enter_button"))
-                            // FK-TODO: keine fest kodierten Strings, verwende stattdessen die Keys der Google-App
-                            || contentDesc.equalsIgnoreCase("Send")
-                            || contentDesc.equalsIgnoreCase("Senden")
-                            || text.equalsIgnoreCase("Send")
-                            || text.equalsIgnoreCase("Senden");
+                            || contentDesc.equalsIgnoreCase(googleAppContext.sendText)
+                            || text.equalsIgnoreCase(googleAppContext.sendText);
                     return matches && node.isEnabled();
                 })
                 .findFirst();
@@ -352,7 +351,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
         return Optional.empty();
     }
 
-    private static Optional<AccessibilityNodeInfo> findAIModeButton(final AccessibilityNodeInfo root) {
+    private Optional<AccessibilityNodeInfo> findAIModeButton(final AccessibilityNodeInfo root) {
         final AccessibilityNodeInfoWrapper wrapper = new AccessibilityNodeInfoWrapper(root);
 
         // 1. Primäre Suche nach Resource-ID
@@ -372,16 +371,13 @@ public class ScanAddressFeature implements AccessibilityFeature {
                     }
                     final String text = nodeWrapper.getText().orElse("");
                     final String contentDesc = nodeWrapper.getContentDescription().orElse("");
-                    // FK-TODO: keine fest kodierten Strings, verwende stattdessen die Keys der Google-App
-                    return text.equalsIgnoreCase("AI Mode")
-                            || text.equalsIgnoreCase("AI-Modus")
-                            || contentDesc.equalsIgnoreCase("AI Mode")
-                            || contentDesc.equalsIgnoreCase("AI-Modus");
+                    return text.equalsIgnoreCase(googleAppContext.aiModeText)
+                            || contentDesc.equalsIgnoreCase(googleAppContext.aiModeText);
                 })
                 .findFirst();
     }
 
-    private static Optional<AccessibilityNodeInfo> findCameraButton(final AccessibilityNodeInfo root) {
+    private Optional<AccessibilityNodeInfo> findCameraButton(final AccessibilityNodeInfo root) {
         final AccessibilityNodeInfoWrapper wrapper = new AccessibilityNodeInfoWrapper(root);
 
         // 1. Primäre Suche nach Resource-ID (searchbox_aim_camera)
@@ -400,13 +396,9 @@ public class ScanAddressFeature implements AccessibilityFeature {
                         return true;
                     }
                     final String contentDesc = nodeWrapper.getContentDescription().orElse("");
-                    // FK-TODO: keine fest kodierten Strings, verwende stattdessen die Keys der Google-App
                     final String text = nodeWrapper.getText().orElse("");
-                    return contentDesc.equalsIgnoreCase("Take a photo")
-                            || contentDesc.equalsIgnoreCase("Foto aufnehmen")
-                            || contentDesc.equalsIgnoreCase("Kamera")
-                            || text.equalsIgnoreCase("Take a photo")
-                            || text.equalsIgnoreCase("Foto aufnehmen");
+                    return contentDesc.equalsIgnoreCase(googleAppContext.takePhotoText)
+                            || text.equalsIgnoreCase(googleAppContext.takePhotoText);
                 })
                 .findFirst();
     }

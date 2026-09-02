@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import de.knollfrank.extensionsformaps.accessibility.GoogleAppContextResolver;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContext;
 import de.knollfrank.extensionsformaps.accessibility.GoogleMapsContextResolver;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
@@ -56,7 +57,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                                         () -> Optional.of(sortFeature),
                                         () -> Optional.of(addStopFeature),
                                         () -> Optional.of(new ActiveServiceHighlightFeature(this)),
-                                        () -> ScanAddressFeatureFactory.createScanAddressFeature(this))
+                                        () -> ScanAddressFeatureFactory.createScanAddressFeature(this, GoogleAppContextResolver.resolve(this)))
                                 .toList());
         compoundFeature.onServiceConnected();
     }
@@ -127,7 +128,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                         accessibilityService,
                         googleMapsContext,
                         urlRequester,
-                        new RouteUrlRequester.RouteUrlCallback() {
+                        new RouteUrlCallback() {
 
                             @Override
                             public void onRouteUrlExtracted(final DirectionsUrl routeUrl) {
