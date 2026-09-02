@@ -79,21 +79,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     @Override
     public void onGoogleMapsEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
-        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            if (state != State.IDLE
-                    && state != State.AWAITING_AI_MODE_CLICK
-                    && state != State.AI_MODE_CLICKED
-                    && state != State.AWAITING_CAMERA_BUTTON_CLICK
-                    && state != State.CAMERA_BUTTON_CLICKED
-                    && state != State.FILLING_PROMPT
-                    && state != State.PROMPT_FILLED
-                    && state != State.SENDING_PROMPT
-                    && state != State.AWAITING_RESPONSE
-                    && address.isEmpty()) {
-                Log.d(TAG, "Resetting state to IDLE on Maps TYPE_WINDOW_STATE_CHANGED");
-                state = State.IDLE;
-            }
-        }
         address.ifPresent(
                 _address -> {
                     final boolean success = pasteAddress(root, _address);
