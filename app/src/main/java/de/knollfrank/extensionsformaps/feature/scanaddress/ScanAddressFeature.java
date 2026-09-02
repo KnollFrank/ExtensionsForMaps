@@ -285,7 +285,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
         }
         return Optionals
                 .streamOfPresentElements(
-                        () -> findNodeByHintOrText(root, googleAppContext.askAnythingText),
+                        () -> findNodeByHintOrText(root, googleAppContext.askAnythingText()),
                         () -> findEditText(root))
                 .findFirst();
     }
@@ -333,8 +333,8 @@ public class ScanAddressFeature implements AccessibilityFeature {
                     final String text = nodeWrapper.getText().orElse("");
                     final String viewId = node.getViewIdResourceName();
                     final boolean matches = (viewId != null && viewId.contains("aim_enter_button"))
-                            || contentDesc.equalsIgnoreCase(googleAppContext.sendText)
-                            || text.equalsIgnoreCase(googleAppContext.sendText);
+                            || contentDesc.equalsIgnoreCase(googleAppContext.sendText())
+                            || text.equalsIgnoreCase(googleAppContext.sendText());
                     return matches && node.isEnabled();
                 })
                 .findFirst();
@@ -371,8 +371,8 @@ public class ScanAddressFeature implements AccessibilityFeature {
                     }
                     final String text = nodeWrapper.getText().orElse("");
                     final String contentDesc = nodeWrapper.getContentDescription().orElse("");
-                    return text.equalsIgnoreCase(googleAppContext.aiModeText)
-                            || contentDesc.equalsIgnoreCase(googleAppContext.aiModeText);
+                    return text.equalsIgnoreCase(googleAppContext.aiModeText())
+                            || contentDesc.equalsIgnoreCase(googleAppContext.aiModeText());
                 })
                 .findFirst();
     }
@@ -397,8 +397,8 @@ public class ScanAddressFeature implements AccessibilityFeature {
                     }
                     final String contentDesc = nodeWrapper.getContentDescription().orElse("");
                     final String text = nodeWrapper.getText().orElse("");
-                    return contentDesc.equalsIgnoreCase(googleAppContext.takePhotoText)
-                            || text.equalsIgnoreCase(googleAppContext.takePhotoText);
+                    return contentDesc.equalsIgnoreCase(googleAppContext.takePhotoText())
+                            || text.equalsIgnoreCase(googleAppContext.takePhotoText());
                 })
                 .findFirst();
     }
