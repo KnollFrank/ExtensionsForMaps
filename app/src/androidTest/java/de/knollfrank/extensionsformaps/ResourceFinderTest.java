@@ -30,8 +30,8 @@ public class ResourceFinderTest {
                 new ResourceFinder(
                         GOOGLE_APP_PACKAGE,
                         new ResourceFinder.Candidates(
-                                List.of("stop", "waypoint", "add"),
-                                List.of("stopp", "halt", "zwischen", "add stop", "share", "teilen")));
+                                List.of(),
+                                List.of("Ask anything", "Send", "AI Mode", "Take a photo")));
         resourceFinder.findAndLogResources();
     }
 }
