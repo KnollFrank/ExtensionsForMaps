@@ -92,9 +92,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     @Override
     public void onGoogleAppEvent(final AccessibilityEvent event, final AccessibilityNodeInfo root) {
-        if (isNotGoogleApp(root)) {
-            return;
-        }
         Log.d(TAG, "onGoogleAppEvent called in state: " + state);
         if (address.isPresent()) {
             if (System.currentTimeMillis() - lastActionTime > 1000) {
@@ -127,14 +124,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
     @Override
     public void reset() {
         removeScanButton();
-    }
-
-    private static boolean isNotGoogleApp(final AccessibilityNodeInfo root) {
-        final Optional<String> packageName = new AccessibilityNodeInfoWrapper(root).getPackageName();
-        if (packageName.isEmpty()) {
-            return false;
-        }
-        return !GOOGLE_APP_PACKAGE.equals(packageName.get());
     }
 
     private boolean tryExtractAIResponse(final AccessibilityNodeInfo root) {

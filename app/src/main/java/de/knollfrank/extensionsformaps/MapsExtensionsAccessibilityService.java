@@ -8,6 +8,7 @@ import static de.knollfrank.extensionsformaps.accessibility.PackageNames.SYSTEM_
 import android.accessibilityservice.AccessibilityService;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester.RouteUrlCallback;
 import de.knollfrank.extensionsformaps.accessibility.StopCountDetector;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityEventWrapper;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.feature.ActiveServiceHighlightFeature;
@@ -164,6 +166,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
         urlRequester.handleGoogleMapsEvent(event);
         new AccessibilityServiceWrapper(this)
                 .getRootInActiveWindow()
+                .filter(root -> hasPackageName(root, GOOGLE_MAPS_PACKAGE))
                 .ifPresent(
                         root -> {
                             stopCountDetector.detectStopCount(root);
@@ -174,6 +177,14 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
     private void handleGoogleAppEvent(final AccessibilityEvent event) {
         new AccessibilityServiceWrapper(this)
                 .getRootInActiveWindow()
+                .filter(root -> hasPackageName(root, GOOGLE_APP_PACKAGE))
                 .ifPresent(root -> compoundFeature.onGoogleAppEvent(event, root));
+    }
+
+    private static boolean hasPackageName(final AccessibilityNodeInfo node, final String packageName) {
+        return new AccessibilityNodeInfoWrapper(node)
+                .getPackageName()
+                .map(packageName::equals)
+                .orElse(false);
     }
 }
