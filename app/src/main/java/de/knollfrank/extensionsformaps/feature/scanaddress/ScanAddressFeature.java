@@ -204,15 +204,18 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     private void automateGoogleAppPromptAndSend(final AccessibilityNodeInfo root) {
         if (state == State.CAMERA_BUTTON_CLICKED || state == State.FILLING_PROMPT) {
-            findInputField(root).ifPresent(inputField -> {
-                Log.d(TAG, "Input field found, setting AIPrompt text...");
-                if (setInputText(inputField, AIPrompt.getAIPrompt())) {
-                    state = State.PROMPT_FILLED;
-                    lastActionTime = System.currentTimeMillis();
-                    clickRetries = 0;
-                    Log.i(TAG, "AIPrompt text set successfully!");
-                }
-            });
+            this
+                    .findInputField(root)
+                    .ifPresent(
+                            inputField -> {
+                                Log.d(TAG, "Input field found, setting AIPrompt text...");
+                                if (setInputText(inputField, AIPrompt.getAIPrompt())) {
+                                    state = State.PROMPT_FILLED;
+                                    lastActionTime = System.currentTimeMillis();
+                                    clickRetries = 0;
+                                    Log.i(TAG, "AIPrompt text set successfully!");
+                                }
+                            });
         }
 
         if (state == State.PROMPT_FILLED || state == State.SENDING_PROMPT) {
@@ -339,17 +342,18 @@ public class ScanAddressFeature implements AccessibilityFeature {
         // 2. Sekundäre Suche nach View-ID-Teilstring oder Content-Description / Text
         return wrapper
                 .streamPreOrder()
-                .filter(node -> {
-                    final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
-                    final String viewId = node.getViewIdResourceName();
-                    if (viewId != null && viewId.contains("aim_camera")) {
-                        return true;
-                    }
-                    final String contentDesc = nodeWrapper.getContentDescription().orElse("");
-                    final String text = nodeWrapper.getText().orElse("");
-                    return contentDesc.equalsIgnoreCase(googleAppContext.takePhotoText())
-                            || text.equalsIgnoreCase(googleAppContext.takePhotoText());
-                })
+                .filter(
+                        node -> {
+                            final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
+                            final String viewId = node.getViewIdResourceName();
+                            if (viewId != null && viewId.contains("aim_camera")) {
+                                return true;
+                            }
+                            final String contentDesc = nodeWrapper.getContentDescription().orElse("");
+                            final String text = nodeWrapper.getText().orElse("");
+                            return contentDesc.equalsIgnoreCase(googleAppContext.takePhotoText())
+                                    || text.equalsIgnoreCase(googleAppContext.takePhotoText());
+                        })
                 .findFirst();
     }
 
