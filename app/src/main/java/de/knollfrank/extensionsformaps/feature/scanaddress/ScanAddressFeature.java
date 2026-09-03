@@ -176,8 +176,8 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     private boolean clickButton(final AccessibilityNodeInfo button) {
         final AccessibilityNodeInfo ancestorButton =
-                ScanAddressFeature
-                        .findClickableAncestor(button)
+                new AccessibilityNodeInfoWrapper(button)
+                        .findClickableAncestor()
                         .orElse(button);
         return Booleans.executeUntilFirstIsTrue(
                 () -> ancestorButton.performAction(AccessibilityNodeInfo.ACTION_CLICK),
@@ -299,17 +299,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
                     return matches && node.isEnabled();
                 })
                 .findFirst();
-    }
-
-    private static Optional<AccessibilityNodeInfo> findClickableAncestor(final AccessibilityNodeInfo node) {
-        AccessibilityNodeInfo current = node;
-        while (current != null) {
-            if (current.isClickable()) {
-                return Optional.of(current);
-            }
-            current = current.getParent();
-        }
-        return Optional.empty();
     }
 
     private Optional<AccessibilityNodeInfo> findAIModeButton(final AccessibilityNodeInfo root) {

@@ -4,6 +4,7 @@ import android.graphics.Rect;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -61,6 +62,17 @@ public record AccessibilityNodeInfoWrapper(AccessibilityNodeInfo node) {
 
     public Optional<String> getContentDescription() {
         return getString(node::getContentDescription);
+    }
+
+    public Optional<AccessibilityNodeInfo> findClickableAncestor() {
+        return Stream
+                .iterate(node, Objects::nonNull, AccessibilityNodeInfo::getParent)
+                .filter(AccessibilityNodeInfo::isClickable)
+                .findFirst();
+    }
+
+    public Optional<AccessibilityNodeInfo> getParent() {
+        return Optional.ofNullable(node.getParent());
     }
 
     public Stream<AccessibilityNodeInfo> streamPreOrder() {
