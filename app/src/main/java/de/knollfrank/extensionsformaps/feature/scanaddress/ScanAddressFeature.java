@@ -163,7 +163,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
                 .ifPresent(
                         aiModeButton -> {
                             Log.d(TAG, "Found AI Mode button candidate: " + aiModeButton);
-                            final boolean clicked = clickAIModeButton(aiModeButton);
+                            final boolean clicked = clickButton(aiModeButton);
                             if (clicked) {
                                 Log.i(TAG, "AI Mode Button clicked successfully!");
                                 state = State.AWAITING_CAMERA_BUTTON_CLICK;
@@ -174,38 +174,32 @@ public class ScanAddressFeature implements AccessibilityFeature {
                         });
     }
 
-    private boolean clickAIModeButton(final AccessibilityNodeInfo aiModeButton) {
-        final AccessibilityNodeInfo clickableNode =
+    private boolean clickButton(final AccessibilityNodeInfo button) {
+        final AccessibilityNodeInfo ancestorButton =
                 ScanAddressFeature
-                        .findClickableAncestor(aiModeButton)
-                        .orElse(aiModeButton);
+                        .findClickableAncestor(button)
+                        .orElse(button);
         return Booleans.executeUntilFirstIsTrue(
-                () -> clickableNode.performAction(AccessibilityNodeInfo.ACTION_CLICK),
-                () -> new AccessibilityServiceWrapper(accessibilityService).click(clickableNode),
-                () -> new AccessibilityServiceWrapper(accessibilityService).click(aiModeButton));
+                () -> ancestorButton.performAction(AccessibilityNodeInfo.ACTION_CLICK),
+                () -> new AccessibilityServiceWrapper(accessibilityService).click(ancestorButton),
+                () -> new AccessibilityServiceWrapper(accessibilityService).click(button));
     }
 
     private void clickCameraButtonIfFound(final AccessibilityNodeInfo root) {
-        findCameraButton(root).ifPresent(cameraButton -> {
-            Log.d(TAG, "Found Camera button candidate: " + cameraButton);
-            final AccessibilityNodeInfo clickableNode = findClickableAncestor(cameraButton).orElse(cameraButton);
-
-            boolean clicked = clickableNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-            if (!clicked) {
-                clicked = new AccessibilityServiceWrapper(accessibilityService).click(clickableNode);
-            }
-            if (!clicked) {
-                clicked = new AccessibilityServiceWrapper(accessibilityService).click(cameraButton);
-            }
-
-            if (clicked) {
-                Log.i(TAG, "Camera Button ('Take a photo') clicked successfully!");
-                state = State.CAMERA_BUTTON_CLICKED;
-                lastActionTime = System.currentTimeMillis();
-            } else {
-                Log.w(TAG, "Failed to click Camera button candidate");
-            }
-        });
+        this
+                .findCameraButton(root)
+                .ifPresent(
+                        cameraButton -> {
+                            Log.d(TAG, "Found Camera button candidate: " + cameraButton);
+                            boolean clicked = clickButton(cameraButton);
+                            if (clicked) {
+                                Log.i(TAG, "Camera Button ('Take a photo') clicked successfully!");
+                                state = State.CAMERA_BUTTON_CLICKED;
+                                lastActionTime = System.currentTimeMillis();
+                            } else {
+                                Log.w(TAG, "Failed to click Camera button candidate");
+                            }
+                        });
     }
 
     private void automateGoogleAppPromptAndSend(final AccessibilityNodeInfo root) {
@@ -232,15 +226,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private void clickSendButton(final AccessibilityNodeInfo sendButton) {
         if (clickRetries < 5) {
             Log.d(TAG, "Clicking Send button (retry " + clickRetries + ")...");
-            final AccessibilityNodeInfo clickableNode = findClickableAncestor(sendButton).orElse(sendButton);
-            boolean clicked = clickableNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-            if (!clicked) {
-                clicked = new AccessibilityServiceWrapper(accessibilityService).click(clickableNode);
-            }
-            if (!clicked) {
-                clicked = new AccessibilityServiceWrapper(accessibilityService).click(sendButton);
-            }
-
+            boolean clicked = clickButton(sendButton);
             if (clicked) {
                 Log.i(TAG, "Send Button clicked successfully!");
                 state = State.SENDING_PROMPT;
