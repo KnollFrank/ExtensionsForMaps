@@ -30,6 +30,7 @@ import de.knollfrank.extensionsformaps.accessibility.ResourceName;
 import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
+import de.knollfrank.extensionsformaps.common.Booleans;
 import de.knollfrank.extensionsformaps.common.DisplayUtils;
 import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.feature.AccessibilityFeature;
@@ -157,26 +158,31 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private void clickAIModeButtonIfFound(final AccessibilityNodeInfo root) {
-        findAIModeButton(root).ifPresent(aiModeButton -> {
-            Log.d(TAG, "Found AI Mode button candidate: " + aiModeButton);
-            final AccessibilityNodeInfo clickableNode = findClickableAncestor(aiModeButton).orElse(aiModeButton);
+        this
+                .findAIModeButton(root)
+                .ifPresent(
+                        aiModeButton -> {
+                            Log.d(TAG, "Found AI Mode button candidate: " + aiModeButton);
+                            final boolean clicked = clickAIModeButton(aiModeButton);
+                            if (clicked) {
+                                Log.i(TAG, "AI Mode Button clicked successfully!");
+                                state = State.AWAITING_CAMERA_BUTTON_CLICK;
+                                lastActionTime = System.currentTimeMillis();
+                            } else {
+                                Log.w(TAG, "Failed to click AI Mode button candidate");
+                            }
+                        });
+    }
 
-            boolean clicked = clickableNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-            if (!clicked) {
-                clicked = new AccessibilityServiceWrapper(accessibilityService).click(clickableNode);
-            }
-            if (!clicked) {
-                clicked = new AccessibilityServiceWrapper(accessibilityService).click(aiModeButton);
-            }
-
-            if (clicked) {
-                Log.i(TAG, "AI Mode Button clicked successfully!");
-                state = State.AWAITING_CAMERA_BUTTON_CLICK;
-                lastActionTime = System.currentTimeMillis();
-            } else {
-                Log.w(TAG, "Failed to click AI Mode button candidate");
-            }
-        });
+    private boolean clickAIModeButton(final AccessibilityNodeInfo aiModeButton) {
+        final AccessibilityNodeInfo clickableNode =
+                ScanAddressFeature
+                        .findClickableAncestor(aiModeButton)
+                        .orElse(aiModeButton);
+        return Booleans.executeUntilFirstIsTrue(
+                () -> clickableNode.performAction(AccessibilityNodeInfo.ACTION_CLICK),
+                () -> new AccessibilityServiceWrapper(accessibilityService).click(clickableNode),
+                () -> new AccessibilityServiceWrapper(accessibilityService).click(aiModeButton));
     }
 
     private void clickCameraButtonIfFound(final AccessibilityNodeInfo root) {
