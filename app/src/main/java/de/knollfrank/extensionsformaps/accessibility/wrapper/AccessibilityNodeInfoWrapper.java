@@ -66,7 +66,10 @@ public record AccessibilityNodeInfoWrapper(AccessibilityNodeInfo node) {
 
     public Optional<AccessibilityNodeInfo> findClickableAncestor() {
         return Stream
-                .iterate(node, Objects::nonNull, AccessibilityNodeInfo::getParent)
+                .iterate(
+                        node,
+                        Objects::nonNull,
+                        AccessibilityNodeInfo::getParent)
                 .filter(AccessibilityNodeInfo::isClickable)
                 .findFirst();
     }
