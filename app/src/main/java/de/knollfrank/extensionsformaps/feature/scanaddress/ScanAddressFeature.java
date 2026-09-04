@@ -42,7 +42,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private static final ResourceName SEARCH_EDIT_TEXT_ID = ResourceNameFactory.createGoogleMapsResourceName("search_omnibox_edit_text");
     private static final ResourceName AI_MODE_CHIP_ID = ResourceNameFactory.createGoogleAppResourceName("googleapp_sbn_aim_chip");
     private static final ResourceName AIM_CAMERA_ID = ResourceNameFactory.createGoogleAppResourceName("searchbox_aim_camera");
-    private static final ResourceName AIM_INPUT_TEXT_ID = ResourceNameFactory.createGoogleAppResourceName("searchbox_aim_autocomplete_text_input");
     private static final ResourceName AIM_SEND_BUTTON_ID = ResourceNameFactory.createGoogleAppResourceName("searchbox_aim_enter_button");
 
     private enum State {
@@ -204,7 +203,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     private void automateGoogleAppPromptAndSend(final AccessibilityNodeInfo root) {
         if (state == State.CAMERA_BUTTON_CLICKED || state == State.FILLING_PROMPT) {
-            this
+            new InputFieldProvider(ScanAddressFeature::classNameContainsEditText, googleAppContext)
                     .findInputField(root)
                     .ifPresent(
                             inputField -> {
@@ -239,33 +238,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
         } else {
             state = State.AWAITING_RESPONSE;
         }
-    }
-
-    private Optional<AccessibilityNodeInfo> findInputField(final AccessibilityNodeInfo root) {
-        return Optionals
-                .streamOfPresentElements(
-                        () -> new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByViewId(AIM_INPUT_TEXT_ID),
-                        () -> findNodeByHintOrText(root, googleAppContext.askAnythingText()),
-                        () -> findEditText(root))
-                .findFirst();
-    }
-
-    private static Optional<AccessibilityNodeInfo> findNodeByHintOrText(final AccessibilityNodeInfo root, final String needle) {
-        return new AccessibilityNodeInfoWrapper(root)
-                .streamPreOrder()
-                .filter(node -> {
-                    final AccessibilityNodeInfoWrapper wrapper = new AccessibilityNodeInfoWrapper(node);
-                    return wrapper.getHintText().map(h -> h.contains(needle)).orElse(false)
-                            || wrapper.getText().map(t -> t.contains(needle)).orElse(false);
-                })
-                .findFirst();
-    }
-
-    private static Optional<AccessibilityNodeInfo> findEditText(final AccessibilityNodeInfo node) {
-        return new AccessibilityNodeInfoWrapper(node)
-                .streamPreOrder()
-                .filter(ScanAddressFeature::classNameContainsEditText)
-                .findFirst();
     }
 
     private static boolean classNameContainsEditText(final AccessibilityNodeInfo node) {
