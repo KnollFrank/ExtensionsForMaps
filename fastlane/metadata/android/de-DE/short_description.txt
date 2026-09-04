@@ -1,1 +1,1 @@
-Automatische Routen-Erweiterung und Stopps-Sortierung für Google Maps.
+Erweitert Google-Maps-Routen über 10 Stopps hinaus und optimiert die Stopps.

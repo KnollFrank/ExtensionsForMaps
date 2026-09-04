@@ -1,1 +1,1 @@
-Smart route extension and optimization for Google Maps.
+Expand Google Maps routes beyond 10 stops and optimize stop order.

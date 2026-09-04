@@ -1,9 +1,8 @@
-Extensions for Maps is a free open-source utility that adds automatic route optimization and extension to Google Maps.
+Extensions for Maps is a free open-source utility that adds route expansion and optimization to Google Maps.
 
 Features:
 
-- Automatic detection of routes in Google Maps
-- Expands routes beyond the standard Google Maps stop limit
+- Expands Google Maps routes beyond the default 10-stop limit (1 origin, 8 waypoints, 1 destination) up to 27 stops
 - Optimizes stop order based on road network (OpenRouteService) or straight-line distance
 - Displays floating controls directly over Google Maps
 - 100% open source, privacy-friendly, and ad-free
