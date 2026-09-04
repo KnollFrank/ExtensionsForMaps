@@ -1,6 +1,7 @@
 Extensions for Maps ist ein freies Open-Source-Hilfstool, das Google Maps um eine automatische Routenoptimierung und Erweiterung erweitert.
 
 Funktionen:
+
 - Automatische Erkennung von Routen in Google Maps
 - Erweitert Routen über das Standard-Limit von Google Maps hinaus
 - Optimiert die Reihenfolge der Stopps nach Straßennetz (OpenRouteService) oder Luftlinie
