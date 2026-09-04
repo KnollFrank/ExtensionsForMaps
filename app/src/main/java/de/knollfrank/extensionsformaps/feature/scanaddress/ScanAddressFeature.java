@@ -242,13 +242,9 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private Optional<AccessibilityNodeInfo> findInputField(final AccessibilityNodeInfo root) {
-        final AccessibilityNodeInfoWrapper wrapper = new AccessibilityNodeInfoWrapper(root);
-        final Optional<AccessibilityNodeInfo> byId = wrapper.findFirstAccessibilityNodeInfoByViewId(AIM_INPUT_TEXT_ID);
-        if (byId.isPresent()) {
-            return byId;
-        }
         return Optionals
                 .streamOfPresentElements(
+                        () -> new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByViewId(AIM_INPUT_TEXT_ID),
                         () -> findNodeByHintOrText(root, googleAppContext.askAnythingText()),
                         () -> findEditText(root))
                 .findFirst();
