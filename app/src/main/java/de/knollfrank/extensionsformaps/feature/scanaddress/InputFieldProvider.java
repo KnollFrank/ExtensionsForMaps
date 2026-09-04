@@ -33,16 +33,19 @@ class InputFieldProvider {
                 .findFirst();
     }
 
-    // FK-TODO: refactor
     private static Optional<AccessibilityNodeInfo> findNodeByHintOrText(final AccessibilityNodeInfo root, final String needle) {
         return new AccessibilityNodeInfoWrapper(root)
                 .streamPreOrder()
-                .filter(node -> {
-                    final AccessibilityNodeInfoWrapper wrapper = new AccessibilityNodeInfoWrapper(node);
-                    return wrapper.getHintText().map(h -> h.contains(needle)).orElse(false)
-                            || wrapper.getText().map(t -> t.contains(needle)).orElse(false);
-                })
+                .filter(node -> hintOrTextContains(new AccessibilityNodeInfoWrapper(node), needle))
                 .findFirst();
+    }
+
+    private static boolean hintOrTextContains(final AccessibilityNodeInfoWrapper haystack, final String needle) {
+        return Optionals
+                .streamOfPresentElements(
+                        haystack::getHintText,
+                        haystack::getText)
+                .anyMatch(hintOrText -> hintOrText.contains(needle));
     }
 
     private Optional<AccessibilityNodeInfo> findEditText(final AccessibilityNodeInfo node) {
