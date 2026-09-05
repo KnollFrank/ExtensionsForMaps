@@ -40,7 +40,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     private static final String TAG = ScanAddressFeature.class.getSimpleName();
     private static final ResourceName SEARCH_EDIT_TEXT_ID = ResourceNameFactory.createGoogleMapsResourceName("search_omnibox_edit_text");
-    private static final ResourceName AI_MODE_CHIP_ID = ResourceNameFactory.createGoogleAppResourceName("googleapp_sbn_aim_chip");
     private static final ResourceName AIM_SEND_BUTTON_ID = ResourceNameFactory.createGoogleAppResourceName("searchbox_aim_enter_button");
 
     private enum State {
@@ -156,7 +155,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private void clickAIModeButtonIfFound(final AccessibilityNodeInfo root) {
-        this
+        new AIModeButtonProvider(googleAppContext)
                 .findAIModeButton(root)
                 .ifPresent(
                         aiModeButton -> {
@@ -267,32 +266,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
                             || contentDesc.equalsIgnoreCase(googleAppContext.sendText())
                             || text.equalsIgnoreCase(googleAppContext.sendText());
                     return matches && node.isEnabled();
-                })
-                .findFirst();
-    }
-
-    private Optional<AccessibilityNodeInfo> findAIModeButton(final AccessibilityNodeInfo root) {
-        final AccessibilityNodeInfoWrapper wrapper = new AccessibilityNodeInfoWrapper(root);
-
-        // 1. Primäre Suche nach Resource-ID
-        final Optional<AccessibilityNodeInfo> byId = wrapper.findFirstAccessibilityNodeInfoByViewId(AI_MODE_CHIP_ID);
-        if (byId.isPresent()) {
-            return byId;
-        }
-
-        // 2. Sekundäre Suche nach View-ID-Teilstring oder Text/Content-Description
-        return wrapper
-                .streamPreOrder()
-                .filter(node -> {
-                    final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
-                    final String viewId = node.getViewIdResourceName();
-                    if (viewId != null && viewId.contains("aim_chip")) {
-                        return true;
-                    }
-                    final String text = nodeWrapper.getText().orElse("");
-                    final String contentDesc = nodeWrapper.getContentDescription().orElse("");
-                    return text.equalsIgnoreCase(googleAppContext.aiModeText())
-                            || contentDesc.equalsIgnoreCase(googleAppContext.aiModeText());
                 })
                 .findFirst();
     }
