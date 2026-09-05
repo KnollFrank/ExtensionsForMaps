@@ -85,7 +85,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
             }
             return;
         }
-        if (tryExtractAIResponse(root)) {
+        if (tryGetAddress(root)) {
             return;
         }
         switch (state) {
@@ -132,16 +132,17 @@ public class ScanAddressFeature implements AccessibilityFeature {
         };
     }
 
-    private boolean tryExtractAIResponse(final AccessibilityNodeInfo root) {
-        final Optional<String> address = getAddress(root);
-        address.ifPresent(
-                _address -> {
-                    this.address = Optional.of(_address);
-                    Log.i(TAG, "ERGEBNIS GEFUNDEN: " + _address);
-                    lastActionTime = System.currentTimeMillis();
-                    accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
-                });
-        return address.isPresent();
+    private boolean tryGetAddress(final AccessibilityNodeInfo root) {
+        this
+                .getAddress(root)
+                .ifPresent(
+                        address -> {
+                            this.address = Optional.of(address);
+                            Log.i(TAG, "ERGEBNIS GEFUNDEN: " + address);
+                            lastActionTime = System.currentTimeMillis();
+                            accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
+                        });
+        return this.address.isPresent();
     }
 
     private Optional<String> getAddress(final AccessibilityNodeInfo root) {
