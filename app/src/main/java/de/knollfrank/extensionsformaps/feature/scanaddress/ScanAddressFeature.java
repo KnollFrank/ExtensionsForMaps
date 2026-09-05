@@ -53,28 +53,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
         this.googleAppContext = googleAppContext;
         this.scanButton =
                 new ScanButton(
-                        new OnClickListener() {
-
-                            @Override
-                            public void onClick(final View v) {
-                                state = State.AWAITING_AI_MODE_CLICK;
-                                clickRetries = 0;
-                                lastActionTime = System.currentTimeMillis();
-                                address = Optional.empty();
-                                Log.d(ScanAddressFeature.TAG, "Scan button clicked -> set state to AWAITING_AI_MODE_CLICK and launching Google App");
-                                try {
-                                    final Intent intent = accessibilityService.getPackageManager().getLaunchIntentForPackage(GOOGLE_APP_PACKAGE);
-                                    if (intent != null) {
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        accessibilityService.startActivity(intent);
-                                    } else {
-                                        Log.e(ScanAddressFeature.TAG, "Google App launch intent is null");
-                                    }
-                                } catch (final Exception e) {
-                                    Log.e(ScanAddressFeature.TAG, "Could not start Google App", e);
-                                }
-                            }
-                        },
+                        createScanButtonClickListener(accessibilityService),
                         new AccessibilityServiceWrapper(accessibilityService).getWindowManager(),
                         accessibilityService);
     }
@@ -125,6 +104,32 @@ public class ScanAddressFeature implements AccessibilityFeature {
     @Override
     public void reset() {
         scanButton.removeScanButton();
+    }
+
+    private OnClickListener createScanButtonClickListener(final AccessibilityService accessibilityService) {
+        return new OnClickListener() {
+
+            @Override
+            public void onClick(final View view) {
+                scanButton.removeScanButton();
+                state = State.AWAITING_AI_MODE_CLICK;
+                clickRetries = 0;
+                lastActionTime = System.currentTimeMillis();
+                address = Optional.empty();
+                Log.d(ScanAddressFeature.TAG, "Scan button clicked -> set state to AWAITING_AI_MODE_CLICK and launching Google App");
+                try {
+                    final Intent intent = accessibilityService.getPackageManager().getLaunchIntentForPackage(GOOGLE_APP_PACKAGE);
+                    if (intent != null) {
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        accessibilityService.startActivity(intent);
+                    } else {
+                        Log.e(ScanAddressFeature.TAG, "Google App launch intent is null");
+                    }
+                } catch (final Exception e) {
+                    Log.e(ScanAddressFeature.TAG, "Could not start Google App", e);
+                }
+            }
+        };
     }
 
     private boolean tryExtractAIResponse(final AccessibilityNodeInfo root) {

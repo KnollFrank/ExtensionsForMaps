@@ -94,11 +94,7 @@ class ScanButton {
         button.setText(context.getString(R.string.scan_button_text));
         button.setPadding(0, 0, 0, 0);
         button.setBackground(getScanButtonShape());
-        button.setOnClickListener(
-                view -> {
-                    removeScanButton();
-                    scanButtonClickListener.onClick(view);
-                });
+        button.setOnClickListener(scanButtonClickListener);
         return button;
     }
 
