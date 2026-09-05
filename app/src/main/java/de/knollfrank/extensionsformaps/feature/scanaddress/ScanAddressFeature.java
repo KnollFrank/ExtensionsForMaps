@@ -41,7 +41,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private static final String TAG = ScanAddressFeature.class.getSimpleName();
     private static final ResourceName SEARCH_EDIT_TEXT_ID = ResourceNameFactory.createGoogleMapsResourceName("search_omnibox_edit_text");
     private static final ResourceName AI_MODE_CHIP_ID = ResourceNameFactory.createGoogleAppResourceName("googleapp_sbn_aim_chip");
-    private static final ResourceName AIM_CAMERA_ID = ResourceNameFactory.createGoogleAppResourceName("searchbox_aim_camera");
     private static final ResourceName AIM_SEND_BUTTON_ID = ResourceNameFactory.createGoogleAppResourceName("searchbox_aim_enter_button");
 
     private enum State {
@@ -185,7 +184,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private void clickCameraButtonIfFound(final AccessibilityNodeInfo root) {
-        this
+        new CameraButtonProvider(googleAppContext)
                 .findCameraButton(root)
                 .ifPresent(
                         cameraButton -> {
@@ -295,33 +294,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
                     return text.equalsIgnoreCase(googleAppContext.aiModeText())
                             || contentDesc.equalsIgnoreCase(googleAppContext.aiModeText());
                 })
-                .findFirst();
-    }
-
-    private Optional<AccessibilityNodeInfo> findCameraButton(final AccessibilityNodeInfo root) {
-        final AccessibilityNodeInfoWrapper wrapper = new AccessibilityNodeInfoWrapper(root);
-
-        // 1. Primäre Suche nach Resource-ID (searchbox_aim_camera)
-        final Optional<AccessibilityNodeInfo> byId = wrapper.findFirstAccessibilityNodeInfoByViewId(AIM_CAMERA_ID);
-        if (byId.isPresent()) {
-            return byId;
-        }
-
-        // 2. Sekundäre Suche nach View-ID-Teilstring oder Content-Description / Text
-        return wrapper
-                .streamPreOrder()
-                .filter(
-                        node -> {
-                            final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
-                            final String viewId = node.getViewIdResourceName();
-                            if (viewId != null && viewId.contains("aim_camera")) {
-                                return true;
-                            }
-                            final String contentDesc = nodeWrapper.getContentDescription().orElse("");
-                            final String text = nodeWrapper.getText().orElse("");
-                            return contentDesc.equalsIgnoreCase(googleAppContext.takePhotoText())
-                                    || text.equalsIgnoreCase(googleAppContext.takePhotoText());
-                        })
                 .findFirst();
     }
 
