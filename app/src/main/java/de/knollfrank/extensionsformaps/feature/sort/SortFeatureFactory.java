@@ -1,10 +1,9 @@
 package de.knollfrank.extensionsformaps.feature.sort;
 
 import android.accessibilityservice.AccessibilityService;
-import android.content.Context;
-import android.view.WindowManager;
 
 import de.knollfrank.extensionsformaps.accessibility.RouteUrlRequester;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 
 public class SortFeatureFactory {
 
@@ -13,7 +12,7 @@ public class SortFeatureFactory {
                                                 final AccessibilityService accessibilityService) {
         return new SortFeature(
                 new Buttons(
-                        (WindowManager) accessibilityService.getSystemService(Context.WINDOW_SERVICE),
+                        new AccessibilityServiceWrapper(accessibilityService).getWindowManager(),
                         accessibilityService,
                         OnClickListeners.fromSortButtonListenerAndSettingsButtonListener(
                                 view -> routeUrlRequester.requestRouteUrl(onRouteUrlExtracted),

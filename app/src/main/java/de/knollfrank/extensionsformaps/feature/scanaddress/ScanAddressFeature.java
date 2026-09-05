@@ -8,34 +8,24 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.PixelFormat;
-import android.graphics.Rect;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
-import android.view.WindowManager;
+import android.view.View.OnClickListener;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.widget.Button;
-import android.widget.FrameLayout;
 
 import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.accessibility.GoogleAppContext;
-import de.knollfrank.extensionsformaps.accessibility.ResourceName;
-import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
-import de.knollfrank.extensionsformaps.common.DisplayUtils;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.feature.AccessibilityFeature;
 
 // FK-TODO: refactor
 public class ScanAddressFeature implements AccessibilityFeature {
 
     private static final String TAG = ScanAddressFeature.class.getSimpleName();
-    private static final ResourceName SEARCH_EDIT_TEXT_ID = ResourceNameFactory.createGoogleMapsResourceName("search_omnibox_edit_text");
 
     private enum State {
         IDLE,
@@ -50,10 +40,8 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private final AccessibilityService accessibilityService;
-    private final WindowManager windowManager;
     private final GoogleAppContext googleAppContext;
-    private Optional<View> scanButtonOverlay = Optional.empty();
-    private final Rect lastEditTextFieldBounds = new Rect();
+    private final ScanButton scanButton;
     private Optional<String> address = Optional.empty();
     private State state = State.IDLE;
     private long lastActionTime = 0;
@@ -62,8 +50,33 @@ public class ScanAddressFeature implements AccessibilityFeature {
     public ScanAddressFeature(final AccessibilityService accessibilityService,
                               final GoogleAppContext googleAppContext) {
         this.accessibilityService = accessibilityService;
-        this.windowManager = (WindowManager) accessibilityService.getSystemService(Context.WINDOW_SERVICE);
         this.googleAppContext = googleAppContext;
+        this.scanButton =
+                new ScanButton(
+                        new OnClickListener() {
+
+                            @Override
+                            public void onClick(final View v) {
+                                state = State.AWAITING_AI_MODE_CLICK;
+                                clickRetries = 0;
+                                lastActionTime = System.currentTimeMillis();
+                                address = Optional.empty();
+                                Log.d(ScanAddressFeature.TAG, "Scan button clicked -> set state to AWAITING_AI_MODE_CLICK and launching Google App");
+                                try {
+                                    final Intent intent = accessibilityService.getPackageManager().getLaunchIntentForPackage(GOOGLE_APP_PACKAGE);
+                                    if (intent != null) {
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        accessibilityService.startActivity(intent);
+                                    } else {
+                                        Log.e(ScanAddressFeature.TAG, "Google App launch intent is null");
+                                    }
+                                } catch (final Exception e) {
+                                    Log.e(ScanAddressFeature.TAG, "Could not start Google App", e);
+                                }
+                            }
+                        },
+                        new AccessibilityServiceWrapper(accessibilityService).getWindowManager(),
+                        accessibilityService);
     }
 
     @Override
@@ -80,7 +93,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
                         state = State.IDLE;
                     }
                 });
-        updateScanButton(root);
+        scanButton.updateScanButton(root);
     }
 
     @Override
@@ -106,12 +119,12 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     @Override
     public void onDestroy() {
-        removeScanButton();
+        scanButton.removeScanButton();
     }
 
     @Override
     public void reset() {
-        removeScanButton();
+        scanButton.removeScanButton();
     }
 
     private boolean tryExtractAIResponse(final AccessibilityNodeInfo root) {
@@ -239,7 +252,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private boolean pasteAddress(final AccessibilityNodeInfo root, final String address) {
-        final Optional<AccessibilityNodeInfo> node = new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByViewId(SEARCH_EDIT_TEXT_ID);
+        final Optional<AccessibilityNodeInfo> node = EditTextFieldFinder.findEditTextField(root);
         return node.isPresent() && performSetText(node.orElseThrow(), address);
     }
 
@@ -269,107 +282,5 @@ public class ScanAddressFeature implements AccessibilityFeature {
         final Bundle bundle = new Bundle();
         bundle.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text);
         return bundle;
-    }
-
-    private void updateScanButton(final AccessibilityNodeInfo root) {
-        ScanAddressFeature
-                .findEditTextField(root)
-                .ifPresentOrElse(
-                        editTextField -> {
-                            final Rect editTextFieldBounds = new AccessibilityNodeInfoWrapper(editTextField).getBoundsInScreen();
-                            if (scanButtonOverlay.isEmpty()) {
-                                showScanButton(editTextFieldBounds);
-                            } else if (!lastEditTextFieldBounds.equals(editTextFieldBounds)) {
-                                updateScanButtonPosition(editTextFieldBounds);
-                            }
-                        },
-                        this::removeScanButton);
-    }
-
-    private static Optional<AccessibilityNodeInfo> findEditTextField(final AccessibilityNodeInfo root) {
-        return new AccessibilityNodeInfoWrapper(root).findFirstAccessibilityNodeInfoByViewId(SEARCH_EDIT_TEXT_ID);
-    }
-
-    private void showScanButton(final Rect editTextFieldBounds) {
-        lastEditTextFieldBounds.set(editTextFieldBounds);
-        final FrameLayout _scanButtonOverlay = new FrameLayout(accessibilityService);
-        _scanButtonOverlay.addView(createScanButton(), new FrameLayout.LayoutParams(dipToPx(40), dipToPx(40)));
-        try {
-            windowManager.addView(_scanButtonOverlay, getScanButtonLayoutParams(editTextFieldBounds));
-            scanButtonOverlay = Optional.of(_scanButtonOverlay);
-        } catch (final Exception ignored) {
-        }
-    }
-
-    private void updateScanButtonPosition(final Rect editTextFieldBounds) {
-        lastEditTextFieldBounds.set(editTextFieldBounds);
-        scanButtonOverlay.ifPresent(
-                _scanButtonOverlay -> {
-                    try {
-                        windowManager.updateViewLayout(_scanButtonOverlay, getScanButtonLayoutParams(editTextFieldBounds));
-                    } catch (final Exception exception) {
-                        scanButtonOverlay = Optional.empty();
-                    }
-                });
-    }
-
-    private Button createScanButton() {
-        final Button button = new Button(accessibilityService);
-        button.setText("📷");
-        button.setPadding(0, 0, 0, 0);
-        button.setBackground(getScanButtonShape());
-        button.setOnClickListener(
-                view -> {
-                    removeScanButton();
-                    state = State.AWAITING_AI_MODE_CLICK;
-                    clickRetries = 0;
-                    lastActionTime = System.currentTimeMillis();
-                    address = Optional.empty();
-                    Log.d(TAG, "Scan button clicked -> set state to AWAITING_AI_MODE_CLICK and launching Google App");
-                    try {
-                        final Intent intent = accessibilityService.getPackageManager().getLaunchIntentForPackage(GOOGLE_APP_PACKAGE);
-                        if (intent != null) {
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            accessibilityService.startActivity(intent);
-                        } else {
-                            Log.e(TAG, "Google App launch intent is null");
-                        }
-                    } catch (final Exception e) {
-                        Log.e(TAG, "Could not start Google App", e);
-                    }
-                });
-        return button;
-    }
-
-    private GradientDrawable getScanButtonShape() {
-        final GradientDrawable shape = new GradientDrawable();
-        shape.setShape(GradientDrawable.RECTANGLE);
-        shape.setCornerRadius(dipToPx(20)); // Half of 40dp for a circular button
-        shape.setColor(Color.parseColor("#3C4043"));
-        shape.setStroke(dipToPx(2), Color.parseColor("#D4AF37")); // Gold border
-        return shape;
-    }
-
-    private WindowManager.LayoutParams getScanButtonLayoutParams(final Rect rect) {
-        final WindowManager.LayoutParams scanButtonLayoutParams = new WindowManager.LayoutParams(dipToPx(40), dipToPx(40), WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, PixelFormat.TRANSLUCENT);
-        scanButtonLayoutParams.gravity = Gravity.TOP | Gravity.START;
-        scanButtonLayoutParams.x = rect.right - dipToPx(44);
-        scanButtonLayoutParams.y = rect.centerY() - dipToPx(20);
-        return scanButtonLayoutParams;
-    }
-
-    private void removeScanButton() {
-        scanButtonOverlay.ifPresent(
-                _scanButtonOverlay -> {
-                    try {
-                        windowManager.removeView(_scanButtonOverlay);
-                    } catch (final Exception ignored) {
-                    }
-                    scanButtonOverlay = Optional.empty();
-                });
-    }
-
-    private int dipToPx(final int dp) {
-        return DisplayUtils.dipToPx(dp, accessibilityService.getResources().getDisplayMetrics());
     }
 }

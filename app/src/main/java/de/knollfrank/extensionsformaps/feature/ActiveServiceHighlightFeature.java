@@ -1,7 +1,6 @@
 package de.knollfrank.extensionsformaps.feature;
 
 import android.accessibilityservice.AccessibilityService;
-import android.content.Context;
 import android.graphics.PixelFormat;
 import android.view.View;
 import android.view.WindowManager;
@@ -12,6 +11,7 @@ import android.widget.FrameLayout;
 import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.R;
+import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 
 public class ActiveServiceHighlightFeature implements AccessibilityFeature {
 
@@ -21,7 +21,7 @@ public class ActiveServiceHighlightFeature implements AccessibilityFeature {
 
     public ActiveServiceHighlightFeature(final AccessibilityService accessibilityService) {
         this.accessibilityService = accessibilityService;
-        this.windowManager = (WindowManager) accessibilityService.getSystemService(Context.WINDOW_SERVICE);
+        this.windowManager = new AccessibilityServiceWrapper(accessibilityService).getWindowManager();
     }
 
     @Override

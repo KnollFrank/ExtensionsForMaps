@@ -1,7 +1,6 @@
 package de.knollfrank.extensionsformaps.feature.addstop;
 
 import android.accessibilityservice.AccessibilityService;
-import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.Log;
@@ -46,7 +45,7 @@ public class AddStopFeature implements AccessibilityFeature, StopCountDetector.S
                           final RouteUrlRequester routeUrlRequester,
                           final RouteUrlRequester.RouteUrlCallback onRouteUrlExtracted) {
         this.accessibilityService = accessibilityService;
-        this.windowManager = (WindowManager) accessibilityService.getSystemService(Context.WINDOW_SERVICE);
+        this.windowManager = new AccessibilityServiceWrapper(accessibilityService).getWindowManager();
         this.googleMapsContext = googleMapsContext;
         this.routeUrlRequester = routeUrlRequester;
         this.onRouteUrlExtracted = onRouteUrlExtracted;

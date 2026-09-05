@@ -1,8 +1,10 @@
 package de.knollfrank.extensionsformaps.accessibility.wrapper;
 
 import android.accessibilityservice.AccessibilityService;
+import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.Optional;
@@ -13,6 +15,10 @@ public record AccessibilityServiceWrapper(AccessibilityService accessibilityServ
 
     public Optional<AccessibilityNodeInfo> getRootInActiveWindow() {
         return Optional.ofNullable(accessibilityService.getRootInActiveWindow());
+    }
+
+    public WindowManager getWindowManager() {
+        return (WindowManager) accessibilityService.getSystemService(Context.WINDOW_SERVICE);
     }
 
     public boolean click(final AccessibilityNodeInfo node) {
