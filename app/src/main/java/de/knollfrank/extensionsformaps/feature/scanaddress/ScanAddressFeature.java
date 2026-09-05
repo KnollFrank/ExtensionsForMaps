@@ -28,7 +28,6 @@ import de.knollfrank.extensionsformaps.accessibility.GoogleAppContext;
 import de.knollfrank.extensionsformaps.accessibility.ResourceName;
 import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
-import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.common.DisplayUtils;
 import de.knollfrank.extensionsformaps.feature.AccessibilityFeature;
 
@@ -151,14 +150,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private boolean clickButton(final AccessibilityNodeInfo button) {
-        final AccessibilityNodeInfo ancestorButton =
-                new AccessibilityNodeInfoWrapper(button)
-                        .findClickableAncestor()
-                        .orElse(button);
-        return
-                ancestorButton.performAction(AccessibilityNodeInfo.ACTION_CLICK) ||
-                        new AccessibilityServiceWrapper(accessibilityService).click(ancestorButton) ||
-                        new AccessibilityServiceWrapper(accessibilityService).click(button);
+        return new ButtonClick(accessibilityService).clickButton(button);
     }
 
     private void clickCameraButtonIfFound(final AccessibilityNodeInfo root) {
