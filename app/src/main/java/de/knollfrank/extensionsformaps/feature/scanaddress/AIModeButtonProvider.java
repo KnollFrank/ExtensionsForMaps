@@ -16,10 +16,10 @@ class AIModeButtonProvider {
     }
 
     public Optional<AccessibilityNodeInfo> findAIModeButton(final AccessibilityNodeInfo root) {
-        return createButtonProvider().findButton(root);
+        return createAIModeButtonProvider().findButton(root);
     }
 
-    private ButtonProvider createButtonProvider() {
+    private ButtonProvider createAIModeButtonProvider() {
         return new ButtonProvider(
                 ResourceNameFactory.createGoogleAppResourceName("googleapp_sbn_aim_chip"),
                 "aim_chip",

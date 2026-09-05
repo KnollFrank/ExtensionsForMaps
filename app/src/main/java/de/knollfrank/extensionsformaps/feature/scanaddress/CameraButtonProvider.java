@@ -16,10 +16,10 @@ class CameraButtonProvider {
     }
 
     public Optional<AccessibilityNodeInfo> findCameraButton(final AccessibilityNodeInfo root) {
-        return createButtonProvider().findButton(root);
+        return createCameraButtonProvider().findButton(root);
     }
 
-    private ButtonProvider createButtonProvider() {
+    private ButtonProvider createCameraButtonProvider() {
         return new ButtonProvider(
                 ResourceNameFactory.createGoogleAppResourceName("searchbox_aim_camera"),
                 "aim_camera",
