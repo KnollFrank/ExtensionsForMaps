@@ -23,7 +23,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import de.knollfrank.extensionsformaps.accessibility.GoogleAppContext;
 import de.knollfrank.extensionsformaps.accessibility.ResourceName;
@@ -31,7 +30,6 @@ import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.common.DisplayUtils;
-import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.feature.AccessibilityFeature;
 
 // FK-TODO: refactor
@@ -130,26 +128,9 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private Optional<String> getAddress(final AccessibilityNodeInfo root) {
-        return AIPrompt.extractAddressFromAIResponse(collectVisibleResponseText(root));
-    }
-
-    private String collectVisibleResponseText(final AccessibilityNodeInfo root) {
-        return new AccessibilityNodeInfoWrapper(root)
-                .streamPreOrder()
-                .filter(node -> !classNameContainsEditText(node))
-                .map(ScanAddressFeature::getConcatenatedTextAndContentDescription)
-                .filter(text -> !text.isEmpty())
-                .collect(Collectors.joining(" "));
-    }
-
-    private static String getConcatenatedTextAndContentDescription(final AccessibilityNodeInfo node) {
-        final AccessibilityNodeInfoWrapper nodeWrapper = new AccessibilityNodeInfoWrapper(node);
-        return Optionals
-                .streamOfPresentElements(
-                        nodeWrapper::getText,
-                        nodeWrapper::getContentDescription)
-                .filter(text -> !text.isEmpty())
-                .collect(Collectors.joining(" "));
+        return AIPrompt.extractAddressFromAIResponse(
+                new VisibleResponseTextProvider(ScanAddressFeature::classNameContainsEditText)
+                        .collectVisibleResponseText(root));
     }
 
     private void clickAIModeButtonIfFound(final AccessibilityNodeInfo root) {
