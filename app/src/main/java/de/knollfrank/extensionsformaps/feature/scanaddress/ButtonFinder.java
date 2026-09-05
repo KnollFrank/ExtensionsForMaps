@@ -8,15 +8,15 @@ import de.knollfrank.extensionsformaps.accessibility.ResourceName;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.common.Optionals;
 
-class ButtonProvider {
+class ButtonFinder {
 
     private final ResourceName viewId;
     private final String viewIdSubstring;
     private final String contentOrText;
 
-    public ButtonProvider(final ResourceName viewId,
-                          final String viewIdSubstring,
-                          final String contentOrText) {
+    public ButtonFinder(final ResourceName viewId,
+                        final String viewIdSubstring,
+                        final String contentOrText) {
         this.viewId = viewId;
         this.viewIdSubstring = viewIdSubstring;
         this.contentOrText = contentOrText;

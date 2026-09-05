@@ -7,20 +7,20 @@ import java.util.Optional;
 import de.knollfrank.extensionsformaps.accessibility.GoogleAppContext;
 import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
 
-class CameraButtonProvider {
+class CameraButtonFinder {
 
     private final GoogleAppContext googleAppContext;
 
-    public CameraButtonProvider(final GoogleAppContext googleAppContext) {
+    public CameraButtonFinder(final GoogleAppContext googleAppContext) {
         this.googleAppContext = googleAppContext;
     }
 
     public Optional<AccessibilityNodeInfo> findCameraButton(final AccessibilityNodeInfo root) {
-        return createCameraButtonProvider().findButton(root);
+        return createCameraButtonFinder().findButton(root);
     }
 
-    private ButtonProvider createCameraButtonProvider() {
-        return new ButtonProvider(
+    private ButtonFinder createCameraButtonFinder() {
+        return new ButtonFinder(
                 ResourceNameFactory.createGoogleAppResourceName("searchbox_aim_camera"),
                 "aim_camera",
                 googleAppContext.takePhotoText());

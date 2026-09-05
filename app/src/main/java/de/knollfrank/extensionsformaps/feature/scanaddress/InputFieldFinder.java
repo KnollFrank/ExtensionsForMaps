@@ -11,15 +11,15 @@ import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.common.Optionals;
 
-class InputFieldProvider {
+class InputFieldFinder {
 
     private static final ResourceName AIM_INPUT_TEXT_ID = ResourceNameFactory.createGoogleAppResourceName("searchbox_aim_autocomplete_text_input");
 
     private final Predicate<AccessibilityNodeInfo> classNameContainsEditText;
     private final GoogleAppContext googleAppContext;
 
-    public InputFieldProvider(final Predicate<AccessibilityNodeInfo> classNameContainsEditText,
-                              final GoogleAppContext googleAppContext) {
+    public InputFieldFinder(final Predicate<AccessibilityNodeInfo> classNameContainsEditText,
+                            final GoogleAppContext googleAppContext) {
         this.classNameContainsEditText = classNameContainsEditText;
         this.googleAppContext = googleAppContext;
     }

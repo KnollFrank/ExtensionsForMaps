@@ -7,23 +7,23 @@ import java.util.Optional;
 import de.knollfrank.extensionsformaps.accessibility.GoogleAppContext;
 import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
 
-class SendButtonProvider {
+class SendButtonFinder {
 
     private final GoogleAppContext googleAppContext;
 
-    public SendButtonProvider(final GoogleAppContext googleAppContext) {
+    public SendButtonFinder(final GoogleAppContext googleAppContext) {
         this.googleAppContext = googleAppContext;
     }
 
     public Optional<AccessibilityNodeInfo> findSendButton(final AccessibilityNodeInfo root) {
         return this
-                .createSendButtonProvider()
+                .createSendButtonFinder()
                 .findButton(root)
                 .filter(AccessibilityNodeInfo::isEnabled);
     }
 
-    private ButtonProvider createSendButtonProvider() {
-        return new ButtonProvider(
+    private ButtonFinder createSendButtonFinder() {
+        return new ButtonFinder(
                 ResourceNameFactory.createGoogleAppResourceName("searchbox_aim_enter_button"),
                 "aim_enter_button",
                 googleAppContext.sendText());

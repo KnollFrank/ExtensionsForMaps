@@ -7,20 +7,20 @@ import java.util.Optional;
 import de.knollfrank.extensionsformaps.accessibility.GoogleAppContext;
 import de.knollfrank.extensionsformaps.accessibility.ResourceNameFactory;
 
-class AIModeButtonProvider {
+class AIModeButtonFinder {
 
     private final GoogleAppContext googleAppContext;
 
-    public AIModeButtonProvider(final GoogleAppContext googleAppContext) {
+    public AIModeButtonFinder(final GoogleAppContext googleAppContext) {
         this.googleAppContext = googleAppContext;
     }
 
     public Optional<AccessibilityNodeInfo> findAIModeButton(final AccessibilityNodeInfo root) {
-        return createAIModeButtonProvider().findButton(root);
+        return createAIModeButtonFinder().findButton(root);
     }
 
-    private ButtonProvider createAIModeButtonProvider() {
-        return new ButtonProvider(
+    private ButtonFinder createAIModeButtonFinder() {
+        return new ButtonFinder(
                 ResourceNameFactory.createGoogleAppResourceName("googleapp_sbn_aim_chip"),
                 "aim_chip",
                 googleAppContext.aiModeText());

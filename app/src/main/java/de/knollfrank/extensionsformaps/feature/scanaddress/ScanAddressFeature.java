@@ -39,7 +39,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     private static final String TAG = ScanAddressFeature.class.getSimpleName();
     private static final ResourceName SEARCH_EDIT_TEXT_ID = ResourceNameFactory.createGoogleMapsResourceName("search_omnibox_edit_text");
-    private static final ResourceName AIM_SEND_BUTTON_ID = ResourceNameFactory.createGoogleAppResourceName("searchbox_aim_enter_button");
 
     private enum State {
         IDLE,
@@ -154,7 +153,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private void clickAIModeButtonIfFound(final AccessibilityNodeInfo root) {
-        new AIModeButtonProvider(googleAppContext)
+        new AIModeButtonFinder(googleAppContext)
                 .findAIModeButton(root)
                 .ifPresent(
                         aiModeButton -> {
@@ -182,7 +181,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private void clickCameraButtonIfFound(final AccessibilityNodeInfo root) {
-        new CameraButtonProvider(googleAppContext)
+        new CameraButtonFinder(googleAppContext)
                 .findCameraButton(root)
                 .ifPresent(
                         cameraButton -> {
@@ -200,7 +199,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     private void automateGoogleAppPromptAndSend(final AccessibilityNodeInfo root) {
         if (state == State.CAMERA_BUTTON_CLICKED || state == State.FILLING_PROMPT) {
-            new InputFieldProvider(ScanAddressFeature::classNameContainsEditText, googleAppContext)
+            new InputFieldFinder(ScanAddressFeature::classNameContainsEditText, googleAppContext)
                     .findInputField(root)
                     .ifPresent(
                             inputField -> {
@@ -217,7 +216,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
             if (System.currentTimeMillis() - lastActionTime < 300) {
                 return;
             }
-            new SendButtonProvider(googleAppContext)
+            new SendButtonFinder(googleAppContext)
                     .findSendButton(root)
                     .ifPresent(this::clickSendButton);
         }
