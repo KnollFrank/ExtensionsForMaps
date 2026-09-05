@@ -167,7 +167,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
                 .ifPresent(
                         cameraButton -> {
                             Log.d(TAG, "Found Camera button candidate: " + cameraButton);
-                            boolean clicked = clickButton(cameraButton);
+                            final boolean clicked = clickButton(cameraButton);
                             if (clicked) {
                                 Log.i(TAG, "Camera Button ('Take a photo') clicked successfully!");
                                 state = State.CAMERA_BUTTON_CLICKED;
@@ -206,7 +206,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
     private void clickSendButton(final AccessibilityNodeInfo sendButton) {
         if (clickRetries < 5) {
             Log.d(TAG, "Clicking Send button (retry " + clickRetries + ")...");
-            boolean clicked = clickButton(sendButton);
+            final boolean clicked = clickButton(sendButton);
             if (clicked) {
                 Log.i(TAG, "Send Button clicked successfully!");
                 state = State.SENDING_PROMPT;
