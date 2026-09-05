@@ -39,6 +39,7 @@ class AIPrompt {
             return false;
         }
         final String lower = str.toLowerCase();
+        // FK-TODO: i18n diese deutschen zufällig erscheinenden Texte
         return !lower.contains("gefundene adresse") && !lower.contains("extrahiere") && str.matches(".*\\d+.*");
     }
 
