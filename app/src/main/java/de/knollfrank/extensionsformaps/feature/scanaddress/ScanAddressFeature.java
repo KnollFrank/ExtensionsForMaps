@@ -177,7 +177,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
                 new AccessibilityNodeInfoWrapper(button)
                         .findClickableAncestor()
                         .orElse(button);
-        return Booleans.executeUntilFirstIsTrue(
+        return Booleans.or(
                 () -> ancestorButton.performAction(AccessibilityNodeInfo.ACTION_CLICK),
                 () -> new AccessibilityServiceWrapper(accessibilityService).click(ancestorButton),
                 () -> new AccessibilityServiceWrapper(accessibilityService).click(button));

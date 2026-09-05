@@ -9,7 +9,7 @@ public class Booleans {
     }
 
     @SafeVarargs
-    public static boolean executeUntilFirstIsTrue(final Supplier<Boolean>... elements) {
+    public static boolean or(final Supplier<Boolean>... elements) {
         return Arrays
                 .stream(elements)
                 .map(Supplier::get)
