@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.accessibility.ResourceName;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
-import de.knollfrank.extensionsformaps.common.Booleans;
 import de.knollfrank.extensionsformaps.common.Optionals;
 
 class ButtonProvider {
@@ -41,11 +40,7 @@ class ButtonProvider {
             final String contentOrText) {
         return new AccessibilityNodeInfoWrapper(root)
                 .streamPreOrder()
-                .filter(
-                        node ->
-                                Booleans.or(
-                                        () -> viewIdContainsSubstring(node, viewIdSubstring),
-                                        () -> contentOrTextEqualsIgnoreCase(new AccessibilityNodeInfoWrapper(node), contentOrText)))
+                .filter(node -> viewIdContainsSubstring(node, viewIdSubstring) || contentOrTextEqualsIgnoreCase(new AccessibilityNodeInfoWrapper(node), contentOrText))
                 .findFirst();
     }
 
