@@ -64,6 +64,10 @@ public record AccessibilityNodeInfoWrapper(AccessibilityNodeInfo node) {
         return getString(node::getContentDescription);
     }
 
+    public Optional<String> getViewIdResourceName() {
+        return Optional.ofNullable(node.getViewIdResourceName());
+    }
+
     public Optional<AccessibilityNodeInfo> findClickableAncestor() {
         return Stream
                 .iterate(
