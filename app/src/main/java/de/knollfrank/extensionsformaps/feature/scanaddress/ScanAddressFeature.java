@@ -10,15 +10,16 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.Toast;
 
 import java.util.Optional;
 
+import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.accessibility.GoogleAppContext;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
 import de.knollfrank.extensionsformaps.feature.AccessibilityFeature;
 
-// FK-TODO: refactor
 public class ScanAddressFeature implements AccessibilityFeature {
 
     private static final String TAG = ScanAddressFeature.class.getSimpleName();
@@ -119,6 +120,9 @@ public class ScanAddressFeature implements AccessibilityFeature {
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         accessibilityService.startActivity(intent);
                     } else {
+                        Toast
+                                .makeText(accessibilityService, R.string.scan_error_google_app_required, Toast.LENGTH_LONG)
+                                .show();
                         Log.e(ScanAddressFeature.TAG, "Google App launch intent is null");
                     }
                 } catch (final Exception e) {

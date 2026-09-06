@@ -84,6 +84,7 @@
     <string name="scan_add_address">Add address</string>
     <string name="scan_error_permission">Camera permission required</string>
     <string name="scan_error_no_detection">No address detected yet</string>
+    <string name="scan_error_google_app_required">Google App is required for address scanning</string>
 
     <string name="min_stops">11</string>
     <string name="max_stops">27</string>

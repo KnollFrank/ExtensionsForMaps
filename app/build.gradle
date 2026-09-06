@@ -14,12 +14,11 @@ android {
         applicationId "de.knollfrank.extensionsformaps"
         minSdk 26
         targetSdk 36
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "boolean", "SHOW_PLANNING_CARD", "false"
-        buildConfigField "boolean", "FEATURE_SCAN_ADDRESS_ENABLED", "false"
     }
 
     buildFeatures {
@@ -30,10 +29,8 @@ android {
     buildTypes {
         debug {
             buildConfigField "boolean", "SHOW_PLANNING_CARD", "true"
-            buildConfigField "boolean", "FEATURE_SCAN_ADDRESS_ENABLED", "true"
         }
         release {
-            buildConfigField "boolean", "FEATURE_SCAN_ADDRESS_ENABLED", "false"
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

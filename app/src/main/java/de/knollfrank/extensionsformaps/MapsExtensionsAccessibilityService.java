@@ -11,7 +11,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import de.knollfrank.extensionsformaps.accessibility.GoogleAppContextResolver;
@@ -23,11 +22,10 @@ import de.knollfrank.extensionsformaps.accessibility.StopCountDetector;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityEventWrapper;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityNodeInfoWrapper;
 import de.knollfrank.extensionsformaps.accessibility.wrapper.AccessibilityServiceWrapper;
-import de.knollfrank.extensionsformaps.common.Optionals;
 import de.knollfrank.extensionsformaps.feature.ActiveServiceHighlightFeature;
 import de.knollfrank.extensionsformaps.feature.CompoundFeature;
 import de.knollfrank.extensionsformaps.feature.addstop.AddStopFeature;
-import de.knollfrank.extensionsformaps.feature.scanaddress.ScanAddressFeatureFactory;
+import de.knollfrank.extensionsformaps.feature.scanaddress.ScanAddressFeature;
 import de.knollfrank.extensionsformaps.feature.sort.SortFeature;
 import de.knollfrank.extensionsformaps.feature.sort.SortFeatureFactory;
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizerFactory;
@@ -54,13 +52,11 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                         List.of(sortFeature, addStopFeature));
         compoundFeature =
                 new CompoundFeature(
-                        Optionals
-                                .streamOfPresentElements(
-                                        () -> Optional.of(sortFeature),
-                                        () -> Optional.of(addStopFeature),
-                                        () -> Optional.of(new ActiveServiceHighlightFeature(this)),
-                                        () -> ScanAddressFeatureFactory.createScanAddressFeature(this, GoogleAppContextResolver.resolve(this)))
-                                .toList());
+                        List.of(
+                                sortFeature,
+                                addStopFeature,
+                                new ActiveServiceHighlightFeature(this),
+                                new ScanAddressFeature(this, GoogleAppContextResolver.resolve(this))));
         compoundFeature.onServiceConnected();
     }
 

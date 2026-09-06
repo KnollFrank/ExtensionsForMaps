@@ -14,6 +14,7 @@ Description: |-
 
   - Expands Google Maps routes beyond the default 10-stop limit (1 origin, 8 waypoints, 1 destination) up to 27 stops
   - Optimizes stop order based on road network (OpenRouteService) or straight-line distance
+  - Camera address scanner: Scan addresses with your phone camera instead of typing (requires Google App)
   - Displays floating controls directly over Google Maps
   - 100% open source, privacy-friendly, and ad-free
 
@@ -23,9 +24,9 @@ RepoType: git
 Repo: https://github.com/KnollFrank/ExtensionsForMaps.git
 
 Builds:
-  - versionName: '1.0'
-    versionCode: 1
-    commit: v1.0
+  - versionName: '1.1.0'
+    versionCode: 2
+    commit: v1.1.0
     subdir: app
     gradle:
       - yes
