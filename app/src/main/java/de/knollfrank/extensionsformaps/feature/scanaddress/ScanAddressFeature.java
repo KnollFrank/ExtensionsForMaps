@@ -133,22 +133,17 @@ public class ScanAddressFeature implements AccessibilityFeature {
     }
 
     private boolean tryGetAddress(final AccessibilityNodeInfo root) {
-        this
-                .getAddress(root)
-                .ifPresent(
-                        address -> {
-                            this.address = Optional.of(address);
-                            Log.i(TAG, "ERGEBNIS GEFUNDEN: " + address);
-                            lastActionTime = System.currentTimeMillis();
-                            accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
-                        });
-        return this.address.isPresent();
-    }
-
-    private Optional<String> getAddress(final AccessibilityNodeInfo root) {
-        return AIPrompt.extractAddressFromAIResponse(
-                new VisibleResponseTextProvider(ScanAddressFeature::classNameContainsEditText)
-                        .collectVisibleResponseText(root));
+        final Optional<String> address =
+                new AddressProvider(ScanAddressFeature::classNameContainsEditText)
+                        .getAddress(root);
+        address.ifPresent(
+                _address -> {
+                    this.address = Optional.of(_address);
+                    Log.i(TAG, "ERGEBNIS GEFUNDEN: " + _address);
+                    lastActionTime = System.currentTimeMillis();
+                    accessibilityService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
+                });
+        return address.isPresent();
     }
 
     private void clickAIModeButtonIfFound(final AccessibilityNodeInfo root) {
