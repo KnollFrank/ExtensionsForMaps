@@ -4,11 +4,7 @@ import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_
 import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_MAPS_PACKAGE;
 
 import android.accessibilityservice.AccessibilityService;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -191,7 +187,7 @@ public class ScanAddressFeature implements AccessibilityFeature {
                     .ifPresent(
                             inputField -> {
                                 Log.d(TAG, "Input field found, setting AIPrompt text...");
-                                if (setInputText(inputField, AIPrompt.getAIPrompt())) {
+                                if (new TextSetter(accessibilityService).setInputText(inputField, AIPrompt.getAIPrompt())) {
                                     state = State.PROMPT_FILLED;
                                     lastActionTime = System.currentTimeMillis();
                                     clickRetries = 0;
@@ -254,34 +250,6 @@ public class ScanAddressFeature implements AccessibilityFeature {
 
     private boolean pasteAddress(final AccessibilityNodeInfo root, final String address) {
         final Optional<AccessibilityNodeInfo> node = EditTextFieldFinder.findEditTextField(root);
-        return node.isPresent() && performSetText(node.orElseThrow(), address);
-    }
-
-    private boolean setInputText(final AccessibilityNodeInfo node, final String text) {
-        return performSetText(node, text) || performCopyPaste(node, text);
-    }
-
-    private static boolean performSetText(final AccessibilityNodeInfo node, final String text) {
-        return node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, getBundleForSettingText(text));
-    }
-
-    private boolean performCopyPaste(final AccessibilityNodeInfo node, final String text) {
-        try {
-            final ClipboardManager clipboardManager = (ClipboardManager) accessibilityService.getSystemService(Context.CLIPBOARD_SERVICE);
-            if (clipboardManager != null) {
-                clipboardManager.setPrimaryClip(ClipData.newPlainText("text", text));
-                node.performAction(AccessibilityNodeInfo.ACTION_FOCUS);
-                return node.performAction(AccessibilityNodeInfo.ACTION_PASTE);
-            }
-        } catch (final Exception e) {
-            Log.e(TAG, "Error performing copy/paste", e);
-        }
-        return false;
-    }
-
-    private static Bundle getBundleForSettingText(final String text) {
-        final Bundle bundle = new Bundle();
-        bundle.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text);
-        return bundle;
+        return node.isPresent() && TextSetter.performSetText(node.orElseThrow(), address);
     }
 }
