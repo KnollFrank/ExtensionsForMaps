@@ -1,169 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:scrollbars="vertical">
 
-    <!-- Section: General -->
-    <TextView
-        android:id="@+id/tvGeneralLabel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:text="@string/settings_section_general"
-        android:textSize="16sp"
-        android:textStyle="bold" />
-
-    <CheckBox
-        android:id="@+id/checkBoxShowPreview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/settings_show_preview" />
-
-    <!-- Section: Optimization Method -->
-    <TextView
-        android:id="@+id/tvMethodLabel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="24dp"
-        android:paddingBottom="8dp"
-        android:text="@string/settings_section_optimization_method"
-        android:textSize="16sp"
-        android:textStyle="bold" />
-
-    <!-- Option: Straight Line -->
     <LinearLayout
-        android:id="@+id/layoutHaversine"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
         android:orientation="vertical"
-        android:padding="8dp">
+        android:padding="24dp">
 
-        <RadioButton
-            android:id="@+id/rbHaversine"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:text="@string/settings_method_haversine" />
-
+        <!-- Section: General -->
         <TextView
+            android:id="@+id/tvGeneralLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:alpha="0.7"
-            android:text="@string/settings_method_haversine_desc"
-            android:textSize="12sp" />
-    </LinearLayout>
+            android:paddingBottom="8dp"
+            android:text="@string/settings_section_general"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
-    <!-- Option: Road Network -->
-    <LinearLayout
-        android:id="@+id/layoutOrs"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:orientation="vertical"
-        android:padding="8dp">
+        <CheckBox
+            android:id="@+id/checkBoxShowPreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_show_preview" />
 
+        <!-- Section: Optimization Method -->
+        <TextView
+            android:id="@+id/tvMethodLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="24dp"
+            android:paddingBottom="8dp"
+            android:text="@string/settings_section_optimization_method"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Option: Straight Line -->
         <LinearLayout
+            android:id="@+id/layoutHaversine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:padding="8dp">
 
             <RadioButton
-                android:id="@+id/rbOrs"
-                android:layout_width="0dp"
+                android:id="@+id/rbHaversine"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:clickable="false"
-                android:text="@string/settings_method_ors" />
+                android:text="@string/settings_method_haversine" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnConfigureOrs"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="wrap_content"
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:padding="4dp"
-                android:text="@string/settings_configure_button_text"
-                android:textSize="16sp" />
+                android:layout_marginStart="32dp"
+                android:alpha="0.7"
+                android:text="@string/settings_method_haversine_desc"
+                android:textSize="12sp" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvOrsDesc"
+        <!-- Option: Road Network -->
+        <LinearLayout
+            android:id="@+id/layoutOrs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:alpha="0.7"
-            android:text="@string/settings_method_ors_desc"
-            android:textSize="12sp" />
-    </LinearLayout>
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:padding="8dp">
 
-    <!-- Section: Optimization Type -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="24dp"
-        android:paddingBottom="8dp"
-        android:text="@string/settings_section_optimization_type"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-    <!-- Option: Fixed Destination -->
-    <LinearLayout
-        android:id="@+id/layoutFixedDest"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:orientation="vertical"
-        android:padding="8dp">
+                <RadioButton
+                    android:id="@+id/rbOrs"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:clickable="false"
+                    android:text="@string/settings_method_ors" />
 
-        <RadioButton
-            android:id="@+id/rbFixedDest"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:text="@string/settings_type_fixed_destination" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnConfigureOrs"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="4dp"
+                    android:text="@string/settings_configure_button_text"
+                    android:textSize="16sp" />
+            </LinearLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:alpha="0.7"
-            android:text="@string/settings_type_fixed_destination_desc"
-            android:textSize="12sp" />
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tvOrsDesc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:alpha="0.7"
+                android:text="@string/settings_method_ors_desc"
+                android:textSize="12sp" />
+        </LinearLayout>
 
-    <!-- Option: Any Destination -->
-    <LinearLayout
-        android:id="@+id/layoutAnyDest"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:orientation="vertical"
-        android:padding="8dp">
-
-        <RadioButton
-            android:id="@+id/rbAnyDest"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:text="@string/settings_type_any_destination" />
-
+        <!-- Section: Optimization Type -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:alpha="0.7"
-            android:text="@string/settings_type_any_destination_desc"
-            android:textSize="12sp" />
+            android:paddingTop="24dp"
+            android:paddingBottom="8dp"
+            android:text="@string/settings_section_optimization_type"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Option: Fixed Destination -->
+        <LinearLayout
+            android:id="@+id/layoutFixedDest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <RadioButton
+                android:id="@+id/rbFixedDest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:text="@string/settings_type_fixed_destination" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:alpha="0.7"
+                android:text="@string/settings_type_fixed_destination_desc"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Option: Any Destination -->
+        <LinearLayout
+            android:id="@+id/layoutAnyDest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <RadioButton
+                android:id="@+id/rbAnyDest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:text="@string/settings_type_any_destination" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:alpha="0.7"
+                android:text="@string/settings_type_any_destination_desc"
+                android:textSize="12sp" />
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</ScrollView>
