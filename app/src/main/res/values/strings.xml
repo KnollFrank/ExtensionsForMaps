@@ -70,9 +70,9 @@
     <string name="onboarding_step2">Tap the three dots (⋮) at the top right and select \"Share directions\".</string>
     <string name="onboarding_step3">Select the right feature for your route:</string>
     <string name="onboarding_add_stop_title">Route: Add stop</string>
-    <string name="onboarding_add_stop_desc">Add more stops to your route in Google Maps, even when the 10-stop limit is reached (up to 27 stops).</string>
+    <string name="onboarding_add_stop_desc">Add more stops to your route, even when Google Maps\' 10-stop limit is reached (up to 27 stops).</string>
     <string name="onboarding_sort_title">Route: Sort</string>
-    <string name="onboarding_sort_desc">Automatically sorts all stops on your route so you drive the shortest route.</string>
+    <string name="onboarding_sort_desc">Sorts all stops on your route so you drive the shortest route.</string>
 
     <!-- Add Stop Instruction -->
     <string name="add_stop_instruction_title">Stop Added</string>
