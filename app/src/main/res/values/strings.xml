@@ -70,7 +70,7 @@
     <string name="onboarding_step2">Tap the three dots (⋮) at the top right and select \"Share directions\".</string>
     <string name="onboarding_step3">Choose \"Route: Add stop\" or \"Route: Sort\".</string>
     <string name="onboarding_step3_hint">(Note: \"Add stop\" is primarily useful from the 10th stop onwards, as Google Maps allows up to 10 stops by default.)</string>
-    <string name="onboarding_limit_hint">Note: With the free version, you can create and sort routes with up to 15 stops. From the 16th stop, the Pro version is required. Google Maps itself supports a maximum of 27 stops per route.</string>
+    <string name="onboarding_limit_hint">Note: Google Maps supports a maximum of 27 stops per route.</string>
 
     <!-- Add Stop Instruction -->
     <string name="add_stop_instruction_title">Stop Added</string>

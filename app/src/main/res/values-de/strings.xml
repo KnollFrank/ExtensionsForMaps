@@ -71,7 +71,7 @@
     <string name="onboarding_step2">Tippen Sie oben rechts auf die drei Punkte (⋮) und wählen Sie \"Wegbeschreibung teilen\".</string>
     <string name="onboarding_step3">Wählen Sie \"Route: Stopp hinzufügen\" oder \"Route: Sortieren\".</string>
     <string name="onboarding_step3_hint">(Hinweis: \"Stopp hinzufügen\" ist erst ab dem 10. Stopp sinnvoll, da Google Maps bis dahin eigene Zwischenstopps erlaubt.)</string>
-    <string name="onboarding_limit_hint">Hinweis: Mit der kostenlosen Version können Sie Routen mit bis zu 15 Stopps erzeugen und sortieren. Ab dem 16. Stopp ist die Pro-Version erforderlich. Google Maps selbst unterstützt maximal 27 Stopps pro Route.</string>
+    <string name="onboarding_limit_hint">Hinweis: Google Maps unterstützt maximal 27 Stopps pro Route.</string>
 
     <!-- Add Stop Instruction -->
     <string name="add_stop_instruction_title">Stopp hinzugefügt</string>
