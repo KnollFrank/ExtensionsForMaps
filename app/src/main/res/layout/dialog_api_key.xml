@@ -6,7 +6,6 @@
     android:padding="24dp">
 
     <TextView
-        android:id="@+id/tvDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/api_key_description" />
@@ -21,7 +20,6 @@
         android:textColor="?attr/colorPrimary" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilApiKey"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -17,7 +17,7 @@ class GeocodeTokenParser {
 
         public Optional<Double> latitude = Optional.empty();
         public Optional<Double> longitude = Optional.empty();
-        public List<String> extractedStrings = new ArrayList<>();
+        public final List<String> extractedStrings = new ArrayList<>();
         public Optional<String> officialPlaceId = Optional.empty();
     }
 

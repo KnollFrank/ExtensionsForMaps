@@ -41,7 +41,7 @@ public class ProgressOverlay {
             binding = DialogProgressBinding.inflate(LayoutInflater.from(themeContext));
             dialog = createAlertDialog(themeContext, onCancelListener, binding.getRoot());
             if (dialog.getWindow() != null) {
-                dialog.getWindow().setType(getWindowType());
+                dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION);
             }
             dialog.show();
         });
@@ -91,9 +91,5 @@ public class ProgressOverlay {
         dialogBuilder.setNegativeButton(
                 R.string.cancel,
                 (dialog, which) -> onCancelListener.run());
-    }
-
-    public static int getWindowType() {
-        return WindowManager.LayoutParams.TYPE_APPLICATION;
     }
 }

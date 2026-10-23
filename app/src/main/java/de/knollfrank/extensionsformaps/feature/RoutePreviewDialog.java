@@ -13,7 +13,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.function.Consumer;
 
-import de.knollfrank.extensionsformaps.ProgressOverlay;
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.StopsAdapter;
 import de.knollfrank.extensionsformaps.databinding.DialogRoutePreviewBinding;
@@ -50,7 +49,7 @@ public class RoutePreviewDialog {
                                 })
                         .create();
         if (routePreviewDialog.getWindow() != null) {
-            routePreviewDialog.getWindow().setType(ProgressOverlay.getWindowType());
+            routePreviewDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION);
         }
         routePreviewDialog.show();
         if (routePreviewDialog.getWindow() != null) {

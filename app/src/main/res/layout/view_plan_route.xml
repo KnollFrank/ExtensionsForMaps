@@ -56,7 +56,6 @@
             app:layout_constraintTop_toBottomOf="@id/sliderTotalStops" />
 
         <TextView
-            android:id="@+id/tvMaxStops"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="12dp"
@@ -78,7 +77,6 @@
             app:layout_constraintTop_toBottomOf="@id/tvMinStops" />
 
         <LinearLayout
-            android:id="@+id/llTipContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
@@ -97,7 +95,6 @@
                 app:tint="?attr/colorOnSurfaceVariant" />
 
             <TextView
-                android:id="@+id/tvQuickTip"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"

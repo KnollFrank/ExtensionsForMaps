@@ -42,10 +42,6 @@ public class SettingsDialog {
         this.apiKeyRepository = new ApiKeyRepository(context);
     }
 
-    public void show() {
-        show(emptyCallback());
-    }
-
     public void show(final Callback callback) {
         final Context themedContext = new ContextThemeWrapper(context, R.style.Theme_ExtensionsForMaps_Dialog);
         final DialogSettingsBinding binding = DialogSettingsBinding.inflate(LayoutInflater.from(themedContext));
@@ -233,18 +229,5 @@ public class SettingsDialog {
                                 }
                             }).start();
                         });
-    }
-
-    private static Callback emptyCallback() {
-        return new Callback() {
-
-            @Override
-            public void onOk() {
-            }
-
-            @Override
-            public void onCancel() {
-            }
-        };
     }
 }

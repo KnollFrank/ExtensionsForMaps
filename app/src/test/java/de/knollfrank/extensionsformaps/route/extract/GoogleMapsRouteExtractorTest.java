@@ -74,7 +74,7 @@ public class GoogleMapsRouteExtractorTest {
                     Geodetic.fromLatitudeLongitude(
                             new Angle(48.4765345, DEGREES),
                             new Angle(8.9349009, DEGREES)),
-                    waypoints.get(0).geodetic());
+                    waypoints.getFirst().geodetic());
         }
         {
             final Stop destination = route.destination();

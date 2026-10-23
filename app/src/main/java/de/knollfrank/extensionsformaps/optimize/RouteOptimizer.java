@@ -198,7 +198,7 @@ public class RouteOptimizer {
         return bestSolution;
     }
 
-    // ANFORDERUNG 1: Check ob alle Jobs zugewiesen wurden
+    // ANFORDERUNG 1: Check, ob alle Jobs zugewiesen wurden
     private static void assertHasNoUnassignedJobs(final VehicleRoutingProblemSolution solution) {
         if (!solution.getUnassignedJobs().isEmpty()) {
             throw new IllegalStateException("UNASSIGNED_JOBS:" + solution.getUnassignedJobs());

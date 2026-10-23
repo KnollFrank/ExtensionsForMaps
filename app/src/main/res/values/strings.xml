@@ -6,23 +6,12 @@
     <string name="plan_route_title">Route Planning</string>
     <string name="open_in_google_maps">Open in Google Maps</string>
     <string name="instructions_tip">Tap the stops in Google Maps and overwrite them with your own addresses.</string>
-    <string name="thanks_title">Thank You</string>
-    <string name="close">Close</string>
     <string name="info_icon_desc">Information icon</string>
-    <string name="accessibility_service_label">Extensions for Maps</string>
-    <string name="accessibility_service_description">Automatically detects when Google Maps reaches the 10-stop limit and helps to expand the route.</string>
     <string name="coffee_button">Buy me a coffee</string>
-    <string name="permissions_title">Setup Automation</string>
-    <string name="permissions_message">To automate Google Maps, please enable the following permission:</string>
-    <string name="permit_accessibility">Enable Service</string>
-    <string name="permit_accessibility_done">Service enabled ✓</string>
-    <string name="permit_done">✓ Enabled</string>
     <string name="error_processing_route">An error occurred while processing the route.</string>
     <string name="error_no_route_found">No Google Maps route found.</string>
-    <string name="error_with_message">Error: %s</string>
     <string name="percentage_format">%d%%</string>
     <string name="address_with_suburb_format">%1$s (%2$s)</string>
-    <string name="sort_button_label">↕️ Sort</string>
     <string name="settings_title">Settings</string>
     <string name="settings_section_general">General</string>
     <string name="settings_show_preview">Show route preview</string>
@@ -31,7 +20,6 @@
     <string name="settings_method_haversine_desc">Calculation based on direct distance.</string>
     <string name="settings_method_ors">Road Network</string>
     <string name="settings_method_ors_desc">Maximum precision considering real roads and paths.</string>
-    <string name="settings_configure_ors">Configure</string>
     <string name="settings_configure_button_text">⚙️</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
@@ -48,8 +36,6 @@
     <string name="settings_type_any_destination">End anywhere</string>
     <string name="settings_type_any_destination_desc">The destination is flexible for a shorter route.</string>
 
-    <string name="sort_dialog_title">Select Sort Type</string>
-
     <!-- Progress & Status -->
     <string name="status_reading_route">Reading route…</string>
     <string name="status_optimizing_route">Sorting route…</string>
@@ -57,7 +43,6 @@
     <string name="route_preview_title">Route Preview</string>
 
     <!-- Errors -->
-    <string name="error_network">Network error: %s</string>
     <string name="error_general">Error: %s</string>
     <string name="error_optimization">Sorting error: %s</string>
     <string name="error_unassigned_jobs">Unassigned stops: %s</string>

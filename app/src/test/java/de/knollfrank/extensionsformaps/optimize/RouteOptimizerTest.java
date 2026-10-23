@@ -323,7 +323,7 @@ public class RouteOptimizerTest {
         // Then: Should end at Munich (it's the furthest from Berlin)
         // Order: Berlin -> Potsdam -> Munich
         assertEquals(munich, optimizedAny.destination());
-        assertEquals(potsdam, optimizedAny.waypoints().get(0));
+        assertEquals(potsdam, optimizedAny.waypoints().getFirst());
 
         // When: Swap Munich and Potsdam in input, but still ANY_DESTINATION
         final Route routeSwapped = new Route(berlin, List.of(munich), potsdam);
@@ -338,7 +338,7 @@ public class RouteOptimizerTest {
         // Then: Should still end at Munich (the furthest)
         // Order: Berlin -> Potsdam -> Munich
         assertEquals(munich, optimizedAnySwapped.destination());
-        assertEquals(potsdam, optimizedAnySwapped.waypoints().get(0));
+        assertEquals(potsdam, optimizedAnySwapped.waypoints().getFirst());
     }
 
     @Test
@@ -390,7 +390,7 @@ public class RouteOptimizerTest {
 
         // Then: Destination MUST remain Potsdam
         assertEquals(potsdam, optimizedFixed.destination());
-        assertEquals(munich, optimizedFixed.waypoints().get(0));
+        assertEquals(munich, optimizedFixed.waypoints().getFirst());
     }
 
     @Test
