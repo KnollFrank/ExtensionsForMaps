@@ -19,7 +19,7 @@
     <string name="settings_method_haversine">Straight Line</string>
     <string name="settings_method_haversine_desc">Calculation based on direct distance.</string>
     <string name="settings_method_ors">Road Network</string>
-    <string name="settings_method_ors_desc">Maximum precision considering real roads and paths.</string>
+    <string name="settings_method_ors_desc">Maximum precision considering real roads.</string>
     <string name="settings_configure_button_text">⚙️</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>

@@ -20,7 +20,7 @@
     <string name="settings_method_haversine">Luftlinie</string>
     <string name="settings_method_haversine_desc">Berechnung basierend auf der direkten Entfernung.</string>
     <string name="settings_method_ors">Straßennetz</string>
-    <string name="settings_method_ors_desc">Maximale Präzision unter Beachtung realer Straßen und Wege.</string>
+    <string name="settings_method_ors_desc">Maximale Präzision unter Beachtung realer Straßen.</string>
     <string name="settings_configure_button_text">⚙️</string>
     <string name="ok">OK</string>
     <string name="cancel">Abbrechen</string>
