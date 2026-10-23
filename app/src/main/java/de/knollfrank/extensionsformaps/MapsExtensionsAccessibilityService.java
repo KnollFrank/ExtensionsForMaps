@@ -62,9 +62,9 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                                         () -> GoogleAppContextResolver
                                                 .resolve(this)
                                                 .map(googleAppContext ->
-                                                        new ScanAddressFeature(
-                                                                this,
-                                                                googleAppContext)))
+                                                             new ScanAddressFeature(
+                                                                     this,
+                                                                     googleAppContext)))
                                 .toList());
         compoundFeature.onServiceConnected();
     }
@@ -117,7 +117,7 @@ public class MapsExtensionsAccessibilityService extends AccessibilityService {
                         Log.d(TAG, "Extracted route URL for SORT: " + routeUrl);
                         final RouteOptimizationWorkflow routeOptimizationWorkflow =
                                 new RouteOptimizationWorkflow(
-                                        RouteOptimizerFactory.createRouteOptimizer(accessibilityService),
+                                        () -> RouteOptimizerFactory.createRouteOptimizer(accessibilityService),
                                         accessibilityService);
                         routeOptimizationWorkflow.optimizeThenShowRoute(routeUrl);
                     }

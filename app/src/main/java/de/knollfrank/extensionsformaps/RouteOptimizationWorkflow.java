@@ -10,11 +10,11 @@ import android.widget.Toast;
 import androidx.annotation.VisibleForTesting;
 
 import java.util.Locale;
+import java.util.function.Supplier;
 
-import de.knollfrank.extensionsformaps.feature.OptimizationTypeDialog;
 import de.knollfrank.extensionsformaps.feature.RoutePreviewDialog;
+import de.knollfrank.extensionsformaps.feature.sort.SettingsDialog;
 import de.knollfrank.extensionsformaps.optimize.NativeSuburbResolver;
-import de.knollfrank.extensionsformaps.optimize.OptimizationType;
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizer;
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
@@ -25,14 +25,15 @@ public class RouteOptimizationWorkflow {
     private final ProgressOverlay progressOverlay;
     private boolean showOptimizationTypeDialog = false;
 
-    public RouteOptimizationWorkflow(final RouteOptimizer routeOptimizer, final Context context) {
+    public RouteOptimizationWorkflow(final Supplier<RouteOptimizer> routeOptimizerSupplier,
+                                     final Context context) {
         this.progressOverlay = new ProgressOverlay(context);
         this.routeOptimizationOrchestrator =
                 new RouteOptimizationOrchestrator(
                         context,
                         createExtractRouteCallback(context, progressOverlay),
                         createOptimizationCallback(context, progressOverlay),
-                        routeOptimizer);
+                        routeOptimizerSupplier);
         this.progressOverlay.setOnCancelListener(() -> {
             routeOptimizationOrchestrator.cancelOptimization();
             Toast
@@ -75,7 +76,7 @@ public class RouteOptimizationWorkflow {
                 final Route enrichedRoute = addSuburbsToAddresses(route, context);
                 runOnUiThread(() -> {
                     if (showOptimizationTypeDialog) {
-                        showOptimizationTypeDialog(enrichedRoute, context);
+                        showSettingsDialog(enrichedRoute, context);
                     } else {
                         proceedWithRoute(enrichedRoute, context);
                     }
@@ -87,13 +88,12 @@ public class RouteOptimizationWorkflow {
                 RouteOptimizationWorkflow.onError(message, progressOverlay, context);
             }
 
-            private void showOptimizationTypeDialog(final Route route, final Context context) {
-                OptimizationTypeDialog.show(
-                        context,
-                        new OptimizationTypeDialog.Callback() {
+            private void showSettingsDialog(final Route route, final Context context) {
+                new SettingsDialog(context).show(
+                        new SettingsDialog.Callback() {
 
                             @Override
-                            public void onOptimizationTypeSelected(OptimizationType selectedType) {
+                            public void onOk() {
                                 proceedWithRoute(route, context);
                             }
 

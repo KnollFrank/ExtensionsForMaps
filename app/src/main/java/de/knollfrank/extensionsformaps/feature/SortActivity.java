@@ -60,7 +60,10 @@ public class SortActivity extends AppCompatActivity {
     }
 
     private void startOptimizationWorkflow(final URL url) {
-        final RouteOptimizationWorkflow workflow = new RouteOptimizationWorkflow(RouteOptimizerFactory.createRouteOptimizer(this), this);
+        final RouteOptimizationWorkflow workflow =
+                new RouteOptimizationWorkflow(
+                        () -> RouteOptimizerFactory.createRouteOptimizer(this),
+                        this);
         workflow.setShowOptimizationTypeDialog(true);
         DirectionsUrlFactory
                 .createDirectionsUrl(url)

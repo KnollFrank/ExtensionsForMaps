@@ -1,5 +1,6 @@
 package de.knollfrank.extensionsformaps.feature.sort;
 
+import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,7 +27,14 @@ import de.knollfrank.extensionsformaps.databinding.DialogSettingsBinding;
 import de.knollfrank.extensionsformaps.optimize.OptimizationType;
 import de.knollfrank.extensionsformaps.optimize.ors.OpenRouteServiceRoutingMatrixProvider;
 
-class SettingsDialog {
+public class SettingsDialog {
+
+    public interface Callback {
+
+        void onOk();
+
+        void onCancel();
+    }
 
     private final Context context;
     private final ApiKeyRepository apiKeyRepository;
@@ -37,6 +45,20 @@ class SettingsDialog {
     }
 
     public void show() {
+        show(
+                new Callback() {
+
+                    @Override
+                    public void onOk() {
+                    }
+
+                    @Override
+                    public void onCancel() {
+                    }
+                });
+    }
+
+    public void show(final Callback callback) {
         final Context themedContext = new ContextThemeWrapper(context, R.style.Theme_ExtensionsForMaps_Dialog);
         final DialogSettingsBinding binding = DialogSettingsBinding.inflate(LayoutInflater.from(themedContext));
 
@@ -112,10 +134,15 @@ class SettingsDialog {
                                             binding.rbAnyDest.isChecked() ?
                                                     OptimizationType.ANY_DESTINATION :
                                                     OptimizationType.FIXED_DESTINATION);
+                                    callback.onOk();
                                 })
                         .setNegativeButton(
                                 R.string.cancel,
-                                (dialog, which) -> dialog.dismiss())
+                                (dialog, which) -> {
+                                    dialog.dismiss();
+                                    callback.onCancel();
+                                })
+                        .setOnCancelListener(dialog -> callback.onCancel())
                         .setOnDismissListener(dialog -> prefs.unregisterOnSharedPreferenceChangeListener(prefsListener))
                         .create();
 
@@ -140,7 +167,7 @@ class SettingsDialog {
             binding.rbFixedDest.setChecked(false);
         }
 
-        if (settingsDialog.getWindow() != null) {
+        if (settingsDialog.getWindow() != null && context instanceof AccessibilityService) {
             settingsDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY);
         }
         settingsDialog.show();
@@ -174,7 +201,7 @@ class SettingsDialog {
             parentDialog.dismiss();
         });
 
-        if (apiKeyDialog.getWindow() != null) {
+        if (apiKeyDialog.getWindow() != null && context instanceof AccessibilityService) {
             apiKeyDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY);
         }
 

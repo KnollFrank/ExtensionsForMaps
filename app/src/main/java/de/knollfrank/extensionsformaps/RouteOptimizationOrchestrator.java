@@ -3,6 +3,7 @@ package de.knollfrank.extensionsformaps;
 import android.content.Context;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizer;
 import de.knollfrank.extensionsformaps.route.Route;
@@ -34,17 +35,24 @@ public class RouteOptimizationOrchestrator {
     private final Context context;
     private final ExtractRouteCallback extractRouteCallback;
     private final OptimizationCallback optimizationCallback;
-    private final RouteOptimizer routeOptimizer;
+    private final Supplier<RouteOptimizer> routeOptimizerSupplier;
     private final AtomicBoolean isOptimizationCanceled = new AtomicBoolean(false);
 
     public RouteOptimizationOrchestrator(final Context context,
                                          final ExtractRouteCallback extractRouteCallback,
                                          final OptimizationCallback optimizationCallback,
-                                         final RouteOptimizer routeOptimizer) {
+                                         final Supplier<RouteOptimizer> routeOptimizerSupplier) {
         this.context = context;
         this.extractRouteCallback = extractRouteCallback;
         this.optimizationCallback = optimizationCallback;
-        this.routeOptimizer = routeOptimizer;
+        this.routeOptimizerSupplier = routeOptimizerSupplier;
+    }
+
+    public RouteOptimizationOrchestrator(final Context context,
+                                         final ExtractRouteCallback extractRouteCallback,
+                                         final OptimizationCallback optimizationCallback,
+                                         final RouteOptimizer routeOptimizer) {
+        this(context, extractRouteCallback, optimizationCallback, () -> routeOptimizer);
     }
 
     public void extractRouteFromDirectionsUrl(final DirectionsUrl directionsUrl) {
@@ -64,7 +72,7 @@ public class RouteOptimizationOrchestrator {
         new Thread(() -> {
             try {
                 optimizationCallback.onOptimizationSuccess(
-                        routeOptimizer.optimize(
+                        routeOptimizerSupplier.get().optimize(
                                 route,
                                 SortConfig.getOptimizationType(context),
                                 optimizationCallback::onOptimizationProgress,
