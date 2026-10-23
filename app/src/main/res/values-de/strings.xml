@@ -69,9 +69,11 @@
     <string name="onboarding_number3">3.</string>
     <string name="onboarding_step1">Planen Sie Ihre Route in Google Maps.</string>
     <string name="onboarding_step2">Tippen Sie oben rechts auf die drei Punkte (⋮) und wählen Sie \"Wegbeschreibung teilen\".</string>
-    <string name="onboarding_step3">Wählen Sie \"Route: Stopp hinzufügen\" oder \"Route: Sortieren\".</string>
-    <string name="onboarding_step3_hint">(Hinweis: \"Stopp hinzufügen\" ist erst ab dem 10. Stopp sinnvoll, da Google Maps bis dahin eigene Zwischenstopps erlaubt.)</string>
-    <string name="onboarding_limit_hint">Hinweis: Google Maps unterstützt maximal 27 Stopps pro Route.</string>
+    <string name="onboarding_step3">Wählen Sie die passende Funktion für Ihre Route:</string>
+    <string name="onboarding_add_stop_title">Route: Stopp hinzufügen</string>
+    <string name="onboarding_add_stop_desc">Fügen Sie Ihrer Route in Google Maps weitere Stopps hinzu, selbst wenn das Limit von 10 Stopps erreicht ist (bis zu 27 Stopps).</string>
+    <string name="onboarding_sort_title">Route: Sortieren</string>
+    <string name="onboarding_sort_desc">Sortiert alle Stopps Ihrer Route automatisch so, dass Sie die kürzeste Strecke fahren.</string>
 
     <!-- Add Stop Instruction -->
     <string name="add_stop_instruction_title">Stopp hinzugefügt</string>
