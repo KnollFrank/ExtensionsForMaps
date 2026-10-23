@@ -67,7 +67,7 @@
     <string name="onboarding_number2">2.</string>
     <string name="onboarding_number3">3.</string>
     <string name="onboarding_step1">Plan your route in Google Maps.</string>
-    <string name="onboarding_step2">Tap the three dots (⋮) at the top right and select \"Share directions\".</string>
+    <string name="onboarding_step2">In Google Maps, tap the three dots (⋮) at the top right and select \"Share directions\".</string>
     <string name="onboarding_step3">Select the right feature for your route:</string>
     <string name="onboarding_add_stop_title">Route: Add stop</string>
     <string name="onboarding_add_stop_desc">Adds more stops to your route, even when Google Maps\' 10-stop limit is reached (up to 27 stops).</string>

@@ -68,7 +68,7 @@
     <string name="onboarding_number2">2.</string>
     <string name="onboarding_number3">3.</string>
     <string name="onboarding_step1">Planen Sie Ihre Route in Google Maps.</string>
-    <string name="onboarding_step2">Tippen Sie oben rechts auf die drei Punkte (⋮) und wählen Sie \"Wegbeschreibung teilen\".</string>
+    <string name="onboarding_step2">Tippen Sie in Google Maps oben rechts auf die drei Punkte (⋮) und wählen Sie \"Wegbeschreibung teilen\".</string>
     <string name="onboarding_step3">Wählen Sie die passende Funktion für Ihre Route:</string>
     <string name="onboarding_add_stop_title">Route: Stopp hinzufügen</string>
     <string name="onboarding_add_stop_desc">Fügt Ihrer Route weitere Stopps hinzu, selbst wenn die 10-Stopps-Grenze von Google Maps erreicht ist (bis zu 27 Stopps).</string>
