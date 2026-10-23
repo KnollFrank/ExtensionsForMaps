@@ -1,11 +1,9 @@
-Extensions for Maps ist ein freies Open-Source-Hilfstool, das Google Maps um eine Routenerweiterung und Routenoptimierung ergänzt.
+Erweiterungen für Maps ist ein freies Open-Source-Hilfstool, das Google Maps um eine Routenerweiterung und Routenoptimierung ergänzt.
 
 Funktionen:
 
 - Erweitert Google-Maps-Routen über das Standardlimit von 10 Stopps (1 Start, 8 Zwischenstopps, 1 Ziel) hinaus auf bis zu 27 Stopps
 - Optimiert die Reihenfolge der Stopps nach Straßennetz (OpenRouteService) oder Luftlinie
-- Kamera-Adress-Scanner: Scanne Adressen mit der Kamera ein, statt sie einzutippen (erfordert die Google-App)
-- Zeigt Steuerungselemente schwebend direkt über Google Maps an
 - 100 % Open Source, datenschutzfreundlich und werbefrei
 
-Extensions for Maps ist ein unabhängiges Open-Source-Hilfstool für Android und steht in keiner offiziellen Verbindung zu Google LLC oder Google Maps.
+Erweiterungen für Maps ist ein unabhängiges Open-Source-Hilfstool für Android und steht in keiner offiziellen Verbindung zu Google LLC oder Google Maps.
