@@ -6,7 +6,6 @@ import android.net.Uri;
 
 import java.net.URL;
 
-import de.knollfrank.extensionsformaps.accessibility.PackageNames;
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.RouteDirectionsUrlConverter;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;

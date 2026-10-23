@@ -75,17 +75,6 @@
     <string name="api_key_error_invalid">Invalid API key or network error: %s</string>
     <string name="api_key_success">API Key saved successfully!</string>
 
-    <!-- Scan Address -->
-    <string name="scan_button_text">📷</string>
-    <string name="scan_instructions">Align address within the frame</string>
-    <string name="scan_capture">Capture</string>
-    <string name="scan_detected_title">Detected Address:</string>
-    <string name="scan_wrong_address">Wrong address</string>
-    <string name="scan_add_address">Add address</string>
-    <string name="scan_error_permission">Camera permission required</string>
-    <string name="scan_error_no_detection">No address detected yet</string>
-    <string name="scan_error_google_app_required">Google App is required for address scanning</string>
-
     <string name="min_stops">11</string>
     <string name="max_stops">27</string>
     <string name="onboarding_title">How it works</string>

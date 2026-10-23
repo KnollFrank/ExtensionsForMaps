@@ -3,7 +3,7 @@ package de.knollfrank.extensionsformaps;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import static de.knollfrank.extensionsformaps.accessibility.PackageNames.GOOGLE_MAPS_PACKAGE;
+import static de.knollfrank.extensionsformaps.PackageNames.GOOGLE_MAPS_PACKAGE;
 
 import android.content.Context;
 import android.content.Intent;

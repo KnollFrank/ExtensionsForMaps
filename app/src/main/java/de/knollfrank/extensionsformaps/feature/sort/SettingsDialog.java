@@ -1,6 +1,5 @@
 package de.knollfrank.extensionsformaps.feature.sort;
 
-import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,7 +7,6 @@ import android.net.Uri;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -45,17 +43,7 @@ public class SettingsDialog {
     }
 
     public void show() {
-        show(
-                new Callback() {
-
-                    @Override
-                    public void onOk() {
-                    }
-
-                    @Override
-                    public void onCancel() {
-                    }
-                });
+        show(emptyCallback());
     }
 
     public void show(final Callback callback) {
@@ -167,9 +155,6 @@ public class SettingsDialog {
             binding.rbFixedDest.setChecked(false);
         }
 
-        if (settingsDialog.getWindow() != null && context instanceof AccessibilityService) {
-            settingsDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY);
-        }
         settingsDialog.show();
     }
 
@@ -200,10 +185,6 @@ public class SettingsDialog {
             apiKeyDialog.dismiss();
             parentDialog.dismiss();
         });
-
-        if (apiKeyDialog.getWindow() != null && context instanceof AccessibilityService) {
-            apiKeyDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY);
-        }
 
         apiKeyDialog.show();
 
@@ -252,5 +233,18 @@ public class SettingsDialog {
                                 }
                             }).start();
                         });
+    }
+
+    private static Callback emptyCallback() {
+        return new Callback() {
+
+            @Override
+            public void onOk() {
+            }
+
+            @Override
+            public void onCancel() {
+            }
+        };
     }
 }

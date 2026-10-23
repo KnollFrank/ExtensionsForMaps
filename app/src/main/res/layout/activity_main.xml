@@ -18,20 +18,11 @@
             style="?attr/materialCardViewFilledStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
+            android:visibility="visible"
             app:cardCornerRadius="24dp"
             app:layout_constraintTop_toTopOf="parent"
             app:strokeWidth="0dp"
             tools:visibility="visible" />
-
-        <de.knollfrank.extensionsformaps.feature.PermissionsCard
-            android:id="@+id/cardPermissions"
-            style="?attr/materialCardViewElevatedStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="24dp"
-            app:layout_constraintTop_toBottomOf="@id/cardOnboarding" />
 
         <de.knollfrank.extensionsformaps.feature.PlanRouteCard
             android:id="@+id/cardPlanning"
@@ -40,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             app:cardCornerRadius="24dp"
-            app:layout_constraintTop_toBottomOf="@id/cardPermissions"
+            app:layout_constraintTop_toBottomOf="@id/cardOnboarding"
             app:strokeWidth="0dp" />
 
         <com.google.android.material.button.MaterialButton

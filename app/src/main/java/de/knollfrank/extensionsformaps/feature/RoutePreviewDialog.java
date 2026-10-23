@@ -50,7 +50,7 @@ public class RoutePreviewDialog {
                                 })
                         .create();
         if (routePreviewDialog.getWindow() != null) {
-            routePreviewDialog.getWindow().setType(ProgressOverlay.getWindowType(context));
+            routePreviewDialog.getWindow().setType(ProgressOverlay.getWindowType());
         }
         routePreviewDialog.show();
         if (routePreviewDialog.getWindow() != null) {

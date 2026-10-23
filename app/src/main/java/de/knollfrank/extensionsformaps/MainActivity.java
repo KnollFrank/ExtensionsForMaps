@@ -23,12 +23,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        binding.cardPermissions.onResume();
-    }
-
-    @Override
     protected void onNewIntent(@NonNull final Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
