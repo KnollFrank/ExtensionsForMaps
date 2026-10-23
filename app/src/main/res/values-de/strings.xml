@@ -71,7 +71,7 @@
     <string name="onboarding_step2">Tippen Sie oben rechts auf die drei Punkte (⋮) und wählen Sie \"Wegbeschreibung teilen\".</string>
     <string name="onboarding_step3">Wählen Sie die passende Funktion für Ihre Route:</string>
     <string name="onboarding_add_stop_title">Route: Stopp hinzufügen</string>
-    <string name="onboarding_add_stop_desc">Fügen Sie Ihrer Route weitere Stopps hinzu, selbst wenn die 10-Stopps-Grenze von Google Maps erreicht ist (bis zu 27 Stopps).</string>
+    <string name="onboarding_add_stop_desc">Fügt Ihrer Route weitere Stopps hinzu, selbst wenn die 10-Stopps-Grenze von Google Maps erreicht ist (bis zu 27 Stopps).</string>
     <string name="onboarding_sort_title">Route: Sortieren</string>
     <string name="onboarding_sort_desc">Sortiert alle Stopps Ihrer Route so, dass Sie die kürzeste Strecke fahren.</string>
 
