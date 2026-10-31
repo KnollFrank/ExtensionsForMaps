@@ -79,4 +79,8 @@
     <string name="add_stop_instruction_title">Stopp hinzugefügt</string>
     <string name="add_stop_instruction_message">Der letzte Stopp Ihrer Route wurde verdoppelt. Tippen Sie in Google Maps auf diesen verdoppelten Stopp, um ihn durch Ihre neue Adresse zu ersetzen.</string>
     <string name="dont_show_again">Nicht mehr anzeigen</string>
+
+    <string name="error_no_browser">Kein Webbrowser auf diesem Gerät gefunden.</string>
+    <string name="url_copied_to_clipboard">Link in die Zwischenablage kopiert.</string>
+    <string name="error_google_maps_not_installed">Google Maps ist auf diesem Gerät nicht installiert.</string>
 </resources>

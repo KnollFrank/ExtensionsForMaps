@@ -1,9 +1,7 @@
 package de.knollfrank.extensionsformaps.feature.sort;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +18,7 @@ import java.io.IOException;
 import de.knollfrank.extensionsformaps.ApiKeyRepository;
 import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.SortConfig;
+import de.knollfrank.extensionsformaps.WebUrlLauncher;
 import de.knollfrank.extensionsformaps.databinding.DialogApiKeyBinding;
 import de.knollfrank.extensionsformaps.databinding.DialogSettingsBinding;
 import de.knollfrank.extensionsformaps.optimize.OptimizationType;
@@ -171,12 +170,7 @@ public class SettingsDialog {
                         .create();
 
         binding.tvLink.setOnClickListener(v -> {
-            final Intent intent =
-                    new Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse(binding.tvLink.getText().toString()));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            this.context.startActivity(intent);
+            WebUrlLauncher.openUrl(this.context, binding.tvLink.getText().toString());
             // Close both dialogs so they don't cover the browser
             apiKeyDialog.dismiss();
             parentDialog.dismiss();

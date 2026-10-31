@@ -1,7 +1,6 @@
 package de.knollfrank.extensionsformaps;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -30,10 +29,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void configureCoffeeButton() {
         binding.btnCoffee.setOnClickListener(
-                view ->
-                        startActivity(
-                                new Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse("https://paypal.me/KnollFrank"))));
+                view -> WebUrlLauncher.openUrl(this, "https://paypal.me/KnollFrank"));
     }
 }

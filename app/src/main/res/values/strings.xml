@@ -78,4 +78,8 @@
     <string name="add_stop_instruction_title">Stop Added</string>
     <string name="add_stop_instruction_message">The last stop of your route has been duplicated. In Google Maps, tap on this duplicate stop to replace it with your new address.</string>
     <string name="dont_show_again">Don\'t show again</string>
+
+    <string name="error_no_browser">No web browser found on this device.</string>
+    <string name="url_copied_to_clipboard">Link copied to clipboard.</string>
+    <string name="error_google_maps_not_installed">Google Maps is not installed on this device.</string>
 </resources>
