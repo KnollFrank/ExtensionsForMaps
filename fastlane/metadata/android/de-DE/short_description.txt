@@ -1,1 +1,1 @@
-Erweitert Google-Maps-Routen über 10 Stopps hinaus und optimiert die Stopps.
+Erweitert Google-Maps-Routen über 10 Stopps hinaus und sortiert die Stopps.
