@@ -20,7 +20,6 @@ public class WebUrlLauncher {
         if (!(context instanceof android.app.Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
-
         try {
             context.startActivity(intent);
         } catch (final ActivityNotFoundException e) {
