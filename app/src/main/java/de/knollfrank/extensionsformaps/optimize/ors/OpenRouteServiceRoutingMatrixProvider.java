@@ -25,7 +25,7 @@ public class OpenRouteServiceRoutingMatrixProvider implements RoutingMatrixProvi
     private final OrsService orsService;
 
     public OpenRouteServiceRoutingMatrixProvider(final String apiKey) {
-        this(apiKey, URLs.createUrl("https://api.heigit.org/"));
+        this(apiKey, URLs.createUrl("https://api.openrouteservice.org/"));
     }
 
     public OpenRouteServiceRoutingMatrixProvider(final String apiKey, final URL baseUrl) {
