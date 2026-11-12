@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Extensions for Maps</string>
-    <string name="label_add_stop">Route: Add stop</string>
     <string name="label_sort">Route: Sort</string>
     <string name="total_stops_label">Number of stops: %d</string>
     <string name="plan_route_title">Route Planning</string>
@@ -23,12 +22,6 @@
     <string name="settings_configure_button_content_description">Configure OpenRouteService API key</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
-
-    <string name="add_stop_limit_reached_title">Limit reached</string>
-    <string name="add_stop_limit_reached_message">Google Maps supports a maximum of 27 stops per route. Further expansion is unfortunately not possible.</string>
-    <string name="add_stop_suggest_maps_title">Possible in Google Maps</string>
-    <string name="add_stop_suggest_maps_message">This route has fewer than 10 stops. You can also add more stops directly in Google Maps. Do you still want this app to add the stop?</string>
-    <string name="add_stop_yes">Yes, add it</string>
 
     <string name="settings_section_optimization_type">Sort Type</string>
     <string name="settings_type_fixed_destination">Lock last destination</string>
@@ -68,15 +61,9 @@
     <string name="onboarding_number3">3.</string>
     <string name="onboarding_step1">Plan your route in Google Maps.</string>
     <string name="onboarding_step2">In Google Maps, tap the three dots (⋮) at the top right and select \"Share directions\".</string>
-    <string name="onboarding_step3">Select the right feature for your route:</string>
-    <string name="onboarding_add_stop_title">Route: Add stop</string>
-    <string name="onboarding_add_stop_desc">Adds more stops to your route, even when Google Maps\' 10-stop limit is reached (up to 27 stops).</string>
+    <string name="onboarding_step3">Select \"Route: Sort\".</string>
     <string name="onboarding_sort_title">Route: Sort</string>
     <string name="onboarding_sort_desc">Sorts all stops on your route so you drive the shortest route.</string>
-
-    <!-- Add Stop Instruction -->
-    <string name="add_stop_instruction_title">Stop Added</string>
-    <string name="add_stop_instruction_message">The last stop of your route has been duplicated. In Google Maps, tap on this duplicate stop to replace it with your new address.</string>
     <string name="dont_show_again">Don\'t show again</string>
 
     <string name="error_no_browser">No web browser found on this device.</string>
