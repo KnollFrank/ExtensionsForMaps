@@ -9,11 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.slider.Slider;
 
 import de.knollfrank.extensionsformaps.BuildConfig;
 import de.knollfrank.extensionsformaps.GoogleMapsNavigator;
-import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.databinding.ViewPlanRouteBinding;
 import de.knollfrank.extensionsformaps.route.RouteDirectionsUrlConverter;
 import de.knollfrank.extensionsformaps.route.RouteTemplateFactory;
@@ -46,39 +44,22 @@ public class PlanRouteCard extends MaterialCardView {
             setVisibility(View.GONE);
             return;
         }
-        binding.tvTotalStopsLabel.setText(getContext().getString(R.string.total_stops_label, (int) binding.sliderTotalStops.getValue()));
-        binding.sliderTotalStops.addOnChangeListener(
-                new Slider.OnChangeListener() {
-
-                    @Override
-                    public void onValueChange(@NonNull final Slider slider,
-                                              final float value,
-                                              final boolean fromUser) {
-                        binding.tvTotalStopsLabel.setText(PlanRouteCard.this.getContext().getString(R.string.total_stops_label, (int) value));
-                    }
-                });
-        binding.btnGenerateTemplate.setOnClickListener(onBtnGenerateTemplateClick(binding.sliderTotalStops, getContext()));
+        binding.btnGenerateTemplate.setOnClickListener(onBtnGenerateTemplateClick(getContext()));
     }
 
-    private static View.OnClickListener onBtnGenerateTemplateClick(final Slider sliderTotalStops,
-                                                                   final Context context) {
+    private static View.OnClickListener onBtnGenerateTemplateClick(final Context context) {
         return new View.OnClickListener() {
 
             @Override
             public void onClick(final View view) {
                 GoogleMapsNavigator.launchDirectionsUrl(
-                        createDirectionsUrlTemplate(getSliderTotalStops()),
+                        createDirectionsUrlTemplate(),
                         context);
             }
 
-            private DirectionsUrl createDirectionsUrlTemplate(final int totalStops) {
+            private DirectionsUrl createDirectionsUrlTemplate() {
                 return RouteDirectionsUrlConverter.getDirectionsUrl(
-                        RouteTemplateFactory.createRouteTemplate(
-                                totalStops));
-            }
-
-            private int getSliderTotalStops() {
-                return (int) sliderTotalStops.getValue();
+                        RouteTemplateFactory.createRouteTemplate(10));
             }
         };
     }

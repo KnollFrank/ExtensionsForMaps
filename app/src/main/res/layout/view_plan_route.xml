@@ -19,62 +19,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/tvTotalStopsLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvTemplateTitle"
-            tools:text="Anzahl Stopps: 15" />
-
-        <com.google.android.material.slider.Slider
-            android:id="@+id/sliderTotalStops"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:stepSize="1.0"
-            android:value="15.0"
-            android:valueFrom="11.0"
-            android:valueTo="27.0"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvTotalStopsLabel"
-            app:tickColor="@android:color/transparent" />
-
-        <TextView
-            android:id="@+id/tvMinStops"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:alpha="0.7"
-            android:text="@string/min_stops"
-            android:textAppearance="?attr/textAppearanceLabelMedium"
-            app:layout_constraintStart_toStartOf="@id/sliderTotalStops"
-            app:layout_constraintTop_toBottomOf="@id/sliderTotalStops" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
-            android:alpha="0.7"
-            android:text="@string/max_stops"
-            android:textAppearance="?attr/textAppearanceLabelMedium"
-            app:layout_constraintEnd_toEndOf="@id/sliderTotalStops"
-            app:layout_constraintTop_toBottomOf="@id/sliderTotalStops" />
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGenerateTemplate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             android:padding="16dp"
-            android:text="@string/open_in_google_maps"
+            android:text="@string/open_10_stops_in_google_maps"
             app:cornerRadius="16dp"
             app:iconGravity="textStart"
-            app:layout_constraintTop_toBottomOf="@id/tvMinStops" />
+            app:layout_constraintTop_toBottomOf="@id/tvTemplateTitle" />
 
         <LinearLayout
             android:layout_width="match_parent"

@@ -3,9 +3,8 @@
     <string name="app_name">Erweiterungen für Maps</string>
 
     <string name="label_sort">Route: Sortieren</string>
-    <string name="total_stops_label">Anzahl Stopps: %d</string>
     <string name="plan_route_title">Route planen</string>
-    <string name="open_in_google_maps">In Google Maps öffnen</string>
+    <string name="open_10_stops_in_google_maps">10 Stopps in Google Maps öffnen</string>
     <string name="instructions_tip">Tippen Sie in Google Maps auf die Stopps und überschreiben diese mit Ihren eigenen Adressen.</string>
     <string name="info_icon_desc">Informations-Icon</string>
     <string name="coffee_button">Kaffeekasse</string>
@@ -55,8 +54,6 @@
     <string name="api_key_error_invalid">API Key ungültig oder Netzwerkfehler: %s</string>
     <string name="api_key_success">API Key erfolgreich gespeichert!</string>
 
-    <string name="min_stops">11</string>
-    <string name="max_stops">27</string>
     <string name="onboarding_title">So funktioniert\'s</string>
     <string name="onboarding_number1">1.</string>
     <string name="onboarding_number2">2.</string>

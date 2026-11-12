@@ -1,9 +1,8 @@
 <resources>
     <string name="app_name">Extensions for Maps</string>
     <string name="label_sort">Route: Sort</string>
-    <string name="total_stops_label">Number of stops: %d</string>
     <string name="plan_route_title">Route Planning</string>
-    <string name="open_in_google_maps">Open in Google Maps</string>
+    <string name="open_10_stops_in_google_maps">Open 10 stops in Google Maps</string>
     <string name="instructions_tip">Tap the stops in Google Maps and overwrite them with your own addresses.</string>
     <string name="info_icon_desc">Information icon</string>
     <string name="coffee_button">Buy me a coffee</string>
@@ -53,8 +52,6 @@
     <string name="api_key_error_invalid">Invalid API key or network error: %s</string>
     <string name="api_key_success">API Key saved successfully!</string>
 
-    <string name="min_stops">11</string>
-    <string name="max_stops">27</string>
     <string name="onboarding_title">How it works</string>
     <string name="onboarding_number1">1.</string>
     <string name="onboarding_number2">2.</string>

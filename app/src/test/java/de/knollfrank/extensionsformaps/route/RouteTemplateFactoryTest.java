@@ -16,8 +16,8 @@ public class RouteTemplateFactoryTest {
     }
 
     @Test
-    public void test_createRouteTemplate_numberOfStops_11() {
-        test_createRouteTemplate_hasSize(11);
+    public void test_createRouteTemplate_numberOfStops_10() {
+        test_createRouteTemplate_hasSize(10);
     }
 
     @Test
