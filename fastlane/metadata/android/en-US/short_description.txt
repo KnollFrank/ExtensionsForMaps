@@ -1,1 +1,1 @@
-Expand Google Maps routes beyond 10 stops and sort stop order.
+Sorts Google Maps route stops to find the shortest path.

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Extensions for Maps</string>
+    <string name="app_name">Route Sorter for Maps</string>
     <string name="label_sort">Route: Sort</string>
     <string name="plan_route_title">Route Planning</string>
     <string name="open_10_stops_in_google_maps">Open 10 stops in Google Maps</string>

@@ -1,1 +1,1 @@
-Erweitert Google-Maps-Routen über 10 Stopps hinaus und sortiert die Stopps.
+Sortiert die Stopps von Google-Maps-Routen für die kürzeste Strecke.

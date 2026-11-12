@@ -1,9 +1,9 @@
-Extensions for Maps is a free open-source utility that adds route expansion and route sorting to Google Maps.
+Route Sorter for Maps is a free open-source utility that automatically sorts routes from Google Maps to find the shortest path.
 
 Features:
 
-- Expands Google Maps routes beyond the default 10-stop limit (1 origin, 8 waypoints, 1 destination) up to 27 stops
+- Sorts the order of route stops to minimize total travel distance
 - Sorts stop order based on road network (OpenRouteService) or straight-line distance
 - 100% open source, privacy-friendly, and ad-free
 
-Extensions for Maps is an independent open-source utility for Android and is not affiliated with, endorsed by, or sponsored by Google LLC or Google Maps.
+Route Sorter for Maps is an independent open-source utility for Android and is not affiliated with, endorsed by, or sponsored by Google LLC or Google Maps.
