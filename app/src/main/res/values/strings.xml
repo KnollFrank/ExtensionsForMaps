@@ -57,9 +57,7 @@
     <string name="onboarding_number3">3.</string>
     <string name="onboarding_step1">Plan your route in Google Maps.</string>
     <string name="onboarding_step2">In Google Maps, tap the three dots (⋮) at the top right and select \"Share directions\".</string>
-    <string name="onboarding_step3">Select \"Route: Sort\".</string>
-    <string name="onboarding_sort_title">Route: Sort</string>
-    <string name="onboarding_sort_desc">Sorts all stops on your route so you drive the shortest route.</string>
+    <string name="onboarding_step3">Select \"%1$s\", which then sorts all stops on your route so you drive the shortest route.</string>
     <string name="dont_show_again">Don\'t show again</string>
 
     <string name="error_no_browser">No web browser found on this device.</string>

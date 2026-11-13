@@ -59,9 +59,7 @@
     <string name="onboarding_number3">3.</string>
     <string name="onboarding_step1">Planen Sie Ihre Route in Google Maps.</string>
     <string name="onboarding_step2">Tippen Sie in Google Maps oben rechts auf die drei Punkte (⋮) und wählen Sie \"Wegbeschreibung teilen\".</string>
-    <string name="onboarding_step3">Wählen Sie \"Route: Sortieren\".</string>
-    <string name="onboarding_sort_title">Route: Sortieren</string>
-    <string name="onboarding_sort_desc">Sortiert alle Stopps Ihrer Route so, dass Sie die kürzeste Strecke fahren.</string>
+    <string name="onboarding_step3">Wählen Sie \"%1$s\", der dann alle Stopps Ihrer Route so sortiert, dass Sie die kürzeste Strecke fahren.</string>
     <string name="dont_show_again">Nicht mehr anzeigen</string>
 
     <string name="error_no_browser">Kein Webbrowser auf diesem Gerät gefunden.</string>

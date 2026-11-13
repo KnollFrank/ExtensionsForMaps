@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.google.android.material.card.MaterialCardView;
 
+import de.knollfrank.extensionsformaps.R;
 import de.knollfrank.extensionsformaps.databinding.ViewOnboardingBinding;
 
 public class OnboardingCard extends MaterialCardView {
@@ -27,6 +28,7 @@ public class OnboardingCard extends MaterialCardView {
     }
 
     private void init(final Context context) {
-        ViewOnboardingBinding.inflate(LayoutInflater.from(context), this);
+        final ViewOnboardingBinding binding = ViewOnboardingBinding.inflate(LayoutInflater.from(context), this);
+        binding.tvStep3.setText(context.getString(R.string.onboarding_step3, context.getString(R.string.app_name)));
     }
 }
