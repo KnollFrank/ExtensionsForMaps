@@ -34,7 +34,6 @@
             android:excludeFromRecents="true"
             android:exported="true"
             android:icon="@drawable/ic_feature_sort"
-            android:label="@string/label_sort"
             android:taskAffinity=".sort"
             android:theme="@style/Theme.ExtensionsForMaps.Transparent">
             <intent-filter>
