@@ -1,0 +1,2 @@
+Version 1.1.4:
+- Removed option to add more than 10 stops (Google Maps now strictly enforces a 10-stop limit)

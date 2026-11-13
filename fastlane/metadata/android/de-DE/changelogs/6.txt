@@ -1,0 +1,2 @@
+Version 1.1.4:
+- Entfernen der Funktion für mehr als 10 Stopps (Google Maps erzwingt in neueren Versionen ein Limit von maximal 10 Stopps)
