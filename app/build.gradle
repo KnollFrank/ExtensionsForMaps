@@ -75,6 +75,8 @@ dependencies {
     implementation libs.gson
     implementation libs.guava
     implementation libs.protobuf.javalite
+    implementation libs.room.runtime
+    annotationProcessor libs.room.compiler
 
     testImplementation libs.junit
     testImplementation libs.mockwebserver

@@ -65,4 +65,17 @@
     <string name="error_no_browser">Kein Webbrowser auf diesem Gerät gefunden.</string>
     <string name="url_copied_to_clipboard">Link in die Zwischenablage kopiert.</string>
     <string name="error_google_maps_not_installed">Google Maps ist auf diesem Gerät nicht installiert.</string>
+
+    <!-- Stops Accumulation & Stages -->
+    <string name="stops_accumulated_title">Stopps gesammelt</string>
+    <string name="stops_accumulated_message_format">%1$d Stopps insgesamt gesammelt (+%2$d neu hinzugefügt).</string>
+    <string name="btn_collect_more">Weitere Stopps sammeln</string>
+    <string name="btn_sort_all_stops">Alle %d Stopps sortieren</string>
+    <string name="btn_clear_stops">Zurücksetzen</string>
+    <string name="route_stages_title">Sortierte Etappen (%d Stopps)</string>
+    <string name="stage_title_format">Etappe %1$d von %2$d (%3$d Stopps)</string>
+    <string name="stage_detail_format">Von: %1$s\nNach: %2$s</string>
+    <string name="btn_open_stage_in_maps">In Google Maps öffnen</string>
+    <string name="accumulated_stops_card_title">Gesammelte Stopps (%d)</string>
+    <string name="accumulated_stops_card_desc">Sie haben %d Stopps gesammelt. Klicken Sie auf Sortieren, um die optimale Route zu berechnen.</string>
 </resources>

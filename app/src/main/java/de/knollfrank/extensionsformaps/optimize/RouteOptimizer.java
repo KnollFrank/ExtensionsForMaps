@@ -19,10 +19,11 @@ import com.graphhopper.jsprit.core.util.Solutions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import de.knollfrank.extensionsformaps.common.InitAndLast;
@@ -94,12 +95,16 @@ public class RouteOptimizer {
     }
 
     private static ImmutableMap<String, Stop> getStopById(final List<Stop> stops) {
-        return stops
-                .stream()
-                .collect(
-                        ImmutableMap.toImmutableMap(
-                                Stop::id,
-                                Function.identity()));
+        final Map<String, Stop> map = new LinkedHashMap<>();
+        for (final Stop stop : stops) {
+            String key = stop.id();
+            int suffix = 1;
+            while (map.containsKey(key)) {
+                key = stop.id() + "_" + suffix++;
+            }
+            map.put(key, stop);
+        }
+        return ImmutableMap.copyOf(map);
     }
 
     private VehicleRoutingAlgorithm createVehicleRoutingAlgorithm(

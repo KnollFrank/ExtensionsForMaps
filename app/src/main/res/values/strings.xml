@@ -63,4 +63,17 @@
     <string name="error_no_browser">No web browser found on this device.</string>
     <string name="url_copied_to_clipboard">Link copied to clipboard.</string>
     <string name="error_google_maps_not_installed">Google Maps is not installed on this device.</string>
+
+    <!-- Stops Accumulation & Stages -->
+    <string name="stops_accumulated_title">Stops Collected</string>
+    <string name="stops_accumulated_message_format">%1$d stops collected in total (+%2$d newly added).</string>
+    <string name="btn_collect_more">Collect More Stops</string>
+    <string name="btn_sort_all_stops">Sort All %d Stops</string>
+    <string name="btn_clear_stops">Reset</string>
+    <string name="route_stages_title">Sorted Stages (%d Stops)</string>
+    <string name="stage_title_format">Stage %1$d of %2$d (%3$d Stops)</string>
+    <string name="stage_detail_format">From: %1$s\nTo: %2$s</string>
+    <string name="btn_open_stage_in_maps">Open in Google Maps</string>
+    <string name="accumulated_stops_card_title">Collected Stops (%d)</string>
+    <string name="accumulated_stops_card_desc">You have collected %d stops. Tap Sort to calculate the optimal route.</string>
 </resources>

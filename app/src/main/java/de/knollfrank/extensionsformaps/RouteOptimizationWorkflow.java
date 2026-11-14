@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.function.Supplier;
 
 import de.knollfrank.extensionsformaps.feature.RoutePreviewDialog;
+import de.knollfrank.extensionsformaps.feature.RouteStagesDialog;
 import de.knollfrank.extensionsformaps.feature.sort.SettingsDialog;
 import de.knollfrank.extensionsformaps.optimize.NativeSuburbResolver;
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizer;
@@ -56,6 +57,17 @@ public class RouteOptimizationWorkflow {
         routeOptimizationOrchestrator.extractRouteFromDirectionsUrl(directionsUrl);
     }
 
+    public void startOptimizationForRoute(final Route route, final Context context) {
+        final Route enrichedRoute = addSuburbsToAddresses(route, context);
+        runOnUiThread(() -> {
+            if (showOptimizationTypeDialog) {
+                showSettingsDialog(enrichedRoute, context);
+            } else {
+                proceedWithRoute(enrichedRoute, context);
+            }
+        });
+    }
+
     public void setShowOptimizationTypeDialog(boolean show) {
         this.showOptimizationTypeDialog = show;
     }
@@ -73,63 +85,56 @@ public class RouteOptimizationWorkflow {
 
             @Override
             public void onExtractRouteFromDirectionsUrlSuccess(final Route route) {
-                final Route enrichedRoute = addSuburbsToAddresses(route, context);
-                runOnUiThread(() -> {
-                    if (showOptimizationTypeDialog) {
-                        showSettingsDialog(enrichedRoute, context);
-                    } else {
-                        proceedWithRoute(enrichedRoute, context);
-                    }
-                });
+                startOptimizationForRoute(route, context);
             }
 
             @Override
             public void onError(final String message) {
                 RouteOptimizationWorkflow.onError(message, progressOverlay, context);
             }
-
-            private void showSettingsDialog(final Route route, final Context context) {
-                new SettingsDialog(context).show(
-                        new SettingsDialog.Callback() {
-
-                            @Override
-                            public void onOk() {
-                                proceedWithRoute(route, context);
-                            }
-
-                            @Override
-                            public void onCancel() {
-                                if (context instanceof final Activity activity) {
-                                    activity.finish();
-                                }
-                            }
-                        });
-            }
-
-            private void proceedWithRoute(final Route route, final Context context) {
-                if (SortConfig.shouldShowRoutePreview(context)) {
-                    progressOverlay.hide();
-                    RoutePreviewDialog.show(
-                            route,
-                            SortConfig.getOptimizationType(context),
-                            routeOptimizationOrchestrator::optimizeRoute,
-                            context);
-                } else {
-                    routeOptimizationOrchestrator.optimizeRoute(route);
-                }
-            }
-
-            private Route addSuburbsToAddresses(final Route route, final Context context) {
-                final SuburbsToAddressesAdder suburbsToAddressesAdder =
-                        new SuburbsToAddressesAdder(
-                                new NativeSuburbResolver(
-                                        new Geocoder(
-                                                context,
-                                                Locale.getDefault())),
-                                context);
-                return suburbsToAddressesAdder.addSuburbsToAddresses(route);
-            }
         };
+    }
+
+    private void showSettingsDialog(final Route route, final Context context) {
+        new SettingsDialog(context).show(
+                new SettingsDialog.Callback() {
+
+                    @Override
+                    public void onOk() {
+                        proceedWithRoute(route, context);
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        if (context instanceof final Activity activity) {
+                            activity.finish();
+                        }
+                    }
+                });
+    }
+
+    private void proceedWithRoute(final Route route, final Context context) {
+        if (SortConfig.shouldShowRoutePreview(context)) {
+            progressOverlay.hide();
+            RoutePreviewDialog.show(
+                    route,
+                    SortConfig.getOptimizationType(context),
+                    routeOptimizationOrchestrator::optimizeRoute,
+                    context);
+        } else {
+            routeOptimizationOrchestrator.optimizeRoute(route);
+        }
+    }
+
+    private static Route addSuburbsToAddresses(final Route route, final Context context) {
+        final SuburbsToAddressesAdder suburbsToAddressesAdder =
+                new SuburbsToAddressesAdder(
+                        new NativeSuburbResolver(
+                                new Geocoder(
+                                        context,
+                                        Locale.getDefault())),
+                        context);
+        return suburbsToAddressesAdder.addSuburbsToAddresses(route);
     }
 
     private static RouteOptimizationOrchestrator.OptimizationCallback createOptimizationCallback(
@@ -151,10 +156,23 @@ public class RouteOptimizationWorkflow {
             @Override
             public void onOptimizationSuccess(final Route optimizedRoute) {
                 progressOverlay.hide();
-                GoogleMapsNavigator.launchRouteOverview(optimizedRoute, context);
-                if (context instanceof final Activity activity) {
-                    activity.finish();
-                }
+                runOnUiThread(() -> {
+                    if (optimizedRoute.stops().size() > 10) {
+                        RouteStagesDialog.show(
+                                context,
+                                optimizedRoute,
+                                () -> {
+                                    if (context instanceof final Activity activity) {
+                                        activity.finish();
+                                    }
+                                });
+                    } else {
+                        GoogleMapsNavigator.launchRouteOverview(optimizedRoute, context);
+                        if (context instanceof final Activity activity) {
+                            activity.finish();
+                        }
+                    }
+                });
             }
 
             @Override
@@ -177,7 +195,6 @@ public class RouteOptimizationWorkflow {
                 });
     }
 
-    // FK-TODO: die Methode runOnUiThread() gibt es mehrfach im Projekt. In eine neue common-Klasse auslagern.
     private static void runOnUiThread(final Runnable runnable) {
         new Handler(Looper.getMainLooper()).post(runnable);
     }

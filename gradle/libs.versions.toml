@@ -20,6 +20,7 @@ rules = "1.7.0"
 uiautomator = "2.4.0"
 browser = "1.10.0"
 protobuf = "4.36.2"
+room = "2.8.5"
 
 [libraries]
 core = { module = "androidx.test:core", version.ref = "rules" }
@@ -45,6 +46,8 @@ rules = { module = "androidx.test:rules", version.ref = "rules" }
 uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 protobuf-javalite = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protobuf" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
