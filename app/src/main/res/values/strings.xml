@@ -76,4 +76,7 @@
     <string name="btn_open_stage_in_maps">Open in Google Maps</string>
     <string name="accumulated_stops_card_title">Collected Stops (%d)</string>
     <string name="accumulated_stops_card_desc">You have collected %d stops. Tap Sort to calculate the optimal route.</string>
+    <string name="sorted_route_card_title">Sorted Route (%1$d Stops, %2$d Stages)</string>
+    <string name="sorted_route_card_desc">Your route has been sorted. You can open the stages sequentially in Google Maps.</string>
+    <string name="btn_show_stages">Show Stages</string>
 </resources>

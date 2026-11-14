@@ -78,4 +78,7 @@
     <string name="btn_open_stage_in_maps">In Google Maps öffnen</string>
     <string name="accumulated_stops_card_title">Gesammelte Stopps (%d)</string>
     <string name="accumulated_stops_card_desc">Sie haben %d Stopps gesammelt. Klicken Sie auf Sortieren, um die optimale Route zu berechnen.</string>
+    <string name="sorted_route_card_title">Sortierte Route (%1$d Stopps, %2$d Etappen)</string>
+    <string name="sorted_route_card_desc">Ihre Route wurde sortiert. Sie können die Etappen nacheinander in Google Maps öffnen.</string>
+    <string name="btn_show_stages">Etappen anzeigen</string>
 </resources>

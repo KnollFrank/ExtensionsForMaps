@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import de.knollfrank.extensionsformaps.db.AppDatabase;
+import de.knollfrank.extensionsformaps.db.RouteMetadataEntity;
 import de.knollfrank.extensionsformaps.db.StopDao;
 import de.knollfrank.extensionsformaps.db.StopEntity;
 import de.knollfrank.extensionsformaps.route.Route;
@@ -54,6 +55,21 @@ public class AccumulatedStopsRepository {
         }
 
         stopDao.insertAll(entitiesToInsert);
+        setSorted(false);
+    }
+
+    public synchronized void saveSortedRoute(final List<Stop> sortedStops) {
+        if (sortedStops == null || sortedStops.isEmpty()) {
+            return;
+        }
+        stopDao.deleteAll();
+        int currentOrder = 0;
+        final List<StopEntity> entitiesToInsert = new ArrayList<>();
+        for (final Stop stop : sortedStops) {
+            entitiesToInsert.add(StopEntity.fromStop(stop, currentOrder++));
+        }
+        stopDao.insertAll(entitiesToInsert);
+        setSorted(true);
     }
 
     public synchronized List<Stop> getAccumulatedStops() {
@@ -77,14 +93,24 @@ public class AccumulatedStopsRepository {
 
     public synchronized void clearAccumulatedStops() {
         stopDao.deleteAll();
+        stopDao.deleteMetadata();
     }
 
     public synchronized boolean hasAccumulatedStops() {
         return getAccumulatedStopsCount() > 0;
     }
 
+    public synchronized boolean isSorted() {
+        final Boolean sorted = stopDao.isSorted();
+        return Boolean.TRUE.equals(sorted);
+    }
+
     public synchronized int getAccumulatedStopsCount() {
         return stopDao.getCount();
+    }
+
+    private void setSorted(final boolean isSorted) {
+        stopDao.setMetadata(new RouteMetadataEntity(isSorted));
     }
 
     private boolean isSameStop(final Stop s1, final Stop s2) {

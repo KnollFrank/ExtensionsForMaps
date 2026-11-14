@@ -17,6 +17,7 @@ import de.knollfrank.extensionsformaps.feature.RouteStagesDialog;
 import de.knollfrank.extensionsformaps.feature.sort.SettingsDialog;
 import de.knollfrank.extensionsformaps.optimize.NativeSuburbResolver;
 import de.knollfrank.extensionsformaps.optimize.RouteOptimizer;
+import de.knollfrank.extensionsformaps.repository.AccumulatedStopsRepository;
 import de.knollfrank.extensionsformaps.route.Route;
 import de.knollfrank.extensionsformaps.route.url.DirectionsUrl;
 
@@ -156,19 +157,20 @@ public class RouteOptimizationWorkflow {
             @Override
             public void onOptimizationSuccess(final Route optimizedRoute) {
                 progressOverlay.hide();
+                new AccumulatedStopsRepository(context).saveSortedRoute(optimizedRoute.stops());
                 runOnUiThread(() -> {
                     if (optimizedRoute.stops().size() > 10) {
                         RouteStagesDialog.show(
                                 context,
                                 optimizedRoute,
                                 () -> {
-                                    if (context instanceof final Activity activity) {
+                                    if (context instanceof final Activity activity && !(activity instanceof MainActivity)) {
                                         activity.finish();
                                     }
                                 });
                     } else {
                         GoogleMapsNavigator.launchRouteOverview(optimizedRoute, context);
-                        if (context instanceof final Activity activity) {
+                        if (context instanceof final Activity activity && !(activity instanceof MainActivity)) {
                             activity.finish();
                         }
                     }
